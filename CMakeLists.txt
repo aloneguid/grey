@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required (VERSION 3.8)
 
-set (APP_NAME grey)
+set (APP_NAME imgrey)
 
 add_compile_definitions(X_EXPORT)
 
@@ -21,12 +21,12 @@ set(interface_libs imgui::imgui)
 #add_executable (cputracker  ${core_src} "samples/cputracker.cpp")
 #add_executable (puredom     ${core_src} "samples/puredom.cpp")
 #add_executable (mind        ${core_src} "samples/mind.cpp")
-add_library    (grey SHARED ${core_src} "api.cpp")
-add_library    (libgrey STATIC ${core_src})
+add_library    (imgrey SHARED ${core_src} "api.cpp")
+add_library    (libimgrey STATIC ${core_src})
 
-set_property(TARGET grey PROPERTY
+set_property(TARGET imgrey PROPERTY
   MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-set_property(TARGET libgrey PROPERTY
+set_property(TARGET libimgrey PROPERTY
   MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 
@@ -38,10 +38,10 @@ set_property(TARGET libgrey PROPERTY
 #target_link_libraries(puredom     PRIVATE ${libs})
 
 # dynamic lib should include both private and interface libs as private dependencies
-target_link_libraries(grey        
+target_link_libraries(imgrey        
    PRIVATE ${private_libs} ${interface_libs})
 
-target_link_libraries(libgrey
+target_link_libraries(libimgrey
    PRIVATE ${private_libs}
    INTERFACE ${interface_libs})
 
