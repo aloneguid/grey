@@ -91,6 +91,9 @@ namespace grey {
     class accordion;
     class child;
     class selectable;
+#if _DEBUG
+    class demo;
+#endif
 
     class container : public component {
     public:
@@ -139,6 +142,10 @@ namespace grey {
         // child windows have their own scrolling/clipping area.
         std::shared_ptr<child> make_child_window(size_t width = 0, size_t height = 0, bool horizonal_scroll = false);
         std::shared_ptr<selectable> make_selectable(const std::string& value);
+
+#if _DEBUG
+        std::shared_ptr<demo> make_demo();
+#endif
 
         // edge case helpers
         void same_line();

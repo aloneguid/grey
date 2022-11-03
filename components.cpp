@@ -323,6 +323,14 @@ namespace grey
       return r;
    }
 
+#if _DEBUG
+   std::shared_ptr<demo> container::make_demo() {
+       auto r = make_shared<demo>();
+       assign_child(r);
+       return r;
+   }
+#endif
+
    void container::set_pos(float x, float y)
    {
       assign_child(make_shared<positioner>(x, y));
