@@ -103,6 +103,7 @@ namespace grey {
         virtual const void render_visible() = 0;
 
         bool empty() { return managed_children.empty() && owned_children.empty(); }
+        void clear() { owned_children.clear(); }
         void assign_child(std::shared_ptr<component> child);
         void assign_managed_child(std::shared_ptr<component> child);
         std::shared_ptr<component> get_child(int index);
