@@ -707,13 +707,25 @@ namespace grey
          ImGui::PopStyleVar();
    }
 
+   shared_ptr<menu_item> menu_item::add(const std::string& id, const std::string& label) {
+       auto mi = make_shared<menu_item>(id, label);
+       children.push_back(mi);
+       return mi;
+   }
+
+   shared_ptr<menu_item> menu_bar::add(const std::string& id, const std::string& label) {
+       auto mi = make_shared<menu_item>(id, label);
+       items.push_back(mi);
+       return mi;
+   }
+
    const void menu_bar::render_visible()
    {
       bool rendered = is_main_menu ? ImGui::BeginMainMenuBar() : ImGui::BeginMenuBar();
 
       if (rendered)
       {
-         for (auto& mi : items)
+         for (auto mi : items)
          {
             render(mi);
          }
@@ -725,22 +737,22 @@ namespace grey
       }
    }
 
-   void menu_bar::render(menu_item& mi)
+   void menu_bar::render(shared_ptr<menu_item> mi)
    {
-      if (mi.children.empty())
+      if (mi->children.empty())
       {
-         if (ImGui::MenuItem(mi.label.c_str(),
-            mi.shortcut_text.empty() ? nullptr : mi.shortcut_text.c_str(),
-            mi.is_selected, mi.is_enabled) && clicked && !mi.id.empty())
+         if (ImGui::MenuItem(mi->label.c_str(),
+            mi->shortcut_text.empty() ? nullptr : mi->shortcut_text.c_str(),
+            mi->is_selected, mi->is_enabled) && clicked && !mi->id.empty())
          {
-            clicked(mi);
+            clicked(*mi);
          }
       }
       else
       {
-         if (ImGui::BeginMenu(mi.label.c_str()))
+         if (ImGui::BeginMenu(mi->label.c_str()))
          {
-            for (auto& imi : mi.children)
+            for (auto imi : mi->children)
             {
                render(imi);
             }

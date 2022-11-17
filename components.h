@@ -262,7 +262,9 @@ namespace grey {
         bool is_enabled{ true };
         std::string shortcut_text;
         void* tag{ nullptr };
-        std::vector<menu_item> children;
+        std::vector<std::shared_ptr<menu_item>> children;
+
+        std::shared_ptr<menu_item> add(const std::string& id, const std::string& label);
     };
 
     class menu_bar : public component {
@@ -271,12 +273,14 @@ namespace grey {
 
         bool is_main_menu{ false };
 
-        std::vector<menu_item> items;
+        std::vector<std::shared_ptr<menu_item>> items;
 
         std::function<void(menu_item&)> clicked;
 
+        std::shared_ptr<menu_item> add(const std::string& id, const std::string& label);
+
     private:
-        void render(menu_item& mi);
+        void render(std::shared_ptr<menu_item> mi);
     };
 
     class list_item {
@@ -748,6 +752,8 @@ namespace grey {
         std::function<void(bool&)> on_open_changed;
 
         void close();
+
+        float get_system_scale() { return container::tmgr.get_system_scale(); }
 
     private:
         bool is_open{ true };
