@@ -56,6 +56,8 @@ namespace grey
 
          virtual void bring_to_top();
 
+         virtual float get_system_scale();
+
          virtual void exit();
 
          // instance specific

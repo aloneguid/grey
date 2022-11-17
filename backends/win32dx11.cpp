@@ -1,6 +1,7 @@
 #include "win32dx11.h"
 #include "../../common/str.h"
 #include "../../common/win32/user.h"
+#include "../../common/win32/shell.h"
 #include <Windows.h>
 #include <windowsx.h>
 
@@ -308,7 +309,8 @@ void grey::backends::win32dx11::set_visibility(bool visible)
 
 void grey::backends::win32dx11::resize(int width, int height)
 {
-   win32::user::set_window_pos(hwnd, -1, -1, width, height);
+    float scale = get_system_scale();
+    win32::user::set_window_pos(hwnd, -1, -1, width * scale, height * scale);
 }
 
 void grey::backends::win32dx11::move(int x, int y)
@@ -340,6 +342,13 @@ void grey::backends::win32dx11::bring_to_top()
    ::SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
    ::BringWindowToTop(hwnd);
+}
+
+float grey::backends::win32dx11::get_system_scale()
+{
+    int dpi = win32::shell::get_dpi();
+    float scale = dpi / 96.f;
+    return scale;
 }
 
 void grey::backends::win32dx11::exit()

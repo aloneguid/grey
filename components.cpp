@@ -316,6 +316,12 @@ namespace grey
       return r;
    }
 
+   std::shared_ptr<group> container::make_group() {
+       auto r = make_shared<group>(tmgr);
+       assign_child(r);
+       return r;
+   }
+
    std::shared_ptr<selectable> container::make_selectable(const std::string& value)
    {
       auto r = make_shared<selectable>(value);
@@ -390,6 +396,25 @@ namespace grey
          render_children();
       }
       ImGui::EndChild();   // must be called regardless
+   }
+
+   group::group(texture_mgr& mgr) : container{ mgr } {
+
+   }
+
+   const void group::render_visible() {
+
+       ImGui::Selectable("test");
+
+       // group does not follow begin/end common rules. Always call begin. Always call end.
+       ImGui::BeginGroup();
+
+       render_children();
+
+       ImGui::EndGroup();
+
+       // item size can be used:
+       // ImVec2 size = ImGui::GetItemRectSize();
    }
 
    grey::window::window(texture_mgr& mgr, string title,
@@ -1452,5 +1477,4 @@ namespace grey
    {
       ImGui::SetCursorPos(pos);
    }
-   
 }

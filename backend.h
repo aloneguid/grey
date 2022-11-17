@@ -76,6 +76,7 @@ namespace grey
       virtual void center_on_screen() = 0;
       virtual void bring_to_top() = 0;
       virtual void set_is_resizeable(bool value) { is_resizeable = value; };
+      virtual float get_system_scale() { return 1.0f; }
       virtual void exit() = 0;
 
       void enable_docking();

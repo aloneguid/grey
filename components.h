@@ -90,6 +90,7 @@ namespace grey {
     class status_bar;
     class accordion;
     class child;
+    class group;
     class selectable;
 #if _DEBUG
     class demo;
@@ -142,6 +143,7 @@ namespace grey {
         std::shared_ptr<accordion> make_accordion(const std::string& label);
         // child windows have their own scrolling/clipping area.
         std::shared_ptr<child> make_child_window(size_t width = 0, size_t height = 0, bool horizonal_scroll = false);
+        std::shared_ptr<group> make_group();
         std::shared_ptr<selectable> make_selectable(const std::string& value);
 
 #if _DEBUG
@@ -707,6 +709,9 @@ namespace grey {
         bool is_open{ true };
     };
 
+    /**
+     * @brief Child (or child window) allows for independent scrollable/clippable area
+    */
     class child : public container {
     public:
         child(texture_mgr& mgr, size_t width, size_t height, bool horizontal_scroll);
@@ -716,6 +721,16 @@ namespace grey {
     private:
         ImVec2 size;
         ImGuiWindowFlags flags{ 0 };
+    };
+
+    /**
+     * @brief Group allows for treating all the items inside as one so you can use item functions like on_hover etc.
+    */
+    class group : public container {
+    public:
+        group(texture_mgr& mgr);
+
+        virtual const void render_visible() override;
     };
 
     class window : public container {

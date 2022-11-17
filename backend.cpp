@@ -182,12 +182,20 @@ namespace grey
       style.FrameRounding = 1;
       style.WindowRounding = 0;
       style.FrameBorderSize = 1.0f;
+
+      // apply scaling settings
+      float scale = get_system_scale();
+      style.ScaleAllSizes(scale);
+      ImGuiIO& io = ImGui::GetIO();
+      //io.FontGlobalScale = scale;
+      io.DisplayFramebufferScale = { scale, scale };
    }
 
    void backend::set_default_font(font font) {
        ImGuiIO io = ImGui::GetIO();
 
        ImFont* f{ nullptr };
+       float scale = get_system_scale();
 
        switch (font) {
            case font::proggy_clean:
@@ -198,11 +206,13 @@ namespace grey
                break;
            case font::roboto:
                f = io.Fonts->AddFontFromMemoryCompressedTTF(
-                   Roboto_compressed_data, Roboto_compressed_size, 16);
+                   Roboto_compressed_data, Roboto_compressed_size, 
+                   16.0f * scale);
                break;
            case font::opensans:
                f = io.Fonts->AddFontFromMemoryCompressedTTF(
-                   OpenSansRegular_compressed_data, OpenSansRegular_compressed_size, 20);
+                   OpenSansRegular_compressed_data, OpenSansRegular_compressed_size,
+                   20.0f * scale);
                break;
        }
 
@@ -211,7 +221,9 @@ namespace grey
            config.MergeMode = true;
            config.GlyphMinAdvanceX = 13.0f; // Use if you want to make the icon monospaced
            static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-           io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size, 13.0f, &config, icon_ranges);
+           io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size,
+               13.0f * scale, 
+               &config, icon_ranges);
        }
    }
 
