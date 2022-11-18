@@ -222,7 +222,7 @@ namespace grey
            config.GlyphMinAdvanceX = 13.0f; // Use if you want to make the icon monospaced
            static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
            io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size,
-               13.0f * scale, 
+               16.0f * scale, 
                &config, icon_ranges);
        }
    }

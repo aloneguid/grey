@@ -10,7 +10,13 @@ find_package(nlohmann_json CONFIG REQUIRED)
 
 find_path(STB_INCLUDE_DIRS "stb.h")
 
-file(GLOB core_src CONFIGURE_DEPENDS "*.cpp" "backends/*.cpp" "common/*.cpp" "../common/*.cpp" "../common/win32/user.cpp" "../common/win32/gdi.cpp")
+file(GLOB core_src CONFIGURE_DEPENDS "*.cpp"
+    "backends/*.cpp"
+    "common/*.cpp"
+    "../common/*.cpp"
+    "../common/win32/user.cpp"
+    "../common/win32/gdi.cpp"
+    "../common/win32/shell.cpp")
 set(private_libs fmt::fmt-header-only D3D11.lib nlohmann_json::nlohmann_json)
 set(interface_libs imgui::imgui)
 
