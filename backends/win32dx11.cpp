@@ -507,7 +507,7 @@ LRESULT WINAPI grey::backends::win32dx11::WndProc(
                     }
 
                     // might conflict with ImGui's "close" button
-                    if (p.y <= 20 && p.x < width - 40) {
+                    if (p.y <= (20 * backend->get_system_scale()) && p.x < width - 40) {
                         //cout << "cap!" << endl;
                         return HTCAPTION;
                     }
