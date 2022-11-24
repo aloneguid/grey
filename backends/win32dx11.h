@@ -60,6 +60,8 @@ namespace grey
 
          virtual void exit();
 
+         virtual virtual void set_theme(colour_theme theme);
+
          // instance specific
 
          // hwnd is initialised in the constructor and safe to use immediately after constructing the backend

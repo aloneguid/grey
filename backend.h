@@ -2,29 +2,12 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "texture_mgr.h"
+#include "grey_context.h"
 #include "components.h"
 
 namespace grey
 {
-   enum class colour_theme
-   {
-      dark,
-      light,
-      light2,
-      classic,
-      corp_grey
-   };
-
-   enum class font
-   {
-      proggy_clean,
-      sweet_16_mono,
-      roboto,
-      opensans
-   };
-
-   class backend : public texture_mgr
+   class backend : public grey_context
    {
    public:
       std::function<void(const std::string& key, const std::string&)> on_save_settings;
@@ -60,11 +43,11 @@ namespace grey
           return root;
       }
 
-     
+      virtual std::vector<app_theme> list_themes();
 
-      colour_theme get_theme() { return theme; }
-      //std::vector<std::string> list_themes() { return vector<string> {"dark", "light", "classic"}; };
+      virtual colour_theme get_theme() { return theme; }
       virtual void set_theme(colour_theme theme);
+      virtual void set_theme(const std::string& theme_id);
 
       void set_default_font(font font);
 

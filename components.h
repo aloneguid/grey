@@ -5,7 +5,7 @@
 #include <map>
 #include <functional>
 #include "common/containers.hpp"
-#include "texture_mgr.h"
+#include "grey_context.h"
 #include "3rdparty/memory_editor.h"
 
 namespace grey {
@@ -98,7 +98,7 @@ namespace grey {
 
     class container : public component {
     public:
-        container(texture_mgr& mgr) : tmgr{ mgr } {}
+        container(grey_context& mgr) : tmgr{ mgr } {}
 
         virtual const void render() override;
         virtual const void render_visible() = 0;
@@ -159,7 +159,7 @@ namespace grey {
 
 
     protected:
-        texture_mgr& tmgr;
+        grey_context& tmgr;
         // managed children are not owned, but you are responsible for rendering them
         std::vector<std::shared_ptr<component>> managed_children;
         std::vector<std::shared_ptr<component>> owned_children;
@@ -273,13 +273,13 @@ namespace grey {
 
         bool is_main_menu{ false };
 
-        std::vector<std::shared_ptr<menu_item>> items;
-
         std::function<void(menu_item&)> clicked;
 
-        std::shared_ptr<menu_item> add(const std::string& id, const std::string& label);
+        std::shared_ptr<menu_item> items() { return root; }
 
     private:
+        std::shared_ptr<menu_item> root{std::make_shared<menu_item>()};
+
         void render(std::shared_ptr<menu_item> mi);
     };
 
@@ -358,7 +358,7 @@ namespace grey {
         std::string label;
         bool is_bold{ false };
 
-        tree_node(texture_mgr& mgr, const std::string& label, bool is_expanded, bool is_leaf)
+        tree_node(grey_context& mgr, const std::string& label, bool is_expanded, bool is_leaf)
             : container{ mgr }, label{ label }, is_expanded{ is_expanded }, is_leaf{ is_leaf } {}
 
         std::vector<std::shared_ptr<tree_node>> nodes;
@@ -376,7 +376,7 @@ namespace grey {
 
     class tree : public component {
     public:
-        tree(texture_mgr& mgr) : tmgr{ mgr } {}
+        tree(grey_context& mgr) : tmgr{ mgr } {}
 
         std::vector<std::shared_ptr<tree_node>> nodes;
 
@@ -387,7 +387,7 @@ namespace grey {
 
 
     private:
-        texture_mgr& tmgr;
+        grey_context& tmgr;
     };
 
     class input : public component {
@@ -455,7 +455,7 @@ namespace grey {
 
     class image : public component {
     public:
-        image(const texture_mgr& mgr,
+        image(const grey_context& mgr,
             const std::string& file_path,
             unsigned char* buffer = nullptr, unsigned int len = 0,
             size_t desired_width = std::string::npos,
@@ -469,7 +469,7 @@ namespace grey {
         virtual const void render_visible() override;
 
     private:
-        const texture_mgr& mgr;
+        const grey_context& mgr;
         std::string file_path_or_tag;
         unsigned char* buffer;
         unsigned int len;
@@ -506,7 +506,7 @@ namespace grey {
 
     class table_cell : public container {
     public:
-        table_cell(texture_mgr& tmgr) : container{ tmgr } {
+        table_cell(grey_context& tmgr) : container{ tmgr } {
 
         }
 
@@ -527,7 +527,7 @@ namespace grey {
     template<class TRowState>
     class complex_table : public component {
     public:
-        complex_table(texture_mgr& mgr, std::vector<std::string> columns) : mgr{ mgr }, columns{ columns } {}
+        complex_table(grey_context& mgr, std::vector<std::string> columns) : mgr{ mgr }, columns{ columns } {}
 
         table_row<TRowState> make_row(std::shared_ptr<TRowState> state) {
 
@@ -582,21 +582,21 @@ namespace grey {
         void erase(int index) { if (index < rows.size()) rows.erase(rows.begin() + index); }
 
     private:
-        texture_mgr& mgr;
+        grey_context& mgr;
         std::vector<std::string> columns;
         std::vector<table_row<TRowState>> rows;
     };
 
     class tab : public container {
     public:
-        tab(texture_mgr& tmgr) : container{ tmgr } {}
+        tab(grey_context& tmgr) : container{ tmgr } {}
 
         virtual const void render_visible() override { render_children(); };
     };
 
     class tabs : public component {
     public:
-        tabs(texture_mgr& mgr) : mgr{ mgr } {
+        tabs(grey_context& mgr) : mgr{ mgr } {
 
         }
 
@@ -605,7 +605,7 @@ namespace grey {
         virtual const void render_visible() override;
 
     private:
-        texture_mgr& mgr;
+        grey_context& mgr;
         std::vector<std::string> tab_headers;
         std::vector<std::shared_ptr<tab>> tab_containers;
     };
@@ -674,7 +674,7 @@ namespace grey {
     /// </summary>
     class modal_popup : public container {
     public:
-        modal_popup(texture_mgr& mgr, const std::string& title);
+        modal_popup(grey_context& mgr, const std::string& title);
 
         virtual const void render() override;
         virtual const void render_visible() override;
@@ -693,7 +693,7 @@ namespace grey {
 
     class status_bar : public container {
     public:
-        status_bar(texture_mgr& mgr) : container{ mgr } {}
+        status_bar(grey_context& mgr) : container{ mgr } {}
 
         virtual const void render_visible() override;
 
@@ -703,7 +703,7 @@ namespace grey {
 
     class accordion : public container {
     public:
-        accordion(texture_mgr& mgr, const std::string& label, bool is_closeable);
+        accordion(grey_context& mgr, const std::string& label, bool is_closeable);
 
         virtual const void render_visible() override;
 
@@ -718,7 +718,7 @@ namespace grey {
     */
     class child : public container {
     public:
-        child(texture_mgr& mgr, size_t width, size_t height, bool horizontal_scroll);
+        child(grey_context& mgr, size_t width, size_t height, bool horizontal_scroll);
 
         virtual const void render_visible() override;
 
@@ -732,7 +732,7 @@ namespace grey {
     */
     class group : public container {
     public:
-        group(texture_mgr& mgr);
+        group(grey_context& mgr);
 
         virtual const void render_visible() override;
     };
@@ -741,7 +741,7 @@ namespace grey {
     public:
         bool has_menu_space{ false };
 
-        window(texture_mgr& mgr,
+        window(grey_context& mgr,
             std::string title,
             bool is_maximized = false,
             bool can_close = true,

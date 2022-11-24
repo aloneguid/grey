@@ -74,7 +74,17 @@ grey::backends::win32dx11::win32dx11(const string& title, bool is_visible)
     //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     // Setup Dear ImGui style
-    set_theme(theme);
+    //set_theme(theme);
+
+    // apply scaling settings
+    ImGuiStyle& style = ImGui::GetStyle();
+    float scale = get_system_scale();
+    style.ScaleAllSizes(scale);
+    // don't apply font global scaling, they will look terrible on high DPI.
+    // instead, when loading a font, apply scaling factor
+    //io.FontGlobalScale = scale;
+    io.DisplayFramebufferScale = {scale, scale};
+
 
     // Setup Platform/Renderer backends
     ImGui_ImplWin32_Init(hwnd);
@@ -356,6 +366,18 @@ void grey::backends::win32dx11::exit()
    ::DestroyWindow(hwnd);
    hwnd = nullptr;
    //is_running = false;
+}
+
+void grey::backends::win32dx11::set_theme(colour_theme theme) {
+
+    if(theme == colour_theme::follow_os) {
+        bool is_light{false};
+        win32::user::is_app_light_theme(is_light);
+
+        theme = is_light ? colour_theme::light : colour_theme::dark;
+    }
+
+    backend::set_theme(theme);
 }
 
 // Helper functions

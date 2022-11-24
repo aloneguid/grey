@@ -382,7 +382,7 @@ namespace grey
    }
 #endif
 
-   grey::child::child(texture_mgr& mgr, size_t width, size_t height, bool horizonal_scroll) 
+   grey::child::child(grey_context& mgr, size_t width, size_t height, bool horizonal_scroll) 
       : container{ mgr }, size{ width, height }
    {
       if (horizonal_scroll)
@@ -398,7 +398,7 @@ namespace grey
       ImGui::EndChild();   // must be called regardless
    }
 
-   group::group(texture_mgr& mgr) : container{ mgr } {
+   group::group(grey_context& mgr) : container{ mgr } {
 
    }
 
@@ -417,7 +417,7 @@ namespace grey
        // ImVec2 size = ImGui::GetItemRectSize();
    }
 
-   grey::window::window(texture_mgr& mgr, string title,
+   grey::window::window(grey_context& mgr, string title,
                         bool is_maximized, bool can_close, bool is_dockspace)
    :
       container{ mgr }, title{ title },
@@ -467,7 +467,7 @@ namespace grey
       ImGui::End(); // status bar, should be outside of BeginViewportSideBar just like for a normal window
    }
 
-   accordion::accordion(texture_mgr& mgr, const string& label, bool is_closeable) : container{ mgr }, is_closeable{ is_closeable }
+   accordion::accordion(grey_context& mgr, const string& label, bool is_closeable) : container{ mgr }, is_closeable{ is_closeable }
    {
       this->label = sys_label(label);
    }
@@ -713,19 +713,13 @@ namespace grey
        return mi;
    }
 
-   shared_ptr<menu_item> menu_bar::add(const std::string& id, const std::string& label) {
-       auto mi = make_shared<menu_item>(id, label);
-       items.push_back(mi);
-       return mi;
-   }
-
    const void menu_bar::render_visible()
    {
       bool rendered = is_main_menu ? ImGui::BeginMainMenuBar() : ImGui::BeginMenuBar();
 
       if (rendered)
       {
-         for (auto mi : items)
+         for (auto mi : root->children)
          {
             render(mi);
          }
@@ -1158,7 +1152,7 @@ namespace grey
       //}
    }
 
-   image::image(const texture_mgr& mgr,
+   image::image(const grey_context& mgr,
       const string& file_path,
       unsigned char* buffer, unsigned int len,
       size_t desired_width, size_t desired_height) :
@@ -1168,7 +1162,7 @@ namespace grey
       desired_width{ desired_width }, desired_height{ desired_height }
    {
       int width, height;
-      texture_mgr& ncmgr = const_cast<texture_mgr&>(mgr);
+      grey_context& ncmgr = const_cast<grey_context&>(mgr);
       texture = (buffer == nullptr)
          ? ncmgr.load_texture_from_file(file_path, width, height)
          : ncmgr.load_texture_from_memory(file_path, buffer, len, width, height);
@@ -1234,7 +1228,7 @@ namespace grey
       ImGui::ProgressBar(*value, size, overlay_text);
    }
 
-   modal_popup::modal_popup(texture_mgr& mgr, const string& title) : container{ mgr }, title{ title }
+   modal_popup::modal_popup(grey_context& mgr, const string& title) : container{ mgr }, title{ title }
    {
       // pop-ups should be invisible initially
       is_visible = false;

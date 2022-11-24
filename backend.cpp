@@ -3,13 +3,14 @@
 #include "imgui.h"
 #include "imconfig.h"
 
-// fonts
-#include "fonts/Sweet16_ImGui.inl"
-#include "fonts/Sweet16mono_ImGui.inl"
+// fonts (some are disabled to minimize the output binary size)
+// I found Roboto Mono really pleasant
+//#include "fonts/Sweet16_ImGui.inl"
+//#include "fonts/Sweet16mono_ImGui.inl"
 #include "fonts/font_awesome.inl"
 #include "fonts/font_awesome.h"
 #include "fonts/roboto.inl"
-#include "fonts/opensans.inl"
+//#include "fonts/opensans.inl"
 
 using namespace std;
 
@@ -30,7 +31,22 @@ namespace grey
       ImGuiIO& io = ImGui::GetIO();
       io.IniFilename = nullptr;
 
+      // set default theme and font
+      be->set_theme(colour_theme::follow_os);
+      be->set_default_font(font::roboto);
+
       return be;
+   }
+
+   std::vector<app_theme> backend::list_themes() {
+       return std::vector<app_theme>{
+           { "follow_os", "Follow OS", colour_theme::follow_os },
+           { "dark", "Dark", colour_theme::dark },
+           { "light", "Light", colour_theme::light },
+           { "light2", "Alternative Light", colour_theme::light2 },
+           { "classic", "Classic", colour_theme::classic },
+           { "corp_grey", "Corporate Grey", colour_theme::corp_grey }
+       };
    }
 
    void backend::set_theme(colour_theme theme)
@@ -178,17 +194,19 @@ namespace grey
       }
 
       // my personal touch
-      ImGuiStyle& style = ImGui::GetStyle();
-      style.FrameRounding = 1;
-      style.WindowRounding = 0;
-      style.FrameBorderSize = 1.0f;
+      //ImGuiStyle& style = ImGui::GetStyle();
+      //style.FrameRounding = 1;
+      //style.WindowRounding = 0;
+      //style.FrameBorderSize = 1.0f;
+   }
 
-      // apply scaling settings
-      float scale = get_system_scale();
-      style.ScaleAllSizes(scale);
-      ImGuiIO& io = ImGui::GetIO();
-      //io.FontGlobalScale = scale;
-      io.DisplayFramebufferScale = { scale, scale };
+   void backend::set_theme(const std::string& theme_id) {
+       for(auto& theme : list_themes()) {
+           if(theme.id == theme_id) {
+               set_theme(theme.theme);
+               break;
+           }
+       }
    }
 
    void backend::set_default_font(font font) {
@@ -201,19 +219,19 @@ namespace grey
            case font::proggy_clean:
                f = io.Fonts->AddFontDefault();
                break;
-           case font::sweet_16_mono:
-               f = AddSweet16MonoFont();
-               break;
+           //case font::sweet_16_mono:
+           //    f = AddSweet16MonoFont();
+           //    break;
            case font::roboto:
                f = io.Fonts->AddFontFromMemoryCompressedTTF(
                    Roboto_compressed_data, Roboto_compressed_size, 
                    16.0f * scale);
                break;
-           case font::opensans:
-               f = io.Fonts->AddFontFromMemoryCompressedTTF(
-                   OpenSansRegular_compressed_data, OpenSansRegular_compressed_size,
-                   20.0f * scale);
-               break;
+           //case font::opensans:
+           //    f = io.Fonts->AddFontFromMemoryCompressedTTF(
+           //        OpenSansRegular_compressed_data, OpenSansRegular_compressed_size,
+           //        20.0f * scale);
+           //    break;
        }
 
        if (f) {
