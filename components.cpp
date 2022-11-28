@@ -78,12 +78,12 @@ namespace grey
 
        if (!is_visible) return;
 
-       if (desired_width != 0)
-           ImGui::PushItemWidth(desired_width);
+       if (width != 0)
+           ImGui::PushItemWidth(width);
 
        render_visible();
 
-       if (desired_width != 0)
+       if (width != 0)
            ImGui::PopItemWidth();
 
        if (on_hovered && ImGui::IsItemHovered()) {
@@ -261,8 +261,8 @@ namespace grey
       return r;
    }
 
-   std::shared_ptr<tabs> container::make_tabs() {
-       auto r = make_shared<tabs>(tmgr);
+   std::shared_ptr<tabs> container::make_tabs(bool tab_list_popup) {
+       auto r = make_shared<tabs>(tmgr, tab_list_popup);
        assign_child(r);
        return r;
    }
@@ -337,9 +337,9 @@ namespace grey
    }
 #endif
 
-   void container::set_pos(float x, float y)
+   void container::set_pos(float x, float y, bool is_movement)
    {
-      assign_child(make_shared<positioner>(x, y));
+      assign_child(make_shared<positioner>(x, y, is_movement));
    }
 
    void container::same_line()
@@ -376,29 +376,35 @@ namespace grey
    }
 
 #ifdef _DEBUG
-   const void demo::render_visible()
-   {
-      ImGui::ShowDemoWindow();
+   const void demo::render_visible() {
+       ImGui::ShowDemoWindow();
    }
 #endif
 
-   grey::child::child(grey_context& mgr, size_t width, size_t height, bool horizonal_scroll) 
-      : container{ mgr }, size{ width, height }
-   {
-      if (horizonal_scroll)
-         flags |= ImGuiWindowFlags_HorizontalScrollbar;
+   grey::child::child(grey_context& mgr, size_t width, size_t height, bool horizonal_scroll)
+       : container{mgr}, size{width, height} {
+       if(horizonal_scroll)
+           flags |= ImGuiWindowFlags_HorizontalScrollbar;
    }
 
-   const void child::render_visible()
-   {
-      if (ImGui::BeginChild(this->id.c_str(), size, false, flags))
-      {
-         render_children();
-      }
-      ImGui::EndChild();   // must be called regardless
+   const void child::render_visible() {
+       //ImGui::PushStyleColor(ImGuiCol_Border, )
+
+       if(em != emphasis::none) {
+           ImGui::PushStyleColor(ImGuiCol_Border, em_normal);
+       }
+
+       if(ImGui::BeginChild(this->id.c_str(), size, has_border, flags)) {
+           render_children();
+       }
+       ImGui::EndChild();   // must be called regardless
+
+       if(em != emphasis::none) {
+           ImGui::PopStyleColor();
+       }
    }
 
-   group::group(grey_context& mgr) : container{ mgr } {
+   group::group(grey_context& mgr) : container{mgr} {
 
    }
 
@@ -1228,48 +1234,52 @@ namespace grey
       ImGui::ProgressBar(*value, size, overlay_text);
    }
 
-   modal_popup::modal_popup(grey_context& mgr, const string& title) : container{ mgr }, title{ title }
-   {
-      // pop-ups should be invisible initially
-      is_visible = false;
+   modal_popup::modal_popup(grey_context& mgr, const string& title) : container{mgr}, title{title} {
+       // pop-ups should be invisible initially
+       is_visible = false;
    }
 
-   const void modal_popup::render()
-   {
-      // to open, call ImGui::OpenPopup(id.c_str()); _once_
+   const void modal_popup::render() {
+       // to open, call ImGui::OpenPopup(id.c_str()); _once_
 
-      // to close, call CloseCurrentPopup _once_
+       // to close, call CloseCurrentPopup _once_
 
-      if (!was_visible && is_visible)
-      {
-         // quickly show and flip the flag
+       // do not fuck up this flag flipping logic, it's very fragile!!!!
 
-         ImGui::OpenPopup(title.c_str());
+       if(!sys_open) {  // check sys flip state - set to false by ImGui when popup closure is handled by imgui itself
+           is_visible = false;
+           was_visible = false;
+           sys_open = true;
+       }
 
-         was_visible = true;
-      }
+       if(!was_visible && is_visible) {
+           // quickly show and flip the flag
 
-      container::render();
+           sys_open = true;
 
-      //render_visible();
+           ImGui::OpenPopup(title.c_str());
+
+           was_visible = true;
+       }
+
+       container::render();
+
+       //render_visible();
    }
 
-   const void modal_popup::render_visible()
-   {
-      if (ImGui::BeginPopupModal(title.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-      {
-         render_children();
+   const void modal_popup::render_visible() {
+       if(ImGui::BeginPopupModal(title.c_str(), &sys_open)) {
+           render_children();
 
-         if (was_visible && !is_visible)
-         {
-            // "close" needs to be called from inside the pop-up cycle, otherwise it won't work
-            ImGui::CloseCurrentPopup();
+           if(was_visible && !is_visible) {
+               // "close" needs to be called from inside the pop-up cycle, otherwise it won't work
+               ImGui::CloseCurrentPopup();
 
-            was_visible = false;
-         }
+               was_visible = false;
+           }
 
-         ImGui::EndPopup();
-      }
+           ImGui::EndPopup();
+       }
    }
 
    checkbox::checkbox(const string& text, bool* value) : text{ text }, value{ value }
@@ -1414,11 +1424,17 @@ namespace grey
       }
    }
 
+   tabs::tabs(grey_context& mgr, bool tab_list_popup) : mgr{mgr} {
+       flags = ImGuiTabBarFlags_NoCloseWithMiddleMouseButton;
+       if(tab_list_popup)
+           flags |= ImGuiTabBarFlags_TabListPopupButton;
+   }
+
    const void tabs::render_visible() {
        if (tab_headers.empty()) return;
 
        for (size_t i = 0; i < tab_headers.size(); i++) {
-           if (ImGui::BeginTabBar(id.c_str(), ImGuiTabBarFlags_NoCloseWithMiddleMouseButton)) {
+           if (ImGui::BeginTabBar(id.c_str(), flags)) {
                if (ImGui::BeginTabItem(tab_headers[i].c_str())) {
                    tab_containers[i]->render_visible();
                    ImGui::EndTabItem();
@@ -1426,6 +1442,11 @@ namespace grey
                ImGui::EndTabBar();
            }
        }
+   }
+
+   void tabs::clear() {
+       tab_headers.clear();
+       tab_containers.clear();
    }
 
    std::shared_ptr<tab> tabs::make(const std::string& title) {
@@ -1474,13 +1495,26 @@ namespace grey
          size);
    }
 
-   positioner::positioner(float x, float y)
-   {
-      pos = ImVec2(x, y);
+   positioner::positioner(float x, float y, bool is_movement) : is_movement{is_movement} {
+       pos = ImVec2(x, y);
    }
 
-   const void positioner::render_visible()
-   {
-      ImGui::SetCursorPos(pos);
+   const void positioner::render_visible() {
+
+       if(is_movement) {
+           ImVec2 mv = ImGui::GetCursorPos();
+           mv.x += pos.x;
+           mv.y += pos.y;
+           ImGui::SetCursorPos(mv);
+
+       } else {
+           if(pos.x < 0 && pos.y > 0) {
+               ImGui::SetCursorPosY(pos.y);
+           } else if(pos.x > 0 && pos.y < 0) {
+               ImGui::SetCursorPosX(pos.x);
+           } else {
+               ImGui::SetCursorPos(pos);
+           }
+       }
    }
 }

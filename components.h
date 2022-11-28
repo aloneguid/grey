@@ -38,7 +38,8 @@ namespace grey {
         bool is_visible{ true };
         std::string tooltip;
         component* parent{ nullptr };
-        float desired_width{ 0 };
+        float width{0};
+        float height{0};
         void* tag{ nullptr };
 
         component(const std::string& id = "");
@@ -134,7 +135,7 @@ namespace grey {
             assign_child(r);
             return r;
         }
-        std::shared_ptr<tabs> make_tabs();
+        std::shared_ptr<tabs> make_tabs(bool tab_list_popup = false);
         std::shared_ptr<slider> make_slider(const std::string& label, float* value, float min = 0, float max = 1);
         std::shared_ptr<progress_bar> make_progress_bar(float* value, const char* overlay_text = nullptr, float height = 10);
         std::shared_ptr<modal_popup> make_modal_popup(const std::string& title);
@@ -155,7 +156,7 @@ namespace grey {
         void spacer();
         void separator();
         std::shared_ptr<imgui_raw> make_raw_imgui();
-        void set_pos(float x, float y);
+        void set_pos(float x, float y, bool is_movement = false);
 
 
     protected:
@@ -596,16 +597,16 @@ namespace grey {
 
     class tabs : public component {
     public:
-        tabs(grey_context& mgr) : mgr{ mgr } {
+        tabs(grey_context& mgr, bool tab_list_popup = false);
 
-        }
-
+        void clear();
         std::shared_ptr<tab> make(const std::string& title);
 
         virtual const void render_visible() override;
 
     private:
         grey_context& mgr;
+        ImGuiTabBarFlags flags;
         std::vector<std::string> tab_headers;
         std::vector<std::shared_ptr<tab>> tab_containers;
     };
@@ -661,12 +662,13 @@ namespace grey {
     /// </summary>
     class positioner : public component {
     public:
-        positioner(float x, float y);
+        positioner(float x, float y, bool is_movement);
 
         virtual const void render_visible() override;
 
     private:
         ImVec2 pos;
+        bool is_movement;
     };
 
     /// <summary>
@@ -682,6 +684,7 @@ namespace grey {
     private:
         bool was_visible{ false };
         std::string title;
+        bool sys_open{true};
     };
 
 #ifdef _DEBUG
@@ -721,6 +724,8 @@ namespace grey {
         child(grey_context& mgr, size_t width, size_t height, bool horizontal_scroll);
 
         virtual const void render_visible() override;
+
+        bool has_border{false};
 
     private:
         ImVec2 size;
