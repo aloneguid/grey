@@ -394,7 +394,15 @@ namespace grey
            ImGui::PushStyleColor(ImGuiCol_Border, em_normal);
        }
 
-       if(ImGui::BeginChild(this->id.c_str(), size, has_border, flags)) {
+       //ImVec2 sz2 = ImGui::GetWindowSize();
+       ImVec2 tsz = size;
+
+       if(padding_bottom != 0) {
+           ImVec2 wsz = ImGui::GetWindowSize();
+           tsz = ImVec2(tsz.x, wsz.y - padding_bottom);
+       }
+
+       if(ImGui::BeginChild(this->id.c_str(), tsz, has_border, flags)) {
            render_children();
        }
        ImGui::EndChild();   // must be called regardless
@@ -409,8 +417,6 @@ namespace grey
    }
 
    const void group::render_visible() {
-
-       ImGui::Selectable("test");
 
        // group does not follow begin/end common rules. Always call begin. Always call end.
        ImGui::BeginGroup();

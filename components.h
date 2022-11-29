@@ -727,6 +727,9 @@ namespace grey {
 
         bool has_border{false};
 
+        //experimental
+        size_t padding_bottom{0};
+
     private:
         ImVec2 size;
         ImGuiWindowFlags flags{ 0 };
@@ -773,5 +776,36 @@ namespace grey {
         bool is_dockspace;
         ImGuiID dockspace_id{};
         ImGuiDockNodeFlags dockspace_flags{ ImGuiDockNodeFlags_PassthruCentralNode };
+    };
+
+    template<class TDataElement>
+    class repeater : public container {
+    public:
+        repeater(grey_context& ctx,
+            std::function<void(std::shared_ptr<container>, std::shared_ptr<TDataElement>)> element_factory) 
+            : container{ctx}, ctx{ctx}, make_element{element_factory} {
+        }
+
+        virtual const void render_visible() override {
+            //ImGui::Text("repeater begin");
+
+            render_children();
+
+            //ImGui::Text("repeater end");
+        }
+
+        void bind(std::vector<std::shared_ptr<TDataElement>>& data) {
+            clear();
+            for(auto e : data) {
+                auto ec = std::make_shared<group>(ctx);
+                assign_child(ec);
+                //ec->make_label("repeater element");
+                make_element(ec, e);
+            }
+        }
+
+    private:
+        grey_context& ctx;
+        std::function<void(std::shared_ptr<container>, std::shared_ptr<TDataElement>)> make_element;
     };
 }
