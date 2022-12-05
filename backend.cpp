@@ -194,7 +194,8 @@ namespace grey
       }
 
       // my personal touch
-      //ImGuiStyle& style = ImGui::GetStyle();
+      ImGuiStyle& style = ImGui::GetStyle();
+      //style.TabBorderSize = 5;
       //style.FrameRounding = 1;
       //style.WindowRounding = 0;
       //style.FrameBorderSize = 1.0f;

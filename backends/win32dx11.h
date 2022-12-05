@@ -68,6 +68,8 @@ namespace grey
          HWND get_hwnd() { return hwnd; }
          std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> on_unhandled_window_message;
 
+         virtual void* get_native_window_handle() override { return hwnd; }
+
       private:
          WNDCLASSEX wc;
          HWND hwnd {nullptr};

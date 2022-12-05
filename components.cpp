@@ -9,27 +9,13 @@
 #include <map>
 #include <iostream>
 #include <algorithm>
+#include <fmt/core.h>
 
 using namespace std;
 
 namespace grey
 {
-   const size_t MAX_TABLE_COLUMNS = 64;
-
-   const ImVec4 emphasis_primary_colour = (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.6f);
-   const ImVec4 emphasis_primary_colour_hovered = (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.7f);
-   const ImVec4 emphasis_primary_colour_active = (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.8f);
-
-   const ImVec4 emphasis_error_colour = (ImVec4)ImColor::HSV(0.0f, 0.6f, 0.6f);
-   const ImVec4 emphasis_error_colour_hovered = (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.7f);
-   const ImVec4 emphasis_error_colour_active = (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.8f);
-
-   const ImVec4 emphasis_warning_colour = (ImVec4)ImColor::HSV(7 / 7.0f, 0.6f, 0.6f);
-   const ImVec4 emphasis_warning_colour_hovered = (ImVec4)ImColor::HSV(7 / 7.0f, 0.6f, 0.7f);
-   const ImVec4 emphasis_warning_colour_active = (ImVec4)ImColor::HSV(7 / 7.0f, 0.6f, 0.8f);
-
-
-   void set_colours(emphasis em, ImVec4& normal, ImVec4& hovered, ImVec4& active)
+   void set_colours(emphasis em, ImColor& normal, ImColor& hovered, ImColor& active)
    {
       switch (em)
       {
@@ -110,34 +96,30 @@ namespace grey
 
    }
 
-   const void common_component::render_visible()
-   {
-      switch (c)
-      {
-      case 1:
-         ImGui::SameLine();
-         break;
-      case 2:
-         ImGui::Spacing();
-         break;
-      case 3:
-         ImGui::Separator();
-         break;
+   const void common_component::render_visible() {
+       switch(c) {
+           case 1:
+               ImGui::SameLine();
+               break;
+           case 2:
+               ImGui::Spacing();
+               break;
+           case 3:
+               ImGui::Separator();
+               break;
 
-      }
+       }
    }
 
-   const void container::render()
-   {
-      if (!managed_children.empty())
-      {
-         for (const auto& mc : managed_children)
-         {
-            mc->render();
-         }
-      }
+   const void container::render() {
+       // render non-owned children
+       if(!managed_children.empty()) {
+           for(const auto& mc : managed_children) {
+               mc->render();
+           }
+       }
 
-      component::render();
+       component::render();
    }
 
    void component::set_emphasis(emphasis em)
@@ -146,10 +128,20 @@ namespace grey
       set_colours(em, em_normal, em_hovered, em_active);
    }
 
-   void container::assign_child(std::shared_ptr<component> child)
-   {
-      owned_children.push_back(child);
-      child->parent = this;
+   void container::clear() {
+       owned_children_new.clear();
+       is_dirty = true;
+   }
+
+   void container::assign_child(std::shared_ptr<component> child) {
+       if(!is_dirty) {
+           // make a copy
+           owned_children_new = vector<shared_ptr<component>>{owned_children};
+       }
+
+       owned_children_new.push_back(child);
+       child->parent = this;
+       is_dirty = true;
    }
 
    void container::assign_managed_child(std::shared_ptr<component> child)
@@ -357,22 +349,30 @@ namespace grey
       assign_child(make_shared<common_component>(3));
    }
 
-   std::shared_ptr<imgui_raw> container::make_raw_imgui()
-   {
-      auto r = make_shared<imgui_raw>();
-      assign_child(r);
-      return r;
+   std::shared_ptr<imgui_raw> container::make_raw_imgui() {
+       auto r = make_shared<imgui_raw>();
+       assign_child(r);
+       return r;
    }
 
-   const void container::render_children()
-   {
-      if (!owned_children.empty())
-      {
-         for (auto& child : owned_children)
-         {
-            child->render();
-         }
-      }
+   const void container::render_children() {
+       if(owned_children.empty()) return;
+       for(auto child : owned_children) {
+           child->render();
+       }
+   }
+
+   void container::post_render() {
+
+       if(is_dirty) {
+           owned_children = owned_children_new;
+           owned_children_new.clear();
+           is_dirty = false;
+       }
+
+       for(auto child : owned_children) {
+           child->post_render();
+       }
    }
 
 #ifdef _DEBUG
@@ -391,7 +391,7 @@ namespace grey
        //ImGui::PushStyleColor(ImGuiCol_Border, )
 
        if(em != emphasis::none) {
-           ImGui::PushStyleColor(ImGuiCol_Border, em_normal);
+           ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)em_normal);
        }
 
        //ImVec2 sz2 = ImGui::GetWindowSize();
@@ -423,10 +423,39 @@ namespace grey
 
        render_children();
 
+       // dirty hack, but works!
+       if(spread_horizontally) {
+           auto sz = ImGui::GetWindowSize();
+           ImGui::SameLine(sz.x); ImGui::Text("");
+       }
+
        ImGui::EndGroup();
 
-       // item size can be used:
-       // ImVec2 size = ImGui::GetItemRectSize();
+       if(border_colour) {
+           auto min = ImGui::GetItemRectMin();
+           auto max = ImGui::GetItemRectMax();
+           ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+           //draw_list->AddLine(min, ImVec2(min.x, max.y), (ImU32)emphasis_primary_colour);
+           draw_list->AddRect(min, max, border_colour);
+       }
+
+       if(ImGui::IsItemHovered() && hover_border_colour.o > 0) {
+           auto min = ImGui::GetItemRectMin();
+           auto max = ImGui::GetItemRectMax();
+           ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+           //draw_list->AddLine(min, ImVec2(min.x, max.y), (ImU32)emphasis_primary_colour);
+           draw_list->AddRect(min, max, hover_border_colour);
+       }
+
+       //if(on_click && ImGui::IsItemClicked()) {
+       //    on_click(*this);
+       //}
+
+       if(on_hovered && ImGui::IsItemHovered()) {
+           on_hovered(*this);
+       }
    }
 
    grey::window::window(grey_context& mgr, string title,
@@ -580,9 +609,9 @@ namespace grey
       
       if(em != emphasis::none)
       {
-         ImGui::PushStyleColor(ImGuiCol_Button, em_normal);
-         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, em_hovered);
-         ImGui::PushStyleColor(ImGuiCol_ButtonActive, em_active);
+         ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)em_normal);
+         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)em_hovered);
+         ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)em_active);
       }
 
       if (is_small)
@@ -664,59 +693,48 @@ namespace grey
          this->value = value;
    }
 
-   const void label::render_visible()
-   {
-      if (text_wrap_pos > 0)
-         ImGui::PushTextWrapPos(text_wrap_pos);
+   const void label::render_visible() {
+       if(text_wrap_pos > 0)
+           ImGui::PushTextWrapPos(text_wrap_pos);
 
-      const char* buf = value_ptr == nullptr ? value.c_str() : (*value_ptr).c_str();
+       const char* buf = value_ptr == nullptr ? value.c_str() : (*value_ptr).c_str();
 
-      if (is_enabled)
-      {
-         if (em != emphasis::none)
-         {
-            ImGui::TextColored(em_normal, buf);
-         }
-         else
-         {
-            ImGui::Text(buf);
-         }
-      }
-      else
-      {
-         ImGui::TextDisabled("%s", buf);
-      }
+       if(is_enabled) {
+           if(em != emphasis::none) {
+               ImGui::TextColored(em_normal, buf);
+           } else {
+               ImGui::Text(buf);
+           }
+       } else {
+           ImGui::TextDisabled("%s", buf);
+       }
 
-      if (text_wrap_pos > 0)
-         ImGui::PopTextWrapPos();
+       if(text_wrap_pos > 0)
+           ImGui::PopTextWrapPos();
    }
 
    selectable::selectable(const std::string& value)
-      : value{ sys_label(value) }
-   {
+       : value{sys_label(value)} {
 
    }
 
-   const void selectable::render_visible()
-   {
-      // todo: flag can be set to appear as disabled
-      //ImGuiSelectableFlags rflags = flags;
+   const void selectable::render_visible() {
+       // todo: flag can be set to appear as disabled
+       //ImGuiSelectableFlags rflags = flags;
 
-      bool align = alignment.x > 0 || alignment.y > 0;
+       bool align = alignment.x > 0 || alignment.y > 0;
 
-      if (align)
-         ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, alignment);
+       if(align)
+           ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, alignment);
 
-      if (ImGui::Selectable(value.c_str(), &is_selected, flags, size))
-      {
-         if (on_selected)
-         {
-            on_selected(*this);
-         }
-      }
+       if(ImGui::Selectable(value.c_str(), &is_selected, flags, size)) {
+           if(on_selected) {
+               on_selected(*this);
+           }
+       }
 
-      if (align)
-         ImGui::PopStyleVar();
+       if(align)
+           ImGui::PopStyleVar();
    }
 
    shared_ptr<menu_item> menu_item::add(const std::string& id, const std::string& label) {
@@ -725,220 +743,193 @@ namespace grey
        return mi;
    }
 
-   const void menu_bar::render_visible()
-   {
-      bool rendered = is_main_menu ? ImGui::BeginMainMenuBar() : ImGui::BeginMenuBar();
+   const void menu_bar::render_visible() {
+       bool rendered = is_main_menu ? ImGui::BeginMainMenuBar() : ImGui::BeginMenuBar();
 
-      if (rendered)
-      {
-         for (auto mi : root->children)
-         {
-            render(mi);
-         }
+       if(rendered) {
+           for(auto mi : root->children) {
+               render(mi);
+           }
 
-         if (is_main_menu)
-            ImGui::EndMainMenuBar();
-         else
-            ImGui::EndMenuBar();
-      }
+           if(is_main_menu)
+               ImGui::EndMainMenuBar();
+           else
+               ImGui::EndMenuBar();
+       }
    }
 
-   void menu_bar::render(shared_ptr<menu_item> mi)
-   {
-      if (mi->children.empty())
-      {
-         if (ImGui::MenuItem(mi->label.c_str(),
-            mi->shortcut_text.empty() ? nullptr : mi->shortcut_text.c_str(),
-            mi->is_selected, mi->is_enabled) && clicked && !mi->id.empty())
-         {
-            clicked(*mi);
-         }
-      }
-      else
-      {
-         if (ImGui::BeginMenu(mi->label.c_str()))
-         {
-            for (auto imi : mi->children)
-            {
-               render(imi);
-            }
-
-            ImGui::EndMenu();
-         }
-      }
-
-   }
-
-   component::component(const string& id)
-   {
-      this->id = id.empty() ? generate_id() : id;
-   }
-
-   listbox::listbox(const string& title)
-   {
-      this->title = sys_label(title);
-   }
-
-   const void listbox::render_visible()
-   {
-      ImVec2 size = is_full_width
-         ? ImVec2(-FLT_MIN, items_tall * ImGui::GetTextLineHeightWithSpacing())
-         : ImVec2(0, items_tall * ImGui::GetTextLineHeightWithSpacing());
-
-      // begin rendering
-      bool ok;
-      switch (mode)
-      {
-      case grey::listbox_mode::list:
-      {
-         ok = ImGui::BeginListBox(title.c_str(), size);
-      }
-      break;
-      case grey::listbox_mode::combo:
-      {
-         string preview = (selected_index == -1) ? "" : items[selected_index].text;
-         ok = ImGui::BeginCombo(title.c_str(), preview.c_str());
-      }
-      break;
-      default:
-         ok = false;
-         break;
-      }
-
-      // render items
-      if (ok)
-      {
-         size_t si = 0;
-
-         for (list_item& item : items)
-         {
-            bool is_selected = selected_index == si;
-
-            if (ImGui::Selectable(item.text.c_str(), is_selected))
-            {
-               selected_index = si;
-               if (on_selected)
-               {
-                  on_selected(si, item);
+   void menu_bar::render(shared_ptr<menu_item> mi) {
+       if(mi->children.empty()) {
+           if(ImGui::MenuItem(mi->label.c_str(),
+               mi->shortcut_text.empty() ? nullptr : mi->shortcut_text.c_str(),
+               mi->is_selected, mi->is_enabled) && clicked && !mi->id.empty()) {
+               clicked(*mi);
+           }
+       } else {
+           if(ImGui::BeginMenu(mi->label.c_str())) {
+               for(auto imi : mi->children) {
+                   render(imi);
                }
-            }
 
-            if (is_selected)
-               ImGui::SetItemDefaultFocus();
+               ImGui::EndMenu();
+           }
+       }
 
-            if (!item.tooltip.empty() && ImGui::IsItemHovered())
-            {
-               ImGui::SetTooltip(item.tooltip.c_str());
-            }
+   }
 
-            si += 1;
-         }
+   component::component(const string& id) {
+       this->id = id.empty() ? generate_id() : id;
+   }
 
-         // end rendering
-         switch (mode)
-         {
-         case grey::listbox_mode::list:
-            ImGui::EndListBox();
-            break;
-         case grey::listbox_mode::combo:
-            ImGui::EndCombo();
-            break;
-         default:
-            break;
-         }
+   listbox::listbox(const string& title) {
+       this->title = sys_label(title);
+   }
 
-      }
+   const void listbox::render_visible() {
+       ImVec2 size = is_full_width
+           ? ImVec2(-FLT_MIN, items_tall * ImGui::GetTextLineHeightWithSpacing())
+           : ImVec2(0, items_tall * ImGui::GetTextLineHeightWithSpacing());
+
+       // begin rendering
+       bool ok;
+       switch(mode) {
+           case grey::listbox_mode::list:
+           {
+               ok = ImGui::BeginListBox(title.c_str(), size);
+           }
+           break;
+           case grey::listbox_mode::combo:
+           {
+               string preview = (selected_index == -1) ? "" : items[selected_index].text;
+               ok = ImGui::BeginCombo(title.c_str(), preview.c_str());
+           }
+           break;
+           default:
+               ok = false;
+               break;
+       }
+
+       // render items
+       if(ok) {
+           size_t si = 0;
+
+           for(list_item& item : items) {
+               bool is_selected = selected_index == si;
+
+               if(ImGui::Selectable(item.text.c_str(), is_selected)) {
+                   selected_index = si;
+                   if(on_selected) {
+                       on_selected(si, item);
+                   }
+               }
+
+               if(is_selected)
+                   ImGui::SetItemDefaultFocus();
+
+               if(!item.tooltip.empty() && ImGui::IsItemHovered()) {
+                   ImGui::SetTooltip(item.tooltip.c_str());
+               }
+
+               si += 1;
+           }
+
+           // end rendering
+           switch(mode) {
+               case grey::listbox_mode::list:
+                   ImGui::EndListBox();
+                   break;
+               case grey::listbox_mode::combo:
+                   ImGui::EndCombo();
+                   break;
+               default:
+                   break;
+           }
+
+       }
    }
 
    // custom tree node
    // https://github.com/ocornut/imgui/issues/282#issuecomment-135988273
-   bool tree_node::x_tree_node()
-   {
-      const ImGuiStyle& style = ImGui::GetStyle();
-      ImGuiStorage* storage = ImGui::GetStateStorage();
+   bool tree_node::x_tree_node() {
+       const ImGuiStyle& style = ImGui::GetStyle();
+       ImGuiStorage* storage = ImGui::GetStateStorage();
 
-      bool x_opened = false;
+       bool x_opened = false;
 
-      float x = ImGui::GetCursorPosX();
-      ImGui::BeginGroup();
-      /*
-      if (ImGui::InvisibleButton(label.c_str(), ImVec2(-1, ImGui::GetFontSize() + style.FramePadding.y * 2)))
-      {
-         int* p_opened = storage->GetIntRef(id, 0);
-         opened = *p_opened = !*p_opened;
-      }*/
+       float x = ImGui::GetCursorPosX();
+       ImGui::BeginGroup();
+       /*
+       if (ImGui::InvisibleButton(label.c_str(), ImVec2(-1, ImGui::GetFontSize() + style.FramePadding.y * 2)))
+       {
+          int* p_opened = storage->GetIntRef(id, 0);
+          opened = *p_opened = !*p_opened;
+       }*/
 
-      ImGui::InvisibleButton(id.c_str(), ImVec2(-1, ImGui::GetFontSize() + style.FramePadding.y * 2));
+       ImGui::InvisibleButton(id.c_str(), ImVec2(-1, ImGui::GetFontSize() + style.FramePadding.y * 2));
 
-      bool hovered = ImGui::IsItemHovered();
-      bool active = ImGui::IsItemActive();
-      if (hovered || active)
-         ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(),
-            ImColor(ImGui::GetStyle().Colors[active ? ImGuiCol_HeaderActive : ImGuiCol_HeaderHovered]));
+       bool hovered = ImGui::IsItemHovered();
+       bool active = ImGui::IsItemActive();
+       if(hovered || active)
+           ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(),
+              ImColor(ImGui::GetStyle().Colors[active ? ImGuiCol_HeaderActive : ImGuiCol_HeaderHovered]));
 
-      // Icon, text
-      ImGui::SameLine(x);
-      //ImGui::ColorButton(x_opened ? ImColor(255, 0, 0) : ImColor(0, 255, 0));
-      //ImGui::SameLine();
-      ImGui::Text(label.c_str());
-      ImGui::EndGroup();
-      if (x_opened)
-         ImGui::TreePush(label.c_str());
-      return x_opened;
+       // Icon, text
+       ImGui::SameLine(x);
+       //ImGui::ColorButton(x_opened ? ImColor(255, 0, 0) : ImColor(0, 255, 0));
+       //ImGui::SameLine();
+       ImGui::Text(label.c_str());
+       ImGui::EndGroup();
+       if(x_opened)
+           ImGui::TreePush(label.c_str());
+       return x_opened;
    }
 
-   const void tree_node::render_visible()
-   {
-      ImGuiTreeNodeFlags flags = 
-         ImGuiTreeNodeFlags_SpanAvailWidth;
+   const void tree_node::render_visible() {
+       ImGuiTreeNodeFlags flags =
+           ImGuiTreeNodeFlags_SpanAvailWidth;
 
-      if (is_bold) flags |= ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
-      if (is_expanded) flags |= ImGuiTreeNodeFlags_DefaultOpen;
-      if (is_leaf) flags |= ImGuiTreeNodeFlags_Leaf;
+       if(is_bold) flags |= ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
+       if(is_expanded) flags |= ImGuiTreeNodeFlags_DefaultOpen;
+       if(is_leaf) flags |= ImGuiTreeNodeFlags_Leaf;
 
 
-      if(em != emphasis::none)
-      {
-         ImGui::PushStyleColor(ImGuiCol_Header, em_normal);
-         ImGui::PushStyleColor(ImGuiCol_HeaderHovered, em_hovered);
-         ImGui::PushStyleColor(ImGuiCol_HeaderActive, em_active);
-      }
+       if(em != emphasis::none) {
+           ImGui::PushStyleColor(ImGuiCol_Header, (ImVec4)em_normal);
+           ImGui::PushStyleColor(ImGuiCol_HeaderHovered, (ImVec4)em_hovered);
+           ImGui::PushStyleColor(ImGuiCol_HeaderActive, (ImVec4)em_active);
+       }
 
-      //ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(1, 0, 0, 1));
-      // use overload that allows passing node ID instead of just label, so node persists on rename
-      if (ImGui::TreeNodeEx(id.c_str(), flags, label.c_str()))
-      //if (x_tree_node())
-      {
-         render_children();
+       //ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(1, 0, 0, 1));
+       // use overload that allows passing node ID instead of just label, so node persists on rename
+       if(ImGui::TreeNodeEx(id.c_str(), flags, label.c_str()))
+           //if (x_tree_node())
+       {
+           render_children();
 
-         for (auto child : nodes)
-         {
-            child->render();
-         }
+           for(auto child : nodes) {
+               child->render();
+           }
 
-         ImGui::TreePop();
-      }
+           ImGui::TreePop();
+       }
 
-      if(em != emphasis::none) ImGui::PopStyleColor(3);
+       if(em != emphasis::none) ImGui::PopStyleColor(3);
    }
 
-   std::shared_ptr<tree_node> tree_node::add_node(const string& label, bool is_expanded, bool is_leaf)
-   {
-      auto node = make_shared<tree_node>(tmgr, label, is_expanded, is_leaf);
-      nodes.push_back(node);
-      return node;
+   std::shared_ptr<tree_node> tree_node::add_node(const string& label, bool is_expanded, bool is_leaf) {
+       auto node = make_shared<tree_node>(tmgr, label, is_expanded, is_leaf);
+       nodes.push_back(node);
+       return node;
    }
 
-   std::shared_ptr<tree_node> tree::add_node(const string& label, bool is_expanded, bool is_leaf)
-   {
-      auto node = make_shared<tree_node>(tmgr, label, is_expanded, is_leaf);
-      nodes.push_back(node);
-      return node;
+   std::shared_ptr<tree_node> tree::add_node(const string& label, bool is_expanded, bool is_leaf) {
+       auto node = make_shared<tree_node>(tmgr, label, is_expanded, is_leaf);
+       nodes.push_back(node);
+       return node;
    }
 
-   void tree::remove_node(size_t index)
-   {
-      nodes.erase(nodes.begin() + index);
+   void tree::remove_node(size_t index) {
+       nodes.erase(nodes.begin() + index);
    }
 
    const void tree::render_visible()
@@ -1018,23 +1009,19 @@ namespace grey
          ImGui::PopStyleColor();
    }
 
-   void input::fire_changed()
-   {
-      if (on_value_changed)
-      {
-         on_value_changed(*value);
-      }
+   void input::fire_changed() {
+       if(on_value_changed) {
+           on_value_changed(*value);
+       }
    }
 
-   input_int::input_int(const string& label, int* value) : value{ value }
-   {
-      owns_mem = value == nullptr;
-      if (owns_mem)
-      {
-         this->value = new int();
-      }
+   input_int::input_int(const string& label, int* value) : value{value} {
+       owns_mem = value == nullptr;
+       if(owns_mem) {
+           this->value = new int();
+       }
 
-      this->label = sys_label(label);
+       this->label = sys_label(label);
    }
 
    input_int::~input_int()
@@ -1168,29 +1155,26 @@ namespace grey
       const string& file_path,
       unsigned char* buffer, unsigned int len,
       size_t desired_width, size_t desired_height) :
-      file_path_or_tag{ file_path },
-      buffer{ buffer }, len{ len },
-      mgr{ mgr },
-      desired_width{ desired_width }, desired_height{ desired_height }
-   {
-      int width, height;
-      grey_context& ncmgr = const_cast<grey_context&>(mgr);
-      texture = (buffer == nullptr)
-         ? ncmgr.load_texture_from_file(file_path, width, height)
-         : ncmgr.load_texture_from_memory(file_path, buffer, len, width, height);
+       file_path_or_tag{file_path},
+       buffer{buffer}, len{len},
+       mgr{mgr},
+       desired_width{desired_width}, desired_height{desired_height} {
+       int width, height;
+       grey_context& ncmgr = const_cast<grey_context&>(mgr);
+       texture = (buffer == nullptr)
+           ? ncmgr.load_texture_from_file(file_path, width, height)
+           : ncmgr.load_texture_from_memory(file_path, buffer, len, width, height);
 
-      actual_width = width;
-      actual_height = height;
-      this->desired_width = desired_width == string::npos ? actual_width : desired_width;
-      this->desired_height = desired_height == string::npos ? actual_height : desired_height;
+       actual_width = width;
+       actual_height = height;
+       this->desired_width = desired_width == string::npos ? actual_width : desired_width;
+       this->desired_height = desired_height == string::npos ? actual_height : desired_height;
    }
 
-   const void image::render_visible()
-   {
-      if (texture)
-      {
-         ImGui::Image(texture, ImVec2(desired_width, desired_height));
-      }
+   const void image::render_visible() {
+       if(texture) {
+           ImGui::Image(texture, ImVec2(desired_width, desired_height));
+       }
    }
 
    slider::slider(const string& label, float* value, float min, float max) :
@@ -1210,22 +1194,18 @@ namespace grey
       this->max = max;
    }
 
-   const void slider::render_visible()
-   {
-      if (ImGui::SliderFloat(label.c_str(), value, min, max, format, flags))
-      {
-         value_changed = true;
-      }
+   const void slider::render_visible() {
+       if(ImGui::SliderFloat(label.c_str(), value, min, max, format, flags)) {
+           value_changed = true;
+       }
 
-      if (value_changed && !ImGui::IsAnyMouseDown())
-      {
-         if (on_value_changed)
-         {
-            on_value_changed(*this);
-         }
+       if(value_changed && !ImGui::IsAnyMouseDown()) {
+           if(on_value_changed) {
+               on_value_changed(*this);
+           }
 
-         value_changed = false;
-      }
+           value_changed = false;
+       }
 
    }
 
@@ -1431,34 +1411,65 @@ namespace grey
    }
 
    tabs::tabs(grey_context& mgr, bool tab_list_popup) : mgr{mgr} {
-       flags = ImGuiTabBarFlags_NoCloseWithMiddleMouseButton;
+       flags = ImGuiTabBarFlags_NoCloseWithMiddleMouseButton | ImGuiTabBarFlags_AutoSelectNewTabs;
        if(tab_list_popup)
            flags |= ImGuiTabBarFlags_TabListPopupButton;
    }
 
    const void tabs::render_visible() {
-       if (tab_headers.empty()) return;
+       if(tab_headers.empty()) return;
 
-       for (size_t i = 0; i < tab_headers.size(); i++) {
-           if (ImGui::BeginTabBar(id.c_str(), flags)) {
-               if (ImGui::BeginTabItem(tab_headers[i].c_str())) {
+       if(ImGui::BeginTabBar(id.c_str(), flags)) {
+
+           for(size_t i = 0; i < tab_headers.size(); i++) {
+
+               // handle cases when there can be more than one tab header with the same title
+               string tl = fmt::format("{}##{}", tab_headers[i], i);
+
+               if(ImGui::BeginTabItem(tl.c_str())) {
                    tab_containers[i]->render_visible();
                    ImGui::EndTabItem();
                }
-               ImGui::EndTabBar();
+
            }
+           ImGui::EndTabBar();
+       }
+   }
+
+   void tabs::post_render() {
+
+       component::post_render();
+
+       if(tabs_dirty) {
+           tab_headers = tab_headers_new;
+           tab_headers_new.clear();
+           tab_containers = tab_containers_new;
+           tab_containers_new.clear();
+           tabs_dirty = false;
+       }
+
+       for(auto tc : tab_containers) {
+           tc->post_render();
        }
    }
 
    void tabs::clear() {
-       tab_headers.clear();
-       tab_containers.clear();
+       tab_headers_new.clear();
+       tab_containers_new.clear();
+       tabs_dirty = true;
    }
 
    std::shared_ptr<tab> tabs::make(const std::string& title) {
+
+       if(!tabs_dirty) {
+           tab_headers_new = tab_headers;
+           tab_containers_new = tab_containers;
+       }
+
        auto c = make_shared<tab>(mgr);
-       tab_headers.push_back(title);
-       tab_containers.push_back(c);
+       tab_headers_new.push_back(title);
+       tab_containers_new.push_back(c);
+       tabs_dirty = true;
        return c;
    }
 
@@ -1467,38 +1478,35 @@ namespace grey
       me.DrawContents((void*)(&data[0]), data.size());
    }
 
-   const void plot::render_visible()
-   {
-      if (values.empty()) return;
+   const void plot::render_visible() {
+       if(values.empty()) return;
 
-      // autoscale
-      float min = values[0];
-      float max = values[0];
-      for (float f : values)
-      {
-         min = std::min(min, f);
-         max = std::max(max, f);
-      }
+       // autoscale
+       float min = values[0];
+       float max = values[0];
+       for(float f : values) {
+           min = std::min(min, f);
+           max = std::max(max, f);
+       }
 
-      ImVec2 ws = ImGui::GetWindowSize();
-      ImGuiStyle& style = ImGui::GetStyle();
-      
-      if (stick_to_bottom)
-      {
-         ImGui::SetCursorPosY(ws.y - height - style.ItemSpacing.y * 2);
-      }
+       ImVec2 ws = ImGui::GetWindowSize();
+       ImGuiStyle& style = ImGui::GetStyle();
 
-      ImVec2 size = ImVec2(width == -1
-         ? (ws.x - style.ItemSpacing.x * 2)
-         : width,
-         height);
+       if(stick_to_bottom) {
+           ImGui::SetCursorPosY(ws.y - height - style.ItemSpacing.y * 2);
+       }
 
-      ImGui::PlotHistogram(
-         label.c_str(),
-         &values[0], values.size(),
-         0, NULL,
-         min, max,
-         size);
+       ImVec2 size = ImVec2(width == -1
+          ? (ws.x - style.ItemSpacing.x * 2)
+          : width,
+          height);
+
+       ImGui::PlotHistogram(
+          label.c_str(),
+          &values[0], values.size(),
+          0, NULL,
+          min, max,
+          size);
    }
 
    positioner::positioner(float x, float y, bool is_movement) : is_movement{is_movement} {
@@ -1514,9 +1522,9 @@ namespace grey
            ImGui::SetCursorPos(mv);
 
        } else {
-           if(pos.x < 0 && pos.y > 0) {
+           if(pos.x < 0 && pos.y >= 0) {
                ImGui::SetCursorPosY(pos.y);
-           } else if(pos.x > 0 && pos.y < 0) {
+           } else if(pos.x >= 0 && pos.y < 0) {
                ImGui::SetCursorPosX(pos.x);
            } else {
                ImGui::SetCursorPos(pos);

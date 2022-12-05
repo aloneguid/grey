@@ -43,5 +43,11 @@ namespace grey
         virtual void set_theme(colour_theme theme) = 0;
         virtual void set_theme(const std::string& theme_id) = 0;
 
+        /**
+         * @brief OS specific. On Windows returns HWND.
+         * @return 
+        */
+        virtual void* get_native_window_handle() = 0;
+
     };
 }

@@ -169,6 +169,7 @@ void grey::backends::win32dx11::run_one_frame() {
     // default renderer - render all the windows
     for (auto& wnd : windows) {
         wnd->render();
+        wnd->post_render();
     }
 
     // Rendering

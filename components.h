@@ -9,13 +9,53 @@
 #include "3rdparty/memory_editor.h"
 
 namespace grey {
+
+    const size_t MAX_TABLE_COLUMNS = 64;
+
+    const ImColor emphasis_primary_colour = ImColor::HSV(2 / 7.0f, 0.6f, 0.6f);
+    const ImColor emphasis_primary_colour_hovered = ImColor::HSV(2 / 7.0f, 0.6f, 0.7f);
+    const ImColor emphasis_primary_colour_active = ImColor::HSV(2 / 7.0f, 0.6f, 0.8f);
+
+    const ImColor emphasis_error_colour = ImColor::HSV(0.0f, 0.6f, 0.6f);
+    const ImColor emphasis_error_colour_hovered = ImColor::HSV(2 / 7.0f, 0.6f, 0.7f);
+    const ImColor emphasis_error_colour_active = ImColor::HSV(2 / 7.0f, 0.6f, 0.8f);
+
+    const ImColor emphasis_warning_colour = ImColor::HSV(7 / 7.0f, 0.6f, 0.6f);
+    const ImColor emphasis_warning_colour_hovered = ImColor::HSV(7 / 7.0f, 0.6f, 0.7f);
+    const ImColor emphasis_warning_colour_active = ImColor::HSV(7 / 7.0f, 0.6f, 0.8f);
+
     static int generate_int_id();
 
-    struct rgb_colour {
+    class rgb_colour {
+    public:
         float r;
         float g;
         float b;
         float o;
+
+        rgb_colour() : r{0}, g{0}, b{0}, o{0} {
+
+        }
+
+        rgb_colour(const ImColor& ic) {
+            r = ic.Value.x;
+            g = ic.Value.y;
+            b = ic.Value.z;
+            o = ic.Value.w;
+        }
+
+        operator ImColor() {
+            return ImColor(r, g, b, o);
+        }
+
+        operator ImU32() {
+            return (ImU32)ImColor(r, g, b, o);
+        }
+
+        /**
+         * @brief Returns true if color has any opacity at all
+        */
+        operator bool() { return o > 0; }
     };
 
     enum class emphasis {
@@ -41,10 +81,12 @@ namespace grey {
         float width{0};
         float height{0};
         void* tag{ nullptr };
+        float float_tag{0};
 
         component(const std::string& id = "");
         virtual const void render();
         virtual const void render_visible() = 0;
+        virtual void post_render() {}
         void set_emphasis(emphasis em);
         emphasis get_emphasis() { return em; }
 
@@ -55,9 +97,9 @@ namespace grey {
 
     protected:
         //emphasis
-        ImVec4 em_normal;
-        ImVec4 em_hovered;
-        ImVec4 em_active;
+        ImColor em_normal;
+        ImColor em_hovered;
+        ImColor em_active;
         emphasis em{ emphasis::none };
 
         inline std::string sys_label(const std::string& label) { return label + "##" + id; }
@@ -93,6 +135,8 @@ namespace grey {
     class child;
     class group;
     class selectable;
+    template<class TDataElement> class repeater_bind_context;
+    template<class TDataElement> class repeater;
 #if _DEBUG
     class demo;
 #endif
@@ -103,9 +147,10 @@ namespace grey {
 
         virtual const void render() override;
         virtual const void render_visible() = 0;
+        void post_render() override;
 
         bool empty() { return managed_children.empty() && owned_children.empty(); }
-        void clear() { owned_children.clear(); }
+        void clear();
         void assign_child(std::shared_ptr<component> child);
         void assign_managed_child(std::shared_ptr<component> child);
         std::shared_ptr<component> get_child(int index);
@@ -131,7 +176,7 @@ namespace grey {
         std::shared_ptr<big_table> make_big_table(std::vector<std::string> columns, size_t row_count);
         template<class TRowState>
         std::shared_ptr<complex_table<TRowState>> make_complex_table(std::vector<std::string> columns) {
-            auto r = make_shared<complex_table<TRowState>>(tmgr, columns);
+            auto r = std::make_shared<complex_table<TRowState>>(tmgr, columns);
             assign_child(r);
             return r;
         }
@@ -146,6 +191,14 @@ namespace grey {
         std::shared_ptr<child> make_child_window(size_t width = 0, size_t height = 0, bool horizonal_scroll = false);
         std::shared_ptr<group> make_group();
         std::shared_ptr<selectable> make_selectable(const std::string& value);
+        template<class TDataElement>
+        std::shared_ptr<repeater<TDataElement>> make_repeater(
+            std::function<void(repeater_bind_context<TDataElement>)> element_factory,
+            bool track_selection = false) {
+            auto r = std::make_shared<repeater<TDataElement>>(tmgr, element_factory, track_selection);
+            assign_child(r);
+            return r;
+        }
 
 #if _DEBUG
         std::shared_ptr<demo> make_demo();
@@ -163,9 +216,14 @@ namespace grey {
         grey_context& tmgr;
         // managed children are not owned, but you are responsible for rendering them
         std::vector<std::shared_ptr<component>> managed_children;
-        std::vector<std::shared_ptr<component>> owned_children;
 
         const void render_children();
+
+
+    private:
+        bool is_dirty{false};
+        std::vector<std::shared_ptr<component>> owned_children;
+        std::vector<std::shared_ptr<component>> owned_children_new;
     };
 
     class common_component : public component {
@@ -599,16 +657,21 @@ namespace grey {
     public:
         tabs(grey_context& mgr, bool tab_list_popup = false);
 
+        size_t selected_idx{0};
+
         void clear();
         std::shared_ptr<tab> make(const std::string& title);
-
         virtual const void render_visible() override;
+        void post_render() override;
 
     private:
+        bool tabs_dirty{false};
         grey_context& mgr;
         ImGuiTabBarFlags flags;
         std::vector<std::string> tab_headers;
+        std::vector<std::string> tab_headers_new;
         std::vector<std::shared_ptr<tab>> tab_containers;
+        std::vector<std::shared_ptr<tab>> tab_containers_new;
     };
 
     /// <summary>
@@ -743,6 +806,10 @@ namespace grey {
         group(grey_context& mgr);
 
         virtual const void render_visible() override;
+
+        bool spread_horizontally{false};
+        rgb_colour hover_border_colour{};
+        rgb_colour border_colour{};
     };
 
     class window : public container {
@@ -779,33 +846,80 @@ namespace grey {
     };
 
     template<class TDataElement>
+    struct repeater_bind_context {
+        repeater<TDataElement>& rpt;
+        std::shared_ptr<container> container;
+        std::shared_ptr<TDataElement> data;
+        size_t idx;
+    };
+
+    template<class TDataElement>
     class repeater : public container {
     public:
         repeater(grey_context& ctx,
-            std::function<void(std::shared_ptr<container>, std::shared_ptr<TDataElement>)> element_factory) 
-            : container{ctx}, ctx{ctx}, make_element{element_factory} {
+            std::function<void(repeater_bind_context<TDataElement>)> element_factory,
+            bool track_selection = false)
+            : container{ctx}, ctx{ctx}, make_element{element_factory}, track_selection{track_selection} {
         }
 
         virtual const void render_visible() override {
-            //ImGui::Text("repeater begin");
-
             render_children();
-
-            //ImGui::Text("repeater end");
         }
 
         void bind(std::vector<std::shared_ptr<TDataElement>>& data) {
             clear();
-            for(auto e : data) {
+            bound_groups.clear();
+            ImGuiStyle& style = ImGui::GetStyle();
+            size_t idx{0};
+            for(auto data_element : data) {
                 auto ec = std::make_shared<group>(ctx);
                 assign_child(ec);
-                //ec->make_label("repeater element");
-                make_element(ec, e);
+                bound_groups.push_back(ec);
+                make_element(repeater_bind_context<TDataElement>{*this, ec, data_element, idx++});
+                ec->spread_horizontally = true;
+                if(track_selection) {
+                    ec->hover_border_colour = rgb_colour{style.Colors[ImGuiCol_FrameBgHovered]};
+
+                    ec->on_click = [this, ec, data_element](component&) {
+                        ImGuiStyle& style = ImGui::GetStyle();
+
+                        for(auto bg : bound_groups) {
+                            bg->border_colour = rgb_colour{
+                                style.Colors[bg->id == ec->id ? ImGuiCol_FrameBgActive : ImGuiCol_WindowBg]};
+                        }
+
+                        if(on_item_clicked) {
+                            on_item_clicked(ec, data_element);
+                        }
+                    };
+
+                    ec->on_hovered = [this, ec, data_element](component&) {
+                        if(on_item_hovered) {
+                            on_item_hovered(ec, data_element);
+                        }
+                    };
+                }
+            }
+            this->data = data;
+        }
+
+        std::function<void(std::shared_ptr<container>, std::shared_ptr<TDataElement>)> on_item_hovered;
+        std::function<void(std::shared_ptr<container>, std::shared_ptr<TDataElement>)> on_item_clicked;
+
+        void set_selected_index(size_t idx) {
+            ImGuiStyle& style = ImGui::GetStyle();
+
+            for(int i = 0; i < bound_groups.size(); i++) {
+                bound_groups[i]->border_colour = rgb_colour{
+                    style.Colors[i == idx ? ImGuiCol_FrameBgActive : ImGuiCol_WindowBg]};
             }
         }
 
     private:
         grey_context& ctx;
-        std::function<void(std::shared_ptr<container>, std::shared_ptr<TDataElement>)> make_element;
+        bool track_selection;
+        std::vector<std::shared_ptr<group>> bound_groups;   // only to track visual state i.e. selection
+        std::function<void(repeater_bind_context<TDataElement>)> make_element;
+        std::vector<std::shared_ptr<TDataElement>> data;
     };
 }
