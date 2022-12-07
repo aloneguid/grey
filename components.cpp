@@ -460,32 +460,28 @@ namespace grey
 
    grey::window::window(grey_context& mgr, string title,
                         bool is_maximized, bool can_close, bool is_dockspace)
-   :
-      container{ mgr }, title{ title },
-      is_maximized{ is_maximized },
-      can_close{ can_close },
-      is_dockspace{ is_dockspace }
-   {
-      if (is_maximized)
-      {
-         flags = (
-            ImGuiWindowFlags_NoBringToFrontOnFocus |
-            ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoSavedSettings |
-            //ImGuiWindowFlags_NoTitleBar |
-            ImGuiWindowFlags_NoResize
-            );
+       :
+       container{mgr}, title{title},
+       is_maximized{is_maximized},
+       can_close{can_close},
+       is_dockspace{is_dockspace} {
+       if(is_maximized) {
+           flags = (
+              ImGuiWindowFlags_NoBringToFrontOnFocus |
+              ImGuiWindowFlags_NoCollapse |
+              ImGuiWindowFlags_NoSavedSettings |
+              //ImGuiWindowFlags_NoTitleBar |
+              ImGuiWindowFlags_NoResize
+              );
 
-         // need to call PopStyleVar elsewhere
-         //ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
-      }
-      else
-      {
-         flags = 0;
-         //flags |= ImGuiWindowFlags_NoDocking;
-      }
+           // need to call PopStyleVar elsewhere
+           //ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
+       } else {
+           flags = 0;
+           //flags |= ImGuiWindowFlags_NoDocking;
+       }
 
-      if (has_menu_space) flags |= ImGuiWindowFlags_MenuBar;
+       if(has_menu_space) flags |= ImGuiWindowFlags_MenuBar;
    }
 
    const void grey::status_bar::render_visible()
@@ -678,19 +674,17 @@ namespace grey
       draw_list->AddCircleFilled(ImVec2(p.x + radius + (*value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 1.5f, IM_COL32(255, 255, 255, 255));
    }
 
-   string label::get_value()
-   {
-      if (value_ptr)
-         return *value_ptr;
+   string label::get_value() {
+       if(value_ptr)
+           return *value_ptr;
 
-      return value;
+       return value;
    }
 
-   void label::set_value(const string& value)
-   {
-      // only allow changing it if we own it!
-      if (!value_ptr)
-         this->value = value;
+   void label::set_value(const string& value) {
+       // only allow changing it if we own it!
+       if(!value_ptr)
+           this->value = value;
    }
 
    const void label::render_visible() {
@@ -1281,25 +1275,29 @@ namespace grey
       }
    }
 
-   const void checkbox::render_visible()
-   {
-      if (is_highlighted)
-      {
-         ImGui::PushStyleColor(
-            ImGuiCol_CheckMark,
-            (ImVec4)ImColor::HSV(5.0f, 255.0f, 255.0f));
-      }
+   const void checkbox::render_visible() {
+       if(is_highlighted) {
+           ImGui::PushStyleColor(
+              ImGuiCol_CheckMark,
+              (ImVec4)ImColor::HSV(5.0f, 255.0f, 255.0f));
+       }
 
-      if (ImGui::Checkbox(text.c_str(), value))
-      {
-         if (on_value_changed)
-            on_value_changed(*value);
-      }
+       if(em != emphasis::none) {
+           ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)em_normal);
+       }
 
-      if (is_highlighted)
-      {
-         ImGui::PopStyleColor();
-      }
+       if(ImGui::Checkbox(text.c_str(), value)) {
+           if(on_value_changed)
+               on_value_changed(*value);
+       }
+
+       if(is_highlighted) {
+           ImGui::PopStyleColor();
+       }
+
+       if(em != emphasis::none) {
+           ImGui::PopStyleColor();
+       }
    }
 
    const void table::render_visible()
