@@ -831,18 +831,16 @@ namespace grey {
         float get_system_scale() { return container::tmgr.get_system_scale(); }
 
     private:
-        bool is_open{ true };
-        bool user_is_open{ true };  // user-controlled flag
-        bool is_maximized;
+        const bool is_maximized;
         ImGuiWindowFlags flags;
         std::string title;
-        bool can_close;
-        bool was_open{ true };
-        bool first_time{ true };
+        const bool can_close;
 
-        bool is_dockspace;
+        const bool is_dockspace;
         ImGuiID dockspace_id{};
         ImGuiDockNodeFlags dockspace_flags{ ImGuiDockNodeFlags_PassthruCentralNode };
+
+        bool was_visible{true};
     };
 
     template<class TDataElement>

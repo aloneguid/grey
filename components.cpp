@@ -15,38 +15,34 @@ using namespace std;
 
 namespace grey
 {
-   void set_colours(emphasis em, ImColor& normal, ImColor& hovered, ImColor& active)
-   {
-      switch (em)
-      {
-      case emphasis::primary:
-         normal = emphasis_primary_colour;
-         hovered = emphasis_primary_colour_hovered;
-         active = emphasis_primary_colour_hovered;
-         break;
-      case emphasis::error:
-         normal = emphasis_error_colour;
-         hovered = emphasis_error_colour_hovered;
-         active = emphasis_error_colour_active;
-         break;
-      case emphasis::warning:
-         normal = emphasis_warning_colour;
-         hovered = emphasis_warning_colour_hovered;
-         active = emphasis_warning_colour_active;
-         break;
-      }
-   }
+    void set_colours(emphasis em, ImColor& normal, ImColor& hovered, ImColor& active) {
+        switch(em) {
+            case emphasis::primary:
+                normal = emphasis_primary_colour;
+                hovered = emphasis_primary_colour_hovered;
+                active = emphasis_primary_colour_hovered;
+                break;
+            case emphasis::error:
+                normal = emphasis_error_colour;
+                hovered = emphasis_error_colour_hovered;
+                active = emphasis_error_colour_active;
+                break;
+            case emphasis::warning:
+                normal = emphasis_warning_colour;
+                hovered = emphasis_warning_colour_hovered;
+                active = emphasis_warning_colour_active;
+                break;
+        }
+    }
 
    static int incrementing_id;
 
-   int generate_int_id()
-   {
-      return incrementing_id++;
+   int generate_int_id() {
+       return incrementing_id++;
    }
 
-   static string generate_id(const string& prefix = "")
-   {
-      return prefix + std::to_string(incrementing_id++);
+   static string generate_id(const string& prefix = "") {
+       return prefix + std::to_string(incrementing_id++);
    }
 
    const void component::render() {
@@ -518,7 +514,7 @@ namespace grey
    }
 
    void window::close() {
-       this->user_is_open = false;
+       this->is_visible = false;
    }
 
    const void window::render_visible() {
@@ -530,7 +526,7 @@ namespace grey
        //}
 
 
-       if (!is_open) return;
+       if (!is_visible) return;
 
        ImGuiWindowFlags rflags = flags;
        if (has_menu_space) rflags |= ImGuiWindowFlags_MenuBar;
@@ -545,14 +541,9 @@ namespace grey
 
        // the rest
 
-       bool began = ImGui::Begin(title.c_str(), can_close ? &is_open : nullptr, rflags);
+       bool began = ImGui::Begin(title.c_str(), &is_visible, rflags);
 
-       if (is_maximized) {
-           // ImGuiStyleVar_FramePadding
-           //ImGui::PopStyleVar();
-       }
-
-       if (is_dockspace) {
+       /*if(is_dockspace) {
            // useful docking links:
            // - https://github.com/ocornut/imgui/issues/4430
            // - https://gist.github.com/moebiussurfing/d7e6ec46a44985dd557d7678ddfeda99
@@ -563,20 +554,18 @@ namespace grey
            }
 
            ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-       }
+       }*/
 
        if (began) {
-           if (!user_is_open) {
-               is_open = false;
-           }
-           if (was_open != is_open) {
-               if (on_open_changed) {
-                   on_open_changed(is_open);
-               }
-               was_open = is_open;
-           }
-
            render_children();
+       }
+
+       if(is_visible != was_visible) {
+           was_visible = is_visible;
+
+           if(on_open_changed) {
+               on_open_changed(is_visible);
+           }
        }
 
        // for the window, End must be called regardless
