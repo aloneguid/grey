@@ -80,8 +80,9 @@ namespace grey {
         component* parent{ nullptr };
         float width{0};
         float height{0};
+        float alpha{1};
         void* tag{ nullptr };
-        float float_tag{0};
+        float tag_float{0};
 
         component(const std::string& id = "");
         virtual const void render();
@@ -205,7 +206,7 @@ namespace grey {
 #endif
 
         // edge case helpers
-        void same_line();
+        void same_line(float offset_left = 0);
         void spacer();
         void separator();
         std::shared_ptr<imgui_raw> make_raw_imgui();
@@ -228,11 +229,12 @@ namespace grey {
 
     class common_component : public component {
     public:
-        common_component(int c) : c{ c } {}
+        common_component(int c, float arg1 = 0) : c{c}, arg1{arg1} {}
         virtual const void render_visible() override;
 
     private:
         int c;
+        float arg1;
     };
 
     class button : public component {
@@ -820,7 +822,8 @@ namespace grey {
             std::string title,
             bool is_maximized = false,
             bool can_close = true,
-            bool is_dockspace = false);
+            bool is_dockspace = false,
+            bool show_title = true);
 
         virtual const void render_visible() override;
 

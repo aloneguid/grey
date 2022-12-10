@@ -63,7 +63,12 @@ namespace grey
        if (width != 0)
            ImGui::PushItemWidth(width);
 
+       bool change_alpha = alpha != 1;
+       if(change_alpha) ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
+
        render_visible();
+
+       if(change_alpha) ImGui::PopStyleVar();
 
        if (width != 0)
            ImGui::PopItemWidth();
@@ -95,7 +100,7 @@ namespace grey
    const void common_component::render_visible() {
        switch(c) {
            case 1:
-               ImGui::SameLine();
+               ImGui::SameLine(arg1);
                break;
            case 2:
                ImGui::Spacing();
@@ -330,9 +335,9 @@ namespace grey
       assign_child(make_shared<positioner>(x, y, is_movement));
    }
 
-   void container::same_line()
+   void container::same_line(float offset_left)
    {
-      assign_child(make_shared<common_component>(1));
+      assign_child(make_shared<common_component>(1, offset_left));
    }
 
    void container::spacer()
@@ -454,32 +459,6 @@ namespace grey
        }
    }
 
-   grey::window::window(grey_context& mgr, string title,
-                        bool is_maximized, bool can_close, bool is_dockspace)
-       :
-       container{mgr}, title{title},
-       is_maximized{is_maximized},
-       can_close{can_close},
-       is_dockspace{is_dockspace} {
-       if(is_maximized) {
-           flags = (
-              ImGuiWindowFlags_NoBringToFrontOnFocus |
-              ImGuiWindowFlags_NoCollapse |
-              ImGuiWindowFlags_NoSavedSettings |
-              //ImGuiWindowFlags_NoTitleBar |
-              ImGuiWindowFlags_NoResize
-              );
-
-           // need to call PopStyleVar elsewhere
-           //ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
-       } else {
-           flags = 0;
-           //flags |= ImGuiWindowFlags_NoDocking;
-       }
-
-       if(has_menu_space) flags |= ImGuiWindowFlags_MenuBar;
-   }
-
    const void grey::status_bar::render_visible()
    {
       // source: https://github.com/ocornut/imgui/issues/3518#issuecomment-807398290
@@ -515,6 +494,34 @@ namespace grey
 
    void window::close() {
        this->is_visible = false;
+   }
+
+   grey::window::window(grey_context& mgr, string title,
+                     bool is_maximized, bool can_close, bool is_dockspace, bool show_title)
+       : 
+       container{mgr}, title{title},
+       is_maximized{is_maximized},
+       can_close{can_close},
+       is_dockspace{is_dockspace} {
+       if(is_maximized) {
+           flags = (
+              ImGuiWindowFlags_NoBringToFrontOnFocus |
+              ImGuiWindowFlags_NoCollapse |
+              ImGuiWindowFlags_NoSavedSettings |
+              //ImGuiWindowFlags_NoTitleBar |
+              ImGuiWindowFlags_NoResize
+              );
+
+           // need to call PopStyleVar elsewhere
+           //ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
+       } else {
+           flags = 0;
+           //flags |= ImGuiWindowFlags_NoDocking;
+       }
+
+       if(!show_title) flags |= ImGuiWindowFlags_NoTitleBar;
+
+       if(has_menu_space) flags |= ImGuiWindowFlags_MenuBar;
    }
 
    const void window::render_visible() {
@@ -1275,7 +1282,7 @@ namespace grey
            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)em_normal);
        }
 
-       if(ImGui::Checkbox(text.c_str(), value)) {
+       if(ImGui::Checkbox(sys_label(text).c_str(), value)) {
            if(on_value_changed)
                on_value_changed(*value);
        }
