@@ -590,6 +590,8 @@ namespace grey {
     public:
         complex_table(grey_context& mgr, std::vector<std::string> columns) : mgr{ mgr }, columns{ columns } {}
 
+        bool stretchy{false};
+
         table_row<TRowState> make_row(std::shared_ptr<TRowState> state) {
 
             table_row<TRowState> row(state);
@@ -607,12 +609,14 @@ namespace grey {
         virtual const void render_visible() {
             if (columns.empty()) return;
 
-            if (ImGui::BeginTable(id.c_str(), columns.size(),
-                ImGuiTableFlags_RowBg |
+            ImGuiTableFlags flags = ImGuiTableFlags_RowBg |
                 ImGuiTableFlags_BordersV |
                 ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable |
-                ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY
-            )) {
+                ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY;
+
+            if(stretchy) flags |= ImGuiTableFlags_SizingStretchSame;
+
+            if (ImGui::BeginTable(id.c_str(), columns.size(), flags)) {
                 // render header
 
                 ImGui::TableSetupScrollFreeze(0, 1);   // freeze top row
@@ -633,6 +637,14 @@ namespace grey {
                 }
 
                 ImGui::EndTable();
+            }
+        }
+
+        void post_render() override {
+            for(auto& row : rows) {
+                for(auto& cell : row.cells) {
+                    cell->post_render();
+                }
             }
         }
 
