@@ -73,8 +73,8 @@ namespace grey
        if (width != 0)
            ImGui::PopItemWidth();
 
-       if (on_hovered && ImGui::IsItemHovered()) {
-           on_hovered(*this);
+       if (on_hovered) {
+           on_hovered(*this, ImGui::IsItemHovered());
        }
 
        if (!tooltip.empty() && ImGui::IsItemHovered()) {
@@ -281,9 +281,9 @@ namespace grey
       return r;
    }
 
-   std::shared_ptr<plot> container::make_plot(const string& title, std::vector<float>& values)
+   std::shared_ptr<plot> container::make_plot(const string& title, size_t max_values)
    {
-      auto r = make_shared<plot>(title, values);
+      auto r = make_shared<plot>(title, max_values);
       assign_child(r);
       return r;
    }
@@ -454,8 +454,8 @@ namespace grey
        //    on_click(*this);
        //}
 
-       if(on_hovered && ImGui::IsItemHovered()) {
-           on_hovered(*this);
+       if(on_hovered) {
+           on_hovered(*this, ImGui::IsItemHovered());
        }
    }
 
@@ -1475,20 +1475,12 @@ namespace grey
    const void plot::render_visible() {
        if(values.empty()) return;
 
-       // autoscale
-       float min = values[0];
-       float max = values[0];
-       for(float f : values) {
-           min = std::min(min, f);
-           max = std::max(max, f);
-       }
-
        ImVec2 ws = ImGui::GetWindowSize();
        ImGuiStyle& style = ImGui::GetStyle();
 
-       if(stick_to_bottom) {
-           ImGui::SetCursorPosY(ws.y - height - style.ItemSpacing.y * 2);
-       }
+       //if(stick_to_bottom) {
+       //    ImGui::SetCursorPosY(ws.y - height - style.ItemSpacing.y * 2);
+       //}
 
        ImVec2 size = ImVec2(width == -1
           ? (ws.x - style.ItemSpacing.x * 2)
@@ -1501,6 +1493,16 @@ namespace grey
           0, NULL,
           min, max,
           size);
+   }
+
+   void plot::add(float value) {
+       if(values.size() == max_values) {
+           values.erase(values.begin(), values.begin() + 1);
+       }
+       values.push_back(value);
+       min = *std::min_element(values.begin(), values.end());
+       max = *std::max_element(values.begin(), values.end());
+       if(min == max) min = 0;
    }
 
    positioner::positioner(float x, float y, bool is_movement) : is_movement{is_movement} {

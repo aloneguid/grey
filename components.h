@@ -91,7 +91,7 @@ namespace grey {
         void set_emphasis(emphasis em);
         emphasis get_emphasis() { return em; }
 
-        std::function<void(component&)> on_hovered;
+        std::function<void(component&, bool)> on_hovered;
         std::function<void(component&)> on_click;
         std::function<void(component&)> on_frame;
         std::function<void(component&)> on_visibility_changed;
@@ -185,7 +185,7 @@ namespace grey {
         std::shared_ptr<slider> make_slider(const std::string& label, float* value, float min = 0, float max = 1);
         std::shared_ptr<progress_bar> make_progress_bar(float* value, const char* overlay_text = nullptr, float height = 10);
         std::shared_ptr<modal_popup> make_modal_popup(const std::string& title);
-        std::shared_ptr<plot> make_plot(const std::string& title, std::vector<float>& values);
+        std::shared_ptr<plot> make_plot(const std::string& title, size_t max_values);
         std::shared_ptr<status_bar> make_status_bar();
         std::shared_ptr<accordion> make_accordion(const std::string& label);
         // child windows have their own scrolling/clipping area.
@@ -705,20 +705,21 @@ namespace grey {
 
     class plot : public component {
     public:
-        plot(const std::string& label, std::vector<float>& values)
-            : label{ label }, values{ values } {
-
+        plot(const std::string& label, size_t max_values = 10)
+            : label{label}, max_values{max_values} {
+            values.resize(max_values);
         }
-
-        int height{ 50 };
-        int width{ -1 };
-        bool stick_to_bottom{ false }; // todo: should be some kind of a layout manager?
 
         virtual const void render_visible() override;
 
+        void add(float value);
+
     private:
         std::string label;
-        std::vector<float>& values;
+        size_t max_values;
+        std::vector<float> values;
+        float min{0};
+        float max{0};
     };
 
     /// <summary>
@@ -906,8 +907,8 @@ namespace grey {
                         }
                     };
 
-                    ec->on_hovered = [this, ec, data_element](component&) {
-                        if(on_item_hovered) {
+                    ec->on_hovered = [this, ec, data_element](component&, bool is_hovered) {
+                        if(on_item_hovered && is_hovered) {
                             on_item_hovered(ec, data_element);
                         }
                     };
