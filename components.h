@@ -81,6 +81,12 @@ namespace grey {
         float width{0};
         float height{0};
         float alpha{1};
+        bool bg_draw{false};    // when set to true, does not change cursor coordinates (draws as background)
+
+        // paddings
+        float padding_left{0};
+        float padding_top{0};
+
         void* tag{ nullptr };
         float tag_float{0};
 
@@ -107,10 +113,13 @@ namespace grey {
 
     private:
         bool is_visible_prev_frame{ true };
+        ImVec2 start_cursor_pos;
 
         //click state
         bool state_click_pressed{ false };
         bool on_click_sent{ false };
+
+        const void cursor_move(float x, float y);
     };
 
     class menu_bar;
@@ -824,6 +833,7 @@ namespace grey {
 
         bool spread_horizontally{false};
         rgb_colour hover_border_colour{};
+        rgb_colour hover_bg_colour{};
         rgb_colour border_colour{};
     };
 
@@ -892,7 +902,7 @@ namespace grey {
                 make_element(repeater_bind_context<TDataElement>{*this, ec, data_element, idx++});
                 ec->spread_horizontally = true;
                 if(track_selection) {
-                    ec->hover_border_colour = rgb_colour{style.Colors[ImGuiCol_FrameBgHovered]};
+                    ec->hover_border_colour = ec->hover_bg_colour = rgb_colour{style.Colors[ImGuiCol_FrameBgHovered]};
 
                     ec->on_click = [this, ec, data_element](component&) {
                         ImGuiStyle& style = ImGui::GetStyle();

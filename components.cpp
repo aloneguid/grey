@@ -45,6 +45,13 @@ namespace grey
        return prefix + std::to_string(incrementing_id++);
    }
 
+   const void component::cursor_move(float x, float y) {
+       ImVec2 mv = ImGui::GetCursorPos();
+       mv.x += x;
+       mv.y += y;
+       ImGui::SetCursorPos(mv);
+   }
+
    const void component::render() {
        if (on_frame) {
            on_frame(*this);
@@ -66,7 +73,20 @@ namespace grey
        bool change_alpha = alpha != 1;
        if(change_alpha) ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 
+       if(bg_draw) {
+           start_cursor_pos = ImGui::GetCursorPos();
+       }
+
+       bool pad = padding_left != 0 || padding_top != 0;
+       if(pad) {
+           cursor_move(padding_left, padding_top);
+       }
+
        render_visible();
+
+       if(bg_draw) {
+           ImGui::SetCursorPos(start_cursor_pos);
+       }
 
        if(change_alpha) ImGui::PopStyleVar();
 
@@ -427,10 +447,12 @@ namespace grey
        // dirty hack, but works!
        if(spread_horizontally) {
            auto sz = ImGui::GetWindowSize();
-           ImGui::SameLine(sz.x); ImGui::Text("");
+           ImGui::SameLine(sz.x - 20); ImGui::Text("");
        }
 
        ImGui::EndGroup();
+
+       auto& style = ImGui::GetStyle();
 
        if(border_colour) {
            auto min = ImGui::GetItemRectMin();
@@ -438,7 +460,7 @@ namespace grey
            ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
            //draw_list->AddLine(min, ImVec2(min.x, max.y), (ImU32)emphasis_primary_colour);
-           draw_list->AddRect(min, max, border_colour);
+           draw_list->AddRect(min, max, border_colour, style.FrameRounding);
        }
 
        if(ImGui::IsItemHovered() && hover_border_colour.o > 0) {
@@ -447,7 +469,17 @@ namespace grey
            ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
            //draw_list->AddLine(min, ImVec2(min.x, max.y), (ImU32)emphasis_primary_colour);
-           draw_list->AddRect(min, max, hover_border_colour);
+           draw_list->AddRect(min, max, hover_border_colour, style.FrameRounding);
+       }
+
+       if(ImGui::IsItemHovered() && hover_bg_colour.o > 0) {
+           auto min = ImGui::GetItemRectMin();
+           auto max = ImGui::GetItemRectMax();
+           ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
+
+           //draw_list->AddLine(min, ImVec2(min.x, max.y), (ImU32)emphasis_primary_colour);
+           //draw_list->AddRect(min, max, hover_border_colour);
+           draw_list->AddRectFilled(min, max, hover_bg_colour, style.FrameRounding);
        }
 
        //if(on_click && ImGui::IsItemClicked()) {
@@ -544,6 +576,7 @@ namespace grey
            ImGui::SetNextWindowSize(io.DisplaySize);
 
            //ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
+           ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
        }
 
        // the rest
@@ -577,6 +610,10 @@ namespace grey
 
        // for the window, End must be called regardless
        ImGui::End();
+
+       if(is_maximized) {
+           ImGui::PopStyleVar();
+       }
    }
 
    button::button(const string& label, bool is_small, emphasis e) : is_small{ is_small }

@@ -486,6 +486,17 @@ LRESULT WINAPI grey::backends::win32dx11::WndProc(
                 backend->dx_swap_chain->ResizeBuffers(0, (UINT)LOWORD(lParam), (UINT)HIWORD(lParam), DXGI_FORMAT_UNKNOWN, 0);
                 backend->dx_create_render_target();
             }
+
+            //rounded corners!
+            {
+                RECT wRect;
+                if(::GetWindowRect(hWnd, &wRect)) {
+                    HRGN hRgn = ::CreateRoundRectRgn(wRect.left, wRect.top, wRect.right, wRect.bottom, 30, 30);
+                    ::SetWindowRgn(hWnd, hRgn, TRUE);
+                    ::DeleteObject(hRgn);
+                }
+            }
+
             return 0;
         }
         

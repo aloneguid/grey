@@ -10,7 +10,8 @@ namespace grey
         light,
         light2,
         classic,
-        corp_grey
+        corp_grey,
+        cherry
     };
 
     enum class font {
