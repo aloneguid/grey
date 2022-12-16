@@ -764,8 +764,8 @@ namespace grey
            ImGui::PopStyleVar();
    }
 
-   shared_ptr<menu_item> menu_item::add(const std::string& id, const std::string& label) {
-       auto mi = make_shared<menu_item>(id, label);
+   shared_ptr<menu_item> menu_item::add(const std::string& id, const std::string& label, const std::string& icon) {
+       auto mi = make_shared<menu_item>(id, label, icon);
        children.push_back(mi);
        return mi;
    }
@@ -775,7 +775,7 @@ namespace grey
 
        if(rendered) {
            for(auto mi : root->children) {
-               render(mi);
+               render(mi, false);
            }
 
            if(is_main_menu)
@@ -785,23 +785,41 @@ namespace grey
        }
    }
 
-   void menu_bar::render(shared_ptr<menu_item> mi) {
+   void menu_bar::render(shared_ptr<menu_item> mi, bool icon_pad) {
+       string label = icon_pad
+           ? string{"       "} + mi->label
+           : mi->label;
+
+       ImVec2 cp = ImGui::GetCursorPos();
+
        if(mi->children.empty()) {
-           if(ImGui::MenuItem(mi->label.c_str(),
+           if(ImGui::MenuItem(label.c_str(),
                mi->shortcut_text.empty() ? nullptr : mi->shortcut_text.c_str(),
                mi->is_selected, mi->is_enabled) && clicked && !mi->id.empty()) {
                clicked(*mi);
            }
        } else {
-           if(ImGui::BeginMenu(mi->label.c_str())) {
+           if(ImGui::BeginMenu(label.c_str())) {
+               bool has_icons{false};
                for(auto imi : mi->children) {
-                   render(imi);
+                   if(!imi->icon.empty()) {
+                       has_icons = true;
+                       break;
+                   }
+               }
+
+               for(auto imi : mi->children) {
+                   render(imi, has_icons);
                }
 
                ImGui::EndMenu();
            }
        }
 
+       if(!mi->icon.empty()) {
+           ImGui::SetCursorPos(cp);
+           ImGui::Text(mi->icon.c_str());
+       }
    }
 
    component::component(const string& id) {

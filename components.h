@@ -328,13 +328,14 @@ namespace grey {
     public:
         std::string id;
         std::string label;
+        std::string icon;
         bool is_selected{ false };
         bool is_enabled{ true };
         std::string shortcut_text;
         void* tag{ nullptr };
         std::vector<std::shared_ptr<menu_item>> children;
 
-        std::shared_ptr<menu_item> add(const std::string& id, const std::string& label);
+        std::shared_ptr<menu_item> add(const std::string& id, const std::string& label, const std::string& icon = "");
     };
 
     class menu_bar : public component {
@@ -350,7 +351,7 @@ namespace grey {
     private:
         std::shared_ptr<menu_item> root{std::make_shared<menu_item>()};
 
-        void render(std::shared_ptr<menu_item> mi);
+        void render(std::shared_ptr<menu_item> mi, bool icon_pad);
     };
 
     class list_item {
