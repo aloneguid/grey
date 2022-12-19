@@ -536,6 +536,7 @@ namespace grey {
         size_t desired_height;
         size_t actual_width;
         size_t actual_height;
+        float rounding{0};
 
         virtual const void render_visible() override;
 

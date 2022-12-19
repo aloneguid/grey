@@ -409,13 +409,10 @@ namespace grey
    }
 
    const void child::render_visible() {
-       //ImGui::PushStyleColor(ImGuiCol_Border, )
-
        if(em != emphasis::none) {
            ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)em_normal);
        }
 
-       //ImVec2 sz2 = ImGui::GetWindowSize();
        ImVec2 tsz = size;
 
        if(padding_bottom != 0) {
@@ -1218,7 +1215,17 @@ namespace grey
 
    const void image::render_visible() {
        if(texture) {
-           ImGui::Image(texture, ImVec2(desired_width, desired_height));
+           if(rounding == 0) {
+               ImGui::Image(texture, ImVec2(desired_width, desired_height));
+           } else {
+
+               ImDrawList* dl = ImGui::GetForegroundDrawList();
+               ImVec2 p_min = ImGui::GetCursorScreenPos();
+               ImVec2 p_max = ImVec2(p_min.x + desired_width, p_min.y + desired_height);
+               dl->AddImageRounded(texture, p_min, p_max,
+                   ImVec2(0, 0), ImVec2(1, 1), ImGui::GetColorU32(ImVec4(1, 1, 1, 1)),
+                   rounding);
+           }
        }
    }
 
