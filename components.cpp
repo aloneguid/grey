@@ -178,16 +178,16 @@ namespace grey
    }
 
 
-   std::shared_ptr<grey::label> container::make_label(const string& text)
+   std::shared_ptr<grey::label> container::make_label(const string& text, bool is_bullet)
    {
-      auto r = make_shared<label>(text);
+      auto r = make_shared<label>(text, is_bullet);
       assign_child(r);
       return r;
    }
 
-   std::shared_ptr<label> container::make_label(string* text)
+   std::shared_ptr<label> container::make_label(string* text, bool is_bullet)
    {
-      auto r = make_shared<label>(text);
+      auto r = make_shared<label>(text, is_bullet);
       assign_child(r);
       return r;
    }
@@ -723,6 +723,10 @@ namespace grey
 
        const char* buf = value_ptr == nullptr ? value.c_str() : (*value_ptr).c_str();
 
+       if(is_bullet) {
+           ImGui::Bullet();
+       }
+
        if(is_enabled) {
            if(em != emphasis::none) {
                ImGui::TextColored(em_normal, buf);
@@ -974,15 +978,16 @@ namespace grey
        nodes.erase(nodes.begin() + index);
    }
 
-   const void tree::render_visible()
-   {
-      for (auto node : nodes)
-      {
-         if (node)
-         {
+   const void tree::render_visible() {
+       for(auto node : nodes) {
             node->render();
-         }
-      }
+       }
+   }
+
+   void tree::post_render() {
+       for(auto node : nodes) {
+           node->post_render();
+       }
    }
 
    input::input(const string& label, string* value)

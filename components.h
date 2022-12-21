@@ -167,8 +167,8 @@ namespace grey {
 
         // general helpers
         std::shared_ptr<menu_bar> make_menu_bar();
-        std::shared_ptr<label> make_label(const std::string& text);
-        std::shared_ptr<label> make_label(std::string* text);
+        std::shared_ptr<label> make_label(const std::string& text, bool is_bullet = false);
+        std::shared_ptr<label> make_label(std::string* text, bool is_bullet = false);
         std::shared_ptr<listbox> make_listbox(const std::string& label);
         std::shared_ptr<tree> make_tree();
         std::shared_ptr<input> make_input(const std::string& label, std::string* value = nullptr);
@@ -284,8 +284,8 @@ namespace grey {
     public:
         size_t text_wrap_pos{ 0 };
 
-        label(const std::string& value) : value{ value }, value_ptr{ nullptr } {}
-        label(const std::string* value) : value_ptr{ value } {}
+        label(const std::string& value, bool is_bullet) : value{value}, value_ptr{nullptr}, is_bullet{is_bullet} {}
+        label(const std::string* value, bool is_bullet) : value_ptr{value}, is_bullet{is_bullet} {}
 
         virtual const void render_visible() override;
 
@@ -295,6 +295,7 @@ namespace grey {
     private:
         std::string value;
         const std::string* value_ptr;
+        bool is_bullet;
     };
 
     class selectable : public component {
@@ -455,6 +456,8 @@ namespace grey {
 
         std::shared_ptr<tree_node> add_node(const std::string& label, bool is_expanded, bool is_leaf);
         void remove_node(size_t index);
+
+        void post_render() override;
 
 
     private:
