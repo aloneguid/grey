@@ -20,8 +20,8 @@ namespace grey
     // From https://github.com/procedural/gpulib/blob/master/gpulib_imgui.h
     struct ImVec3 { float x, y, z; ImVec3(float _x = 0.0f, float _y = 0.0f, float _z = 0.0f) { x = _x; y = _y; z = _z; } };
 
-    std::unique_ptr<grey::backend> backend::make_platform_default(const string& title, bool is_visible) {
-        auto be = make_unique<grey::backends::win32dx11>(title, is_visible);
+    std::unique_ptr<grey::backend> backend::make_platform_default(const string& title) {
+        auto be = make_unique<grey::backends::win32dx11>(title);
         //be->set_theme(colour_theme::corp_grey);
 
         //ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;

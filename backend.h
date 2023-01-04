@@ -12,12 +12,7 @@ namespace grey
         std::function<void(const std::string& key, const std::string&)> on_save_settings;
         std::function<std::string(const std::string& key)> on_load_settings;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="title"></param>
-        /// <param name="is_visible">Set to false to adjust the window before showing, otherwise you might see it flicker.</param>
-        backend(const std::string& title, bool is_visible = true) : is_visible{is_visible}, title{title} {}
+        backend(const std::string& title) : title{title} {}
 
         // destructor must be virtual to ensure proper cleanup of graphics resources
         virtual ~backend() {};
@@ -28,7 +23,7 @@ namespace grey
          * @param is_visible
          * @return
         */
-        static std::unique_ptr<backend> make_platform_default(const std::string& title, bool is_visible = true);
+        static std::unique_ptr<backend> make_platform_default(const std::string& title);
 
         //virtual void run(std::function<bool(void)> frame) = 0;
         virtual void run_one_frame() = 0;
@@ -42,9 +37,6 @@ namespace grey
         virtual void set_theme(const std::string& theme_id);
 
         void set_default_font(font font);
-
-        bool get_visibility() { return is_visible; }
-        virtual void set_visibility(bool visible) = 0;
 
         virtual void resize(int width, int height) = 0;
         virtual void move(int x, int y) = 0;
@@ -65,7 +57,6 @@ namespace grey
         size_t window_count() { return windows.size(); }
 
     protected:
-        bool is_visible;
         bool is_borderless{false};
         bool is_resizeable{true};
         std::vector<std::shared_ptr<grey::window>> windows;

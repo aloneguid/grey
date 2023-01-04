@@ -109,6 +109,8 @@ namespace grey {
         ImColor em_active;
         emphasis em{ emphasis::none };
 
+        bool is_window{false};
+
         inline std::string sys_label(const std::string& label) { return label + "##" + id; }
 
     private:
@@ -845,7 +847,7 @@ namespace grey {
     class window : public container {
     public:
         bool has_menu_space{ false };
-        size_t left{0}, top{0};
+        //size_t left{0}, top{0};
         bool can_resize{true};
         bool detach_on_close{false};
 

@@ -28,7 +28,7 @@ namespace grey
             /// <param name="height"></param>
             /// <param name="always_on_top"></param>
             /// <param name="dwStyle">https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles</param>
-            win32dx11(const std::string& title, bool is_visible = true);
+            win32dx11(const std::string& title);
             ~win32dx11();
 
             void run_one_frame();

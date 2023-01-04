@@ -13,7 +13,7 @@
 
 using namespace std;
 
-grey::backends::win32dx11::win32dx11(const string& title, bool is_visible) : grey::backend(title, is_visible) {
+grey::backends::win32dx11::win32dx11(const string& title) : grey::backend(title) {
 
     h_module_inst = ::GetModuleHandle(nullptr);
 
@@ -42,10 +42,9 @@ grey::backends::win32dx11::win32dx11(const string& title, bool is_visible) : gre
     }
 
     wstring wtitle = str::to_wstr(title);
-    // 0  is WS_OVERLAPPED
+    //DWORD dwStyle = WS_POPUP;
+    //DWORD dwExStyle = WS_EX_APPWINDOW;
     DWORD dwStyle = WS_POPUP;
-    //DWORD dwStyle = WS_OVERLAPPED | WS_THICKFRAME;
-    //DWORD dwExStyle = always_on_top ? WS_EX_TOPMOST : 0;
     DWORD dwExStyle = WS_EX_APPWINDOW;
     hwnd = ::CreateWindowEx(dwExStyle,
         ClassName,
@@ -68,8 +67,7 @@ grey::backends::win32dx11::win32dx11(const string& title, bool is_visible) : gre
     }
 
     // Show the window
-    if (is_visible)
-        ::ShowWindow(hwnd, SW_SHOWDEFAULT);
+    ::ShowWindow(hwnd, SW_SHOWDEFAULT);
     ::UpdateWindow(hwnd);
 
     // Setup Dear ImGui context
@@ -85,6 +83,7 @@ grey::backends::win32dx11::win32dx11(const string& title, bool is_visible) : gre
     // Enable multi-viewports
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     io.ConfigViewportsNoTaskBarIcon = true;
+    //io.ConfigViewportsNoAutoMerge = true;
 
 
     // Setup Dear ImGui style
@@ -181,27 +180,10 @@ void grey::backends::win32dx11::run_one_frame() {
     ImGui::NewFrame();
 
     // render all the windows
-    // the first window is special as it's the main viewport (may change during the lifetime)
-    bool is_first_window{true};
-    for (auto& wnd : windows) {
+    for(auto& wnd : windows) {
 
-        //wnd->is_main = is_first_window;
         wnd->render();
         wnd->post_render();
-
-        /*if(is_first_window) {
-            if(w != wnd->width || h != wnd->height || l != wnd->left || t != wnd->top) {
-                l = wnd->left;
-                t = wnd->top;
-                w = wnd->width;
-                h = wnd->height;
-                move(l, t);
-                resize(w, h);
-            }
-            //move(wnd->left, wnd->top);
-            //resize(wnd->width, wnd->height);
-            is_first_window = false;
-        }*/
     }
 
     // Rendering
@@ -350,8 +332,6 @@ void grey::backends::win32dx11::set_visibility(bool visible) {
         ::ShowWindow(hwnd, SW_SHOW);
     else
         ::ShowWindow(hwnd, SW_HIDE);
-
-    is_visible = visible;
 }
 
 void grey::backends::win32dx11::resize(int width, int height) {

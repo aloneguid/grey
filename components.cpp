@@ -53,6 +53,7 @@ namespace grey
    }
 
    const void component::render() {
+
        if (on_frame) {
            on_frame(*this);
        }
@@ -67,7 +68,8 @@ namespace grey
 
        if (!is_visible) return;
 
-       if (width != 0)
+       bool change_width = !is_window && width != 0;
+       if (change_width)
            ImGui::PushItemWidth(width);
 
        bool change_alpha = alpha != 1;
@@ -90,7 +92,7 @@ namespace grey
 
        if(change_alpha) ImGui::PopStyleVar();
 
-       if (width != 0)
+       if (change_width != 0)
            ImGui::PopItemWidth();
 
        if (on_hovered) {
@@ -522,6 +524,8 @@ namespace grey
        : container{ctx}, title{title}, id_title{ sys_label(title) },
        ctx{ctx}, can_close{can_close} {
 
+       is_window = true;
+
        float scale = get_system_scale();
        component::width = width * scale;
        component::height = height * scale;
@@ -551,38 +555,10 @@ namespace grey
    }
 
    const void window::render_visible() {
-       //if (ImGui::BeginMainMenuBar())
-       //{
-       //   this->owned_children[0]->render();
-
-       //   ImGui::EndMainMenuBar();
-       //}
-
-
-       if (!is_visible) return;
 
        ImGuiWindowFlags rflags = flags;
        if(has_menu_space) rflags |= ImGuiWindowFlags_MenuBar;
        if(!can_resize) rflags |= ImGuiWindowFlags_NoResize;
-
-       /*if(is_maximized) {
-           auto& io = ImGui::GetIO();
-           ImGuiViewport* mvp = ImGui::GetMainViewport();
-           ImVec2 mvp_pos = mvp->Pos;
-
-           ImGui::SetNextWindowPos(mvp_pos);
-           ImGui::SetNextWindowSize(io.DisplaySize);
-
-           //ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
-           ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-       }
-
-       if(is_main) {
-           auto& io = ImGui::GetIO();
-           ImGuiViewport* mvp = ImGui::GetMainViewport();
-           ImVec2 mvp_pos = mvp->Pos;
-           ImGui::SetNextWindowPos(mvp_pos);
-       }*/
 
        if(!initialised) {
            if(width != 0 && height != 0) {
@@ -619,14 +595,12 @@ namespace grey
        if (began) {
            ImVec2 pos = ImGui::GetWindowPos();
            ImVec2 size = ImGui::GetWindowSize();
-           left = pos.x;
-           top = pos.y;
+           //left = pos.x;
+           //top = pos.y;
            width = size.x;
            height = size.y;
 
            render_children();
-
-
        }
 
        if(is_visible != was_visible) {
