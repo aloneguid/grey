@@ -862,6 +862,7 @@ namespace grey {
         float get_system_scale() { return container::tmgr.get_system_scale(); }
 
         void center();
+        void bring_to_top();
 
     private:
         grey_context& ctx;
@@ -871,6 +872,7 @@ namespace grey {
         const bool can_close{true};
         bool initialised{false};
         bool do_center{false};
+        bool do_top{false};
 
         //const bool is_dockspace;
         //ImGuiID dockspace_id{};

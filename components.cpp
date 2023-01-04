@@ -564,6 +564,7 @@ namespace grey
            if(width != 0 && height != 0) {
                ImGui::SetNextWindowSize(ImVec2(width, height));
            }
+
            initialised = true;
        }
 
@@ -600,6 +601,14 @@ namespace grey
            width = size.x;
            height = size.y;
 
+           if(do_top) {
+               auto vp = ImGui::GetWindowViewport();
+               if(vp->PlatformWindowCreated) {
+                   ctx.bring_native_window_to_top(vp->PlatformHandleRaw);
+                   do_top = false;
+               }
+           }
+
            render_children();
        }
 
@@ -627,6 +636,10 @@ namespace grey
        do_center = true;
    }
 
+   void window::bring_to_top() {
+       do_top = true;
+   }
+
    button::button(const string& label, bool is_small, emphasis e) : is_small{is_small} {
        set_label(label);
        set_emphasis(e);
@@ -637,84 +650,69 @@ namespace grey
       this->label = sys_label(label);
    }
 
-   const void button::render_visible()
-   {
-      bool disabled = !is_enabled;  // cache value as it might change after callback
+   const void button::render_visible() {
+       bool disabled = !is_enabled;  // cache value as it might change after callback
 
-      if (disabled)
-      {
-         ImGui::BeginDisabled(true);
-      }
-      
-      if(em != emphasis::none)
-      {
-         ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)em_normal);
-         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)em_hovered);
-         ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)em_active);
-      }
+       if(disabled) {
+           ImGui::BeginDisabled(true);
+       }
 
-      if (is_small)
-      {
-         if (ImGui::SmallButton(label.c_str()) && on_pressed)
-         {
-            on_pressed(*this);
-         }
-      }
-      else
-      {
-         if (ImGui::Button(label.c_str()) && on_pressed)
-         {
-            on_pressed(*this);
-         }
-      }
+       if(em != emphasis::none) {
+           ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)em_normal);
+           ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)em_hovered);
+           ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)em_active);
+       }
 
-      if (disabled) ImGui::EndDisabled();
-      if (em != emphasis::none) ImGui::PopStyleColor(3);
+       if(is_small) {
+           if(ImGui::SmallButton(label.c_str()) && on_pressed) {
+               on_pressed(*this);
+           }
+       } else {
+           if(ImGui::Button(label.c_str()) && on_pressed) {
+               on_pressed(*this);
+           }
+       }
+
+       if(disabled) ImGui::EndDisabled();
+       if(em != emphasis::none) ImGui::PopStyleColor(3);
    }
 
-   const void grey::toggle::render_visible()
-   {
-      if (*value)
-      {
-         if (!label_off.empty())
-         {
-            ImGui::Text(label_off.c_str());
-            ImGui::SameLine();
-         }
-      }
-      else
-      {
-         if (!label_on.empty())
-         {
-            ImGui::Text(label_on.c_str());
-            ImGui::SameLine();
-         }
-      }
+   const void grey::toggle::render_visible() {
+       if(*value) {
+           if(!label_off.empty()) {
+               ImGui::Text(label_off.c_str());
+               ImGui::SameLine();
+           }
+       } else {
+           if(!label_on.empty()) {
+               ImGui::Text(label_on.c_str());
+               ImGui::SameLine();
+           }
+       }
 
-      ImVec4* colors = ImGui::GetStyle().Colors;
-      ImVec2 p = ImGui::GetCursorScreenPos();
-      ImDrawList* draw_list = ImGui::GetWindowDrawList();
+       ImVec4* colors = ImGui::GetStyle().Colors;
+       ImVec2 p = ImGui::GetCursorScreenPos();
+       ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-      float height = ImGui::GetFrameHeight();
-      float width = height * 1.55f;
-      float radius = height * 0.50f;
+       float height = ImGui::GetFrameHeight();
+       float width = height * 1.55f;
+       float radius = height * 0.50f;
 
-      ImGui::InvisibleButton(id.c_str(), ImVec2(width, height));
-      if (ImGui::IsItemClicked())
-      {
-         *value = !*value;
-         if (on_toggled) on_toggled(*value);
-      }
+       ImGui::InvisibleButton(id.c_str(), ImVec2(width, height));
+       if(ImGui::IsItemClicked()) {
+           *value = !*value;
+           if(on_toggled) on_toggled(*value);
+       }
 
-      ImGuiContext& gg = *GImGui;
-      float ANIM_SPEED = 0.085f;
-      if (gg.LastActiveId == gg.CurrentWindow->GetID(id.c_str()))// && g.LastActiveIdTimer < ANIM_SPEED)
-         float t_anim = ImSaturate(gg.LastActiveIdTimer / ANIM_SPEED);
-      if (ImGui::IsItemHovered())
-         draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), ImGui::GetColorU32(*value ? colors[ImGuiCol_ButtonActive] : ImVec4(0.78f, 0.78f, 0.78f, 1.0f)), height * 0.5f);
-      else
-         draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), ImGui::GetColorU32(*value ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f)), height * 0.50f);
-      draw_list->AddCircleFilled(ImVec2(p.x + radius + (*value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 1.5f, IM_COL32(255, 255, 255, 255));
+       ImGuiContext& gg = *GImGui;
+       float ANIM_SPEED = 0.085f;
+       if(gg.LastActiveId == gg.CurrentWindow->GetID(id.c_str()))// && g.LastActiveIdTimer < ANIM_SPEED)
+           float t_anim = ImSaturate(gg.LastActiveIdTimer / ANIM_SPEED);
+       if(ImGui::IsItemHovered())
+           draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), ImGui::GetColorU32(*value ? colors[ImGuiCol_ButtonActive] : ImVec4(0.78f, 0.78f, 0.78f, 1.0f)), height * 0.5f);
+       else
+           draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), ImGui::GetColorU32(*value ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f)), height * 0.50f);
+       draw_list->AddCircleFilled(ImVec2(p.x + radius + (*value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 1.5f, IM_COL32(255, 255, 255, 255));
    }
 
    string label::get_value() {

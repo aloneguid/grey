@@ -68,6 +68,8 @@ namespace grey
 
             virtual void* get_native_window_handle() override { return hwnd; }
 
+            virtual void bring_native_window_to_top(void* raw_handle) override;
+
         private:
             const wchar_t* ClassName = L"GreyWin32";
             HINSTANCE h_module_inst;

@@ -389,6 +389,12 @@ void grey::backends::win32dx11::set_theme(colour_theme theme) {
     backend::set_theme(theme);
 }
 
+void grey::backends::win32dx11::bring_native_window_to_top(void* raw_handle) {
+    HWND hwnd = (HWND)raw_handle;
+    ::BringWindowToTop(hwnd);
+    ::SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+}
+
 // Helper functions
 
 bool grey::backends::win32dx11::dx_create_device() {
@@ -477,6 +483,7 @@ LRESULT WINAPI grey::backends::win32dx11::WndProc(
                 if (hMainIcon)
                     ::SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hMainIcon);
             }
+
             return 0;
         }
 
