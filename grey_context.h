@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace grey
 {
@@ -27,6 +28,8 @@ namespace grey
         const colour_theme theme;
     };
 
+    class window;
+
     class grey_context {
     public:
         virtual void* load_texture_from_file(
@@ -49,6 +52,24 @@ namespace grey
          * @return 
         */
         virtual void* get_native_window_handle() = 0;
+
+        virtual void attach(std::shared_ptr<grey::window> w) = 0;
+        virtual void detach(std::shared_ptr<grey::window> w) = 0;
+        virtual void detach(std::string window_id) = 0;
+
+        /**
+         * @brief Constructs root window and performs all the necessary initialisation logic
+         * @tparam T grey::window subclass
+         * @tparam ...Args
+         * @param ...args any extra constructor arguments in the grey::window subclass
+         * @return
+        */
+        template<class T, class... Args>
+        std::shared_ptr<T> make_window(Args&& ... args) {
+            const auto root = std::make_shared<T>(*this, std::forward<Args>(args)...);
+            attach(root);
+            return root;
+        }
 
     };
 }

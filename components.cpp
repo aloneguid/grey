@@ -312,6 +312,7 @@ namespace grey
    {
       auto r = make_shared<status_bar>(tmgr);
       assign_child(r);
+      //assign_managed_child(r);
       return r;
    }
 
@@ -488,57 +489,53 @@ namespace grey
        }
    }
 
-   const void grey::status_bar::render_visible()
-   {
-      // source: https://github.com/ocornut/imgui/issues/3518#issuecomment-807398290
-      //ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
-      float height = ImGui::GetFrameHeight();
-      if (ImGui::BeginViewportSideBar("##MainStatusBar", /*viewport*/nullptr, ImGuiDir_Down, height, flags))
-      {
-         if (ImGui::BeginMenuBar())
-         {
-            //ImGui::Text("Happy status bar");
+   const void grey::status_bar::render_visible() {
+       // source: https://github.com/ocornut/imgui/issues/3518#issuecomment-807398290
+       ImGuiViewport* win_vp = ImGui::GetWindowViewport();
+       //ImGuiViewport* main_vp = ImGui::GetMainViewport();
+       float height = ImGui::GetFrameHeight();
+       if(ImGui::BeginViewportSideBar("##MainStatusBar", win_vp, ImGuiDir_Down, height, flags)) {
+           if(ImGui::BeginMenuBar()) {
+               render_children();
+               ImGui::EndMenuBar();
+           }
 
-            render_children();
-
-            ImGui::EndMenuBar();
-         }
-      }
-
-      ImGui::End(); // status bar, should be outside of BeginViewportSideBar just like for a normal window
+       }
+       ImGui::End(); // status bar, should be outside of BeginViewportSideBar just like for a normal window
    }
 
-   accordion::accordion(grey_context& mgr, const string& label, bool is_closeable) : container{ mgr }, is_closeable{ is_closeable }
-   {
-      this->label = sys_label(label);
+   accordion::accordion(grey_context& mgr, const string& label, bool is_closeable) : container{mgr}, is_closeable{is_closeable} {
+       this->label = sys_label(label);
    }
 
-   const void grey::accordion::render_visible()
-   {
-      if (is_closeable ? ImGui::CollapsingHeader(label.c_str(), &is_open) : ImGui::CollapsingHeader(label.c_str()))
-      {
-         render_children();
-      }
+   const void grey::accordion::render_visible() {
+       if(is_closeable ? ImGui::CollapsingHeader(label.c_str(), &is_open) : ImGui::CollapsingHeader(label.c_str())) {
+           render_children();
+       }
    }
 
    void window::close() {
        this->is_visible = false;
    }
 
-   grey::window::window(grey_context& mgr, string title,
-                     bool is_maximized, bool can_close, bool is_dockspace, bool show_title)
-       : 
-       container{mgr}, title{title},
-       is_maximized{is_maximized},
-       can_close{can_close},
-       is_dockspace{is_dockspace} {
-       if(is_maximized) {
+   grey::window::window(grey_context& ctx, string title, float width, float height)
+       : container{ctx}, title{title}, id_title{ sys_label(title) },
+       ctx{ctx}, can_close{can_close} {
+
+       float scale = get_system_scale();
+       component::width = width * scale;
+       component::height = height * scale;
+
+       //flags = ImGuiWindowFlags_NoCollapse;
+       flags = ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+       /*if(is_maximized) {
            flags = (
               ImGuiWindowFlags_NoBringToFrontOnFocus |
-              ImGuiWindowFlags_NoCollapse |
-              ImGuiWindowFlags_NoSavedSettings |
+              //ImGuiWindowFlags_NoCollapse |
+              ImGuiWindowFlags_NoSavedSettings
               //ImGuiWindowFlags_NoTitleBar |
-              ImGuiWindowFlags_NoResize
+              //ImGuiWindowFlags_NoResize
               );
 
            // need to call PopStyleVar elsewhere
@@ -546,9 +543,9 @@ namespace grey
        } else {
            flags = 0;
            //flags |= ImGuiWindowFlags_NoDocking;
-       }
+       }*/
 
-       if(!show_title) flags |= ImGuiWindowFlags_NoTitleBar;
+       //if(!show_title) flags |= ImGuiWindowFlags_NoTitleBar;
 
        if(has_menu_space) flags |= ImGuiWindowFlags_MenuBar;
    }
@@ -565,20 +562,46 @@ namespace grey
        if (!is_visible) return;
 
        ImGuiWindowFlags rflags = flags;
-       if (has_menu_space) rflags |= ImGuiWindowFlags_MenuBar;
+       if(has_menu_space) rflags |= ImGuiWindowFlags_MenuBar;
+       if(!can_resize) rflags |= ImGuiWindowFlags_NoResize;
 
-       if (is_maximized) {
+       /*if(is_maximized) {
            auto& io = ImGui::GetIO();
-           ImGui::SetNextWindowPos(ImVec2(0, 0));
+           ImGuiViewport* mvp = ImGui::GetMainViewport();
+           ImVec2 mvp_pos = mvp->Pos;
+
+           ImGui::SetNextWindowPos(mvp_pos);
            ImGui::SetNextWindowSize(io.DisplaySize);
 
            //ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
        }
 
+       if(is_main) {
+           auto& io = ImGui::GetIO();
+           ImGuiViewport* mvp = ImGui::GetMainViewport();
+           ImVec2 mvp_pos = mvp->Pos;
+           ImGui::SetNextWindowPos(mvp_pos);
+       }*/
+
+       if(!initialised) {
+           if(width != 0 && height != 0) {
+               ImGui::SetNextWindowSize(ImVec2(width, height));
+           }
+           initialised = true;
+       }
+
+       if(do_center) {
+           float scale = get_system_scale();
+           ImVec2 ss = ImGui::GetPlatformIO().Monitors[0].WorkSize;
+           ImVec2 ws = ImGui::GetWindowSize();
+           ImGui::SetNextWindowPos(ImVec2(ss.x / 2 - ws.x * scale / 2, ss.y / 2 - ws.y * scale / 2));
+           do_center = false;
+       }
+
        // the rest
 
-       bool began = ImGui::Begin(title.c_str(), &is_visible, rflags);
+       bool began = ImGui::Begin(id_title.c_str(), &is_visible, rflags);
 
        /*if(is_dockspace) {
            // useful docking links:
@@ -594,7 +617,16 @@ namespace grey
        }*/
 
        if (began) {
+           ImVec2 pos = ImGui::GetWindowPos();
+           ImVec2 size = ImGui::GetWindowSize();
+           left = pos.x;
+           top = pos.y;
+           width = size.x;
+           height = size.y;
+
            render_children();
+
+
        }
 
        if(is_visible != was_visible) {
@@ -603,20 +635,27 @@ namespace grey
            if(on_open_changed) {
                on_open_changed(is_visible);
            }
+
+           if(!is_visible && detach_on_close) {
+               ctx.detach(this->id);
+           }
        }
 
        // for the window, End must be called regardless
        ImGui::End();
 
-       if(is_maximized) {
+       /*if(is_maximized) {
            ImGui::PopStyleVar();
-       }
+       }*/
    }
 
-   button::button(const string& label, bool is_small, emphasis e) : is_small{ is_small }
-   {
-      set_label(label);
-      set_emphasis(e);
+   void window::center() {
+       do_center = true;
+   }
+
+   button::button(const string& label, bool is_small, emphasis e) : is_small{is_small} {
+       set_label(label);
+       set_emphasis(e);
    }
 
    void button::set_label(const string& label)

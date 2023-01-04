@@ -845,13 +845,11 @@ namespace grey {
     class window : public container {
     public:
         bool has_menu_space{ false };
+        size_t left{0}, top{0};
+        bool can_resize{true};
+        bool detach_on_close{false};
 
-        window(grey_context& mgr,
-            std::string title,
-            bool is_maximized = false,
-            bool can_close = true,
-            bool is_dockspace = false,
-            bool show_title = true);
+        window(grey_context& ctx, std::string title, float width, float height);
 
         virtual const void render_visible() override;
 
@@ -861,15 +859,20 @@ namespace grey {
 
         float get_system_scale() { return container::tmgr.get_system_scale(); }
 
-    private:
-        const bool is_maximized;
-        ImGuiWindowFlags flags;
-        std::string title;
-        const bool can_close;
+        void center();
 
-        const bool is_dockspace;
-        ImGuiID dockspace_id{};
-        ImGuiDockNodeFlags dockspace_flags{ ImGuiDockNodeFlags_PassthruCentralNode };
+    private:
+        grey_context& ctx;
+        ImGuiWindowFlags flags;
+        const std::string title;
+        const std::string id_title;
+        const bool can_close{true};
+        bool initialised{false};
+        bool do_center{false};
+
+        //const bool is_dockspace;
+        //ImGuiID dockspace_id{};
+        //ImGuiDockNodeFlags dockspace_flags{ ImGuiDockNodeFlags_PassthruCentralNode };
 
         bool was_visible{true};
     };

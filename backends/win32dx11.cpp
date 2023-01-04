@@ -13,37 +13,46 @@
 
 using namespace std;
 
-grey::backends::win32dx11::win32dx11(const string& title, bool is_visible)
-    : grey::backend(title, is_visible) {
-    wc = {
-          sizeof(WNDCLASSEX),
-          CS_CLASSDC,
-          WndProc,
-          0L,
-          0L,
-          GetModuleHandle(nullptr),
-          nullptr,
-          nullptr,
-          nullptr,
-          nullptr,
-          L"GreyWin32",
-          nullptr
-    };
+grey::backends::win32dx11::win32dx11(const string& title, bool is_visible) : grey::backend(title, is_visible) {
 
-    if (!::RegisterClassEx(&wc))
-        return;
+    h_module_inst = ::GetModuleHandle(nullptr);
+
+    // check if class is registered already before registering again
+    {
+        WNDCLASSEX wc{0};
+        if(!::GetClassInfoEx(h_module_inst, ClassName, &wc)) {
+            wc = {
+              sizeof(WNDCLASSEX),
+              CS_CLASSDC,
+              WndProc,
+              0L,
+              0L,
+              GetModuleHandle(nullptr),
+              nullptr,
+              nullptr,
+              nullptr,
+              nullptr,
+              ClassName,
+              nullptr
+            };
+
+            if(!::RegisterClassEx(&wc))
+                return;
+        }
+    }
 
     wstring wtitle = str::to_wstr(title);
     // 0  is WS_OVERLAPPED
     DWORD dwStyle = WS_POPUP;
+    //DWORD dwStyle = WS_OVERLAPPED | WS_THICKFRAME;
     //DWORD dwExStyle = always_on_top ? WS_EX_TOPMOST : 0;
-    DWORD dwExStyle = 0;
+    DWORD dwExStyle = WS_EX_APPWINDOW;
     hwnd = ::CreateWindowEx(dwExStyle,
-        wc.lpszClassName,
+        ClassName,
         wtitle.c_str(),
         dwStyle,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-        nullptr, NULL, wc.hInstance,
+        nullptr, NULL, h_module_inst,
 
         // pass "this" pointer to WM_CREATE
         this);
@@ -54,7 +63,7 @@ grey::backends::win32dx11::win32dx11(const string& title, bool is_visible)
     // Initialize Direct3D
     if (!dx_create_device()) {
         dx_cleanup_device();
-        ::UnregisterClass(wc.lpszClassName, wc.hInstance);
+        ::UnregisterClass(ClassName, h_module_inst);
         return;
     }
 
@@ -72,6 +81,11 @@ grey::backends::win32dx11::win32dx11(const string& title, bool is_visible)
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     // the below requires "docking" branch, see https://github.com/ocornut/imgui/wiki/Docking
     //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+    // Enable multi-viewports
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    io.ConfigViewportsNoTaskBarIcon = true;
+
 
     // Setup Dear ImGui style
     //set_theme(theme);
@@ -154,7 +168,7 @@ grey::backends::win32dx11::~win32dx11() {
 
     ::SendMessage(hwnd, WM_CLOSE, 0, 0);
     ::DestroyWindow(hwnd);
-    ::UnregisterClass(wc.lpszClassName, wc.hInstance);
+    ::UnregisterClass(ClassName, h_module_inst);
 }
 
 void grey::backends::win32dx11::run_one_frame() {
@@ -166,14 +180,33 @@ void grey::backends::win32dx11::run_one_frame() {
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
-    // default renderer - render all the windows
+    // render all the windows
+    // the first window is special as it's the main viewport (may change during the lifetime)
+    bool is_first_window{true};
     for (auto& wnd : windows) {
+
+        //wnd->is_main = is_first_window;
         wnd->render();
         wnd->post_render();
+
+        /*if(is_first_window) {
+            if(w != wnd->width || h != wnd->height || l != wnd->left || t != wnd->top) {
+                l = wnd->left;
+                t = wnd->top;
+                w = wnd->width;
+                h = wnd->height;
+                move(l, t);
+                resize(w, h);
+            }
+            //move(wnd->left, wnd->top);
+            //resize(wnd->width, wnd->height);
+            is_first_window = false;
+        }*/
     }
 
     // Rendering
     ImGui::Render();
+
     const float clear_color_with_alpha[4] = {
         clear_color.x * clear_color.w,
         clear_color.y * clear_color.w,
@@ -186,187 +219,182 @@ void grey::backends::win32dx11::run_one_frame() {
 
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
+    // Update and Render additional Platform Windows
+    ImGuiIO& io = ImGui::GetIO();
+    if(io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+    }
+
     dx_swap_chain->Present(1, 0); // Present with vsync
     //dx_swap_chain->Present(0, 0); // Present without vsync
 }
 
+void grey::backend::post_run_one_frame() {
+    if(windows_dirty) {
+        windows = windows_new;
+        windows_new.clear();
+        windows_dirty = false;
+    }
+}
+
 void grey::backends::win32dx11::run() {
     owns_message_loop = true;
-    while (true) {
+    while(true) {
         // Poll and handle messages (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         MSG msg;
-        while (::PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE)) {
+        while(::PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE)) {
             ::TranslateMessage(&msg);
             ::DispatchMessage(&msg);
-            if (msg.message == WM_QUIT)
+            if(msg.message == WM_QUIT)
                 return;
         }
 
         run_one_frame();
+        post_run_one_frame();
     }
 }
 
-ID3D11ShaderResourceView* grey::backends::win32dx11::image_data_to_texture(grey::img::raw_img& img) const
-{
-   D3D11_TEXTURE2D_DESC desc{ 0 };
-   desc.Width = img.x;
-   desc.Height = img.y;
-   desc.MipLevels = 1;
-   desc.ArraySize = 1;
-   desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-   desc.SampleDesc.Count = 1;
-   desc.Usage = D3D11_USAGE_DEFAULT;
-   desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-   desc.CPUAccessFlags = 0;
+ID3D11ShaderResourceView* grey::backends::win32dx11::image_data_to_texture(grey::img::raw_img& img) const {
+    D3D11_TEXTURE2D_DESC desc{0};
+    desc.Width = img.x;
+    desc.Height = img.y;
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    desc.CPUAccessFlags = 0;
 
-   ID3D11Texture2D* pTexture = nullptr;
-   D3D11_SUBRESOURCE_DATA subResource;
-   subResource.pSysMem = img.get_data();
-   subResource.SysMemPitch = desc.Width * 4;
-   subResource.SysMemSlicePitch = 0;
-   dx_device->CreateTexture2D(&desc, &subResource, &pTexture);
-   ID3D11ShaderResourceView* out_srv{ nullptr };
+    ID3D11Texture2D* pTexture = nullptr;
+    D3D11_SUBRESOURCE_DATA subResource;
+    subResource.pSysMem = img.get_data();
+    subResource.SysMemPitch = desc.Width * 4;
+    subResource.SysMemSlicePitch = 0;
+    dx_device->CreateTexture2D(&desc, &subResource, &pTexture);
+    ID3D11ShaderResourceView* out_srv{nullptr};
 
-   // Create texture view
-   if (pTexture)
-   {
-      D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-      ZeroMemory(&srvDesc, sizeof(srvDesc));
-      srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-      srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-      srvDesc.Texture2D.MipLevels = desc.MipLevels;
-      srvDesc.Texture2D.MostDetailedMip = 0;
-      dx_device->CreateShaderResourceView(pTexture, &srvDesc, &out_srv);
-      pTexture->Release();
-   }
+    // Create texture view
+    if(pTexture) {
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+        ZeroMemory(&srvDesc, sizeof(srvDesc));
+        srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MipLevels = desc.MipLevels;
+        srvDesc.Texture2D.MostDetailedMip = 0;
+        dx_device->CreateShaderResourceView(pTexture, &srvDesc, &out_srv);
+        pTexture->Release();
+    }
 
-   return out_srv;
+    return out_srv;
 }
 
 // https://github.com/hoffstadt/DearPyGui/tree/0e51794aeef487dd7ca5dcb2550c631131374222/DearPyGui/src/platform
-void* grey::backends::win32dx11::load_texture_from_file(const std::string& path, int& width, int& height)
-{
-   auto entry = texture_cache.find(path);
-   if (entry == texture_cache.end())
-   {
-      grey::img::raw_img img_data = img::load_image_from_file(path);
-      if (!img_data) return nullptr;
+void* grey::backends::win32dx11::load_texture_from_file(const std::string& path, int& width, int& height) {
+    auto entry = texture_cache.find(path);
+    if(entry == texture_cache.end()) {
+        grey::img::raw_img img_data = img::load_image_from_file(path);
+        if(!img_data) return nullptr;
 
-      ID3D11ShaderResourceView* texture = image_data_to_texture(img_data);
-      if (texture)
-      {
-         win32dx11_texture_tag tag{ texture, img_data.x, img_data.y };
-         texture_cache[path] = tag;
+        ID3D11ShaderResourceView* texture = image_data_to_texture(img_data);
+        if(texture) {
+            win32dx11_texture_tag tag{texture, img_data.x, img_data.y};
+            texture_cache[path] = tag;
 
-         width = img_data.x;
-         height = img_data.y;
-         return texture;
-      }
-   }
-   else
-   {
-      width = entry->second.width;
-      height = entry->second.height;
-      return entry->second.texture;
-   }
+            width = img_data.x;
+            height = img_data.y;
+            return texture;
+        }
+    } else {
+        width = entry->second.width;
+        height = entry->second.height;
+        return entry->second.texture;
+    }
 
-   return nullptr;
+    return nullptr;
 }
 
 void* grey::backends::win32dx11::load_texture_from_memory(
    const string& cache_name,
-   unsigned char* buffer, unsigned int len, int& width, int& height)
-{
-   auto entry = texture_cache.find(cache_name);
-   if (entry == texture_cache.end())
-   {
-      grey::img::raw_img img_data = img::load_image_from_memory(buffer, len);
-      if (!img_data) return nullptr;
+   unsigned char* buffer, unsigned int len, int& width, int& height) {
+    auto entry = texture_cache.find(cache_name);
+    if(entry == texture_cache.end()) {
+        grey::img::raw_img img_data = img::load_image_from_memory(buffer, len);
+        if(!img_data) return nullptr;
 
-      ID3D11ShaderResourceView* texture = image_data_to_texture(img_data);
-      if (texture)
-      {
-         win32dx11_texture_tag tag{ texture, img_data.x, img_data.y };
-         texture_cache[cache_name] = tag;
+        ID3D11ShaderResourceView* texture = image_data_to_texture(img_data);
+        if(texture) {
+            win32dx11_texture_tag tag{texture, img_data.x, img_data.y};
+            texture_cache[cache_name] = tag;
 
-         width = img_data.x;
-         height = img_data.y;
-         return texture;
-      }
-   }
-   else
-   {
-      width = entry->second.width;
-      height = entry->second.height;
-      return entry->second.texture;
-   }
+            width = img_data.x;
+            height = img_data.y;
+            return texture;
+        }
+    } else {
+        width = entry->second.width;
+        height = entry->second.height;
+        return entry->second.texture;
+    }
 
-   return nullptr;
+    return nullptr;
 }
 
-void grey::backends::win32dx11::set_visibility(bool visible)
-{
-   if (visible)
-      ::ShowWindow(hwnd, SW_SHOW);
-   else
-      ::ShowWindow(hwnd, SW_HIDE);
+void grey::backends::win32dx11::set_visibility(bool visible) {
+    if(visible)
+        ::ShowWindow(hwnd, SW_SHOW);
+    else
+        ::ShowWindow(hwnd, SW_HIDE);
 
-   is_visible = visible;
+    is_visible = visible;
 }
 
-void grey::backends::win32dx11::resize(int width, int height)
-{
-    float scale = get_system_scale();
-    win32::user::set_window_pos(hwnd, -1, -1, width * scale, height * scale);
+void grey::backends::win32dx11::resize(int width, int height) {
+    //float scale = get_system_scale();
+    win32::user::set_window_pos(hwnd, -1, -1, width, height);
 }
 
-void grey::backends::win32dx11::move(int x, int y)
-{
-   win32::user::set_window_pos(hwnd, x, y, -1, -1);
+void grey::backends::win32dx11::move(int x, int y) {
+    win32::user::set_window_pos(hwnd, x, y, -1, -1);
 }
 
-void grey::backends::win32dx11::center_on_screen()
-{
-   RECT wr{};
-   if (::GetWindowRect(hwnd, &wr))
-   {
-      int sw = ::GetSystemMetrics(SM_CXFULLSCREEN);
-      int sh = ::GetSystemMetrics(SM_CYFULLSCREEN);
+void grey::backends::win32dx11::center_on_screen() {
+    RECT wr{};
+    if(::GetWindowRect(hwnd, &wr)) {
+        int sw = ::GetSystemMetrics(SM_CXFULLSCREEN);
+        int sh = ::GetSystemMetrics(SM_CYFULLSCREEN);
 
-      move(
-         sw / 2 - (wr.right - wr.left) / 2,
-         sh / 2 - (wr.bottom - wr.top) / 2);
-   }
+        move(
+           sw / 2 - (wr.right - wr.left) / 2,
+           sh / 2 - (wr.bottom - wr.top) / 2);
+    }
 }
 
-void grey::backends::win32dx11::set_title(const std::string& title)
-{
-   ::SetWindowTextA(hwnd, title.c_str());
+void grey::backends::win32dx11::set_title(const std::string& title) {
+    ::SetWindowTextA(hwnd, title.c_str());
 }
 
-void grey::backends::win32dx11::bring_to_top()
-{
-   ::SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+void grey::backends::win32dx11::bring_to_top() {
+    ::SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
-   ::BringWindowToTop(hwnd);
+    ::BringWindowToTop(hwnd);
 }
 
-float grey::backends::win32dx11::get_system_scale()
-{
+float grey::backends::win32dx11::get_system_scale() {
     int dpi = win32::shell::get_dpi();
     float scale = dpi / 96.f;
     return scale;
 }
 
-void grey::backends::win32dx11::exit()
-{
-   ::DestroyWindow(hwnd);
-   hwnd = nullptr;
-   //is_running = false;
+void grey::backends::win32dx11::exit() {
+    ::DestroyWindow(hwnd);
+    hwnd = nullptr;
+    //is_running = false;
 }
 
 void grey::backends::win32dx11::set_theme(colour_theme theme) {
@@ -383,67 +411,60 @@ void grey::backends::win32dx11::set_theme(colour_theme theme) {
 
 // Helper functions
 
-bool grey::backends::win32dx11::dx_create_device()
-{
-   // Setup swap chain
-   DXGI_SWAP_CHAIN_DESC sd;
-   ::ZeroMemory(&sd, sizeof(sd));
-   sd.BufferCount = 2;
-   sd.BufferDesc.Width = 0;
-   sd.BufferDesc.Height = 0;
-   sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-   sd.BufferDesc.RefreshRate.Numerator = 60;
-   sd.BufferDesc.RefreshRate.Denominator = 1;
-   sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-   sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-   sd.OutputWindow = hwnd;
-   sd.SampleDesc.Count = 1;
-   sd.SampleDesc.Quality = 0;
-   sd.Windowed = TRUE;
-   sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+bool grey::backends::win32dx11::dx_create_device() {
+    // Setup swap chain
+    DXGI_SWAP_CHAIN_DESC sd;
+    ::ZeroMemory(&sd, sizeof(sd));
+    sd.BufferCount = 2;
+    sd.BufferDesc.Width = 0;
+    sd.BufferDesc.Height = 0;
+    sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    sd.BufferDesc.RefreshRate.Numerator = 60;
+    sd.BufferDesc.RefreshRate.Denominator = 1;
+    sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+    sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    sd.OutputWindow = hwnd;
+    sd.SampleDesc.Count = 1;
+    sd.SampleDesc.Quality = 0;
+    sd.Windowed = TRUE;
+    sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
-   UINT createDeviceFlags = 0;
-   //createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-   D3D_FEATURE_LEVEL featureLevel;
-   const D3D_FEATURE_LEVEL featureLevelArray[2] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_0, };
-   if (D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &dx_swap_chain, &dx_device, &featureLevel, &dx_device_context) != S_OK)
-      return false;
+    UINT createDeviceFlags = 0;
+    //createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+    D3D_FEATURE_LEVEL featureLevel;
+    const D3D_FEATURE_LEVEL featureLevelArray[2] = {D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_0,};
+    if(D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &dx_swap_chain, &dx_device, &featureLevel, &dx_device_context) != S_OK)
+        return false;
 
-   dx_create_render_target();
-   return true;
+    dx_create_render_target();
+    return true;
 }
 
-void grey::backends::win32dx11::dx_cleanup_device()
-{
-   dx_cleanup_render_target();
-   if (dx_swap_chain) { dx_swap_chain->Release(); dx_swap_chain = nullptr; }
-   if (dx_device_context) { dx_device_context->Release(); dx_device_context = nullptr; }
+void grey::backends::win32dx11::dx_cleanup_device() {
+    dx_cleanup_render_target();
+    if(dx_swap_chain) { dx_swap_chain->Release(); dx_swap_chain = nullptr; }
+    if(dx_device_context) { dx_device_context->Release(); dx_device_context = nullptr; }
 
-   if (dx_device)
-   {
-      dx_device->Release();
-      dx_device = nullptr;
-   }
+    if(dx_device) {
+        dx_device->Release();
+        dx_device = nullptr;
+    }
 }
 
-void grey::backends::win32dx11::dx_create_render_target()
-{
-   ID3D11Texture2D* pBackBuffer{ nullptr };
-   dx_swap_chain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
-   if (pBackBuffer)
-   {
-      dx_device->CreateRenderTargetView(pBackBuffer, nullptr, &dx_render_target_view);
-      pBackBuffer->Release();
-   }
+void grey::backends::win32dx11::dx_create_render_target() {
+    ID3D11Texture2D* pBackBuffer{nullptr};
+    dx_swap_chain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
+    if(pBackBuffer) {
+        dx_device->CreateRenderTargetView(pBackBuffer, nullptr, &dx_render_target_view);
+        pBackBuffer->Release();
+    }
 }
 
-void grey::backends::win32dx11::dx_cleanup_render_target()
-{
-   if (dx_render_target_view)
-   {
-      dx_render_target_view->Release();
-      dx_render_target_view = nullptr;
-   }
+void grey::backends::win32dx11::dx_cleanup_render_target() {
+    if(dx_render_target_view) {
+        dx_render_target_view->Release();
+        dx_render_target_view = nullptr;
+    }
 }
 
 // Forward declare message handler from imgui_impl_win32.cpp
@@ -457,6 +478,8 @@ LRESULT WINAPI grey::backends::win32dx11::WndProc(
         return true;
 
     win32dx11* backend{ nullptr };
+
+
 
     switch (msg) {
         case WM_CREATE: {
@@ -488,20 +511,20 @@ LRESULT WINAPI grey::backends::win32dx11::WndProc(
             }
 
             //rounded corners!
-            {
+            /* {
                 RECT wRect;
                 if(::GetWindowRect(hWnd, &wRect)) {
                     HRGN hRgn = ::CreateRoundRectRgn(wRect.left, wRect.top, wRect.right, wRect.bottom, 30, 30);
                     ::SetWindowRgn(hWnd, hRgn, TRUE);
                     ::DeleteObject(hRgn);
                 }
-            }
+            }*/
 
             return 0;
         }
         
         // https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-nchittest
-        case WM_NCHITTEST: {
+        /*case WM_NCHITTEST: {
             if (!backend)
                 backend = (win32dx11*)::GetPropA(hWnd, "backend");
 
@@ -550,7 +573,7 @@ LRESULT WINAPI grey::backends::win32dx11::WndProc(
             }
 
             return ::DefWindowProc(hWnd, msg, wParam, lParam);
-        }
+        }*/
 
         case WM_SYSCOMMAND: {
             if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
