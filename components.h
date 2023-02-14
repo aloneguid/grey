@@ -874,6 +874,10 @@ namespace grey {
         bool do_center{false};
         bool do_top{false};
 
+        bool change_pos{false};
+        ImVec2 change_pos_point{0, 0};
+
+
         //const bool is_dockspace;
         //ImGuiID dockspace_id{};
         //ImGuiDockNodeFlags dockspace_flags{ ImGuiDockNodeFlags_PassthruCentralNode };

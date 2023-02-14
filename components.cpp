@@ -568,15 +568,13 @@ namespace grey
            initialised = true;
        }
 
-       if(do_center) {
-           float scale = get_system_scale();
-           ImVec2 ss = ImGui::GetPlatformIO().Monitors[0].WorkSize;
-           ImVec2 ws = ImGui::GetWindowSize();
-           ImGui::SetNextWindowPos(ImVec2(ss.x / 2 - ws.x * scale / 2, ss.y / 2 - ws.y * scale / 2));
-           do_center = false;
+       // the rest
+
+       if(change_pos) {
+           ImGui::SetNextWindowPos(change_pos_point);
+           change_pos = false;
        }
 
-       // the rest
 
        bool began = ImGui::Begin(id_title.c_str(), &is_visible, rflags);
 
@@ -607,6 +605,14 @@ namespace grey
                    ctx.bring_native_window_to_top(vp->PlatformHandleRaw);
                    do_top = false;
                }
+           }
+
+           if(do_center) {
+               ImVec2 ss = ImGui::GetPlatformIO().Monitors[0].WorkSize;
+               ImVec2 ws = ImGui::GetWindowSize();
+               change_pos = true;
+               change_pos_point = ImVec2(ss.x / 2 - ws.x / 2, ss.y / 2 - ws.y / 2);
+               do_center = false;
            }
 
            render_children();
