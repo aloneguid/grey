@@ -721,6 +721,10 @@ namespace grey {
 
     class plot : public component {
     public:
+
+        float sticky_min = -1;
+        std::string plot_overlay_text;
+
         plot(const std::string& label, size_t max_values = 10)
             : label{label}, max_values{max_values} {
             values.resize(max_values);
@@ -729,6 +733,8 @@ namespace grey {
         virtual const void render_visible() override;
 
         void add(float value);
+
+        void set_label(const std::string& label);
 
     private:
         std::string label;

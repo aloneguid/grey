@@ -1551,9 +1551,8 @@ namespace grey
        return c;
    }
 
-   const void hex_editor::render_visible()
-   {
-      me.DrawContents((void*)(&data[0]), data.size());
+   const void hex_editor::render_visible() {
+       me.DrawContents((void*)(&data[0]), data.size());
    }
 
    const void plot::render_visible() {
@@ -1572,11 +1571,11 @@ namespace grey
           height);
 
        ImGui::PlotHistogram(
-          label.c_str(),
-          &values[0], values.size(),
-          0, NULL,
-          min, max,
-          size);
+           label.c_str(),
+           &values[0], values.size(), 0,
+           plot_overlay_text.c_str(), // overlay text
+           min, max,
+           size);
    }
 
    void plot::add(float value) {
@@ -1584,9 +1583,13 @@ namespace grey
            values.erase(values.begin(), values.begin() + 1);
        }
        values.push_back(value);
-       min = *std::min_element(values.begin(), values.end());
+       min = sticky_min == -1 ? *std::min_element(values.begin(), values.end()) : sticky_min;
        max = *std::max_element(values.begin(), values.end());
        if(min == max) min = 0;
+   }
+
+   void plot::set_label(const string& label) {
+       this->label = label;
    }
 
    positioner::positioner(float x, float y, bool is_movement) : is_movement{is_movement} {
