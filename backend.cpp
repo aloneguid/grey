@@ -178,6 +178,7 @@ namespace grey
                 colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.000f, 0.000f, 0.000f, 0.586f);
                 colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.000f, 0.000f, 0.000f, 0.586f);
             }
+            break;
             case colour_theme::cherry: {
                 // cherry colors, 3 intensities
 #define HI(v)   ImVec4(0.502f, 0.075f, 0.256f, v)
@@ -231,7 +232,7 @@ namespace grey
                 //style.Colors[ImGuiCol_ModalWindowDarkening] = BG(0.73f);
                 style.Colors[ImGuiCol_Border] = ImVec4(0.539f, 0.479f, 0.255f, 0.162f);
             }
-                                     break;
+            break;
 
             default:
                 break;
