@@ -465,8 +465,6 @@ LRESULT WINAPI grey::backends::win32dx11::WndProc(
 
     win32dx11* backend{ nullptr };
 
-
-
     switch (msg) {
         case WM_CREATE: {
             {
