@@ -484,7 +484,7 @@ namespace grey {
         void fire_changed();
 
         std::string& get_value() { return *value; }
-        void set_value(const std::string& value) { *this->value = value; }
+        void set_value(const std::string& value) { *this->value = value; fire_changed(); }
 
     private:
         std::string label;
