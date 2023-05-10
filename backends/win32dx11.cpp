@@ -8,6 +8,7 @@
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
 #include "imconfig.h"
+#include "implot.h"
 
 #include <iostream>
 
@@ -73,7 +74,7 @@ grey::backends::win32dx11::win32dx11(const string& title) : grey::backend(title)
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    //ImPlot::CreateContext();
+    ImPlot::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -159,7 +160,7 @@ grey::backends::win32dx11::~win32dx11() {
     // Cleanup
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
-    //ImPlot::DestroyContext();
+    ImPlot::DestroyContext();
     ImGui::DestroyContext();
 
     dx_cleanup_render_target();
