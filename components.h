@@ -4,7 +4,7 @@
 #include <memory>
 #include <map>
 #include <functional>
-#include "common/containers.hpp"
+#include "imgui.h"
 #include "grey_context.h"
 #include "3rdparty/memory_editor.h"
 
@@ -142,6 +142,7 @@ namespace grey {
     class imgui_raw;
     class modal_popup;
     class plot;
+    class metrics_plot;
     class status_bar;
     class accordion;
     class child;
@@ -197,6 +198,7 @@ namespace grey {
         std::shared_ptr<progress_bar> make_progress_bar(float* value, const char* overlay_text = nullptr, float height = 10);
         std::shared_ptr<modal_popup> make_modal_popup(const std::string& title);
         std::shared_ptr<plot> make_plot(const std::string& title, size_t max_values);
+        std::shared_ptr<metrics_plot> make_metrics_plot(size_t max_points);
         std::shared_ptr<status_bar> make_status_bar();
         std::shared_ptr<accordion> make_accordion(const std::string& label);
         // child windows have their own scrolling/clipping area.
@@ -742,6 +744,101 @@ namespace grey {
         std::vector<float> values;
         float min{0};
         float max{0};
+    };
+
+    class rolling_buffer {
+    public:
+        double y_max_ever{0};
+
+        rolling_buffer(size_t size) : max_size{size} {
+            //data.reserve(size);
+            //xs.resize(size);
+            //ys.resize(size);
+        }
+
+        double* x_begin() { return &xs[0]; }
+
+        double* y_begin() { return &ys[0]; }
+
+        size_t size() { return xs.size(); }
+
+        void add_point(double x, double y) {
+            if(xs.size() == max_size) {
+                xs.erase(xs.begin());
+                ys.erase(ys.begin());
+            }
+
+            xs.push_back(x);
+            ys.push_back(y);
+
+            if(y > y_max_ever) y_max_ever = y;
+        }
+
+        void add_point(double y) {
+            add_point(0, y);
+        }
+
+    private:
+        size_t max_size;
+        std::vector<double> xs;
+        std::vector<double> ys;
+    };
+
+    class metrics_plot_definition {
+    public:
+        metrics_plot_definition(std::string label, size_t max_points) : label{label}, data{max_points} {
+
+        }
+
+        std::string label;
+        rolling_buffer data;
+    };
+
+    /**
+     * @brief General metric plot for the following:
+     * - percentages (%)
+     * - memory (mb, gb etc.)
+     * - number counter
+    */
+    class metrics_plot : public component {
+    public:
+        metrics_plot(size_t max_points) : max_points{max_points} {
+        }
+
+        virtual const void render_visible() override;
+
+        void add_number_plot(std::string label) {
+            number_plots.emplace_back(label, max_points);
+        }
+
+        void add_memory_plot(std::string label) {
+            memory_plots.emplace_back(label, max_points);
+        }
+
+        void add_perc_plot(std::string label) {
+            perc_plots.emplace_back(label, max_points);
+        }
+
+        void add_number_point(size_t plot_idx, double x, double y) {
+            metrics_plot_definition& def = number_plots[plot_idx];
+            def.data.add_point(x, y);
+        }
+
+        void add_memory_point(size_t plot_idx, double x, double y) {
+            metrics_plot_definition& def = memory_plots[plot_idx];
+            def.data.add_point(x, y);
+        }
+
+        void add_perc_point(size_t plot_idx, double x, double y) {
+            metrics_plot_definition& def = perc_plots[plot_idx];
+            def.data.add_point(x, y);
+        }
+
+    private:
+        size_t max_points;
+        std::vector<metrics_plot_definition> number_plots;
+        std::vector<metrics_plot_definition> memory_plots;
+        std::vector<metrics_plot_definition> perc_plots;
     };
 
     /// <summary>

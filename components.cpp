@@ -1,15 +1,15 @@
 #include "components.h"
 #include "imgui.h"
 #include "imgui_internal.h"
-//#include "implot.h"
+#include "implot.h"
 #include "imgui_stdlib.h"
 #include "imgui_internal.h"
 #include <cstdarg>
-//#include "3rdparty/imnodes/imnodes.h"
 #include <map>
 #include <iostream>
 #include <algorithm>
 #include <fmt/core.h>
+#include "../common/str.h"
 
 using namespace std;
 
@@ -303,12 +303,18 @@ namespace grey
       return r;
    }
 
-   std::shared_ptr<plot> container::make_plot(const string& title, size_t max_values)
-   {
-      auto r = make_shared<plot>(title, max_values);
-      assign_child(r);
-      return r;
+   std::shared_ptr<plot> container::make_plot(const string& title, size_t max_values) {
+       auto r = make_shared<plot>(title, max_values);
+       assign_child(r);
+       return r;
    }
+
+   std::shared_ptr<metrics_plot> container::make_metrics_plot(size_t max_points) {
+       auto r = make_shared<metrics_plot>(max_points);
+       assign_child(r);
+       return r;
+   }
+
 
    std::shared_ptr<status_bar> container::make_status_bar()
    {
@@ -1107,36 +1113,7 @@ namespace grey
       }
    }
 
-   /*const void plot::render_visible()
-   {
-      //int bar_data[5] = { 1, 2, 3, 4, 5 };
-      //if (ImPlot::BeginPlot("My Plot"))
-      //{
-      //   ImPlot::PlotBars("Bars", bar_data, 5);
-
-      //   ImPlot::EndPlot();
-      //}
-
-      //auto& io = ImGui::GetIO();
-      //ImPlot::PlotLine()
-
-      //ImPlot::ShowDemoWindow();
-
-      float history = 10;
-      ImPlot::SetNextPlotLimitsX(buffer.last_x - history, buffer.last_x, ImGuiCond_Always);
-      ImPlot::SetNextPlotLimitsY(0, 80);
-      if (ImPlot::BeginPlot(id.c_str(), "time", "FPS", ImVec2(-1, 0),
-         ImPlotAxisFlags_NoTickLabels,
-         ImPlotAxisFlags_NoTickLabels))
-      {
-         ImPlot::PlotLine("FPS",
-            &buffer.Data[0].x, &buffer.Data[0].y, buffer.Data.size(), buffer.Offset, 2 * sizeof(float));
-
-         ImPlot::EndPlot();
-      }
-   }
-
-   void plot::add_point(float y)
+   /*   void plot::add_point(float y)
    {
       x += ImGui::GetIO().DeltaTime;
       buffer.AddPoint(x, y);
@@ -1590,6 +1567,143 @@ namespace grey
 
    void plot::set_label(const string& label) {
        this->label = label;
+   }
+
+   int MetricFormatter(double value, char* buff, int size, void* data) {
+       const char* unit = (const char*)data;
+       static double v[] = {1000000000,1000000,1000,1,0.001,0.000001,0.000000001};
+       static const char* p[] = {"G","M","k","","m","u","n"};
+       if(value == 0) {
+           return snprintf(buff, size, "0 %s", unit);
+       }
+       for(int i = 0; i < 7; ++i) {
+           if(fabs(value) >= v[i]) {
+               return snprintf(buff, size, "%g %s%s", value / v[i], p[i], unit);
+           }
+       }
+       return snprintf(buff, size, "%g %s%s", value / v[6], p[6], unit);
+   }
+
+   int MemoryFormatter(double value, char* buff, int size, void* data) {
+       string sv = str::to_human_readable_size(value);
+       return strcpy_s(buff, size, sv.c_str());
+   }
+
+   int PercentageFormatter(double value, char* buff, int size, void* data) {
+       string sv = fmt::format("{:.2f} %", value);
+       return strcpy_s(buff, size, sv.c_str());
+   }
+
+
+   const void metrics_plot::render_visible() {
+
+       ImPlot::SetNextAxesToFit();
+
+       if(ImPlot::BeginPlot(id.c_str(), ImVec2(-1, height), ImPlotFlags_NoTitle)) {
+
+           //ImPlot::SetupAxes("time", "# proc");
+           //ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickLabels);
+           ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_AutoFit);
+           ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
+
+           // setup stage (ImPlot doesn't allow to setup another axis after drawing)
+
+           // Y1 - number of processes.
+           if(!number_plots.empty()) {
+
+               // get max across all plots
+               double y_max{0};
+               for(auto& def : number_plots) {
+                   if(def.data.y_max_ever > y_max)
+                       y_max = def.data.y_max_ever;
+               }
+               if(y_max > 0) y_max += y_max / 5;
+
+               ImPlot::SetupAxis(ImAxis_Y1, nullptr,
+                   ImPlotAxisFlags_LockMin);
+               //ImPlot::SetupAxisLimits(ImAxis_Y1, 0, y_max);
+           }
+
+           if(!memory_plots.empty()) {
+               ImPlot::SetupAxis(ImAxis_Y2, nullptr, ImPlotAxisFlags_LockMin);
+               //ImPlot::SetupAxisLimits(ImAxis_Y2, 0, y_max);
+               ImPlot::SetupAxisFormat(ImAxis_Y2, MemoryFormatter);
+           }
+
+           if(!perc_plots.empty()) {
+               ImPlot::SetupAxis(ImAxis_Y3, nullptr, ImPlotAxisFlags_LockMin);
+               //ImPlot::SetupAxisLimits(ImAxis_Y2, 0, y_max);
+               ImPlot::SetupAxisFormat(ImAxis_Y3, PercentageFormatter);
+           }
+
+
+           // draw stage
+
+           if(!number_plots.empty()) {
+               ImPlot::SetAxis(ImAxis_Y1);
+
+               for(auto& def : number_plots) {
+                   if(def.data.size() == 0) continue;
+
+                   ImPlot::PlotLine(def.label.c_str(), def.data.x_begin(), def.data.y_begin(), def.data.size());
+               }
+           }
+
+           if(!memory_plots.empty()) {
+               ImPlot::SetAxis(ImAxis_Y2);
+
+               for(auto& def : memory_plots) {
+                   if(def.data.size() == 0) continue;
+
+                   ImPlot::PlotLine(def.label.c_str(), def.data.x_begin(), def.data.y_begin(), def.data.size());
+               }
+           }
+
+           if(!perc_plots.empty()) {
+               ImPlot::SetAxis(ImAxis_Y3);
+
+               for(auto& def : perc_plots) {
+                   if(def.data.size() == 0) continue;
+
+                   ImPlot::PlotLine(def.label.c_str(), def.data.x_begin(), def.data.y_begin(), def.data.size());
+               }
+           }
+
+           //ImPlot::SetupAxis(ImAxis_Y2, nullptr, ImPlotAxisFlags_AutoFit);
+           //ImPlot::SetupAxisFormat
+
+           /*for(auto& def : plots) {
+               if(def.data.size() == 0) continue;
+
+               //set axis index here
+               //ImPlot::SetAxis(ImAxis)
+
+               switch(def.axis_idx) {
+                   case 0:
+                       ImPlot::SetAxis(ImAxis_Y1);
+                       break;
+                   case 1:
+                       ImPlot::SetAxis(ImAxis_Y2);
+                       break;
+               }
+
+               switch(def.type) {
+                   case implot_type::bar:
+                       ImPlot::PlotBars(def.label.c_str(),
+                           def.data.x_begin(), def.data.y_begin(), def.data.size(), 
+                           0.7, 1);
+                       break;
+                   case implot_type::line:
+                       ImPlot::PlotLine(def.label.c_str(),
+                           def.data.x_begin(), def.data.y_begin(), def.data.size());
+                       break;
+               }
+           }
+           */
+           //ImPlot::PlotLine("#proc1", buf.begin(), buf.size());
+
+           ImPlot::EndPlot();
+       }
    }
 
    positioner::positioner(float x, float y, bool is_movement) : is_movement{is_movement} {
