@@ -1584,6 +1584,12 @@ namespace grey
        return snprintf(buff, size, "%g %s%s", value / v[6], p[6], unit);
    }
 
+   int NFormatter(double value, char* buff, int size, void* data) {
+       string sv = fmt::format("# {}", (int)value);
+       return strcpy_s(buff, size, sv.c_str());
+   }
+
+
    int MemoryFormatter(double value, char* buff, int size, void* data) {
        string sv = str::to_human_readable_size(value);
        return strcpy_s(buff, size, sv.c_str());
@@ -1619,8 +1625,8 @@ namespace grey
                }
                if(y_max > 0) y_max += y_max / 5;
 
-               ImPlot::SetupAxis(ImAxis_Y1, nullptr,
-                   ImPlotAxisFlags_LockMin);
+               ImPlot::SetupAxis(ImAxis_Y1, nullptr, ImPlotAxisFlags_LockMin);
+               ImPlot::SetupAxisFormat(ImAxis_Y1, NFormatter);
                //ImPlot::SetupAxisLimits(ImAxis_Y1, 0, y_max);
            }
 
@@ -1638,6 +1644,8 @@ namespace grey
 
 
            // draw stage
+
+           //ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 5);
 
            if(!number_plots.empty()) {
                ImPlot::SetAxis(ImAxis_Y1);
@@ -1668,6 +1676,8 @@ namespace grey
                    ImPlot::PlotLine(def.label.c_str(), def.data.x_begin(), def.data.y_begin(), def.data.size());
                }
            }
+
+           //ImPlot::PopStyleVar();
 
            //ImPlot::SetupAxis(ImAxis_Y2, nullptr, ImPlotAxisFlags_AutoFit);
            //ImPlot::SetupAxisFormat
