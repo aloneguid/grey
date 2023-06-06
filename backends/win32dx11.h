@@ -82,7 +82,7 @@ namespace grey
             ImVec4 clear_color{0, 0, 0, 1.00f};
             bool owns_message_loop{false};
             size_t l{0}, t{0}, w{0}, h{0};
-
+            float scale_cached{-1.0};
 
             // If you cache textures, they must be tied to the backend, not app-global. This is extremely
             // important. Reusing textures across backends results in them not shutting down properly.

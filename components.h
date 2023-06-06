@@ -156,7 +156,7 @@ namespace grey {
 
     class container : public component {
     public:
-        container(grey_context& mgr) : tmgr{ mgr } {}
+        container(grey_context& mgr) : tmgr{mgr}, scale{mgr.get_system_scale()} {}
 
         virtual const void render() override;
         virtual const void render_visible() = 0;
@@ -230,6 +230,7 @@ namespace grey {
         grey_context& tmgr;
         // managed children are not owned, but you are responsible for rendering them
         std::vector<std::shared_ptr<component>> managed_children;
+        float scale;
 
         const void render_children();
 
@@ -689,7 +690,7 @@ namespace grey {
     public:
         tabs(grey_context& mgr, bool tab_list_popup = false);
 
-        size_t selected_idx{0};
+        size_t get_selected_idx() { return rendered_selected_idx; }
 
         void clear();
         std::shared_ptr<tab> make(const std::string& title);
@@ -698,6 +699,7 @@ namespace grey {
 
     private:
         bool tabs_dirty{false};
+        size_t rendered_selected_idx{0};
         grey_context& mgr;
         ImGuiTabBarFlags flags;
         std::vector<std::string> tab_headers;
@@ -954,6 +956,13 @@ namespace grey {
         bool can_resize{true};
         bool detach_on_close{false};
 
+        /**
+         * @brief 
+         * @param ctx 
+         * @param title 
+         * @param width width, will be scaled
+         * @param height height, will be scaled
+        */
         window(grey_context& ctx, std::string title, float width, float height);
 
         virtual const void render_visible() override;

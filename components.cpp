@@ -453,7 +453,8 @@ namespace grey
        // dirty hack, but works!
        if(spread_horizontally) {
            auto sz = ImGui::GetWindowSize();
-           ImGui::SameLine(sz.x - 20); ImGui::Text("");
+           ImGui::SameLine(sz.x - 10 * scale); ImGui::Text("");
+           ImGui::SameLine();
        }
 
        ImGui::EndGroup();
@@ -1482,6 +1483,7 @@ namespace grey
                string tl = fmt::format("{}##{}", tab_headers[i], i);
 
                if(ImGui::BeginTabItem(tl.c_str())) {
+                   rendered_selected_idx = i;
                    tab_containers[i]->render_visible();
                    ImGui::EndTabItem();
                }

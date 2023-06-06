@@ -367,9 +367,11 @@ void grey::backends::win32dx11::bring_to_top() {
 }
 
 float grey::backends::win32dx11::get_system_scale() {
-    int dpi = win32::shell::get_dpi();
-    float scale = dpi / 96.f;
-    return scale;
+    if(scale_cached == -1) {
+        int dpi = win32::shell::get_dpi();
+        scale_cached = dpi / 96.f;
+    }
+    return scale_cached;
 }
 
 void grey::backends::win32dx11::exit() {
