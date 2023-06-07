@@ -489,10 +489,14 @@ namespace grey {
         std::string& get_value() { return *value; }
         void set_value(const std::string& value) { *this->value = value; fire_changed(); }
 
+        void set_is_readonly() { flags |= ImGuiInputTextFlags_ReadOnly; }
+        void set_select_all_on_focus() { flags |= ImGuiInputTextFlags_AutoSelectAll; }
+
     private:
         std::string label;
         bool owns_mem;
         std::string* value;
+        ImGuiInputTextFlags flags{ImGuiInputTextFlags_AllowTabInput};
     };
 
     class input_int : public component {

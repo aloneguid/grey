@@ -194,46 +194,40 @@ namespace grey
       return r;
    }
 
-   std::shared_ptr<menu_bar> container::make_menu_bar()
-   {
-      auto r = make_shared<menu_bar>();
-      assign_child(r);
-      return r;
+   std::shared_ptr<menu_bar> container::make_menu_bar() {
+       auto r = make_shared<menu_bar>();
+       assign_child(r);
+       return r;
    }
 
-   std::shared_ptr<listbox> container::make_listbox(const string& label)
-   {
-      auto r = make_shared<listbox>(label);
-      assign_child(r);
-      return r;
+   std::shared_ptr<listbox> container::make_listbox(const string& label) {
+       auto r = make_shared<listbox>(label);
+       assign_child(r);
+       return r;
    }
 
-   std::shared_ptr<input> container::make_input(const string& label, string* value)
-   {
-      auto r = make_shared<input>(label, value);
-      assign_child(r);
-      return r;
+   std::shared_ptr<input> container::make_input(const string& label, string* value) {
+       auto r = make_shared<input>(label, value);
+       assign_child(r);
+       return r;
    }
 
-   std::shared_ptr<input_int> container::make_input_int(const string& label, int* value)
-   {
-      auto r = make_shared<input_int>(label, value);
-      assign_child(r);
-      return r;
+   std::shared_ptr<input_int> container::make_input_int(const string& label, int* value) {
+       auto r = make_shared<input_int>(label, value);
+       assign_child(r);
+       return r;
    }
 
-   std::shared_ptr<checkbox> container::make_checkbox(const string& label, bool* value)
-   {
-      auto r = make_shared<checkbox>(label, value);
-      assign_child(r);
-      return r;
+   std::shared_ptr<checkbox> container::make_checkbox(const string& label, bool* value) {
+       auto r = make_shared<checkbox>(label, value);
+       assign_child(r);
+       return r;
    }
 
-   std::shared_ptr<grey::tree> container::make_tree()
-   {
-      auto r = make_shared<tree>(tmgr);
-      assign_child(r);
-      return r;
+   std::shared_ptr<grey::tree> container::make_tree() {
+       auto r = make_shared<tree>(tmgr);
+       assign_child(r);
+       return r;
    }
 
    std::shared_ptr<button> container::make_button(const string& label, bool is_small, emphasis e)
@@ -1035,49 +1029,39 @@ namespace grey
       }
    }
 
-   const void input::render_visible()
-   {
-      bool is_error = is_in_error_state;
-      if (is_error)
-         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.00f));
+   const void input::render_visible() {
+       bool is_error = is_in_error_state;
+       if(is_error)
+           ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.00f));
 
-      ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;
-      if (!is_enabled) ImGui::BeginDisabled();
+       if(!is_enabled) ImGui::BeginDisabled();
 
-      if (lines <= 1)
-      {
-         if (ImGui::InputText(label.c_str(), value))
-         {
-            fire_changed();
-         }
-      }
-      else
-      {
-         ImVec2 size;
+       if(lines <= 1) {
+           if(ImGui::InputText(label.c_str(), value, flags)) {
+               fire_changed();
+           }
+       } else {
+           ImVec2 size;
 
-         if (fill && parent)
-         {
-            size = ImGui::GetWindowSize();
-            size.x = -FLT_MIN;
-            size.y -= ImGui::GetTextLineHeight() * (3 + lines_bottom_padding);
-         }
-         else
-         {
-            size = ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * lines);
-         }
+           if(fill && parent) {
+               size = ImGui::GetWindowSize();
+               size.x = -FLT_MIN;
+               size.y -= ImGui::GetTextLineHeight() * (3 + lines_bottom_padding);
+           } else {
+               size = ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * lines);
+           }
 
-         if (ImGui::InputTextMultiline(label.c_str(), value,
-            size,
-            flags))
-         {
-            fire_changed();
-         }
-      }
-      if (!is_enabled) ImGui::EndDisabled();
-      //ImGui::InputText(label.c_str(), &buffer[0], buf_size);
+           if(ImGui::InputTextMultiline(label.c_str(), value,
+               size,
+               flags)) {
+               fire_changed();
+           }
+       }
+       if(!is_enabled) ImGui::EndDisabled();
+       //ImGui::InputText(label.c_str(), &buffer[0], buf_size);
 
-      if (is_error)
-         ImGui::PopStyleColor();
+       if(is_error)
+           ImGui::PopStyleColor();
    }
 
    void input::fire_changed() {
