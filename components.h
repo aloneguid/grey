@@ -701,9 +701,11 @@ namespace grey {
         virtual const void render_visible() override;
         void post_render() override;
 
+        std::function<void(size_t)> on_tab_changed;
+
     private:
         bool tabs_dirty{false};
-        size_t rendered_selected_idx{0};
+        int rendered_selected_idx{-1};
         grey_context& mgr;
         ImGuiTabBarFlags flags;
         std::vector<std::string> tab_headers;

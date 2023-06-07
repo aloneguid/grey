@@ -1467,8 +1467,15 @@ namespace grey
                string tl = fmt::format("{}##{}", tab_headers[i], i);
 
                if(ImGui::BeginTabItem(tl.c_str())) {
-                   rendered_selected_idx = i;
+
                    tab_containers[i]->render_visible();
+
+                   if(on_tab_changed && i != rendered_selected_idx) {
+                       on_tab_changed(i);
+                   }
+
+                   rendered_selected_idx = i;
+
                    ImGui::EndTabItem();
                }
 
