@@ -239,6 +239,8 @@ void grey::backends::win32dx11::run() {
 
         run_one_frame();
         post_run_one_frame();
+
+        if(windows.empty()) break;
     }
 }
 
