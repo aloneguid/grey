@@ -7,8 +7,10 @@
 // I found Roboto Mono really pleasant
 //#include "fonts/Sweet16_ImGui.inl"
 //#include "fonts/Sweet16mono_ImGui.inl"
-#include "fonts/font_awesome.inl"
-#include "fonts/font_awesome.h"
+#include "fonts/font_awesome_6.inl"
+#include "fonts/font_awesome_6_brands.inl"
+#include "fonts/font_awesome_6.h"
+#include "fonts/font_awesome_6_brands.h"
 #include "fonts/roboto.inl"
 //#include "fonts/opensans.inl"
 
@@ -285,13 +287,37 @@ namespace grey
         }
 
         if(f) {
-            ImFontConfig config;
-            config.MergeMode = true;
-            config.GlyphMinAdvanceX = 13.0f; // Use if you want to make the icon monospaced
-            static const ImWchar icon_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
-            io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size,
-                16.0f * scale,
-                &config, icon_ranges);
+
+            // FontAwesome fonts need to have their sizes reduced by 2.0f/3.0f in order to align correctly
+            //float icon_font_size = 16.0f * 2.0f / 3.0f * scale;
+            float icon_font_size = 16.0f * scale;
+
+            // fontawesome v6
+            {
+                ImFontConfig config;
+                config.MergeMode = true;
+                config.PixelSnapH = true;
+                config.GlyphMinAdvanceX = icon_font_size; // Use if you want to make the icon monospaced
+                static const ImWchar icon_ranges[] = {ICON_MIN_FA, ICON_MAX_16_FA, 0};
+                io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_6_compressed_data, font_awesome_6_compressed_size,
+                    icon_font_size,
+                    &config, icon_ranges);
+            }
+
+            // fontawesome v6 (brands)
+            {
+                ImFontConfig config;
+                config.MergeMode = true;
+                config.PixelSnapH = true;
+                config.GlyphMinAdvanceX = icon_font_size; // Use if you want to make the icon monospaced
+                static const ImWchar icon_ranges[] = {ICON_MIN_FAB, ICON_MAX_16_FAB, 0};
+                io.Fonts->AddFontFromMemoryCompressedTTF(
+                    font_awesome_6_brands_compressed_data,
+                    font_awesome_6_brands_compressed_size,
+                    icon_font_size,
+                    &config, icon_ranges);
+            }
+
         }
     }
 
