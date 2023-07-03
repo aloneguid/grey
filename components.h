@@ -366,12 +366,13 @@ namespace grey {
         std::string tooltip;
         void* tag{ nullptr };
 
-        list_item(const std::string& text) : text{ text } {};
+        list_item(const std::string& text, const std::string& tooltip) : text{text}, tooltip{tooltip} {};
     };
 
     enum class listbox_mode {
         list = 0,
-        combo
+        combo,
+        icons
     };
 
     class listbox : public component {
@@ -511,10 +512,16 @@ namespace grey {
         int get_value() { return *value; }
         void set_value(int v) { *value = v; }
 
+        /**
+         * @brief Sets how much to increment/decrement with step buttons. Setting it to 0 hides step buttons completely.
+        */
+        void set_step_button_step(int step = 1) { this->step = step; }
+
     private:
         bool owns_mem;
         std::string label;
         int* value;
+        int step{1};
     };
 
     class checkbox : public component {
@@ -523,6 +530,7 @@ namespace grey {
         bool is_checked() { return *value; };
         void set_checked(bool checked) { *value = checked; }
         bool is_highlighted{ false };
+        bool render_as_icon{false};
 
         checkbox(const std::string& text, bool* value = nullptr);
         ~checkbox();

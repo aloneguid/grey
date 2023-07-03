@@ -99,7 +99,7 @@ namespace grey
            on_hovered(*this, ImGui::IsItemHovered());
        }
 
-       if (!tooltip.empty() && ImGui::IsItemHovered()) {
+       if (!tooltip.empty() && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
            //ImGui::BeginTooltip();
            //ImGui::Text(tooltip.c_str());
            //ImGui::EndTooltip();
@@ -868,6 +868,11 @@ namespace grey
                ok = ImGui::BeginCombo(title.c_str(), preview.c_str());
            }
            break;
+           case grey::listbox_mode::icons:
+           {
+               ok = true;
+           }
+           break;
            default:
                ok = false;
                break;
@@ -880,17 +885,49 @@ namespace grey
            for(list_item& item : items) {
                bool is_selected = selected_index == si;
 
-               if(ImGui::Selectable(item.text.c_str(), is_selected)) {
-                   selected_index = si;
-                   if(on_selected) {
-                       on_selected(si, item);
+               switch(mode) {
+                   case grey::listbox_mode::list:
+                   case grey::listbox_mode::combo:
+                   {
+                       if(ImGui::Selectable(item.text.c_str(), is_selected)) {
+                           selected_index = si;
+                           if(on_selected) {
+                               on_selected(si, item);
+                           }
+                       }
+
+                       if(is_selected)
+                           ImGui::SetItemDefaultFocus();
                    }
+                   break;
+                   case grey::listbox_mode::icons:
+                   {
+                       if(si > 0) ImGui::SameLine();
+
+                       if(is_selected) {
+                           ImGui::Text(item.text.c_str());
+                       } else {
+                           ImGui::TextDisabled(item.text.c_str());
+
+                           // show "hand" cursor for disabled (selectable) options
+                           if(ImGui::IsItemHovered()) {
+                               ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+                               // check if mouse is clicked on this item
+                               if(ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+                                   selected_index = si;
+                                   if(on_selected) {
+                                       on_selected(si, item);
+                                   }
+                               }
+                           }
+
+                       }
+                   }
+                   break;
                }
 
-               if(is_selected)
-                   ImGui::SetItemDefaultFocus();
-
-               if(!item.tooltip.empty() && ImGui::IsItemHovered()) {
+               if(!item.tooltip.empty() && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
                    ImGui::SetTooltip(item.tooltip.c_str());
                }
 
@@ -1079,23 +1116,19 @@ namespace grey
        this->label = sys_label(label);
    }
 
-   input_int::~input_int()
-   {
-      if (owns_mem)
-      {
-         delete value;
-      }
+   input_int::~input_int() {
+       if(owns_mem) {
+           delete value;
+       }
    }
 
-   const void input_int::render_visible()
-   {
-      if (ImGui::InputInt(label.c_str(), value))
-      {
-         if (on_value_changed)
-         {
-            on_value_changed(*value);
-         }
-      }
+   const void input_int::render_visible() {
+
+       if(ImGui::InputInt(label.c_str(), value, step)) {
+           if(on_value_changed) {
+               on_value_changed(*value);
+           }
+       }
    }
 
    /*   void plot::add_point(float y)
@@ -1328,9 +1361,29 @@ namespace grey
            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)em_normal);
        }
 
-       if(ImGui::Checkbox(sys_label(text).c_str(), value)) {
-           if(on_value_changed)
-               on_value_changed(*value);
+       if(render_as_icon) {
+           if(*value) {
+               ImGui::Text(text.c_str());
+           } else {
+               ImGui::TextDisabled(text.c_str());
+           }
+
+           if(ImGui::IsItemHovered()) {
+               ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+               if(ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+                   *value = !*value;
+                   if(on_value_changed) {
+                       on_value_changed(*value);
+                   }
+               }
+           }
+
+       } else {
+           if(ImGui::Checkbox(sys_label(text).c_str(), value)) {
+               if(on_value_changed)
+                   on_value_changed(*value);
+           }
        }
 
        if(is_highlighted) {
