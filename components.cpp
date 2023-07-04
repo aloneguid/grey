@@ -1372,10 +1372,15 @@ namespace grey
                ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
                if(ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-                   *value = !*value;
-                   if(on_value_changed) {
-                       on_value_changed(*value);
+                   if(!mouse_was_down) {
+                       *value = !*value;
+                       if(on_value_changed) {
+                           on_value_changed(*value);
+                       }
                    }
+                   mouse_was_down = true;
+               } else {
+                   mouse_was_down = false;
                }
            }
 

@@ -542,6 +542,7 @@ namespace grey {
     private:
         bool owns_mem;
         bool* value;
+        bool mouse_was_down{false};
     };
 
     class image : public component {
