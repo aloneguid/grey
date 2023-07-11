@@ -886,7 +886,7 @@ namespace grey {
     };
 
     /// <summary>
-    /// To show the pop-up, just set is_viible to true
+    /// To show the pop-up, just set is_visible to true
     /// </summary>
     class modal_popup : public container {
     public:
@@ -979,6 +979,7 @@ namespace grey {
          * @param height height, will be scaled
         */
         window(grey_context& ctx, std::string title, float width, float height);
+        virtual ~window();
 
         virtual const void render_visible() override;
 

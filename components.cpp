@@ -555,6 +555,9 @@ namespace grey
        if(has_menu_space) flags |= ImGuiWindowFlags_MenuBar;
    }
 
+   window::~window() {
+   }
+
    const void window::render_visible() {
 
        ImGuiWindowFlags rflags = flags;
