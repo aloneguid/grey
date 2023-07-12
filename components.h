@@ -91,6 +91,8 @@ namespace grey {
         float tag_float{0};
 
         component(const std::string& id = "");
+        virtual ~component() {}
+
         virtual const void render();
         virtual const void render_visible() = 0;
         virtual void post_render() {}
@@ -979,7 +981,7 @@ namespace grey {
          * @param height height, will be scaled
         */
         window(grey_context& ctx, std::string title, float width, float height);
-        virtual ~window();
+        ~window() override;
 
         virtual const void render_visible() override;
 

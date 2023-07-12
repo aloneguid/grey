@@ -556,6 +556,9 @@ namespace grey
    }
 
    window::~window() {
+#if _DEBUG
+       cout << "window destroyed" << endl;
+#endif
    }
 
    const void window::render_visible() {

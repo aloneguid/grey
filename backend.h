@@ -51,7 +51,6 @@ namespace grey
         //void set_borderless(bool is_borderless) { this->is_borderless = is_borderless; }
 
         virtual void attach(std::shared_ptr<grey::window> w);
-        virtual void detach(std::shared_ptr<grey::window> w);
         virtual void detach(std::string window_id);
 
         size_t window_count() { return windows.size(); }

@@ -12,6 +12,7 @@
 #include "fonts/font_awesome_6.h"
 #include "fonts/font_awesome_6_brands.h"
 #include "fonts/roboto.inl"
+#include <iostream>
 //#include "fonts/opensans.inl"
 
 using namespace std;
@@ -331,28 +332,22 @@ namespace grey
         windows_new.push_back(w);
     }
 
-    void backend::detach(std::shared_ptr<grey::window> w) {
-        windows_dirty = true;
-        windows_new.clear();
-        for(auto ow : windows) {
-            if(ow != w) {
-                windows_new.push_back(ow);
-            }
-        }
-    }
-
     void backend::detach(std::string window_id) {
         windows_dirty = true;
         windows_new.clear();
-        for(auto ow : windows) {
-            if(ow->id != window_id) {
-                windows_new.push_back(ow);
+        for(shared_ptr<window> w : windows) {
+            if(w->id == window_id) {
+#if _DEBUG
+                cout << "window #" << window_id << " detached" << endl;
+#endif
+            } else {
+                windows_new.push_back(w);
             }
         }
     }
 
     bool backend::any_window_visible() {
-        for(auto& w : windows) {
+        for(auto w : windows) {
             if(w->is_visible) return true;
         }
 

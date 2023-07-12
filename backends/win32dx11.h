@@ -58,7 +58,7 @@ namespace grey
 
             virtual void exit();
 
-            virtual virtual void set_theme(colour_theme theme);
+            virtual void set_theme(colour_theme theme);
 
             // instance specific
 
@@ -66,7 +66,7 @@ namespace grey
             HWND get_hwnd() { return hwnd; }
             std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> on_unhandled_window_message;
 
-            virtual void* get_native_window_handle() override { return hwnd; }
+            virtual void* get_native_window_handle() const override { return hwnd; }
 
             virtual void bring_native_window_to_top(void* raw_handle) override;
 

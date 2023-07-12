@@ -51,12 +51,11 @@ namespace grey
          * @brief OS specific. On Windows returns HWND.
          * @return 
         */
-        virtual void* get_native_window_handle() = 0;
+        virtual void* get_native_window_handle() const = 0;
 
         virtual void bring_native_window_to_top(void* raw_handle) = 0;
 
         virtual void attach(std::shared_ptr<grey::window> w) = 0;
-        virtual void detach(std::shared_ptr<grey::window> w) = 0;
         virtual void detach(std::string window_id) = 0;
 
         /**
