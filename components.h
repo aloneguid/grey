@@ -75,7 +75,7 @@ namespace grey {
     public:
         std::string id;
         bool is_enabled{ true };
-        bool is_visible{ true };
+        bool* is_visible{ nullptr };
         std::string tooltip;
         component* parent{ nullptr };
         float width{0};
@@ -985,7 +985,7 @@ namespace grey {
 
         virtual const void render_visible() override;
 
-        std::function<void(bool&)> on_open_changed;
+        std::function<void(bool)> on_open_changed;
 
         void close();
 
@@ -999,7 +999,6 @@ namespace grey {
         ImGuiWindowFlags flags;
         const std::string title;
         const std::string id_title;
-        const bool can_close{true};
         bool initialised{false};
         bool do_center{false};
         bool do_top{false};
@@ -1012,7 +1011,8 @@ namespace grey {
         //ImGuiID dockspace_id{};
         //ImGuiDockNodeFlags dockspace_flags{ ImGuiDockNodeFlags_PassthruCentralNode };
 
-        bool was_visible{true};
+        bool is_open{true};
+        bool was_open{true};
     };
 
     template<class TDataElement>

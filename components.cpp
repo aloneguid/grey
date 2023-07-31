@@ -58,15 +58,17 @@ namespace grey
            on_frame(*this);
        }
 
-       if (is_visible != is_visible_prev_frame) {
-           is_visible_prev_frame = is_visible;
+       if(nullptr != is_visible) {
+           if(*is_visible != is_visible_prev_frame) {
+               is_visible_prev_frame = is_visible;
 
-           if (on_visibility_changed) {
-               on_visibility_changed(*this);
+               if(on_visibility_changed) {
+                   on_visibility_changed(*this);
+               }
            }
+           if(false == *is_visible) return;
        }
 
-       if (!is_visible) return;
 
        bool change_width = !is_window && width != 0;
        if (change_width)
@@ -518,12 +520,12 @@ namespace grey
    }
 
    void window::close() {
-       this->is_visible = false;
+       is_open = false;
    }
 
    grey::window::window(grey_context& ctx, string title, float width, float height)
        : container{ctx}, title{title}, id_title{ sys_label(title) },
-       ctx{ctx}, can_close{can_close} {
+       ctx{ctx} {
 
        is_window = true;
 
@@ -583,7 +585,7 @@ namespace grey
        }
 
 
-       bool began = ImGui::Begin(id_title.c_str(), &is_visible, rflags);
+       bool began = ImGui::Begin(id_title.c_str(), &is_open, rflags);
 
        /*if(is_dockspace) {
            // useful docking links:
@@ -601,8 +603,6 @@ namespace grey
        if (began) {
            ImVec2 pos = ImGui::GetWindowPos();
            ImVec2 size = ImGui::GetWindowSize();
-           //left = pos.x;
-           //top = pos.y;
            width = size.x;
            height = size.y;
 
@@ -625,14 +625,14 @@ namespace grey
            render_children();
        }
 
-       if(is_visible != was_visible) {
-           was_visible = is_visible;
+       if(is_open != was_open) {
+           was_open = is_open;
 
            if(on_open_changed) {
-               on_open_changed(is_visible);
+               on_open_changed(is_open);
            }
 
-           if(!is_visible && detach_on_close) {
+           if(!is_open && detach_on_close) {
                ctx.detach(this->id);
            }
        }
@@ -1297,7 +1297,9 @@ namespace grey
 
    modal_popup::modal_popup(grey_context& mgr, const string& title) : container{mgr}, title{title} {
        // pop-ups should be invisible initially
-       is_visible = false;
+       if(is_visible) {
+           *is_visible = false;
+       }
    }
 
    const void modal_popup::render() {
@@ -1308,12 +1310,12 @@ namespace grey
        // do not fuck up this flag flipping logic, it's very fragile!!!!
 
        if(!sys_open) {  // check sys flip state - set to false by ImGui when popup closure is handled by imgui itself
-           is_visible = false;
+           *is_visible = false;
            was_visible = false;
            sys_open = true;
        }
 
-       if(!was_visible && is_visible) {
+       if(!was_visible && *is_visible) {
            // quickly show and flip the flag
 
            sys_open = true;

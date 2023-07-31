@@ -348,7 +348,7 @@ namespace grey
 
     bool backend::any_window_visible() {
         for(auto w : windows) {
-            if(w->is_visible) return true;
+            if(!w->is_visible || *(w->is_visible)) return true;
         }
 
         return false;
