@@ -811,6 +811,12 @@ namespace grey
    }
 
    void menu_bar::render(shared_ptr<menu_item> mi, bool icon_pad) {
+
+       if(mi->label == "-") {
+           ImGui::Separator();
+           return;
+       }
+
        string label = icon_pad
            ? string{"       "} + mi->label
            : mi->label;

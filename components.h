@@ -343,6 +343,13 @@ namespace grey {
         void* tag{ nullptr };
         std::vector<std::shared_ptr<menu_item>> children;
 
+        /**
+         * @brief Adds menu item
+         * @param id 
+         * @param label Display label. Use "-" to add separator
+         * @param icon 
+         * @return 
+        */
         std::shared_ptr<menu_item> add(const std::string& id, const std::string& label, const std::string& icon = "");
     };
 
