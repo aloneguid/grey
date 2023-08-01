@@ -291,6 +291,11 @@ namespace grey {
     public:
         size_t text_wrap_pos{ 0 };
 
+        /**
+         * @brief When true, renders on the same line (equivalent to calling ->same_line())
+        */
+        bool same_line{false};
+
         label(const std::string& value, bool is_bullet) : value{value}, value_ptr{nullptr}, is_bullet{is_bullet} {}
         label(const std::string* value, bool is_bullet) : value_ptr{value}, is_bullet{is_bullet} {}
 

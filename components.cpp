@@ -182,8 +182,7 @@ namespace grey
    }
 
 
-   std::shared_ptr<grey::label> container::make_label(const string& text, bool is_bullet)
-   {
+   std::shared_ptr<grey::label> container::make_label(const string& text, bool is_bullet) {
       auto r = make_shared<label>(text, is_bullet);
       assign_child(r);
       return r;
@@ -742,6 +741,11 @@ namespace grey
    }
 
    const void label::render_visible() {
+
+       if(same_line) {
+           ImGui::SameLine();
+       }
+
        if(text_wrap_pos > 0)
            ImGui::PushTextWrapPos(text_wrap_pos);
 
