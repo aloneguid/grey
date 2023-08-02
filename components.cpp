@@ -181,15 +181,18 @@ namespace grey
        return owned_children[index];
    }
 
-
-   std::shared_ptr<grey::label> container::make_label(const string& text, bool is_bullet) {
-      auto r = make_shared<label>(text, is_bullet);
-      assign_child(r);
-      return r;
+   std::shared_ptr<label> container::make_label(const std::string& text,
+       const std::string& tooltip, bool is_enabled, bool same_line) {
+       auto r = make_shared<label>(text, false);
+       r->tooltip = tooltip;
+       r->is_enabled = is_enabled;
+       r->same_line = same_line;
+       assign_child(r);
+       return r;
    }
 
-   std::shared_ptr<label> container::make_label(string* text, bool is_bullet)
-   {
+
+   std::shared_ptr<label> container::make_label(string* text, bool is_bullet) {
       auto r = make_shared<label>(text, is_bullet);
       assign_child(r);
       return r;
@@ -1543,6 +1546,7 @@ namespace grey
                string tl = fmt::format("{}##{}", tab_headers[i], i);
 
                if(ImGui::BeginTabItem(tl.c_str())) {
+                   // it's selected
 
                    tab_containers[i]->render_visible();
 
@@ -1581,6 +1585,7 @@ namespace grey
        tab_headers_new.clear();
        tab_containers_new.clear();
        tabs_dirty = true;
+       rendered_selected_idx = -1;
    }
 
    std::shared_ptr<tab> tabs::make(const std::string& title) {

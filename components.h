@@ -172,7 +172,8 @@ namespace grey {
 
         // general helpers
         std::shared_ptr<menu_bar> make_menu_bar();
-        std::shared_ptr<label> make_label(const std::string& text, bool is_bullet = false);
+        std::shared_ptr<label> make_label(const std::string& text,
+            const std::string& tooltip = "", bool is_enabled = true, bool same_line = false);
         std::shared_ptr<label> make_label(std::string* text, bool is_bullet = false);
         std::shared_ptr<listbox> make_listbox(const std::string& label);
         std::shared_ptr<tree> make_tree();
