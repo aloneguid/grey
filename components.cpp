@@ -1087,24 +1087,20 @@ namespace grey
    }
 
    input::input(const string& label, string* value)
-      : value { value }
-   {
-      //buffer.resize(buf_size);
-      owns_mem = value == nullptr;
-      if (owns_mem)
-      {
-         this->value = new string();
-      }
+       : value{value} {
+       //buffer.resize(buf_size);
+       owns_mem = value == nullptr;
+       if(owns_mem) {
+           this->value = new string();
+       }
 
-      this->label = sys_label(label);
+       this->label = sys_label(label);
    }
 
-   input::~input()
-   {
-      if (owns_mem)
-      {
-         delete value;
-      }
+   input::~input() {
+       if(owns_mem) {
+           delete value;
+       }
    }
 
    const void input::render_visible() {

@@ -523,7 +523,7 @@ namespace grey {
         std::string label;
         bool owns_mem;
         std::string* value;
-        ImGuiInputTextFlags flags{ImGuiInputTextFlags_AllowTabInput};
+        ImGuiInputTextFlags flags{};
 
         bool key_arrow_up_pressed{false};
         bool key_arrow_down_pressed{false};
