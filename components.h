@@ -7,6 +7,7 @@
 #include "imgui.h"
 #include "grey_context.h"
 #include "3rdparty/memory_editor.h"
+#include "../common/stl.hpp"
 
 namespace grey {
 
@@ -169,6 +170,15 @@ namespace grey {
         void assign_child(std::shared_ptr<component> child);
         void assign_managed_child(std::shared_ptr<component> child);
         std::shared_ptr<component> get_child(int index);
+        
+        /**
+         * @brief Move child at a position.
+         * @param child Child to move
+         * @param pos Position to move to
+         * @param is_relative if true, position will be relative to current and you can use negative numbres to move up.
+         * @return In case of error (wrong pos or child not found) returns false.
+        */
+        bool move_child(std::shared_ptr<component> child, int pos, bool is_relative = false);
 
         // general helpers
         std::shared_ptr<menu_bar> make_menu_bar();
@@ -236,7 +246,6 @@ namespace grey {
         float scale;
 
         const void render_children();
-
 
     private:
         bool is_dirty{false};
@@ -497,6 +506,8 @@ namespace grey {
         ~input();
 
         std::function<void(std::string&)> on_value_changed;
+        std::function<void(void)> on_arrow_up;
+        std::function<void(void)> on_arrow_down;
 
         virtual const void render_visible() override;
 
@@ -513,6 +524,9 @@ namespace grey {
         bool owns_mem;
         std::string* value;
         ImGuiInputTextFlags flags{ImGuiInputTextFlags_AllowTabInput};
+
+        bool key_arrow_up_pressed{false};
+        bool key_arrow_down_pressed{false};
     };
 
     class input_int : public component {
@@ -1083,7 +1097,6 @@ namespace grey {
                     };
                 }
             }
-            this->data = data;
         }
 
         std::function<void(std::shared_ptr<container>, std::shared_ptr<TDataElement>)> on_item_hovered;
@@ -1098,11 +1111,18 @@ namespace grey {
             }
         }
 
+        void move(size_t idx, int pos, bool is_relative) {
+            // move in the rendering container so they are visually moved
+            if(move_child(bound_groups[idx], pos, is_relative)) {
+                // move inside bound group
+                stl::move(bound_groups, idx, pos, is_relative);
+            }
+        }
+
     private:
         grey_context& ctx;
         bool track_selection;
         std::vector<std::shared_ptr<group>> bound_groups;   // only to track visual state i.e. selection
         std::function<void(repeater_bind_context<TDataElement>)> make_element;
-        std::vector<std::shared_ptr<TDataElement>> data;
     };
 }

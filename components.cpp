@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <fmt/core.h>
 #include "../common/str.h"
+#include "../common/stl.hpp"
 
 using namespace std;
 
@@ -179,6 +180,27 @@ namespace grey
        if (index >= owned_children.size()) return shared_ptr<component>();
 
        return owned_children[index];
+   }
+
+   bool container::move_child(shared_ptr<component> child, int pos, bool is_relative) {
+
+       if(!is_dirty) {
+           // make a copy
+           owned_children_new = owned_children;
+           is_dirty = true;
+       }
+
+       // we need child's index
+       int idx = -1;
+       for(int i = 0; i < owned_children_new.size(); i++) {
+           if(owned_children_new[i]->id == child->id) {
+               idx = i;
+               break;
+           }
+       }
+       if(idx == -1) return false;
+
+       return stl::move(owned_children_new, idx, pos, is_relative);
    }
 
    std::shared_ptr<label> container::make_label(const std::string& text,
@@ -1118,6 +1140,20 @@ namespace grey
 
        if(is_error)
            ImGui::PopStyleColor();
+
+       if(ImGui::IsItemFocused()) {
+           bool key_arrow_up_pressed_now = ImGui::IsKeyDown(ImGuiKey_UpArrow);
+           if(!key_arrow_up_pressed_now && key_arrow_up_pressed && on_arrow_up) {
+               on_arrow_up();
+           }
+           key_arrow_up_pressed = key_arrow_up_pressed_now;
+
+           bool key_arrow_down_pressed_now = ImGui::IsKeyDown(ImGuiKey_DownArrow);
+           if(!key_arrow_down_pressed_now && key_arrow_down_pressed && on_arrow_down) {
+               on_arrow_down();
+           }
+           key_arrow_down_pressed = key_arrow_down_pressed_now;
+       }
    }
 
    void input::fire_changed() {
