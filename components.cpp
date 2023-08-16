@@ -432,7 +432,7 @@ namespace grey
 #endif
 
    grey::child::child(grey_context& mgr, size_t width, size_t height, bool horizonal_scroll)
-       : container{mgr}, size{width, height} {
+       : container{mgr}, size{static_cast<float>(width), static_cast<float>(height)} {
        if(horizonal_scroll)
            flags |= ImGuiWindowFlags_HorizontalScrollbar;
    }
