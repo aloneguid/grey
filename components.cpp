@@ -344,18 +344,16 @@ namespace grey
       return r;
    }
 
-   std::shared_ptr<accordion> container::make_accordion(const string& label)
-   {
-      auto r = make_shared<accordion>(tmgr, label, false);
-      assign_child(r);
-      return r;
+   std::shared_ptr<accordion> container::make_accordion(const string& label) {
+       auto r = make_shared<accordion>(tmgr, label, false);
+       assign_child(r);
+       return r;
    }
 
-   std::shared_ptr<child> container::make_child_window(size_t width, size_t height, bool horizonal_scroll)
-   {
-      auto r = make_shared<child>(tmgr, width, height, horizonal_scroll);
-      assign_child(r);
-      return r;
+   std::shared_ptr<child> container::make_child_window(size_t width, size_t height, bool horizonal_scroll) {
+       auto r = make_shared<child>(tmgr, width, height, horizonal_scroll);
+       assign_child(r);
+       return r;
    }
 
    std::shared_ptr<group> container::make_group() {
