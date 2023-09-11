@@ -637,10 +637,15 @@ namespace grey
            }
 
            if(do_center) {
-               ImVec2 ss = ImGui::GetPlatformIO().Monitors[0].WorkSize;
+               ImVector<ImGuiPlatformMonitor> monitors = ImGui::GetPlatformIO().Monitors;
+               size_t midx = std::min(static_cast<size_t>(monitors.Size - 1), center_monitor_index);
+               ImGuiPlatformMonitor monitor = monitors[midx];
+
                ImVec2 ws = ImGui::GetWindowSize();
                change_pos = true;
-               change_pos_point = ImVec2(ss.x / 2 - ws.x / 2, ss.y / 2 - ws.y / 2);
+               change_pos_point = ImVec2(
+                   monitor.WorkSize.x / 2 - ws.x / 2 + monitor.WorkPos.x,
+                   monitor.WorkSize.y / 2 - ws.y / 2 + monitor.WorkPos.y);
                do_center = false;
            }
 
@@ -667,7 +672,8 @@ namespace grey
        }*/
    }
 
-   void window::center() {
+   void window::center(size_t monitor_index) {
+       center_monitor_index = monitor_index;
        do_center = true;
    }
 
