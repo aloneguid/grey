@@ -5,16 +5,6 @@
 
 namespace grey
 {
-    enum class colour_theme {
-        follow_os,
-        dark,
-        light,
-        light2,
-        classic,
-        corp_grey,
-        cherry
-    };
-
     enum class font {
         proggy_clean,
         //sweet_16_mono,
@@ -25,7 +15,6 @@ namespace grey
     struct app_theme {
         const std::string id;
         const std::string name;
-        const colour_theme theme;
     };
 
     class window;
@@ -43,8 +32,7 @@ namespace grey
 
         virtual std::vector<app_theme> list_themes() = 0;
 
-        virtual colour_theme get_theme() = 0;
-        virtual void set_theme(colour_theme theme) = 0;
+        virtual std::string get_theme() = 0;
         virtual void set_theme(const std::string& theme_id) = 0;
 
         /**

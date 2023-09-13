@@ -32,8 +32,7 @@ namespace grey
 
         virtual std::vector<app_theme> list_themes();
 
-        virtual colour_theme get_theme() { return theme; }
-        virtual void set_theme(colour_theme theme);
+        virtual std::string get_theme();
         virtual void set_theme(const std::string& theme_id);
 
         void set_default_font(font font);
@@ -61,9 +60,13 @@ namespace grey
         std::vector<std::shared_ptr<grey::window>> windows;
         bool windows_dirty{false};
         std::vector<std::shared_ptr<grey::window>> windows_new;
-        colour_theme theme{colour_theme::dark};
+        std::string theme_id;
         std::string title;
 
         bool any_window_visible();
+
+    private:
+        void set_base_dark_theme();
+        void set_base_light_theme();
     };
 }

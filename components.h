@@ -8,19 +8,20 @@
 #include "grey_context.h"
 #include "3rdparty/memory_editor.h"
 #include "../common/stl.hpp"
+#include "extraimstyle.h"
 
 namespace grey {
 
     const size_t MAX_TABLE_COLUMNS = 64;
 
-    const ImColor emphasis_primary_colour = ImColor::HSV(2 / 7.0f, 0.6f, 0.6f);
-    const ImColor emphasis_primary_colour_hovered = ImColor::HSV(2 / 7.0f, 0.6f, 0.7f);
-    const ImColor emphasis_primary_colour_active = ImColor::HSV(2 / 7.0f, 0.6f, 0.8f);
+    // green-ish
 
+    // red-ish
     const ImColor emphasis_error_colour = ImColor::HSV(0.0f, 0.6f, 0.6f);
     const ImColor emphasis_error_colour_hovered = ImColor::HSV(2 / 7.0f, 0.6f, 0.7f);
     const ImColor emphasis_error_colour_active = ImColor::HSV(2 / 7.0f, 0.6f, 0.8f);
 
+    // yellow-ish
     const ImColor emphasis_warning_colour = ImColor::HSV(7 / 7.0f, 0.6f, 0.6f);
     const ImColor emphasis_warning_colour_hovered = ImColor::HSV(7 / 7.0f, 0.6f, 0.7f);
     const ImColor emphasis_warning_colour_active = ImColor::HSV(7 / 7.0f, 0.6f, 0.8f);
@@ -45,6 +46,13 @@ namespace grey {
             o = ic.Value.w;
         }
 
+        rgb_colour(const ImVec4& vec) {
+            r = vec.x;
+            g = vec.y;
+            b = vec.z;
+            o = vec.w;
+        }
+
         operator ImColor() {
             return ImColor(r, g, b, o);
         }
@@ -60,15 +68,13 @@ namespace grey {
     };
 
     enum class emphasis {
-        none,
-        primary,
-        error,
-        warning
+        none = 0,
+        primary = 1,
+        error = 2
     };
 
     enum class cursor {
         normal,
-
         hand
     };
 
@@ -106,15 +112,12 @@ namespace grey {
         std::function<void(component&)> on_visibility_changed;
 
     protected:
-        //emphasis
-        ImColor em_normal;
-        ImColor em_hovered;
-        ImColor em_active;
         emphasis em{ emphasis::none };
 
         bool is_window{false};
 
         inline std::string sys_label(const std::string& label) { return label + "##" + id; }
+        bool set_emphasis_colours(ImVec4& normal, ImVec4& hovered, ImVec4& active);
 
     private:
         bool is_visible_prev_frame{ true };
@@ -988,9 +991,9 @@ namespace grey {
         virtual const void render_visible() override;
 
         bool spread_horizontally{false};
-        rgb_colour hover_border_colour{};
-        rgb_colour hover_bg_colour{};
-        rgb_colour border_colour{};
+        size_t hover_border_colour_index{};
+        size_t hover_bg_colour_index{};
+        size_t border_colour_index{};
     };
 
     class window : public container {
@@ -1081,14 +1084,13 @@ namespace grey {
                 make_element(repeater_bind_context<TDataElement>{*this, ec, data_element, idx++});
                 ec->spread_horizontally = true;
                 if(track_selection) {
-                    ec->hover_border_colour = ec->hover_bg_colour = rgb_colour{style.Colors[ImGuiCol_FrameBgHovered]};
+                    ec->hover_border_colour_index = ec->hover_bg_colour_index = ImGuiCol_FrameBgHovered;
 
                     ec->on_click = [this, ec, data_element](component&) {
                         ImGuiStyle& style = ImGui::GetStyle();
 
                         for(auto bg : bound_groups) {
-                            bg->border_colour = rgb_colour{
-                                style.Colors[bg->id == ec->id ? ImGuiCol_FrameBgActive : ImGuiCol_WindowBg]};
+                            bg->border_colour_index = bg->id == ec->id ? ImGuiCol_FrameBgActive : ImGuiCol_WindowBg;
                         }
 
                         if(on_item_clicked) {
@@ -1112,8 +1114,7 @@ namespace grey {
             ImGuiStyle& style = ImGui::GetStyle();
 
             for(int i = 0; i < bound_groups.size(); i++) {
-                bound_groups[i]->border_colour = rgb_colour{
-                    style.Colors[i == idx ? ImGuiCol_FrameBgActive : ImGuiCol_WindowBg]};
+                bound_groups[i]->border_colour_index = i == idx ? ImGuiCol_FrameBgActive : ImGuiCol_WindowBg;
             }
         }
 

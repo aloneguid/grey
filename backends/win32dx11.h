@@ -58,7 +58,7 @@ namespace grey
 
             virtual void exit();
 
-            virtual void set_theme(colour_theme theme);
+            virtual void set_theme(const std::string& theme_id);
 
             // instance specific
 

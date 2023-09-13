@@ -16,26 +16,6 @@ using namespace std;
 
 namespace grey
 {
-    void set_colours(emphasis em, ImColor& normal, ImColor& hovered, ImColor& active) {
-        switch(em) {
-            case emphasis::primary:
-                normal = emphasis_primary_colour;
-                hovered = emphasis_primary_colour_hovered;
-                active = emphasis_primary_colour_hovered;
-                break;
-            case emphasis::error:
-                normal = emphasis_error_colour;
-                hovered = emphasis_error_colour_hovered;
-                active = emphasis_error_colour_active;
-                break;
-            case emphasis::warning:
-                normal = emphasis_warning_colour;
-                hovered = emphasis_warning_colour_hovered;
-                active = emphasis_warning_colour_active;
-                break;
-        }
-    }
-
    static int incrementing_id;
 
    int generate_int_id() {
@@ -148,10 +128,8 @@ namespace grey
        component::render();
    }
 
-   void component::set_emphasis(emphasis em)
-   {
+   void component::set_emphasis(emphasis em) {
       this->em = em;
-      set_colours(em, em_normal, em_hovered, em_active);
    }
 
    void container::clear() {
@@ -436,9 +414,9 @@ namespace grey
    }
 
    const void child::render_visible() {
-       if(em != emphasis::none) {
-           ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)em_normal);
-       }
+       //if(em != emphasis::none) {
+       //    ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)em_normal);
+       //}
 
        ImVec2 tsz = size;
 
@@ -452,9 +430,9 @@ namespace grey
        }
        ImGui::EndChild();   // must be called regardless
 
-       if(em != emphasis::none) {
-           ImGui::PopStyleColor();
-       }
+       //if(em != emphasis::none) {
+       //    ImGui::PopStyleColor();
+       //}
    }
 
    group::group(grey_context& mgr) : container{mgr} {
@@ -479,32 +457,32 @@ namespace grey
 
        auto& style = ImGui::GetStyle();
 
-       if(border_colour) {
+       if(border_colour_index > 0) {
            auto min = ImGui::GetItemRectMin();
            auto max = ImGui::GetItemRectMax();
            ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
            //draw_list->AddLine(min, ImVec2(min.x, max.y), (ImU32)emphasis_primary_colour);
-           draw_list->AddRect(min, max, border_colour, style.FrameRounding);
+           draw_list->AddRect(min, max, (ImU32)rgb_colour { style.Colors[border_colour_index] }, style.FrameRounding);
        }
 
-       if(ImGui::IsItemHovered() && hover_border_colour.o > 0) {
+       if(ImGui::IsItemHovered() && hover_border_colour_index > 0) {
            auto min = ImGui::GetItemRectMin();
            auto max = ImGui::GetItemRectMax();
            ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
            //draw_list->AddLine(min, ImVec2(min.x, max.y), (ImU32)emphasis_primary_colour);
-           draw_list->AddRect(min, max, hover_border_colour, style.FrameRounding);
+           draw_list->AddRect(min, max, (ImU32)rgb_colour { style.Colors[hover_border_colour_index] }, style.FrameRounding);
        }
 
-       if(ImGui::IsItemHovered() && hover_bg_colour.o > 0) {
+       if(ImGui::IsItemHovered() && hover_bg_colour_index > 0) {
            auto min = ImGui::GetItemRectMin();
            auto max = ImGui::GetItemRectMax();
            ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
 
            //draw_list->AddLine(min, ImVec2(min.x, max.y), (ImU32)emphasis_primary_colour);
            //draw_list->AddRect(min, max, hover_border_colour);
-           draw_list->AddRectFilled(min, max, hover_bg_colour, style.FrameRounding);
+           draw_list->AddRectFilled(min, max, (ImU32)rgb_colour { style.Colors[hover_bg_colour_index] }, style.FrameRounding);
        }
 
        //if(on_click && ImGui::IsItemClicked()) {
@@ -686,8 +664,7 @@ namespace grey
        set_emphasis(e);
    }
 
-   void button::set_label(const string& label)
-   {
+   void button::set_label(const string& label) {
       this->label = sys_label(label);
    }
 
@@ -698,10 +675,15 @@ namespace grey
            ImGui::BeginDisabled(true);
        }
 
+       bool emphasis_changed{false};
        if(em != emphasis::none) {
-           ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)em_normal);
-           ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)em_hovered);
-           ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)em_active);
+           ImVec4 normal, hovered, active;
+           if(set_emphasis_colours(normal, hovered, active)) {
+               ImGui::PushStyleColor(ImGuiCol_Button, normal);
+               ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hovered);
+               ImGui::PushStyleColor(ImGuiCol_ButtonActive, active);
+               emphasis_changed = true;
+           }
        }
 
        if(is_small) {
@@ -715,7 +697,7 @@ namespace grey
        }
 
        if(disabled) ImGui::EndDisabled();
-       if(em != emphasis::none) ImGui::PopStyleColor(3);
+       if(emphasis_changed) ImGui::PopStyleColor(3);
    }
 
    const void grey::toggle::render_visible() {
@@ -785,11 +767,12 @@ namespace grey
        }
 
        if(is_enabled) {
-           if(em != emphasis::none) {
-               ImGui::TextColored(em_normal, buf);
-           } else {
-               ImGui::Text(buf);
-           }
+           //if(em != emphasis::none) {
+           //    ImGui::TextColored(em_normal, buf);
+           //} else {
+           //    ImGui::Text(buf);
+           //}
+           ImGui::Text(buf);
        } else {
            ImGui::TextDisabled("%s", buf);
        }
@@ -888,6 +871,25 @@ namespace grey
 
    component::component(const string& id) {
        this->id = id.empty() ? generate_id() : id;
+   }
+
+   bool component::set_emphasis_colours(ImVec4& normal, ImVec4& hovered, ImVec4& active) {
+       if(em == emphasis::none) return false;
+
+       switch(em) {
+           case grey::emphasis::primary:
+               normal = GreyColors[GreyCol_EmphasisPrimary];
+               hovered = GreyColors[GreyCol_EmphasisPrimaryHovered];
+               active = GreyColors[GreyCol_EmphasisPrimaryActive];
+               return true;
+           case grey::emphasis::error:
+               normal = GreyColors[GreyCol_EmphasisError];
+               hovered = GreyColors[GreyCol_EmphasisErrorHovered];
+               active = GreyColors[GreyCol_EmphasisErrorActive];
+               return true;
+       }
+
+       return false;
    }
 
    listbox::listbox(const string& title) {
@@ -1039,11 +1041,11 @@ namespace grey
        if(is_leaf) flags |= ImGuiTreeNodeFlags_Leaf;
 
 
-       if(em != emphasis::none) {
-           ImGui::PushStyleColor(ImGuiCol_Header, (ImVec4)em_normal);
-           ImGui::PushStyleColor(ImGuiCol_HeaderHovered, (ImVec4)em_hovered);
-           ImGui::PushStyleColor(ImGuiCol_HeaderActive, (ImVec4)em_active);
-       }
+       //if(em != emphasis::none) {
+       //    ImGui::PushStyleColor(ImGuiCol_Header, (ImVec4)em_normal);
+       //    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, (ImVec4)em_hovered);
+       //    ImGui::PushStyleColor(ImGuiCol_HeaderActive, (ImVec4)em_active);
+       //}
 
        //ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(1, 0, 0, 1));
        // use overload that allows passing node ID instead of just label, so node persists on rename
@@ -1059,7 +1061,7 @@ namespace grey
            ImGui::TreePop();
        }
 
-       if(em != emphasis::none) ImGui::PopStyleColor(3);
+       //if(em != emphasis::none) ImGui::PopStyleColor(3);
    }
 
    std::shared_ptr<tree_node> tree_node::add_node(const string& label, bool is_expanded, bool is_leaf) {
@@ -1414,9 +1416,9 @@ namespace grey
               (ImVec4)ImColor::HSV(5.0f, 255.0f, 255.0f));
        }
 
-       if(em != emphasis::none) {
-           ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)em_normal);
-       }
+       //if(em != emphasis::none) {
+       //    ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)em_normal);
+       //}
 
        if(render_as_icon) {
            if(*value) {
@@ -1452,9 +1454,9 @@ namespace grey
            ImGui::PopStyleColor();
        }
 
-       if(em != emphasis::none) {
-           ImGui::PopStyleColor();
-       }
+       //if(em != emphasis::none) {
+       //    ImGui::PopStyleColor();
+       //}
    }
 
    const void table::render_visible()

@@ -382,16 +382,17 @@ void grey::backends::win32dx11::exit() {
     //is_running = false;
 }
 
-void grey::backends::win32dx11::set_theme(colour_theme theme) {
+void grey::backends::win32dx11::set_theme(const string& theme_id) {
 
-    if(theme == colour_theme::follow_os) {
+    if(theme_id == "follow_os") {
         bool is_light{false};
         win32::user::is_app_light_theme(is_light);
-
-        theme = is_light ? colour_theme::light : colour_theme::dark;
+        backend::set_theme(is_light ? "light" : "dark");
+    } else {
+        backend::set_theme(theme_id);
     }
 
-    backend::set_theme(theme);
+    
 }
 
 void grey::backends::win32dx11::bring_native_window_to_top(void* raw_handle) {
