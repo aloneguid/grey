@@ -96,6 +96,7 @@ namespace grey {
 
         void* tag{ nullptr };
         float tag_float{0};
+        bool tag_bool{false};
 
         component(const std::string& id = "");
         virtual ~component() {}

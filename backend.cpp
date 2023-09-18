@@ -133,6 +133,10 @@ namespace grey
         ImGuiStyle& style = ImGui::GetStyle();
         ImVec4* colors = style.Colors;
 
+        // my own additions
+        colors[ImGuiCol_Tab] = ImVec4(0.86f, 0.86f, 0.86f, 1.00f);
+        colors[ImGuiCol_PopupBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.78f);
+
         // grey specific
         grey::GreyColors[GreyCol_EmphasisPrimary] = ImVec4(0.00f, 0.90f, 0.30f, 1.00f);
         grey::GreyColors[GreyCol_EmphasisPrimaryHovered] = ImVec4(0.00f, 0.80f, 0.27f, 1.00f);
