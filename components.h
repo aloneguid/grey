@@ -238,7 +238,7 @@ namespace grey {
         void same_line(float offset_left = 0);
         void spacer();
         void separator();
-        std::shared_ptr<imgui_raw> make_raw_imgui();
+        std::shared_ptr<imgui_raw> make_raw_imgui(std::function<void()> callback);
         void set_pos(float x, float y, bool is_movement = false);
 
 
@@ -895,12 +895,12 @@ namespace grey {
     /// </summary>
     class imgui_raw : public component {
     public:
-        imgui_raw() {}
+        imgui_raw(std::function<void()> callback) : callback{callback} {}
 
-        virtual const void render_visible() override { if (raw_function) raw_function(); }
+        virtual const void render_visible() override { if (callback) callback(); }
 
     private:
-        std::function<void()> raw_function;
+        std::function<void()> callback;
     };
 
     /// <summary>
@@ -1016,6 +1016,7 @@ namespace grey {
         virtual const void render_visible() override;
 
         std::function<void(bool)> on_open_changed;
+
 
         void close();
 

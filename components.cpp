@@ -375,8 +375,8 @@ namespace grey
       assign_child(make_shared<common_component>(3));
    }
 
-   std::shared_ptr<imgui_raw> container::make_raw_imgui() {
-       auto r = make_shared<imgui_raw>();
+   std::shared_ptr<imgui_raw> container::make_raw_imgui(std::function<void()> callback) {
+       auto r = make_shared<imgui_raw>(callback);
        assign_child(r);
        return r;
    }
@@ -628,6 +628,11 @@ namespace grey
            }
 
            render_children();
+
+           //
+           //ImGui::k
+           /*ImGui::Text("Keys down:");         for(ImGuiKey key = start_key; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1)) { if(funcs::IsLegacyNativeDupe(key) || !ImGui::IsKeyDown(key)) continue; ImGui::SameLine(); ImGui::Text((key < ImGuiKey_NamedKey_BEGIN) ? "\"%s\"" : "\"%s\" %d", ImGui::GetKeyName(key), key); }*/
+
        }
 
        if(is_open != was_open) {
@@ -767,12 +772,13 @@ namespace grey
        }
 
        if(is_enabled) {
-           //if(em != emphasis::none) {
-           //    ImGui::TextColored(em_normal, buf);
-           //} else {
-           //    ImGui::Text(buf);
-           //}
-           ImGui::Text(buf);
+           if(em != emphasis::none) {
+               ImVec4 normal, hovered, active;
+               set_emphasis_colours(normal, hovered, active);
+               ImGui::TextColored(normal, buf);
+           } else {
+               ImGui::Text(buf);
+           }
        } else {
            ImGui::TextDisabled("%s", buf);
        }
@@ -1293,7 +1299,8 @@ namespace grey
                ImGui::Image(texture, ImVec2(desired_width, desired_height));
            } else {
 
-               ImDrawList* dl = ImGui::GetForegroundDrawList();
+               //ImDrawList* dl = ImGui::GetForegroundDrawList();
+               ImDrawList* dl = ImGui::GetWindowDrawList();
                ImVec2 p_min = ImGui::GetCursorScreenPos();
                ImVec2 p_max = ImVec2(p_min.x + desired_width, p_min.y + desired_height);
                dl->AddImageRounded(texture, p_min, p_max,
