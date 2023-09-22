@@ -1027,7 +1027,7 @@ namespace grey {
          * @brief Center window on a particular monitor
          * @param monitor_index If specified, uses monitor, otherwise uses primary monitor
         */
-        void center(size_t monitor_index = 0);
+        void center(void* monitor_platform_index = nullptr);
 
         void bring_to_top();
 
@@ -1038,7 +1038,7 @@ namespace grey {
         const std::string id_title;
         bool initialised{false};
         bool do_center{false};
-        size_t center_monitor_index{0};
+        void* center_on_monitor_platform_handle{nullptr};
         bool do_top{false};
 
         bool change_pos{false};

@@ -616,7 +616,14 @@ namespace grey
 
            if(do_center) {
                ImVector<ImGuiPlatformMonitor> monitors = ImGui::GetPlatformIO().Monitors;
-               size_t midx = std::min(static_cast<size_t>(monitors.Size - 1), center_monitor_index);
+               size_t midx = 0;
+               for(size_t i = 0; i < monitors.Size; i++) {
+                   if(monitors[i].PlatformHandle == center_on_monitor_platform_handle) {
+                       midx = i;
+                       break;
+                   }
+               }
+
                ImGuiPlatformMonitor monitor = monitors[midx];
 
                ImVec2 ws = ImGui::GetWindowSize();
@@ -655,8 +662,8 @@ namespace grey
        }*/
    }
 
-   void window::center(size_t monitor_index) {
-       center_monitor_index = monitor_index;
+   void window::center(void* monitor_platform_index) {
+       center_on_monitor_platform_handle = monitor_platform_index;
        do_center = true;
    }
 
