@@ -458,8 +458,12 @@ namespace grey
     }
 
     void backend::attach(std::shared_ptr<grey::window> w) {
-        windows_dirty = true;
-        windows_new = windows;
+
+        if(!windows_dirty) {
+            windows_new = windows;
+            windows_dirty = true;
+        }
+
         windows_new.push_back(w);
     }
 

@@ -506,12 +506,17 @@ namespace grey {
         // temp helper - if true, sets to alternative visual style
         bool is_in_error_state{ false };
 
+        int* completion_index{nullptr};
+        std::vector<std::string>* completion_search{nullptr};
+
         input(const std::string& label, std::string* value = nullptr);
         ~input();
 
         std::function<void(std::string&)> on_value_changed;
         std::function<void(void)> on_arrow_up;
         std::function<void(void)> on_arrow_down;
+        std::function<void(void)> on_enter_pressed;
+        std::function<void(const std::string&)> on_select_completion;
 
         virtual const void render_visible() override;
 
@@ -527,7 +532,10 @@ namespace grey {
         std::string label;
         bool owns_mem;
         std::string* value;
-        ImGuiInputTextFlags flags{};
+        ImGuiInputTextFlags flags{ };
+
+        std::string completion_window_label;
+        bool completion_window_open{true};
 
         bool key_arrow_up_pressed{false};
         bool key_arrow_down_pressed{false};
@@ -1031,6 +1039,9 @@ namespace grey {
 
         void bring_to_top();
 
+        void get_pos(float& x, float& y) { x = pos.x; y = pos.y; }
+        void set_pos(float x, float y) { change_pos_point = ImVec2(x, y); change_pos = true; }
+
     private:
         grey_context& ctx;
         ImGuiWindowFlags flags;
@@ -1041,13 +1052,10 @@ namespace grey {
         void* center_on_monitor_platform_handle{nullptr};
         bool do_top{false};
 
+        ImVec2 pos{0, 0};
+        ImVec2 size{0, 0};
         bool change_pos{false};
         ImVec2 change_pos_point{0, 0};
-
-
-        //const bool is_dockspace;
-        //ImGuiID dockspace_id{};
-        //ImGuiDockNodeFlags dockspace_flags{ ImGuiDockNodeFlags_PassthruCentralNode };
 
         bool is_open{true};
         bool was_open{true};

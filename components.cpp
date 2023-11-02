@@ -418,6 +418,9 @@ namespace grey
        //    ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)em_normal);
        //}
 
+       // https://github.com/ocornut/imgui/issues/718
+       // ImGuiWindowFlags_NoBringToFrontOnFocus
+
        ImVec2 tsz = size;
 
        if(padding_bottom != 0) {
@@ -584,25 +587,11 @@ namespace grey
            change_pos = false;
        }
 
-
        bool began = ImGui::Begin(id_title.c_str(), &is_open, rflags);
 
-       /*if(is_dockspace) {
-           // useful docking links:
-           // - https://github.com/ocornut/imgui/issues/4430
-           // - https://gist.github.com/moebiussurfing/d7e6ec46a44985dd557d7678ddfeda99
-           if (first_time) {
-               first_time = false;
-
-               dockspace_id = ImGui::GetID("MainDockspace");
-           }
-
-           ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-       }*/
-
        if (began) {
-           ImVec2 pos = ImGui::GetWindowPos();
-           ImVec2 size = ImGui::GetWindowSize();
+           pos = ImGui::GetWindowPos();
+           size = ImGui::GetWindowSize();
            width = size.x;
            height = size.y;
 
@@ -635,11 +624,6 @@ namespace grey
            }
 
            render_children();
-
-           //
-           //ImGui::k
-           /*ImGui::Text("Keys down:");         for(ImGuiKey key = start_key; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1)) { if(funcs::IsLegacyNativeDupe(key) || !ImGui::IsKeyDown(key)) continue; ImGui::SameLine(); ImGui::Text((key < ImGuiKey_NamedKey_BEGIN) ? "\"%s\"" : "\"%s\" %d", ImGui::GetKeyName(key), key); }*/
-
        }
 
        if(is_open != was_open) {
@@ -656,10 +640,6 @@ namespace grey
 
        // for the window, End must be called regardless
        ImGui::End();
-
-       /*if(is_maximized) {
-           ImGui::PopStyleVar();
-       }*/
    }
 
    void window::center(void* monitor_platform_index) {
@@ -1107,7 +1087,6 @@ namespace grey
 
    input::input(const string& label, string* value)
        : value{value} {
-       //buffer.resize(buf_size);
        owns_mem = value == nullptr;
        if(owns_mem) {
            this->value = new string();
@@ -1168,6 +1147,62 @@ namespace grey
                on_arrow_down();
            }
            key_arrow_down_pressed = key_arrow_down_pressed_now;
+
+           if(on_enter_pressed && ImGui::IsKeyPressed(ImGuiKey_Enter)) {
+               on_enter_pressed();
+           }
+
+           // search completions
+           if(completion_search && !(*completion_search).empty()) {
+
+               if(completion_index) {
+                   if(ImGui::IsKeyPressed(ImGuiKey_DownArrow)) {
+                       (*completion_index)++;
+                       (*completion_index) %= (*completion_search).size();
+                   } else if(ImGui::IsKeyPressed(ImGuiKey_UpArrow)) {
+                       (*completion_index)--;
+                       if((*completion_index) < 0) {
+                           (*completion_index) = (*completion_search).size() - 1;
+                       }
+                   } else if(ImGui::IsKeyPressed(ImGuiKey_Tab)) {
+                       if(on_select_completion) {
+                           const string& tabbed_value = (*completion_search)[*completion_index];
+                           on_select_completion(tabbed_value);
+
+                           // see https://github.com/ocornut/imgui/issues/3290
+                           ImGui::ClearActiveID();
+                       }
+                   }
+               }
+
+               auto pos = ImGui::GetItemRectMin();
+               auto size = ImGui::GetItemRectSize();
+               ImGui::SetNextWindowPos(ImVec2(ImGui::GetItemRectMin().x, ImGui::GetItemRectMax().y));
+               ImGui::SetNextWindowSize(ImVec2(ImGui::GetItemRectSize().x, 0));
+               if(completion_window_label.empty()) {
+                   completion_window_label = sys_label("");
+               }
+
+               auto pflags =
+                   ImGuiWindowFlags_NoTitleBar |
+                   ImGuiWindowFlags_NoMove |
+                   ImGuiWindowFlags_NoResize |
+                   ImGuiWindowFlags_NoFocusOnAppearing;
+              
+               auto style = ImGui::GetStyle();
+               auto bg = style.Colors[ImGuiCol_WindowBg];
+               bg.w = 0.5f;
+
+               ImGui::PushStyleColor(ImGuiCol_PopupBg, bg);
+               if(ImGui::Begin(completion_window_label.c_str(), &completion_window_open, pflags)) {
+                   for(int i = 0; i < (*completion_search).size(); i++) {
+                       const string& cs = (*completion_search)[i];
+                       ImGui::Selectable(cs.c_str(), completion_index && (i == *completion_index));
+                   }
+               }
+               ImGui::End();
+               ImGui::PopStyleColor();
+           }
        }
    }
 
