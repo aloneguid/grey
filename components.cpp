@@ -33,6 +33,17 @@ namespace grey
        ImGui::SetCursorPos(mv);
    }
 
+   void component::set_padding(float left, float top, float right, float bottom, float scale) {
+       padding_left = left * scale;
+       padding_top = top * scale;
+       padding_right = right * scale;
+       padding_bottom = bottom * scale;
+   }
+
+   void component::set_padding(float padding, float scale) {
+       set_padding(padding, padding, padding, padding, scale);
+   }
+
    const void component::render() {
 
        if (on_frame) {
@@ -58,16 +69,32 @@ namespace grey
        bool change_alpha = alpha != 1;
        if(change_alpha) ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
 
-       if(bg_draw) {
+       bool pad_topleft = padding_left != 0 || padding_top != 0;
+       bool pad_bottomright = padding_right != 0 || padding_bottom != 0;
+
+       if(bg_draw || pad_bottomright) {
            start_cursor_pos = ImGui::GetCursorPos();
        }
 
-       bool pad = padding_left != 0 || padding_top != 0;
-       if(pad) {
+       // top-left padding is just moving the cursor before doing anything else
+       if(pad_topleft) {
            cursor_move(padding_left, padding_top);
        }
 
        render_visible();
+
+       if(pad_bottomright) {
+           ImVec2 p1 = ImGui::GetItemRectMax();
+           p1.x += padding_right;
+           p1.y += padding_bottom;
+           // add dummy for bottom padding
+           ImGui::Dummy(ImVec2(0.0f, padding_bottom));
+           ImGui::GetWindowDrawList()->AddRect(start_cursor_pos, p1, IM_COL32(0, 0, 0, 0));
+
+           // add a dummy to make sure the cursor is at the right place
+           ImGui::SetCursorPos(start_cursor_pos);
+           ImGui::Dummy(ImVec2(0, 0));
+       }
 
        if(bg_draw) {
            ImGui::SetCursorPos(start_cursor_pos);

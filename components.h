@@ -93,6 +93,24 @@ namespace grey {
         // paddings
         float padding_left{0};
         float padding_top{0};
+        float padding_right{0};
+        float padding_bottom{0};
+
+        /**
+         * @brief Utility function that sets padding for all sides
+         * @param left 
+         * @param top 
+         * @param right 
+         * @param bottom 
+        */
+        void set_padding(float left, float top, float right, float bottom, float scale = 1);
+
+        /**
+         * @brief Utility function to set padding on all sides to the same value
+         * @param padding 
+         * @param scale 
+        */
+        void set_padding(float padding, float scale = 1.0f);
 
         void* tag{ nullptr };
         float tag_float{0};
