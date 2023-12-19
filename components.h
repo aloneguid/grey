@@ -207,7 +207,8 @@ namespace grey {
         std::shared_ptr<label> make_label(const std::string& text,
             const std::string& tooltip = "", bool is_enabled = true, bool same_line = false);
         std::shared_ptr<label> make_label(std::string* text, bool is_bullet = false);
-        std::shared_ptr<listbox> make_listbox(const std::string& label);
+        std::shared_ptr<listbox> make_listbox(const std::string& label, int selected_index = -1);
+        std::shared_ptr<listbox> make_listbox(const std::string& label, int* selected_index);
         std::shared_ptr<tree> make_tree();
         std::shared_ptr<input> make_input(const std::string& label, std::string* value = nullptr);
         std::shared_ptr<input_int> make_input_int(const std::string& label, int* value = nullptr);
@@ -237,7 +238,7 @@ namespace grey {
         std::shared_ptr<status_bar> make_status_bar();
         std::shared_ptr<accordion> make_accordion(const std::string& label);
         // child windows have their own scrolling/clipping area.
-        std::shared_ptr<child> make_child_window(size_t width = 0, size_t height = 0, bool horizonal_scroll = false);
+        std::shared_ptr<child> make_child_window(float width = 0, float height = 0, bool horizonal_scroll = false);
         std::shared_ptr<group> make_group();
         std::shared_ptr<selectable> make_selectable(const std::string& value);
         template<class TDataElement>
@@ -423,13 +424,16 @@ namespace grey {
 
     class listbox : public component {
     public:
-        listbox(const std::string& title);
+        listbox(const std::string& title, int selected_index);
+        listbox(const std::string& title, int* selected_index);
 
-        std::size_t selected_index = -1;
         bool is_full_width = false;
         listbox_mode mode = listbox_mode::list;
         std::vector<list_item> items;
         int items_tall{ 5 };
+
+        int get_selected_index() { return selected_index_ptr ? *selected_index_ptr : selected_index; }
+        void set_selected_index(int index) { if (selected_index_ptr) *selected_index_ptr = index; else selected_index = index; }
 
         /// <summary>
         /// Calls back with index of selected item and the item itself
@@ -440,7 +444,8 @@ namespace grey {
 
     private:
         std::string title;
-
+        int selected_index;
+        int* selected_index_ptr;
     };
 
     class slider : public component {
@@ -994,14 +999,16 @@ namespace grey {
     */
     class child : public container {
     public:
-        child(grey_context& mgr, size_t width, size_t height, bool horizontal_scroll);
+        child(grey_context& mgr, float width, float height, bool horizontal_scroll);
 
         virtual const void render_visible() override;
 
         bool has_border{false};
 
         //experimental
-        size_t padding_bottom{0};
+        float padding_bottom{0};
+        float padding_right{0};
+
 
     private:
         ImVec2 size;
@@ -1146,6 +1153,12 @@ namespace grey {
             }
         }
 
+        /**
+         * @brief Moves rendering container position (the underlying data is not moved)
+         * @param idx Position to move from
+         * @param pos Position to move to
+         * @param is_relative When true, movement is relative to current position and you can use negative numbers to move up.
+        */
         void move(size_t idx, int pos, bool is_relative) {
             // move in the rendering container so they are visually moved
             if(move_child(bound_groups[idx], pos, is_relative)) {

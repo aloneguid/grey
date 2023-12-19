@@ -231,8 +231,14 @@ namespace grey
        return r;
    }
 
-   std::shared_ptr<listbox> container::make_listbox(const string& label) {
-       auto r = make_shared<listbox>(label);
+   std::shared_ptr<listbox> container::make_listbox(const string& label, int selected_index) {
+       auto r = make_shared<listbox>(label, selected_index);
+       assign_child(r);
+       return r;
+   }
+
+   std::shared_ptr<listbox> container::make_listbox(const string& label, int* selected_index) {
+       auto r = make_shared<listbox>(label, selected_index);
        assign_child(r);
        return r;
    }
@@ -355,7 +361,7 @@ namespace grey
        return r;
    }
 
-   std::shared_ptr<child> container::make_child_window(size_t width, size_t height, bool horizonal_scroll) {
+   std::shared_ptr<child> container::make_child_window(float width, float height, bool horizonal_scroll) {
        auto r = make_shared<child>(tmgr, width, height, horizonal_scroll);
        assign_child(r);
        return r;
@@ -434,8 +440,8 @@ namespace grey
    }
 #endif
 
-   grey::child::child(grey_context& mgr, size_t width, size_t height, bool horizonal_scroll)
-       : container{mgr}, size{static_cast<float>(width), static_cast<float>(height)} {
+   grey::child::child(grey_context& mgr, float width, float height, bool horizonal_scroll)
+       : container{mgr}, size{width, height} {
        if(horizonal_scroll)
            flags |= ImGuiWindowFlags_HorizontalScrollbar;
    }
@@ -450,9 +456,9 @@ namespace grey
 
        ImVec2 tsz = size;
 
-       if(padding_bottom != 0) {
+       if(padding_bottom != 0 || padding_right != 0) {
            ImVec2 wsz = ImGui::GetWindowSize();
-           tsz = ImVec2(tsz.x, wsz.y - padding_bottom);
+           tsz = ImVec2(tsz.x - padding_right, wsz.y - padding_bottom);
        }
 
        if(ImGui::BeginChild(this->id.c_str(), tsz, has_border, flags)) {
@@ -912,14 +918,19 @@ namespace grey
        return false;
    }
 
-   listbox::listbox(const string& title) {
+   listbox::listbox(const string& title, int selected_index) : selected_index{selected_index}, selected_index_ptr{nullptr} {
        this->title = sys_label(title);
+   }
+
+   listbox::listbox(const std::string& title, int* selected_index) : selected_index_ptr{selected_index} {
    }
 
    const void listbox::render_visible() {
        ImVec2 size = is_full_width
            ? ImVec2(-FLT_MIN, items_tall * ImGui::GetTextLineHeightWithSpacing())
            : ImVec2(0, items_tall * ImGui::GetTextLineHeightWithSpacing());
+
+       int idx = get_selected_index();
 
        // begin rendering
        bool ok;
@@ -931,7 +942,7 @@ namespace grey
            break;
            case grey::listbox_mode::combo:
            {
-               string preview = (selected_index == -1) ? "" : items[selected_index].text;
+               string preview = (idx == -1) ? "" : items[idx].text;
                ok = ImGui::BeginCombo(title.c_str(), preview.c_str());
            }
            break;
@@ -950,14 +961,14 @@ namespace grey
            size_t si = 0;
 
            for(list_item& item : items) {
-               bool is_selected = selected_index == si;
+               bool is_selected = idx == si;
 
                switch(mode) {
                    case grey::listbox_mode::list:
                    case grey::listbox_mode::combo:
                    {
                        if(ImGui::Selectable(item.text.c_str(), is_selected)) {
-                           selected_index = si;
+                           set_selected_index(si);
                            if(on_selected) {
                                on_selected(si, item);
                            }
@@ -982,7 +993,7 @@ namespace grey
 
                                // check if mouse is clicked on this item
                                if(ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-                                   selected_index = si;
+                                   set_selected_index(si);
                                    if(on_selected) {
                                        on_selected(si, item);
                                    }
