@@ -115,6 +115,7 @@ namespace grey {
         void* tag{ nullptr };
         float tag_float{0};
         bool tag_bool{false};
+        size_t tag_size_t{0};
 
         component(const std::string& id = "");
         virtual ~component() {}
@@ -1114,9 +1115,10 @@ namespace grey {
             size_t idx{0};
             for(auto data_element : data) {
                 auto ec = std::make_shared<group>(ctx);
+                ec->tag_size_t = idx;   // important!!! this is how we know the current position
                 assign_child(ec);
                 bound_groups.push_back(ec);
-                make_element(repeater_bind_context<TDataElement>{*this, ec, data_element, idx++});
+                make_element(repeater_bind_context<TDataElement>{*this, ec, data_element, idx});
                 ec->spread_horizontally = true;
                 if(track_selection) {
                     ec->hover_border_colour_index = ec->hover_bg_colour_index = ImGuiCol_FrameBgHovered;
@@ -1127,23 +1129,25 @@ namespace grey {
                         for(auto bg : bound_groups) {
                             bg->border_colour_index = bg->id == ec->id ? ImGuiCol_FrameBgActive : ImGuiCol_WindowBg;
                         }
+                        selected_index = ec->tag_size_t;
 
                         if(on_item_clicked) {
-                            on_item_clicked(ec, data_element);
+                            on_item_clicked(ec->tag_size_t, ec, data_element);
                         }
                     };
 
                     ec->on_hovered = [this, ec, data_element](component&, bool is_hovered) {
                         if(on_item_hovered && is_hovered) {
-                            on_item_hovered(ec, data_element);
+                            on_item_hovered(ec->tag_size_t, ec, data_element);
                         }
                     };
                 }
+                idx += 1;
             }
         }
 
-        std::function<void(std::shared_ptr<container>, std::shared_ptr<TDataElement>)> on_item_hovered;
-        std::function<void(std::shared_ptr<container>, std::shared_ptr<TDataElement>)> on_item_clicked;
+        std::function<void(size_t idx, std::shared_ptr<container>, std::shared_ptr<TDataElement>)> on_item_hovered;
+        std::function<void(size_t idx, std::shared_ptr<container>, std::shared_ptr<TDataElement>)> on_item_clicked;
 
         void set_selected_index(size_t idx) {
             ImGuiStyle& style = ImGui::GetStyle();
@@ -1151,7 +1155,11 @@ namespace grey {
             for(int i = 0; i < bound_groups.size(); i++) {
                 bound_groups[i]->border_colour_index = i == idx ? ImGuiCol_FrameBgActive : ImGuiCol_WindowBg;
             }
+
+            selected_index = idx;
         }
+
+        int get_selected_index() { return selected_index; }
 
         /**
          * @brief Moves rendering container position (the underlying data is not moved)
@@ -1165,11 +1173,17 @@ namespace grey {
                 // move inside bound group
                 stl::move(bound_groups, idx, pos, is_relative);
             }
+
+            // re-tag groups
+            for(size_t i = 0; i < bound_groups.size(); i++) {
+                bound_groups[i]->tag_size_t = i;
+            }
         }
 
     private:
         grey_context& ctx;
         bool track_selection;
+        int selected_index{-1}; // selected item index, when track_selection is enabled
         std::vector<std::shared_ptr<group>> bound_groups;   // only to track visual state i.e. selection
         std::function<void(repeater_bind_context<TDataElement>)> make_element;
     };
