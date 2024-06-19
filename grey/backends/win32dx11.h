@@ -4,7 +4,7 @@
 #include <Windows.h>
 #include "d3d11.h"
 #include "../common/img.h"
-#include "../../common/win32/window.h"
+#include "../common/win32/window.h"
 
 namespace grey
 {
@@ -95,7 +95,7 @@ namespace grey
             void dx_create_render_target();
             void dx_cleanup_render_target();
 
-            ID3D11ShaderResourceView* image_data_to_texture(grey::img::raw_img& img) const;
+            ID3D11ShaderResourceView* image_data_to_texture(grey::common::raw_img& img) const;
         };
     }
 }

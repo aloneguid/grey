@@ -7,8 +7,9 @@
 #include "imgui.h"
 #include "grey_context.h"
 #include "3rdparty/memory_editor.h"
-#include "../common/stl.hpp"
 #include "extraimstyle.h"
+#include "common/stl.hpp"
+#include "common/str.h"
 
 namespace grey {
 
@@ -1171,7 +1172,7 @@ namespace grey {
             // move in the rendering container so they are visually moved
             if(move_child(bound_groups[idx], pos, is_relative)) {
                 // move inside bound group
-                stl::move(bound_groups, idx, pos, is_relative);
+                common::stl::move(bound_groups, idx, pos, is_relative);
             }
 
             // re-tag groups

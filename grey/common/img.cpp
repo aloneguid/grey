@@ -3,17 +3,16 @@
 #define STB_IMAGE_IMPLEMENTATION
 //#include "stb_image.h"
 #include "../3rdparty/stb_image.h"
-#include "../../common/str.h"
-#include "../../common/win32/gdi.h"
+#include "win32/gdi.h"
 #include <fstream>
 
 #include <Windows.h>
 
 using namespace std;
 
-namespace grey::img
+namespace grey::common
 {
-   win32::gdi g;
+   grey::common::win32::gdi g;
 
    raw_img load_image_from_file(const std::string& path)
    {

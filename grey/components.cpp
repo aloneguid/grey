@@ -8,9 +8,6 @@
 #include <map>
 #include <iostream>
 #include <algorithm>
-#include <fmt/core.h>
-#include "../common/str.h"
-#include "../common/stl.hpp"
 
 using namespace std;
 
@@ -205,7 +202,7 @@ namespace grey
        }
        if(idx == -1) return false;
 
-       return stl::move(owned_children_new, idx, pos, is_relative);
+       return common::stl::move(owned_children_new, idx, pos, is_relative);
    }
 
    std::shared_ptr<label> container::make_label(const std::string& text,
@@ -1668,7 +1665,10 @@ namespace grey
            for(size_t i = 0; i < tab_headers.size(); i++) {
 
                // handle cases when there can be more than one tab header with the same title
-               string tl = fmt::format("{}##{}", tab_headers[i], i);
+               //string tl = fmt::format("{}##{}", tab_headers[i], i);
+               string tl { tab_headers[i] };
+               tl += "##";
+               tl += std::to_string(i);
 
                if(ImGui::BeginTabItem(tl.c_str())) {
                    // it's selected
@@ -1784,18 +1784,19 @@ namespace grey
    }
 
    int NFormatter(double value, char* buff, int size, void* data) {
-       string sv = fmt::format("# {}", (int)value);
+       string sv = string{"# "} + std::to_string((int)value);
        return strcpy_s(buff, size, sv.c_str());
    }
 
 
    int MemoryFormatter(double value, char* buff, int size, void* data) {
-       string sv = str::to_human_readable_size(value);
+       string sv = grey::common::str::to_human_readable_size(value);
        return strcpy_s(buff, size, sv.c_str());
    }
 
    int PercentageFormatter(double value, char* buff, int size, void* data) {
-       string sv = fmt::format("{:.2f} %", value);
+       //string sv = fmt::format("{:.2f} %", value);
+       string sv {"todo"};
        return strcpy_s(buff, size, sv.c_str());
    }
 

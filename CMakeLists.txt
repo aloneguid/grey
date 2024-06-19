@@ -1,41 +1,30 @@
-﻿cmake_minimum_required (VERSION 3.20)
+cmake_minimum_required (VERSION 3.20)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set (APP_NAME grey)
+set(GLOBAL_VERSION "$ENV{VERSION}")
+if(NOT GLOBAL_VERSION)
+    set(GLOBAL_VERSION "0.0.0")
+endif()
 
-add_compile_definitions(X_EXPORT)
+project ("btu" VERSION ${GLOBAL_VERSION})
 
-find_package(imgui CONFIG REQUIRED)
-find_package(implot CONFIG REQUIRED)
-find_package(fmt CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
+add_compile_definitions(UNICODE) # required for WIN32 API to use correct versions
 
-find_path(STB_INCLUDE_DIRS "stb.h")
+# statically link MSVC runtime in thrift to being fully self-contained.
+# this increases .exe size but guarantees working on all windows versions
+# see https://cmake.org/cmake/help/latest/variable/CMAKE_MSVC_RUNTIME_LIBRARY.html
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
-file(GLOB core_src CONFIGURE_DEPENDS "*.cpp"
-    "backends/*.cpp"
-    "common/*.cpp"
-    "../common/*.cpp"
-    "../common/win32/user.cpp"
-    "../common/win32/gdi.cpp"
-    "../common/win32/shell.cpp"
-    "../common/win32/reg.cpp")
-set(private_libs fmt::fmt-header-only D3D11.lib nlohmann_json::nlohmann_json implot::implot)
-set(interface_libs imgui::imgui)
+# The cool "edit & continue" feature of MSVC is disabled by default in CMake.
+# https://learn.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-170#edit-and-continue-for-cmake-projects
+# enable globally: https://stackoverflow.com/a/76254117/80858
+if(MSVC AND CMAKE_BUILD_TYPE MATCHES Debug)
+    add_compile_options("/ZI")
+    add_link_options("/INCREMENTAL")
+endif()
 
-#add_library    (grey SHARED ${core_src} "api.cpp")
-add_library    (libgrey STATIC ${core_src})
-
-#set_property(TARGET grey PROPERTY
-#  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-#set_property(TARGET libgrey PROPERTY
-#  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-
-# dynamic lib should include both private and interface libs as private dependencies
-#target_link_libraries(grey        
-#   PRIVATE ${private_libs} ${interface_libs})
-
-target_link_libraries(libgrey
-   PRIVATE ${private_libs}
-   INTERFACE ${interface_libs})
-
-# target_include_directories(${APP_NAME} PRIVATE "../common")
+if(WIN32)
+    add_subdirectory(grey)
+    add_subdirectory(demo/desktop)
+endif()

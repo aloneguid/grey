@@ -1,7 +1,6 @@
 #include "win32dx11.h"
-#include "../../common/str.h"
-#include "../../common/win32/user.h"
-#include "../../common/win32/shell.h"
+#include "../common/str.h"
+#include "../common/win32/os.h"
 #include <Windows.h>
 #include <windowsx.h>
 
@@ -13,6 +12,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace grey::common;
 
 grey::backends::win32dx11::win32dx11(const string& title) : grey::backend(title) {
 
@@ -147,7 +147,7 @@ grey::backends::win32dx11::~win32dx11() {
         WINDOWPLACEMENT wp = { 0 };
         wp.length = sizeof(wp);
         ::GetWindowPlacement(hwnd, &wp);
-        string data = str::base64_encode((const unsigned char*)&wp, sizeof(wp));
+        string data = grey::common::str::base64_encode((const unsigned char*)&wp, sizeof(wp));
         on_save_settings("win32_wp", data);
     }
 
@@ -244,7 +244,7 @@ void grey::backends::win32dx11::run() {
     }
 }
 
-ID3D11ShaderResourceView* grey::backends::win32dx11::image_data_to_texture(grey::img::raw_img& img) const {
+ID3D11ShaderResourceView* grey::backends::win32dx11::image_data_to_texture(grey::common::raw_img& img) const {
     D3D11_TEXTURE2D_DESC desc{0};
     desc.Width = img.x;
     desc.Height = img.y;
@@ -283,7 +283,7 @@ ID3D11ShaderResourceView* grey::backends::win32dx11::image_data_to_texture(grey:
 void* grey::backends::win32dx11::load_texture_from_file(const std::string& path, int& width, int& height) {
     auto entry = texture_cache.find(path);
     if(entry == texture_cache.end()) {
-        grey::img::raw_img img_data = img::load_image_from_file(path);
+        grey::common::raw_img img_data = grey::common::load_image_from_file(path);
         if(!img_data) return nullptr;
 
         ID3D11ShaderResourceView* texture = image_data_to_texture(img_data);
@@ -309,7 +309,7 @@ void* grey::backends::win32dx11::load_texture_from_memory(
    unsigned char* buffer, unsigned int len, int& width, int& height) {
     auto entry = texture_cache.find(cache_name);
     if(entry == texture_cache.end()) {
-        grey::img::raw_img img_data = img::load_image_from_memory(buffer, len);
+        grey::common::raw_img img_data = grey::common::load_image_from_memory(buffer, len);
         if(!img_data) return nullptr;
 
         ID3D11ShaderResourceView* texture = image_data_to_texture(img_data);
@@ -339,11 +339,11 @@ void grey::backends::win32dx11::set_visibility(bool visible) {
 
 void grey::backends::win32dx11::resize(int width, int height) {
     //float scale = get_system_scale();
-    win32::user::set_window_pos(hwnd, -1, -1, width, height);
+    win32::window::set_pos(hwnd, -1, -1, width, height);
 }
 
 void grey::backends::win32dx11::move(int x, int y) {
-    win32::user::set_window_pos(hwnd, x, y, -1, -1);
+    win32::window::set_pos(hwnd, x, y, -1, -1);
 }
 
 void grey::backends::win32dx11::center_on_screen() {
@@ -370,7 +370,7 @@ void grey::backends::win32dx11::bring_to_top() {
 
 float grey::backends::win32dx11::get_system_scale() {
     if(scale_cached == -1) {
-        int dpi = win32::shell::get_dpi();
+        int dpi = win32::os::get_dpi();
         scale_cached = dpi / 96.f;
     }
     return scale_cached;
@@ -386,7 +386,7 @@ void grey::backends::win32dx11::set_theme(const string& theme_id) {
 
     if(theme_id == "follow_os") {
         bool is_light{false};
-        win32::user::is_app_light_theme(is_light);
+        win32::os::is_app_light_theme(is_light);
         backend::set_theme(is_light ? "light" : "dark");
     } else {
         backend::set_theme(theme_id);

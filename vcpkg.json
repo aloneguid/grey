@@ -1,0 +1,29 @@
+{
+    "name": "grey-demo",
+    "version-string": "latest",
+    "dependencies": [
+        {
+            "name": "imgui",
+            "features": [
+                "win32-binding",
+                "dx11-binding",
+                "docking-experimental"
+            ],
+            "platform": "windows"
+        },
+        {
+            "name": "imgui",
+            "features": [
+                "opengl3-binding",
+                "sdl2-binding",
+                "docking-experimental"
+            ],
+            "platform": "linux"
+        },
+        {
+            "name": "opengl",
+            "platform": "linux"
+        },
+        "implot"
+    ]
+}
