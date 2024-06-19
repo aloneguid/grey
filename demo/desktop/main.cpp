@@ -3,6 +3,7 @@
 #include "../grey/widgets.h"
 
 using namespace std;
+namespace w = grey::widgets;
 
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
@@ -12,34 +13,36 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
     auto app = grey::app::make(APP_LONG_NAME);
     app->run([]() {
-        grey::window wnd{"Hello, world!", true};
+        w::window wnd{"Hello, world!", true, true, 600, 400};
 
         // menu
+        {
+            w::menu_bar menu;
+            if(menu) {
 
-        ImGui::BeginMenuBar();
-        if(ImGui::BeginMenu("File")) {
+                if(ImGui::BeginMenu("File")) {
 
-            if(ImGui::MenuItem("New")) {
-                // do something
-            }
+                    if(ImGui::MenuItem("New")) {
+                        // do something
+                    }
 
-            if(ImGui::BeginMenu("Recent")) {
-                if(ImGui::MenuItem("file1.txt")) {
-                    // do something
+                    if(ImGui::BeginMenu("Recent")) {
+                        if(ImGui::MenuItem("file1.txt")) {
+                            // do something
+                        }
+                        ImGui::EndMenu();
+                    }
+                    ImGui::EndMenu();
+
                 }
-                ImGui::EndMenu();
             }
-
-            ImGui::EndMenu();
         }
 
-        ImGui::EndMenuBar();
-
         // labels
-        grey::label("simple text");
-        grey::label(ICON_FA_ADDRESS_BOOK " icon1");
-        grey::label(ICON_FA_CALENDAR " icon2");
-        grey::label(ICON_FA_CHROME " icon3");
+        w::label("simple text");
+        w::label(ICON_FA_ADDRESS_BOOK " icon1");
+        w::label(ICON_FA_CALENDAR " icon2");
+        w::label(ICON_FA_CHROME " icon3");
 
         return true;
     });

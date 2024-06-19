@@ -19,3 +19,4 @@ It's basically ImGui shaped into making desktop applications, because ImGui can 
 .\binary_to_compressed.exe .\fa-regular-400.ttf font_awesome_regular_400 > font_awesome_6_regular_400.inl
 ```
 
+The rest of the code in `font_loader.hpp` shows how to use it.
