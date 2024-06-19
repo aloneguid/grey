@@ -7,7 +7,7 @@ using namespace std;
 namespace demo {
 
 	main_wnd::main_wnd(grey::grey_context& ctx) : grey::window(ctx, APP_LONG_NAME, 800, 600) {
-		detach_on_close = true;
+		//detach_on_close = true;
 		has_menu_space = true;
 
         auto menu = make_menu_bar();
