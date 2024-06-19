@@ -77,6 +77,8 @@ namespace grey
             ID3D11Device* dx_device{nullptr};
             ID3D11DeviceContext* dx_device_context{nullptr};
             IDXGISwapChain* dx_swap_chain{nullptr};
+            bool dx_swap_chain_occluded{false};
+            UINT resize_width{0}, resize_height{0};
             ID3D11RenderTargetView* dx_render_target_view{nullptr};
             static const int BorderSize{5};
             ImVec4 clear_color{0, 0, 0, 1.00f};

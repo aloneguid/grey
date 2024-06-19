@@ -47,7 +47,7 @@ grey::backends::win32dx11::win32dx11(const string& title) : grey::backend(title)
     //DWORD dwExStyle = WS_EX_APPWINDOW;
     DWORD dwStyle = WS_POPUP;
     DWORD dwExStyle = WS_EX_APPWINDOW;
-    hwnd = ::CreateWindowEx(dwExStyle,
+    hwnd = ::CreateWindowExW(dwExStyle,
         ClassName,
         wtitle.c_str(),
         dwStyle,
@@ -63,7 +63,7 @@ grey::backends::win32dx11::win32dx11(const string& title) : grey::backend(title)
     // Initialize Direct3D
     if (!dx_create_device()) {
         dx_cleanup_device();
-        ::UnregisterClass(ClassName, h_module_inst);
+        ::UnregisterClassW(ClassName, h_module_inst);
         return;
     }
 
@@ -174,6 +174,21 @@ grey::backends::win32dx11::~win32dx11() {
 void grey::backends::win32dx11::run_one_frame() {
     // optimisation: don't do anything at all if there are no visible ImGui windows
     if (!any_window_visible()) return;
+
+    // Handle window being minimized or screen locked
+    if(dx_swap_chain_occluded && dx_swap_chain->Present(0, DXGI_PRESENT_TEST) == DXGI_STATUS_OCCLUDED) {
+        ::Sleep(10);
+        return;
+    }
+    dx_swap_chain_occluded = false;
+
+    // Handle window resize (we don't resize directly in the WM_SIZE handler)
+    if(resize_width != 0 && resize_height != 0) {
+        dx_cleanup_render_target();
+        dx_swap_chain->ResizeBuffers(0, resize_width, resize_height, DXGI_FORMAT_UNKNOWN, 0);
+        resize_width = resize_height = 0;
+        dx_create_render_target();
+    }
 
     // Start the Dear ImGui frame
     ImGui_ImplDX11_NewFrame();
@@ -466,12 +481,12 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 LRESULT WINAPI grey::backends::win32dx11::WndProc(
     HWND hWnd, UINT msg,
     WPARAM wParam, LPARAM lParam) {
-    if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+    if(ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
         return true;
 
-    win32dx11* backend{ nullptr };
+    win32dx11* backend{nullptr};
 
-    switch (msg) {
+    switch(msg) {
         case WM_CREATE: {
             {
                 // get a pointer to this backend
@@ -484,7 +499,7 @@ LRESULT WINAPI grey::backends::win32dx11::WndProc(
                 HINSTANCE hInstance = ((LPCREATESTRUCT)lParam)->hInstance;
                 //HANDLE hMainIcon = ::LoadImage(hInstance, MAKEINTRESOURCE(1033), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE);
                 HICON hMainIcon = ::LoadIcon(hInstance, L"IDI_ICON1");
-                if (hMainIcon)
+                if(hMainIcon)
                     ::SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hMainIcon);
             }
 
@@ -492,13 +507,17 @@ LRESULT WINAPI grey::backends::win32dx11::WndProc(
         }
 
         case WM_SIZE: {
-            if (!backend)
+            if(wParam == SIZE_MINIMIZED)
+                return 0;
+
+            // queue resize
+            if(!backend)
                 backend = (win32dx11*)::GetPropA(hWnd, "backend");
 
-            if (backend && backend->dx_device != nullptr && wParam != SIZE_MINIMIZED) {
-                backend->dx_cleanup_render_target();
-                backend->dx_swap_chain->ResizeBuffers(0, (UINT)LOWORD(lParam), (UINT)HIWORD(lParam), DXGI_FORMAT_UNKNOWN, 0);
-                backend->dx_create_render_target();
+            if(backend) {
+                backend->resize_width = (UINT)LOWORD(lParam);
+                backend->resize_height = (UINT)HIWORD(lParam);
+                return 0;
             }
 
             //rounded corners!
@@ -513,70 +532,70 @@ LRESULT WINAPI grey::backends::win32dx11::WndProc(
 
             return 0;
         }
-        
-        // https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-nchittest
-        /*case WM_NCHITTEST: {
-            if (!backend)
-                backend = (win32dx11*)::GetPropA(hWnd, "backend");
 
-            POINT p;
-            if (::GetCursorPos(&p)) {
-                if (::ScreenToClient(hWnd, &p)) {
-                    //cout << p.x << "x" << p.y << endl;
+                    // https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-nchittest
+                    /*case WM_NCHITTEST: {
+                        if (!backend)
+                            backend = (win32dx11*)::GetPropA(hWnd, "backend");
 
-                    // get window width and height
-                    RECT window;
-                    ::GetWindowRect(hWnd, &window);
-                    int width = window.right - window.left;
-                    int height = window.bottom - window.top;
+                        POINT p;
+                        if (::GetCursorPos(&p)) {
+                            if (::ScreenToClient(hWnd, &p)) {
+                                //cout << p.x << "x" << p.y << endl;
 
-                    if (backend->is_resizeable) {
-                        bool at_left = p.x < BorderSize;
-                        bool at_right = p.x > width - BorderSize;
-                        bool at_top = p.y < BorderSize;
-                        bool at_bottom = p.y > height - BorderSize;
+                                // get window width and height
+                                RECT window;
+                                ::GetWindowRect(hWnd, &window);
+                                int width = window.right - window.left;
+                                int height = window.bottom - window.top;
 
-                        if (at_left && at_top)
-                            return HTTOPLEFT;
-                        else if (at_top && at_right)
-                            return HTTOPRIGHT;
-                        else if (at_right && at_bottom)
-                            return HTBOTTOMRIGHT;
-                        else if (at_bottom && at_left)
-                            return HTBOTTOMLEFT;
-                        else if (at_left)
-                            return HTLEFT;
-                        else if (at_right)
-                            return HTRIGHT;
-                        else if (at_top)
-                            return HTTOP;
-                        else if (at_bottom)
-                            return HTBOTTOM;
-                    }
+                                if (backend->is_resizeable) {
+                                    bool at_left = p.x < BorderSize;
+                                    bool at_right = p.x > width - BorderSize;
+                                    bool at_top = p.y < BorderSize;
+                                    bool at_bottom = p.y > height - BorderSize;
 
-                    // might conflict with ImGui's "close" button
-                    if (p.y <= (20 * backend->get_system_scale()) && p.x < width - 40) {
-                        //cout << "cap!" << endl;
-                        return HTCAPTION;
-                    }
+                                    if (at_left && at_top)
+                                        return HTTOPLEFT;
+                                    else if (at_top && at_right)
+                                        return HTTOPRIGHT;
+                                    else if (at_right && at_bottom)
+                                        return HTBOTTOMRIGHT;
+                                    else if (at_bottom && at_left)
+                                        return HTBOTTOMLEFT;
+                                    else if (at_left)
+                                        return HTLEFT;
+                                    else if (at_right)
+                                        return HTRIGHT;
+                                    else if (at_top)
+                                        return HTTOP;
+                                    else if (at_bottom)
+                                        return HTBOTTOM;
+                                }
 
-                }
-            }
+                                // might conflict with ImGui's "close" button
+                                if (p.y <= (20 * backend->get_system_scale()) && p.x < width - 40) {
+                                    //cout << "cap!" << endl;
+                                    return HTCAPTION;
+                                }
 
-            return ::DefWindowProc(hWnd, msg, wParam, lParam);
-        }*/
+                            }
+                        }
+
+                        return ::DefWindowProc(hWnd, msg, wParam, lParam);
+                    }*/
 
         case WM_SYSCOMMAND: {
-            if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
+            if((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
                 return 0;
             break;
         }
 
         case WM_DESTROY: {
-            if (!backend)
+            if(!backend)
                 backend = (win32dx11*)::GetPropA(hWnd, "backend");
 
-            if (backend->owns_message_loop) {
+            if(backend->owns_message_loop) {
                 ::PostQuitMessage(0);
             }
 
@@ -584,7 +603,7 @@ LRESULT WINAPI grey::backends::win32dx11::WndProc(
         }
 
         default: {
-            if (backend && backend->on_unhandled_window_message) {
+            if(backend && backend->on_unhandled_window_message) {
                 return backend->on_unhandled_window_message(hWnd, msg, wParam, lParam);
             }
         }

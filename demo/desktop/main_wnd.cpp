@@ -6,7 +6,7 @@ using namespace std;
 
 namespace demo {
 
-	main_wnd::main_wnd(grey::grey_context& ctx) : grey::window(ctx, APP_LONG_NAME, 1024, 800) {
+	main_wnd::main_wnd(grey::grey_context& ctx) : grey::window(ctx, APP_LONG_NAME, 800, 600) {
 		detach_on_close = true;
 		has_menu_space = true;
 
