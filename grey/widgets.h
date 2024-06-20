@@ -3,6 +3,7 @@
 #include "fonts/forkawesome.h"
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace grey::widgets {
     class window {
@@ -41,7 +42,7 @@ namespace grey::widgets {
     class menu_bar {
     public:
         menu_bar();
-        menu_bar(const std::vector<menu_item>& items);
+        menu_bar(const std::vector<menu_item>& items, std::function<void(const std::string&)> clicked);
         ~menu_bar();
 
         operator bool() const {
@@ -50,7 +51,7 @@ namespace grey::widgets {
 
     private:
         bool rendered{false};
-        void render(const std::vector<menu_item>& items);
+        void render(const std::vector<menu_item>& items, std::function<void(const std::string&)> clicked);
     };
 
     void label(const std::string& text);

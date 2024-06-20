@@ -7,10 +7,6 @@
 // I found Roboto Mono really pleasant
 //#include "fonts/Sweet16_ImGui.inl"
 //#include "fonts/Sweet16mono_ImGui.inl"
-#include "fonts/font_awesome_6_regular_400.inl"
-#include "fonts/font_awesome_6_brands_400.inl"
-#include "fonts/font_awesome_6.h"
-#include "fonts/font_awesome_6_brands.h"
 #include "fonts/roboto.inl"
 #include <iostream>
 //#include "fonts/opensans.inl"
@@ -425,30 +421,30 @@ namespace grey
             float icon_font_size = 16.0f * scale;
 
             // fontawesome v6
-            {
-                ImFontConfig config;
-                config.MergeMode = true;
-                config.PixelSnapH = true;
-                config.GlyphMinAdvanceX = icon_font_size; // Use if you want to make the icon monospaced
-                static const ImWchar icon_ranges[] = {ICON_MIN_FA, ICON_MAX_16_FA, 0};
-                io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_regular_400_compressed_data, font_awesome_regular_400_compressed_size,
-                    icon_font_size,
-                    &config, icon_ranges);
-            }
+            //{
+            //    ImFontConfig config;
+            //    config.MergeMode = true;
+            //    config.PixelSnapH = true;
+            //    config.GlyphMinAdvanceX = icon_font_size; // Use if you want to make the icon monospaced
+            //    static const ImWchar icon_ranges[] = {ICON_MIN_FA, ICON_MAX_16_FA, 0};
+            //    io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_regular_400_compressed_data, font_awesome_regular_400_compressed_size,
+            //        icon_font_size,
+            //        &config, icon_ranges);
+            //}
 
             // fontawesome v6 (brands)
-            {
-                ImFontConfig config;
-                config.MergeMode = true;
-                config.PixelSnapH = true;
-                config.GlyphMinAdvanceX = icon_font_size; // Use if you want to make the icon monospaced
-                static const ImWchar icon_ranges[] = {ICON_MIN_FAB, ICON_MAX_16_FAB, 0};
-                io.Fonts->AddFontFromMemoryCompressedTTF(
-                    font_awesome_6_brands_400_compressed_data,
-                    font_awesome_6_brands_400_compressed_size,
-                    icon_font_size,
-                    &config, icon_ranges);
-            }
+            //{
+            //    ImFontConfig config;
+            //    config.MergeMode = true;
+            //    config.PixelSnapH = true;
+            //    config.GlyphMinAdvanceX = icon_font_size; // Use if you want to make the icon monospaced
+            //    static const ImWchar icon_ranges[] = {ICON_MIN_FAB, ICON_MAX_16_FAB, 0};
+            //    io.Fonts->AddFontFromMemoryCompressedTTF(
+            //        font_awesome_6_brands_400_compressed_data,
+            //        font_awesome_6_brands_400_compressed_size,
+            //        icon_font_size,
+            //        &config, icon_ranges);
+            //}
 
         }
     }

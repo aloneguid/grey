@@ -20,6 +20,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
             { "file_open", "Open" },
             { "file_save", "Save" },
             { "file_save_as", "Save As" },
+            { "", "-"},
             { "file_exit", "Exit" },
             { "Recent", { {"1", "file1.txt" }}}
             }
@@ -36,7 +37,11 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
         // menu
         {
-            w::menu_bar menu{menu_items};
+            w::menu_bar menu{menu_items, [&app_open](const string& id) {
+                if(id == "file_exit") {
+                    app_open = false;
+                }
+            }};
         }
 
         // labels

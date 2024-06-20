@@ -56,13 +56,14 @@ namespace grey::widgets {
         rendered = ImGui::BeginMenuBar();
     }
 
-    menu_bar::menu_bar(const std::vector<menu_item>& items) : menu_bar::menu_bar() {
+    menu_bar::menu_bar(const std::vector<menu_item>& items, std::function<void(const std::string&)> clicked) 
+        : menu_bar::menu_bar() {
         if(rendered) {
-            render(items);
+            render(items, clicked);
         }
     }
 
-    void menu_bar::render(const std::vector<menu_item>& items) {
+    void menu_bar::render(const std::vector<menu_item>& items, std::function<void(const std::string&)> clicked) {
         if(rendered) {
 
             bool has_icon = false;
@@ -75,6 +76,11 @@ namespace grey::widgets {
 
             for(auto& item : items) {
 
+                if(item.text == "-") {
+                    ImGui::Separator();
+                    continue;
+                }
+
                 string label = has_icon
                     ? string{"       "} + item.text
                     : item.text;
@@ -83,12 +89,14 @@ namespace grey::widgets {
 
                 if(item.children.empty()) {
                     if(ImGui::MenuItem(label.c_str())) {
-                        // do something
+                        if(clicked) {
+                            clicked(item.id);
+                        }
                     }
                 } else {
                     if(ImGui::BeginMenu(label.c_str())) {
 
-                        render(item.children);
+                        render(item.children, clicked);
 
                         ImGui::EndMenu();
                     }
