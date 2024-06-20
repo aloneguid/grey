@@ -3,19 +3,44 @@
 using namespace std;
 
 namespace grey::widgets {
-    window::window(const std::string& title, bool has_menubar, bool can_resize, int width, int height) {
+    window::window(const std::string& title, bool* p_open) {
+        this->title = title;
+        this->p_open = p_open;
+    }
 
-        if(width != 0 && height != 0) {
-            ImGui::SetNextWindowSize(ImVec2(width, height));
-        }
+    window& window::size(int width, int height, float scale) {
+        ImGui::SetNextWindowSize(ImVec2(width * scale, height * scale), ImGuiCond_Once);
+        return *this;
+    }
 
-        ImGuiWindowFlags flags = 0;
-        if(has_menubar)
-            flags |= ImGuiWindowFlags_MenuBar;
-        if(!can_resize)
-            flags |= ImGuiWindowFlags_NoResize;
-        ImGui::Begin(title.c_str(), nullptr, flags);
+    window& window::has_menubar() {
+        flags |= ImGuiWindowFlags_MenuBar;
+        return *this;
+    }
 
+    window& window::no_resize() {
+        flags |= ImGuiWindowFlags_NoResize;
+        return *this;
+    }
+
+    window& window::no_focus() {
+        flags |= ImGuiWindowFlags_NoFocusOnAppearing;
+        return *this;
+    }
+
+    window& window::fullscreen() {
+
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->Pos);
+        ImGui::SetNextWindowSize(viewport->Size);
+
+        return *this;
+    }
+
+    void window::render() {
+        rendered = true;
+        ImGui::SetNextWindowBgAlpha(1.0f);
+        ImGui::Begin(title.c_str(), p_open, flags);
     }
 
     window::~window() {

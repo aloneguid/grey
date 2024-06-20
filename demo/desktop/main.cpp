@@ -12,8 +12,13 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
     //backend->run();
 
     auto app = grey::app::make(APP_LONG_NAME);
-    app->run([]() {
-        w::window wnd{"Hello, world!", true, true, 600, 400};
+    bool app_open{true};
+    app->run([&app_open](const grey::app& app) {
+        w::window wnd{"Hello, world!", &app_open};
+        wnd
+            .size(800, 600, app.scale)
+            .no_focus()
+            .render();
 
         // menu
         {
@@ -44,7 +49,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
         w::label(ICON_FA_CALENDAR " icon2");
         w::label(ICON_FA_CHROME " icon3");
 
-        return true;
+        return app_open;
     });
 
     return 0;

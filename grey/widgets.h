@@ -7,9 +7,23 @@
 namespace grey::widgets {
     class window {
     public:
-        window(const std::string& title, bool has_menubar = false, bool can_resize = true,
-            int width = 0, int height = 0);
+        window(const std::string& title, bool* p_open = nullptr);
+
+        window& size(int width, int height, float scale);
+        window& has_menubar();
+        window& fullscreen();
+        window& no_resize();
+        window& no_focus();
+
+        void render();
+
         ~window();
+
+    private:
+        std::string title;
+        bool* p_open{nullptr};
+        ImGuiWindowFlags flags{0};
+        bool rendered{false};
     };
 
     class menu_bar {

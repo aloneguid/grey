@@ -138,13 +138,34 @@ namespace grey::backends {
             this->title = title;
         }
 
-        void run(std::function<bool()> render_frame) {
+        void run(std::function<bool(const app& app)> render_frame) {
             // Create application window
-    //ImGui_ImplWin32_EnableDpiAwareness();
-            WNDCLASSEXW wc = {sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"GreyDX11", nullptr};
+            //ImGui_ImplWin32_EnableDpiAwareness();
+
+            WNDCLASSEXW wc = {
+                sizeof(wc),
+                CS_CLASSDC,
+                WndProc, 0L, 0L,
+                GetModuleHandle(nullptr),
+                nullptr, nullptr, nullptr, nullptr,
+                L"GreyDX11",
+                nullptr};
+
             ::RegisterClassExW(&wc);
+
             wstring w_title = grey::common::str::to_wstr(title);
-            HWND hwnd = ::CreateWindowW(wc.lpszClassName, w_title.c_str(), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, nullptr, nullptr, wc.hInstance, nullptr);
+            //HWND hwnd = ::CreateWindowW(wc.lpszClassName, w_title.c_str(), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, nullptr, nullptr, wc.hInstance, nullptr);
+            HWND hwnd = ::CreateWindowW(wc.lpszClassName, w_title.c_str(), WS_OVERLAPPEDWINDOW, 0, 0, 100, 100, nullptr, nullptr, wc.hInstance, nullptr);
+            //HWND hwnd = ::CreateWindowExW(
+            //    WS_EX_APPWINDOW,
+            //    wc.lpszClassName,
+            //    w_title.c_str(),
+            //    WS_POPUP,
+            //    100, 100, 1280, 800,
+            //    nullptr, nullptr,
+            //    wc.hInstance,
+            //    nullptr);
+
 
             // Initialize Direct3D
             if(!CreateDeviceD3D(hwnd)) {
@@ -154,7 +175,8 @@ namespace grey::backends {
             }
 
             // Show the window
-            ::ShowWindow(hwnd, SW_SHOWDEFAULT);
+            //::ShowWindow(hwnd, SW_SHOWDEFAULT);
+            ::ShowWindow(hwnd, SW_HIDE);
             ::UpdateWindow(hwnd);
 
             // Setup Dear ImGui context
@@ -162,8 +184,8 @@ namespace grey::backends {
             ImGui::CreateContext();
             ImGuiIO& io = ImGui::GetIO(); (void)io;
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-            io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-            io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+            //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+            //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
             io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
             //io.ConfigViewportsNoAutoMerge = true;
             //io.ConfigViewportsNoTaskBarIcon = true;
@@ -248,7 +270,7 @@ namespace grey::backends {
                 ImGui_ImplWin32_NewFrame();
                 ImGui::NewFrame();
 
-                bool has_more = render_frame();
+                bool has_more = render_frame(*this);
                 if(!has_more) done = true;
 
                 // Rendering

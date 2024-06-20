@@ -18,7 +18,7 @@ namespace grey {
 
         app();
 
-        virtual void run(std::function<bool()> render_frame) = 0;
+        virtual void run(std::function<bool(const app&)> render_frame) = 0;
 
     protected:
         void on_after_initialised();
