@@ -16,7 +16,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
     vector<w::menu_item> menu_items{
         { "File", {
-            { "file_new", "New", ICON_FA_NEWSPAPER },
+            { "file_new", "New", ICON_FK_ACTIVITYPUB },
             { "file_open", "Open" },
             { "file_save", "Save" },
             { "file_save_as", "Save As" },
@@ -41,9 +41,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
         // labels
         w::label("simple text");
-        w::label(ICON_FA_ADDRESS_BOOK " icon1");
-        w::label(ICON_FA_CALENDAR " icon2");
-        w::label(ICON_FA_CHROME " icon3");
+        w::label(ICON_FK_BOOK " icon1");
 
         return app_open;
     });

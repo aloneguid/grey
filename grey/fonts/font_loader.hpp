@@ -2,11 +2,14 @@
 
 #include "roboto.inl"
 
-#include "font_awesome_6_regular_400.inl"
-#include "font_awesome_6.h"
+//#include "font_awesome_6_regular_400.inl"
+//#include "font_awesome_6.h"
+//
+//#include "font_awesome_6_brands_400.inl"
+//#include "font_awesome_6_brands.h"
 
-#include "font_awesome_6_brands_400.inl"
-#include "font_awesome_6_brands.h"
+#include "forkawesome.inl"
+#include "forkawesome.h"
 
 #include "imgui.h"
 
@@ -26,6 +29,20 @@ namespace grey {
             //float icon_font_size = 16.0f * 2.0f / 3.0f * scale;
             float icon_font_size = 16.0f * scale;
 
+            // forkawesome
+            {
+                ImFontConfig config;
+                config.MergeMode = true;
+                config.PixelSnapH = true;
+                config.GlyphMinAdvanceX = icon_font_size; // Use if you want to make the icon monospaced
+                static const ImWchar icon_ranges[] = {ICON_MIN_FK, ICON_MAX_16_FK, 0};
+                io.Fonts->AddFontFromMemoryCompressedTTF(
+                    forkawesome_compressed_data, forkawesome_compressed_size,
+                    icon_font_size,
+                    &config, icon_ranges);
+            }
+
+            /*
             // fontawesome v6
             {
                 ImFontConfig config;
@@ -51,7 +68,7 @@ namespace grey {
                     font_awesome_6_brands_400_compressed_size,
                     icon_font_size,
                     &config, icon_ranges);
-            }
+            }*/
 
         }
     }
