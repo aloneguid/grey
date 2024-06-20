@@ -155,7 +155,7 @@ namespace grey::backends {
 
             wstring w_title = grey::common::str::to_wstr(title);
             //HWND hwnd = ::CreateWindowW(wc.lpszClassName, w_title.c_str(), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, nullptr, nullptr, wc.hInstance, nullptr);
-            HWND hwnd = ::CreateWindowW(wc.lpszClassName, w_title.c_str(), WS_OVERLAPPEDWINDOW, 0, 0, 100, 100, nullptr, nullptr, wc.hInstance, nullptr);
+            HWND hwnd = ::CreateWindowW(wc.lpszClassName, w_title.c_str(), WS_OVERLAPPEDWINDOW, 0, 0, 1280, 720, nullptr, nullptr, wc.hInstance, nullptr);
             //HWND hwnd = ::CreateWindowExW(
             //    WS_EX_APPWINDOW,
             //    wc.lpszClassName,

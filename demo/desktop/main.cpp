@@ -13,34 +13,30 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
     auto app = grey::app::make(APP_LONG_NAME);
     bool app_open{true};
-    app->run([&app_open](const grey::app& app) {
+
+    vector<w::menu_item> menu_items{
+        { "File", {
+            { "file_new", "New", ICON_FA_NEWSPAPER },
+            { "file_open", "Open" },
+            { "file_save", "Save" },
+            { "file_save_as", "Save As" },
+            { "file_exit", "Exit" },
+            { "Recent", { {"1", "file1.txt" }}}
+            }
+        }
+    };
+
+    app->run([&app_open, &menu_items](const grey::app& app) {
         w::window wnd{"Hello, world!", &app_open};
         wnd
             .size(800, 600, app.scale)
-            .no_focus()
+            //.no_focus()
+            .has_menubar()
             .render();
 
         // menu
         {
-            w::menu_bar menu;
-            if(menu) {
-
-                if(ImGui::BeginMenu("File")) {
-
-                    if(ImGui::MenuItem("New")) {
-                        // do something
-                    }
-
-                    if(ImGui::BeginMenu("Recent")) {
-                        if(ImGui::MenuItem("file1.txt")) {
-                            // do something
-                        }
-                        ImGui::EndMenu();
-                    }
-                    ImGui::EndMenu();
-
-                }
-            }
+            w::menu_bar menu{menu_items};
         }
 
         // labels

@@ -3,6 +3,9 @@
 using namespace std;
 
 namespace grey::widgets {
+
+    // ---- window ----
+
     window::window(const std::string& title, bool* p_open) {
         this->title = title;
         this->p_open = p_open;
@@ -47,8 +50,56 @@ namespace grey::widgets {
         ImGui::End();
     }
 
+    // ---- menu_bar ----
+
     menu_bar::menu_bar() {
         rendered = ImGui::BeginMenuBar();
+    }
+
+    menu_bar::menu_bar(const std::vector<menu_item>& items) : menu_bar::menu_bar() {
+        if(rendered) {
+            render(items);
+        }
+    }
+
+    void menu_bar::render(const std::vector<menu_item>& items) {
+        if(rendered) {
+
+            bool has_icon = false;
+            for(auto& item : items) {
+                if(!item.icon.empty()) {
+                    has_icon = true;
+                    break;
+                }
+            }
+
+            for(auto& item : items) {
+
+                string label = has_icon
+                    ? string{"       "} + item.text
+                    : item.text;
+
+                ImVec2 cp = ImGui::GetCursorPos();
+
+                if(item.children.empty()) {
+                    if(ImGui::MenuItem(label.c_str())) {
+                        // do something
+                    }
+                } else {
+                    if(ImGui::BeginMenu(label.c_str())) {
+
+                        render(item.children);
+
+                        ImGui::EndMenu();
+                    }
+                }
+
+                if(!item.icon.empty()) {
+                    ImGui::SetCursorPos(cp);
+                    ImGui::Text(item.icon.c_str());
+                }
+            }
+        }
     }
 
     menu_bar::~menu_bar() {
@@ -56,6 +107,8 @@ namespace grey::widgets {
             ImGui::EndMenuBar();
         }
     }
+
+    // ---- label ----
 
     void label(const std::string& text) {
         ImGui::Text(text.c_str());
