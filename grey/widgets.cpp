@@ -1,4 +1,5 @@
 #include "widgets.h"
+#include "themes.h"
 
 using namespace std;
 
@@ -51,6 +52,17 @@ namespace grey::widgets {
     }
 
     // ---- menu_bar ----
+
+    vector<menu_item> menu_item::make_ui_theme_items() {
+
+        vector<menu_item> items;
+
+        for(auto& theme : grey::themes::list_themes()) {
+            items.push_back({string{"set_theme_"} + theme.id, theme.name});
+        }
+
+        return items;
+    }
 
     menu_bar::menu_bar() {
         rendered = ImGui::BeginMenuBar();
@@ -118,7 +130,53 @@ namespace grey::widgets {
 
     // ---- label ----
 
-    void label(const std::string& text) {
+    void label(const std::string& text, size_t text_wrap_pos) {
+        if(text_wrap_pos > 0)
+            ImGui::PushTextWrapPos(text_wrap_pos);
+
         ImGui::Text(text.c_str());
+
+        if(text_wrap_pos > 0)
+            ImGui::PopTextWrapPos();
+    }
+
+    void tooltip(const std::string& text) {
+        if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
+            ImGui::SetTooltip("%s", text.c_str());
+        }
+    }
+
+    void set_pos(float x, float y) {
+        if(x < 0 && y >= 0) {
+            ImGui::SetCursorPosY(y);
+        } else if(x >= 0 && y < 0) {
+            ImGui::SetCursorPosX(x);
+        } else {
+            ImGui::SetCursorPos(ImVec2{x, y});
+        }
+
+    }
+
+    void move_pos(float x, float y) {
+        ImVec2 mv = ImGui::GetCursorPos();
+        mv.x += x;
+        mv.y += y;
+        ImGui::SetCursorPos(mv);
+    }
+
+    void image(app& app, const std::string& key, size_t width, size_t height) {
+        auto tex = app.get_texture(key);
+        if(tex.data) {
+            ImGui::Image(tex.data, ImVec2(width, height));
+        }
+    }
+
+    void sp(size_t repeat) {
+        for(int i = 0; i < repeat; i++)
+            ImGui::Spacing();
+    }
+
+    void sl() {
+        ImGui::SameLine();
     }
 }

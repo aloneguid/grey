@@ -24,7 +24,8 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
             { "file_exit", "Exit" },
             { "Recent", { {"1", "file1.txt" }}}
             }
-        }
+        },
+        { "Theme", w::menu_item::make_ui_theme_items() }
     };
 
     app->run([&app_open, &menu_items](const grey::app& app) {
@@ -37,9 +38,11 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
         // menu
         {
-            w::menu_bar menu{menu_items, [&app_open](const string& id) {
+            w::menu_bar menu{menu_items, [&app_open, &app](const string& id) {
                 if(id == "file_exit") {
                     app_open = false;
+                } else if(id.starts_with("set_theme_")) {
+                    grey::themes::set_theme(id, app.scale);
                 }
             }};
         }

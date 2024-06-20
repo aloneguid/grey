@@ -301,5 +301,40 @@ namespace grey::backends {
             ::DestroyWindow(hwnd);
             ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
         }
+
+        void* make_native_texture(grey::common::raw_img& img) {
+            D3D11_TEXTURE2D_DESC desc{0};
+            desc.Width = img.x;
+            desc.Height = img.y;
+            desc.MipLevels = 1;
+            desc.ArraySize = 1;
+            desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+            desc.SampleDesc.Count = 1;
+            desc.Usage = D3D11_USAGE_DEFAULT;
+            desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+            desc.CPUAccessFlags = 0;
+
+            ID3D11Texture2D* pTexture = nullptr;
+            D3D11_SUBRESOURCE_DATA subResource;
+            subResource.pSysMem = img.get_data();
+            subResource.SysMemPitch = desc.Width * 4;
+            subResource.SysMemSlicePitch = 0;
+            g_pd3dDevice->CreateTexture2D(&desc, &subResource, &pTexture);
+            ID3D11ShaderResourceView* out_srv{nullptr};
+
+            // Create texture view
+            if(pTexture) {
+                D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+                ZeroMemory(&srvDesc, sizeof(srvDesc));
+                srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+                srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+                srvDesc.Texture2D.MipLevels = desc.MipLevels;
+                srvDesc.Texture2D.MostDetailedMip = 0;
+                g_pd3dDevice->CreateShaderResourceView(pTexture, &srvDesc, &out_srv);
+                pTexture->Release();
+            }
+
+            return out_srv;
+        }
     };
 }
