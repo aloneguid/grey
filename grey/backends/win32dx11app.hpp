@@ -5,11 +5,14 @@
 #include "imgui_impl_dx11.h"
 #include <d3d11.h>
 #include "../common/win32/os.h"
+#include "../common/str.h"
 
 // Forward declare message handler from imgui_impl_win32.cpp
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace grey::backends {
+
+    using namespace std;
 
     // Data
     static ID3D11Device* g_pd3dDevice = nullptr;
@@ -101,6 +104,16 @@ namespace grey::backends {
                 if((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
                     return 0;
                 break;
+            case WM_CREATE:
+                // load main icon and set as window icon
+                {
+                    HINSTANCE hInstance = ((LPCREATESTRUCT)lParam)->hInstance;
+                    //HANDLE hMainIcon = ::LoadImage(hInstance, MAKEINTRESOURCE(1033), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE);
+                    HICON hMainIcon = ::LoadIcon(hInstance, L"IDI_ICON1");
+                    if(hMainIcon)
+                        ::SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hMainIcon);
+                }
+                return 0;
             case WM_DESTROY:
                 ::PostQuitMessage(0);
                 return 0;
@@ -118,15 +131,20 @@ namespace grey::backends {
 
     class win32dx11app : public grey::app {
     public:
+
+        string title;
+
         win32dx11app(const std::string& title) {
+            this->title = title;
         }
 
         void run(std::function<bool()> render_frame) {
             // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();
-            WNDCLASSEXW wc = {sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"ImGui Example", nullptr};
+            WNDCLASSEXW wc = {sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"GreyDX11", nullptr};
             ::RegisterClassExW(&wc);
-            HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX11 Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, nullptr, nullptr, wc.hInstance, nullptr);
+            wstring w_title = grey::common::str::to_wstr(title);
+            HWND hwnd = ::CreateWindowW(wc.lpszClassName, w_title.c_str(), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, nullptr, nullptr, wc.hInstance, nullptr);
 
             // Initialize Direct3D
             if(!CreateDeviceD3D(hwnd)) {
