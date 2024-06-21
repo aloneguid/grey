@@ -15,6 +15,45 @@ namespace grey::widgets {
         error = 2
     };
 
+    class rgb_colour {
+    public:
+        float r;
+        float g;
+        float b;
+        float o;
+
+        rgb_colour() : r{0}, g{0}, b{0}, o{0} {
+
+        }
+
+        rgb_colour(const ImColor& ic) {
+            r = ic.Value.x;
+            g = ic.Value.y;
+            b = ic.Value.z;
+            o = ic.Value.w;
+        }
+
+        rgb_colour(const ImVec4& vec) {
+            r = vec.x;
+            g = vec.y;
+            b = vec.z;
+            o = vec.w;
+        }
+
+        operator ImColor() {
+            return ImColor(r, g, b, o);
+        }
+
+        operator ImU32() {
+            return (ImU32)ImColor(r, g, b, o);
+        }
+
+        /**
+         * @brief Returns true if color has any opacity at all
+        */
+        operator bool() { return o > 0; }
+    };
+
     class window {
     public:
         window(const std::string& title, bool* p_open = nullptr);
@@ -59,11 +98,15 @@ namespace grey::widgets {
     class container : public guardable {
     public:
         /**
-         * @brief Creates container for other controls
+         * @brief Creates container for other controls, which can be scrollable.
          * @param width Width of the container, if zero, it will be taking the remaining space.
          * @param height Height of the container, if zero, it will be taking the remaining space.
          */
         container(float width = 0.0F, float height = 0.0F);
+        container(const std::string& id);
+
+        container& border() {
+            has_border = true; return *this; }
 
         void enter() override;
         void leave() override;
@@ -71,6 +114,30 @@ namespace grey::widgets {
     private:
         std::string id;
         ImVec2 size;
+        bool has_border{false};
+    };
+
+    class group {
+    public:
+        group();
+
+        group& border(size_t colour_index) {
+            this->border_colour_index = colour_index; return *this; }
+
+        group& border_hover(size_t colour_index) {
+            this->border_hover_colour_index = colour_index; return *this; }
+
+        group& spread_horizontally() {
+            this->full_width = true; return *this; }
+
+        void render();
+
+        ~group();
+
+    private:
+        size_t border_colour_index{0};
+        size_t border_hover_colour_index{0};
+        bool full_width{false};
     };
 
     class menu_item {

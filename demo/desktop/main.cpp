@@ -76,6 +76,35 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
             }
         }
 
+        {
+            w::group g;
+            g.render();
+
+            w::label("group");
+        }
+
+
+        {
+            w::group g;
+            g.border(ImGuiCol_FrameBgActive).render();
+
+            w::label("bordered group");
+        }
+
+        {
+            w::group g;
+            g.border(ImGuiCol_FrameBgActive).spread_horizontally().render();
+
+            w::label("full width");
+        }
+
+        {
+            w::group g;
+            g.border_hover(ImGuiCol_FrameBgHovered).render();
+
+            w::label("border on hover");
+        }
+
         ImGui::ShowDemoWindow();
 
         return app_open;

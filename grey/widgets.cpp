@@ -87,8 +87,11 @@ namespace grey::widgets {
     container::container(float width, float height) : id{generate_id()}, size{width, height} {
     }
 
+    container::container(const std::string& id) : id{id}, size{0, 0} {
+    }
+
     void container::enter() {
-        ImGui::BeginChild(id.c_str(), size);
+        ImGui::BeginChild(id.c_str(), size, has_border ? ImGuiChildFlags_Border : 0);
     }
 
     void container::leave() {
@@ -292,5 +295,51 @@ namespace grey::widgets {
         }
 
         return clicked;
+    }
+
+    // ---- group ----
+
+    group::group() {
+        
+    }
+
+    void group::render() {
+        ImGui::BeginGroup();
+    }
+
+    group::~group() {
+
+        if(full_width) {
+            float max_width = ImGui::GetWindowWidth();
+            ImGui::SetCursorPosX(0.0);
+            ImGui::InvisibleButton("ib", ImVec2(max_width, 0.1));
+            ImGui::SameLine();
+        }
+
+        ImGui::EndGroup();
+
+        if(border_colour_index > 0) {
+            auto& style = ImGui::GetStyle();
+
+            auto min = ImGui::GetItemRectMin();
+            auto max = ImGui::GetItemRectMax();
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+            draw_list->AddRect(min, max,
+                (ImU32)rgb_colour { style.Colors[border_colour_index] },
+                style.FrameRounding);
+        }
+
+        if(border_hover_colour_index && ImGui::IsItemHovered()) {
+            auto& style = ImGui::GetStyle();
+
+            auto min = ImGui::GetItemRectMin();
+            auto max = ImGui::GetItemRectMax();
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+            draw_list->AddRect(min, max,
+                (ImU32)rgb_colour { style.Colors[border_hover_colour_index] },
+                style.FrameRounding);
+        }
     }
 }
