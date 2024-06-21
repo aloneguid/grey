@@ -1,7 +1,7 @@
 #pragma once
 #include "imgui.h"
 #include "themes.h"
-#include "fonts/forkawesome.h"
+#include "fonts/MaterialIcons.h"
 #include <string>
 #include <vector>
 #include <functional>
@@ -34,6 +34,43 @@ namespace grey::widgets {
         bool* p_open{nullptr};
         ImGuiWindowFlags flags{0};
         bool rendered{false};
+    };
+
+    class guardable {
+    public:
+        virtual void enter() = 0;
+        virtual void leave() = 0;
+    };
+
+    class guard {
+    public:
+        guard(guardable& g) : g{g} {
+            g.enter();
+        }
+
+        ~guard() {
+            g.leave();
+        }
+
+    private:
+        guardable& g;
+    };
+
+    class container : public guardable {
+    public:
+        /**
+         * @brief Creates container for other controls
+         * @param width Width of the container, if zero, it will be taking the remaining space.
+         * @param height Height of the container, if zero, it will be taking the remaining space.
+         */
+        container(float width = 0.0F, float height = 0.0F);
+
+        void enter() override;
+        void leave() override;
+
+    private:
+        std::string id;
+        ImVec2 size;
     };
 
     class menu_item {
@@ -80,16 +117,17 @@ namespace grey::widgets {
      */
     void move_pos(float x, float y);
 
-    void label(const std::string& text, size_t text_wrap_pos = 0);
+    void label(const std::string& text, size_t text_wrap_pos = 0, bool enabled = true);
 
-    void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0);
+    void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0, bool enabled = true);
 
     void tooltip(const std::string& text);
 
     void image(app& app, const std::string& key, size_t width, size_t height);
 
-    void sp(size_t repeat = 1);
+    void spc(size_t repeat = 1);
     void sl();
+    void sep();
 
     bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false);
 }

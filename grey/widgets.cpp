@@ -7,6 +7,16 @@ namespace grey::widgets {
 
     // ---- general ----
 
+    static int incrementing_id;
+
+    int generate_int_id() {
+        return incrementing_id++;
+    }
+
+    static string generate_id(const string& prefix = "") {
+        return prefix + std::to_string(incrementing_id++);
+    }
+
     bool set_emphasis_colours(emphasis em, ImVec4& normal, ImVec4& hovered, ImVec4& active) {
         if(em == emphasis::none) return false;
 
@@ -70,6 +80,19 @@ namespace grey::widgets {
 
     window::~window() {
         ImGui::End();
+    }
+
+    // ---- container ----
+
+    container::container(float width, float height) : id{generate_id()}, size{width, height} {
+    }
+
+    void container::enter() {
+        ImGui::BeginChild(id.c_str(), size);
+    }
+
+    void container::leave() {
+        ImGui::EndChild();
     }
 
     // ---- menu_bar ----
@@ -151,19 +174,22 @@ namespace grey::widgets {
 
     // ---- label ----
 
-    void label(const std::string& text, size_t text_wrap_pos) {
+    void label(const std::string& text, size_t text_wrap_pos, bool enabled) {
         if(text_wrap_pos > 0)
             ImGui::PushTextWrapPos(text_wrap_pos);
 
-        ImGui::Text(text.c_str());
+        if(enabled)
+            ImGui::Text(text.c_str());
+        else
+            ImGui::TextDisabled(text.c_str());
 
         if(text_wrap_pos > 0)
             ImGui::PopTextWrapPos();
     }
 
-    void label(const std::string& text, emphasis emp, size_t text_wrap_pos) {
+    void label(const std::string& text, emphasis emp, size_t text_wrap_pos, bool enabled) {
 
-        if(emp == emphasis::none) {
+        if(emp == emphasis::none || !enabled) {
             label(text, text_wrap_pos);
         } else {
             ImVec4 normal, hovered, active;
@@ -216,7 +242,7 @@ namespace grey::widgets {
 
     // ---- spacing ----
 
-    void sp(size_t repeat) {
+    void spc(size_t repeat) {
         for(int i = 0; i < repeat; i++)
             ImGui::Spacing();
     }
@@ -225,6 +251,12 @@ namespace grey::widgets {
 
     void sl() {
         ImGui::SameLine();
+    }
+
+    // ---- separator ----
+
+    void sep() {
+        ImGui::Separator();
     }
 
     // ---- button ----

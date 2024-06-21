@@ -7,11 +7,13 @@ It's basically ImGui shaped into making desktop applications, because ImGui can 
 ## Features
 
 - Supports High DPI out of the box.
-- Replaces default font with Roboto, and adds support for FontAwesome out of the box.
+- Replaces default font with Roboto, and adds support for an icon font out of the box.
 
 ## Technical remarks
 
-### Installing or updating a font
+### Font choices
+
+Grey uses [Google Material Icons](https://fonts.google.com/icons?icon.set=Material+Icons). Initially, I was using FontAwesome, and then ForkAwesome. The last wasn't updated for quite some time, and I had issues with the first.
 
 [This repo](https://github.com/juliettef/IconFontCppHeaders) contains convenient headers, which can be copied into *fonts* subfolder. To generate the inline, use:
 

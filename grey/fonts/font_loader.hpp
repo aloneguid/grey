@@ -8,8 +8,11 @@
 //#include "font_awesome_6_brands_400.inl"
 //#include "font_awesome_6_brands.h"
 
-#include "forkawesome.inl"
-#include "forkawesome.h"
+//#include "forkawesome.inl"
+//#include "forkawesome.h"
+
+#include "MaterialIcons-Regular.inl"
+#include "MaterialIcons.h"
 
 #include "imgui.h"
 
@@ -27,10 +30,9 @@ namespace grey {
 
             // FontAwesome fonts need to have their sizes reduced by 2.0f/3.0f in order to align correctly
             //float icon_font_size = 16.0f * 2.0f / 3.0f * scale;
-            float icon_font_size = 16.0f * scale;
 
             // forkawesome
-            {
+            /*{
                 ImFontConfig config;
                 config.MergeMode = true;
                 config.PixelSnapH = true;
@@ -38,6 +40,22 @@ namespace grey {
                 static const ImWchar icon_ranges[] = {ICON_MIN_FK, ICON_MAX_16_FK, 0};
                 io.Fonts->AddFontFromMemoryCompressedTTF(
                     forkawesome_compressed_data, forkawesome_compressed_size,
+                    icon_font_size,
+                    &config, icon_ranges);
+            }*/
+
+            // Google Material Icons
+            {
+                float icon_font_size = 16.0f * scale;
+                ImFontConfig config;
+                config.OversampleH = 1;
+                config.MergeMode = true;
+                config.PixelSnapH = true;
+                config.GlyphOffset.y = 3.0f * scale;
+                config.GlyphMinAdvanceX = icon_font_size; // Use if you want to make the icon monospaced
+                static const ImWchar icon_ranges[] = {ICON_MIN_MD, ICON_MAX_16_MD, 0};
+                io.Fonts->AddFontFromMemoryCompressedTTF(
+                    MaterialIconsRegular_compressed_data, MaterialIconsRegular_compressed_size,
                     icon_font_size,
                     &config, icon_ranges);
             }
