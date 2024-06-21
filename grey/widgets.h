@@ -8,6 +8,13 @@
 #include "app.h"
 
 namespace grey::widgets {
+
+    enum class emphasis {
+        none = 0,
+        primary = 1,
+        error = 2
+    };
+
     class window {
     public:
         window(const std::string& title, bool* p_open = nullptr);
@@ -75,6 +82,8 @@ namespace grey::widgets {
 
     void label(const std::string& text, size_t text_wrap_pos = 0);
 
+    void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0);
+
     void tooltip(const std::string& text);
 
     void image(app& app, const std::string& key, size_t width, size_t height);
@@ -82,4 +91,5 @@ namespace grey::widgets {
     void sp(size_t repeat = 1);
     void sl();
 
+    bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false);
 }

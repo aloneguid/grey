@@ -5,6 +5,27 @@ using namespace std;
 
 namespace grey::widgets {
 
+    // ---- general ----
+
+    bool set_emphasis_colours(emphasis em, ImVec4& normal, ImVec4& hovered, ImVec4& active) {
+        if(em == emphasis::none) return false;
+
+        switch(em) {
+            case emphasis::primary:
+                normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisPrimary];
+                hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisPrimaryHovered];
+                active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisPrimaryActive];
+                return true;
+            case emphasis::error:
+                normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisError];
+                hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisErrorHovered];
+                active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisErrorActive];
+                return true;
+        }
+
+        return false;
+    }
+
     // ---- window ----
 
     window::window(const std::string& title, bool* p_open) {
@@ -140,11 +161,31 @@ namespace grey::widgets {
             ImGui::PopTextWrapPos();
     }
 
+    void label(const std::string& text, emphasis emp, size_t text_wrap_pos) {
+
+        if(emp == emphasis::none) {
+            label(text, text_wrap_pos);
+        } else {
+            ImVec4 normal, hovered, active;
+            if(set_emphasis_colours(emp, normal, hovered, active)) {
+                ImGui::PushStyleColor(ImGuiCol_Text, normal);
+                label(text, text_wrap_pos);
+                ImGui::PopStyleColor();
+            } else {
+                label(text, text_wrap_pos);
+            }
+        }
+    }
+
+    // ---- tooltip ----
+
     void tooltip(const std::string& text) {
         if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
             ImGui::SetTooltip("%s", text.c_str());
         }
     }
+
+    // ---- position ----
 
     void set_pos(float x, float y) {
         if(x < 0 && y >= 0) {
@@ -164,6 +205,8 @@ namespace grey::widgets {
         ImGui::SetCursorPos(mv);
     }
 
+    // ---- image ----
+
     void image(app& app, const std::string& key, size_t width, size_t height) {
         auto tex = app.get_texture(key);
         if(tex.data) {
@@ -171,12 +214,51 @@ namespace grey::widgets {
         }
     }
 
+    // ---- spacing ----
+
     void sp(size_t repeat) {
         for(int i = 0; i < repeat; i++)
             ImGui::Spacing();
     }
 
+    // ---- same line ----
+
     void sl() {
         ImGui::SameLine();
+    }
+
+    // ---- button ----
+
+    bool button(const std::string& text, emphasis emp, bool is_enabled, bool is_small) {
+
+        if(!is_enabled) {
+            ImGui::BeginDisabled(true);
+        }
+
+        bool clicked;
+
+        if(emp != emphasis::none) {
+            ImVec4 normal, hovered, active;
+            set_emphasis_colours(emp, normal, hovered, active);
+            ImGui::PushStyleColor(ImGuiCol_Button, normal);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hovered);
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, active);
+        }
+
+        if(is_small) {
+            clicked = ImGui::SmallButton(text.c_str());
+        } else {
+            clicked = ImGui::Button(text.c_str());
+        }
+
+        if(emp != emphasis::none) {
+            ImGui::PopStyleColor(3);
+        }
+
+        if(!is_enabled) {
+            ImGui::EndDisabled();
+        }
+
+        return clicked;
     }
 }

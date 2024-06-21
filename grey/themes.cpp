@@ -4,16 +4,21 @@
 using namespace std;
 
 namespace grey::themes {
+
+    ImVec4 GreyColors[GreyCol_Count];
+
+    std::vector<app_theme> AllThemes {
+        { FollowOsThemeName, "Follow OS" },
+        { "dark", "Dark" },
+        { "light", "Light" },
+        { "microsoft", "Microsoft" },
+        { "cherry", "Cherry" },
+        { "enemymouse", "Enemymouse" },
+        { "gold", "Gold" }
+    };
+
     std::vector<app_theme> list_themes() {
-        return std::vector<app_theme> {
-            { FollowOsThemeName, "Follow OS" },
-            {"dark", "Dark"},
-            {"light", "Light"},
-            {"microsoft", "Microsoft"},
-            {"cherry", "Cherry"},
-            {"enemymouse", "Enemymouse"},
-            {"gold", "Gold"}
-        };
+        return AllThemes;
     }
 
     void set_theme_dark() {
@@ -78,12 +83,12 @@ namespace grey::themes {
 
         // grey specific
 
-        //grey::GreyColors[GreyCol_EmphasisPrimary] = ImColor::HSV(2 / 7.0f, 0.6f, 0.6f);
-        //grey::GreyColors[GreyCol_EmphasisPrimaryHovered] = ImColor::HSV(2 / 7.0f, 0.6f, 0.7f);
-        //grey::GreyColors[GreyCol_EmphasisPrimaryActive] = ImColor::HSV(2 / 7.0f, 0.6f, 0.8f);
-        //grey::GreyColors[GreyCol_EmphasisError] = ImVec4(1.00f, 0.20f, 0.00f, 0.68f);
-        //grey::GreyColors[GreyCol_EmphasisErrorHovered] = ImVec4(1.00f, 0.20f, 0.00f, 0.91f);
-        //grey::GreyColors[GreyCol_EmphasisErrorActive] = ImVec4(1.00f, 0.21f, 0.00f, 1.00f);
+        GreyColors[GreyCol_EmphasisPrimary] = ImColor::HSV(2 / 7.0f, 0.6f, 0.6f);
+        GreyColors[GreyCol_EmphasisPrimaryHovered] = ImColor::HSV(2 / 7.0f, 0.6f, 0.7f);
+        GreyColors[GreyCol_EmphasisPrimaryActive] = ImColor::HSV(2 / 7.0f, 0.6f, 0.8f);
+        GreyColors[GreyCol_EmphasisError] = ImVec4(1.00f, 0.20f, 0.00f, 0.68f);
+        GreyColors[GreyCol_EmphasisErrorHovered] = ImVec4(1.00f, 0.20f, 0.00f, 0.91f);
+        GreyColors[GreyCol_EmphasisErrorActive] = ImVec4(1.00f, 0.21f, 0.00f, 1.00f);
     }
 
     void set_theme_light() {
@@ -97,12 +102,12 @@ namespace grey::themes {
         colors[ImGuiCol_PopupBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.78f);
 
         // grey specific
-        //grey::GreyColors[GreyCol_EmphasisPrimary] = ImVec4(0.00f, 0.90f, 0.30f, 1.00f);
-        //grey::GreyColors[GreyCol_EmphasisPrimaryHovered] = ImVec4(0.00f, 0.80f, 0.27f, 1.00f);
-        //grey::GreyColors[GreyCol_EmphasisPrimaryActive] = ImVec4(0.00f, 0.50f, 0.17f, 1.00f);
-        //grey::GreyColors[GreyCol_EmphasisError] = ImVec4(1.00f, 0.20f, 0.00f, 0.68f);
-        //grey::GreyColors[GreyCol_EmphasisErrorHovered] = ImVec4(1.00f, 0.20f, 0.00f, 0.91f);
-        //grey::GreyColors[GreyCol_EmphasisErrorActive] = ImVec4(1.00f, 0.21f, 0.00f, 1.00f);
+        GreyColors[GreyCol_EmphasisPrimary] = ImVec4(0.00f, 0.90f, 0.30f, 1.00f);
+        GreyColors[GreyCol_EmphasisPrimaryHovered] = ImVec4(0.00f, 0.80f, 0.27f, 1.00f);
+        GreyColors[GreyCol_EmphasisPrimaryActive] = ImVec4(0.00f, 0.50f, 0.17f, 1.00f);
+        GreyColors[GreyCol_EmphasisError] = ImVec4(1.00f, 0.20f, 0.00f, 0.68f);
+        GreyColors[GreyCol_EmphasisErrorHovered] = ImVec4(1.00f, 0.20f, 0.00f, 0.91f);
+        GreyColors[GreyCol_EmphasisErrorActive] = ImVec4(1.00f, 0.21f, 0.00f, 1.00f);
     }
 
     void set_theme_follow_os() {

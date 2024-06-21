@@ -28,7 +28,9 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
         { "Theme", w::menu_item::make_ui_theme_items() }
     };
 
-    app->run([&app_open, &menu_items](const grey::app& app) {
+    string s;
+
+    app->run([&app_open, &menu_items, &s](const grey::app& app) {
         w::window wnd{"Hello, world!", &app_open};
         wnd
             .size(800, 600, app.scale)
@@ -49,7 +51,18 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
         // labels
         w::label("simple text");
-        w::label(ICON_FK_BOOK " icon1");
+        w::sl();  w::label(ICON_FK_BOOK " icon1");
+        w::sl();  w::label("primary", w::emphasis::primary);
+        w::sl();  w::label("error", w::emphasis::error);
+
+        // buttons
+        w::button("simple");
+        w::sl(); w::button("primary", w::emphasis::primary);
+        w::sl(); w::button("error", w::emphasis::error);
+        w::sl(); w::label(s);
+        if(w::button("add dot")) {
+            s += ".";
+        }
 
         return app_open;
     });
