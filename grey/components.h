@@ -1029,7 +1029,7 @@ namespace grey {
         bool spread_horizontally{false};
         size_t hover_border_colour_index{};
         size_t hover_bg_colour_index{};
-        size_t border_colour_index{};
+        size_t bdr_ci{};
     };
 
     class window : public container {
@@ -1128,7 +1128,7 @@ namespace grey {
                         ImGuiStyle& style = ImGui::GetStyle();
 
                         for(auto bg : bound_groups) {
-                            bg->border_colour_index = bg->id == ec->id ? ImGuiCol_FrameBgActive : ImGuiCol_WindowBg;
+                            bg->bdr_ci = bg->id == ec->id ? ImGuiCol_FrameBgActive : ImGuiCol_WindowBg;
                         }
                         selected_index = ec->tag_size_t;
 
@@ -1154,7 +1154,7 @@ namespace grey {
             ImGuiStyle& style = ImGui::GetStyle();
 
             for(int i = 0; i < bound_groups.size(); i++) {
-                bound_groups[i]->border_colour_index = i == idx ? ImGuiCol_FrameBgActive : ImGuiCol_WindowBg;
+                bound_groups[i]->bdr_ci = i == idx ? ImGuiCol_FrameBgActive : ImGuiCol_WindowBg;
             }
 
             selected_index = idx;

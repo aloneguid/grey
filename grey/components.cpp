@@ -8,7 +8,6 @@
 #include <map>
 #include <iostream>
 #include <algorithm>
-#include "widgets.h"
 
 using namespace std;
 
@@ -141,7 +140,6 @@ namespace grey
 
        }
    }
-
 
    const void container::render() {
        // render non-owned children
@@ -492,13 +490,13 @@ namespace grey
 
        auto& style = ImGui::GetStyle();
 
-       if(border_colour_index > 0) {
+       if(bdr_ci > 0) {
            auto min = ImGui::GetItemRectMin();
            auto max = ImGui::GetItemRectMax();
            ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
            //draw_list->AddLine(min, ImVec2(min.x, max.y), (ImU32)emphasis_primary_colour);
-           draw_list->AddRect(min, max, (ImU32)rgb_colour { style.Colors[border_colour_index] }, style.FrameRounding);
+           draw_list->AddRect(min, max, (ImU32)rgb_colour { style.Colors[bdr_ci] }, style.FrameRounding);
        }
 
        if(ImGui::IsItemHovered() && hover_border_colour_index > 0) {

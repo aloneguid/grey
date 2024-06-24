@@ -13,6 +13,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
     auto app = grey::app::make(APP_LONG_NAME);
     bool app_open{true};
+    bool show_demo{false};
     w::container scroller{400, 100};
 
     vector<w::menu_item> menu_items{
@@ -26,12 +27,15 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
             { "Recent", { {"1", "file1.txt" }}}
             }
         },
-        { "Theme", w::menu_item::make_ui_theme_items() }
+        { "Theme", w::menu_item::make_ui_theme_items() },
+        { "ImGui", {
+            { "demo", "Show Demo", ICON_MD_DONUT_LARGE }
+        }}
     };
 
     string s;
 
-    app->run([&app_open, &menu_items, &s, &scroller](const grey::app& app) {
+    app->run([&app_open, &menu_items, &s, &scroller, &show_demo](const grey::app& app) {
         w::window wnd{"Hello, world!", &app_open};
         wnd
             .size(800, 600, app.scale)
@@ -41,11 +45,13 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
         // menu
         {
-            w::menu_bar menu{menu_items, [&app_open, &app](const string& id) {
+            w::menu_bar menu{menu_items, [&app_open, &app, &show_demo](const string& id) {
                 if(id == "file_exit") {
                     app_open = false;
                 } else if(id.starts_with("set_theme_")) {
                     grey::themes::set_theme(id, app.scale);
+                } else if(id == "demo") {
+                    show_demo = true;
                 }
             }};
         }
@@ -100,12 +106,26 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
         {
             w::group g;
-            g.border_hover(ImGuiCol_FrameBgHovered).render();
+            g
+                .background_hover(ImGuiCol_Border)
+                .border_hover(ImGuiCol_FrameBgHovered)
+                .render();
 
             w::label("border on hover");
         }
 
-        ImGui::ShowDemoWindow();
+        w::icon_checkbox(ICON_MD_BATHTUB, show_demo);
+
+
+        {
+            w::status_bar sb;
+
+            w::label("status bar");
+        }
+
+        if(show_demo)
+            ImGui::ShowDemoWindow();
+
 
         return app_open;
     });

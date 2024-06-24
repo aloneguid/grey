@@ -121,11 +121,17 @@ namespace grey::widgets {
     public:
         group();
 
+        group& background(size_t colour_index) {
+            this->bg_ci = colour_index; return *this; }
+
+        group& background_hover(size_t colour_index) {
+            this->bg_hover_ci = colour_index; return *this; }
+
         group& border(size_t colour_index) {
-            this->border_colour_index = colour_index; return *this; }
+            this->bdr_ci = colour_index; return *this; }
 
         group& border_hover(size_t colour_index) {
-            this->border_hover_colour_index = colour_index; return *this; }
+            this->bdr_hover_ci = colour_index; return *this; }
 
         group& spread_horizontally() {
             this->full_width = true; return *this; }
@@ -135,8 +141,10 @@ namespace grey::widgets {
         ~group();
 
     private:
-        size_t border_colour_index{0};
-        size_t border_hover_colour_index{0};
+        size_t bdr_ci{0};
+        size_t bdr_hover_ci{0};
+        size_t bg_ci{0};
+        size_t bg_hover_ci{0};
         bool full_width{false};
     };
 
@@ -170,6 +178,15 @@ namespace grey::widgets {
         void render(const std::vector<menu_item>& items, std::function<void(const std::string&)> clicked);
     };
 
+    class status_bar {
+    public:
+        status_bar();
+        ~status_bar();
+
+    private:
+        bool rendered{false};
+    };
+
     /**
      * @brief Set absolute position. If value is less than zero, no positioning is done for that axis.
      * @param x 
@@ -197,4 +214,10 @@ namespace grey::widgets {
     void sep();
 
     bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false);
+
+    bool icon_checkbox(const std::string& icon, bool is_checked);
+
+    // mouse helpers
+
+    bool is_leftclicked();
 }

@@ -1,5 +1,6 @@
 #include "widgets.h"
 #include "themes.h"
+#include "imgui_internal.h"
 
 using namespace std;
 
@@ -75,6 +76,11 @@ namespace grey::widgets {
     void window::render() {
         rendered = true;
         ImGui::SetNextWindowBgAlpha(1.0f);
+
+        // set window class to prevent viewports to be merged with main window
+        ImGuiWindowClass wc;
+        wc.ViewportFlagsOverrideSet = ImGuiViewportFlags_NoAutoMerge;
+
         ImGui::Begin(title.c_str(), p_open, flags);
     }
 
@@ -91,6 +97,15 @@ namespace grey::widgets {
     }
 
     void container::enter() {
+
+        ImVec2 tsz = size;
+
+        if(size.y < 0) {
+            // pad from the bottom
+            ImVec2 wsz = ImGui::GetWindowSize();
+            tsz = ImVec2(tsz.x, wsz.y + size.y);
+        }
+
         ImGui::BeginChild(id.c_str(), size, has_border ? ImGuiChildFlags_Border : 0);
     }
 
@@ -297,6 +312,24 @@ namespace grey::widgets {
         return clicked;
     }
 
+    bool icon_checkbox(const std::string& icon, bool is_checked) {
+        if(is_checked) {
+            ImGui::Text(icon.c_str());
+        } else {
+            ImGui::TextDisabled(icon.c_str());
+        }
+
+        if(ImGui::IsItemHovered()) {
+            ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+            if(ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                return !is_checked;
+            }
+        }
+
+        return is_checked;
+    }
+
     // ---- group ----
 
     group::group() {
@@ -318,28 +351,65 @@ namespace grey::widgets {
 
         ImGui::EndGroup();
 
-        if(border_colour_index > 0) {
+        if(bdr_ci || bdr_hover_ci || bg_ci || bg_hover_ci) {
             auto& style = ImGui::GetStyle();
 
             auto min = ImGui::GetItemRectMin();
             auto max = ImGui::GetItemRectMax();
-            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+            ImDrawList* fdl = ImGui::GetWindowDrawList();
+            ImDrawList* bdl = ImGui::GetBackgroundDrawList();
 
-            draw_list->AddRect(min, max,
-                (ImU32)rgb_colour { style.Colors[border_colour_index] },
-                style.FrameRounding);
+            if(bg_ci > 0) {
+                bdl->AddRectFilled(min, max,
+                    (ImU32)rgb_colour { style.Colors[bg_ci] },
+                    style.FrameRounding);
+            }
+
+            if(bdr_ci > 0) {
+                fdl->AddRect(min, max,
+                    (ImU32)rgb_colour { style.Colors[bdr_ci] },
+                    style.FrameRounding);
+            }
+
+            if(ImGui::IsItemHovered()) {
+                if(bg_hover_ci > 0) {
+                    bdl->AddRectFilled(min, max,
+                        (ImU32)rgb_colour { style.Colors[bg_hover_ci] },
+                        style.FrameRounding);
+                }
+
+                if(bdr_hover_ci > 0) {
+                    fdl->AddRect(min, max,
+                        (ImU32)rgb_colour { style.Colors[bdr_hover_ci] },
+                        style.FrameRounding);
+                }
+            }
         }
 
-        if(border_hover_colour_index && ImGui::IsItemHovered()) {
-            auto& style = ImGui::GetStyle();
+    }
 
-            auto min = ImGui::GetItemRectMin();
-            auto max = ImGui::GetItemRectMax();
-            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    // ---- status bar ----
 
-            draw_list->AddRect(min, max,
-                (ImU32)rgb_colour { style.Colors[border_hover_colour_index] },
-                style.FrameRounding);
+    status_bar::status_bar() {
+        // source: https://github.com/ocornut/imgui/issues/3518#issuecomment-807398290
+        ImGuiViewport* win_vp = ImGui::GetWindowViewport();
+        float height = ImGui::GetFrameHeight();
+        ImGuiWindowFlags flags{ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar};
+
+        if(ImGui::BeginViewportSideBar("##MainStatusBar", win_vp, ImGuiDir_Down, height, flags)) {
+            rendered = ImGui::BeginMenuBar();
         }
     }
+
+    status_bar::~status_bar() {
+        if(rendered) ImGui::EndMenuBar();
+        ImGui::End(); // status bar, should be outside of BeginViewportSideBar just like for a normal window
+    }
+
+    // mouse helpers
+
+    bool is_leftclicked() {
+        return ImGui::IsItemHovered() && ImGui::IsMouseDown(ImGuiMouseButton_Left);
+    }
+
 }
