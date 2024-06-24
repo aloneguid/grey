@@ -5,6 +5,9 @@
 using namespace std;
 namespace w = grey::widgets;
 
+vector<string> items = { "item1", "item2", "item3" };
+size_t current_item = 0;
+
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
     //auto backend = grey::backend::make_platform_default(APP_LONG_NAME);
@@ -14,6 +17,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
     auto app = grey::app::make(APP_LONG_NAME);
     bool app_open{true};
     bool show_demo{false};
+    string text;
     w::container scroller{400, 100};
 
     vector<w::menu_item> menu_items{
@@ -35,7 +39,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
     string s;
 
-    app->run([&app_open, &menu_items, &s, &scroller, &show_demo](const grey::app& app) {
+    app->run([&app_open, &menu_items, &s, &scroller, &show_demo, &text](const grey::app& app) {
         w::window wnd{"Hello, world!", &app_open};
         wnd
             .size(800, 600, app.scale)
@@ -122,6 +126,35 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
             w::label("status bar");
         }
+
+        // tabs
+        {
+            w::tab_bar tabs{"tabs1"};
+
+            {
+                auto t = tabs.next_tab("tab 1");
+                if(t) {
+                    w::label("tab 1");
+                }
+            }
+
+            {
+                auto t = tabs.next_tab("tab 2");
+                if(t) {
+                    w::button("tab 2");
+                }
+            }
+        }
+
+        if(w::accordion("Content inside")) {
+            w::label("accordion content");
+        }
+
+        w::label(text);
+        w::input(text, "text");
+
+        w::label("selected item: "); w::sl(); w::label(items[current_item]);
+        w::combo("si", items, current_item);
 
         if(show_demo)
             ImGui::ShowDemoWindow();

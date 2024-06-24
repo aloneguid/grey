@@ -187,6 +187,34 @@ namespace grey::widgets {
         bool rendered{false};
     };
 
+    class tab_bar_item {
+    public:
+        tab_bar_item(const std::string& id);
+        ~tab_bar_item();
+
+        operator bool() const {
+            return rendered;
+        }
+
+    private:
+        std::string id;
+        bool rendered{false};
+    };
+
+    class tab_bar {
+    public:
+        tab_bar(const std::string& id);
+        ~tab_bar();
+
+        tab_bar_item next_tab(const std::string& title);
+
+    private:
+        bool rendered{false};
+        std::string id;
+        size_t tab_index{0};
+        ImGuiTabBarFlags flags{0};
+    };
+
     /**
      * @brief Set absolute position. If value is less than zero, no positioning is done for that axis.
      * @param x 
@@ -205,6 +233,8 @@ namespace grey::widgets {
 
     void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0, bool enabled = true);
 
+    void input(std::string& value, const std::string& label = "", bool enabled = true);
+
     void tooltip(const std::string& text);
 
     void image(app& app, const std::string& key, size_t width, size_t height);
@@ -216,6 +246,10 @@ namespace grey::widgets {
     bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false);
 
     bool icon_checkbox(const std::string& icon, bool is_checked);
+
+    bool accordion(const std::string& header);
+
+    void combo(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width = 0);
 
     // mouse helpers
 

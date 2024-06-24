@@ -1,6 +1,7 @@
 #include "widgets.h"
 #include "themes.h"
 #include "imgui_internal.h"
+#include "imgui_stdlib.h"
 
 using namespace std;
 
@@ -17,6 +18,8 @@ namespace grey::widgets {
     static string generate_id(const string& prefix = "") {
         return prefix + std::to_string(incrementing_id++);
     }
+
+    //inline std::string sys_label(const std::string& label) { return label + "##" + id; }
 
     bool set_emphasis_colours(emphasis em, ImVec4& normal, ImVec4& hovered, ImVec4& active) {
         if(em == emphasis::none) return false;
@@ -221,6 +224,12 @@ namespace grey::widgets {
         }
     }
 
+    void input(std::string& value, const std::string& label, bool enabled) {
+        if(!enabled) ImGui::BeginDisabled();
+        ImGui::InputText(label.c_str(), &value);
+        if(!enabled) ImGui::EndDisabled();
+    }
+
     // ---- tooltip ----
 
     void tooltip(const std::string& text) {
@@ -330,6 +339,34 @@ namespace grey::widgets {
         return is_checked;
     }
 
+    bool accordion(const std::string& header) {
+        return ImGui::CollapsingHeader(header.c_str());
+    }
+
+    void combo(const string& label, const std::vector<std::string>& options, size_t& selected, float width) {
+
+        if(width != 0)
+            ImGui::PushItemWidth(width);
+
+        if(ImGui::BeginCombo(label.c_str(), options[selected].c_str())) {
+            for(size_t i = 0; i < options.size(); i++) {
+                bool is_selected = selected == i;
+                if(ImGui::Selectable(options[i].c_str(), is_selected)) {
+                    selected = i;
+                }
+
+                if(is_selected) {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+
+            ImGui::EndCombo();
+        }
+
+        if(width != 0)
+            ImGui::PopItemWidth();
+    }
+
     // ---- group ----
 
     group::group() {
@@ -410,6 +447,34 @@ namespace grey::widgets {
 
     bool is_leftclicked() {
         return ImGui::IsItemHovered() && ImGui::IsMouseDown(ImGuiMouseButton_Left);
+    }
+
+    // ---- tab bar ----
+
+    tab_bar::tab_bar(const std::string& id) {
+        rendered = ImGui::BeginTabBar(id.c_str(), flags);
+        tab_index = 0;
+    }
+
+    tab_bar::~tab_bar() {
+        if(rendered) {
+            ImGui::EndTabBar();
+        }
+    }
+
+    tab_bar_item tab_bar::next_tab(const string& title) {
+        return tab_bar_item{title + "##" + std::to_string(tab_index++)};
+    }
+
+    tab_bar_item::tab_bar_item(const std::string& id) : id{id} {
+        rendered = ImGui::BeginTabItem(id.c_str());
+    }
+
+    tab_bar_item::~tab_bar_item() {
+        if(rendered) {
+            ImGui::EndTabItem();
+            rendered = false;
+        }
     }
 
 }
