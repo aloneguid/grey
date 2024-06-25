@@ -54,7 +54,13 @@ namespace grey::widgets {
         operator bool() { return o > 0; }
     };
 
-    class window {
+    class guardable {
+    public:
+        virtual void enter() = 0;
+        virtual void leave() = 0;
+    };
+
+    class window : public guardable {
     public:
         window(const std::string& title, bool* p_open = nullptr);
 
@@ -63,22 +69,26 @@ namespace grey::widgets {
         window& fullscreen();
         window& no_resize();
         window& no_focus();
+        window& no_scroll();
+        window& center(void* monitor_handle = nullptr);
 
-        void render();
+        void enter() override;
+        void leave() override;
 
         ~window();
 
     private:
-        std::string title;
+        bool rendered_once{false};
+        bool capture_size{false};
+        ImVec2 init_size;
+        bool init_center{false};
+        void* init_center_monitor{nullptr};
+        bool init_center_done{false};
+        ImVec2 size_in;
+        const std::string title;
         bool* p_open{nullptr};
         ImGuiWindowFlags flags{0};
-        bool rendered{false};
-    };
-
-    class guardable {
-    public:
-        virtual void enter() = 0;
-        virtual void leave() = 0;
+        ImGuiWindowClass wc;
     };
 
     class guard {
@@ -103,7 +113,7 @@ namespace grey::widgets {
          * @param height Height of the container, if zero, it will be taking the remaining space.
          */
         container(float width = 0.0F, float height = 0.0F);
-        container(const std::string& id);
+        container(const std::string& id, float width = 0.0F, float height = 0.0F);
 
         container& border() {
             has_border = true; return *this; }
@@ -184,7 +194,8 @@ namespace grey::widgets {
         ~status_bar();
 
     private:
-        bool rendered{false};
+        ImGuiStyle& style;
+        ImVec2 cursor_before;
     };
 
     class tab_bar_item {
@@ -233,14 +244,14 @@ namespace grey::widgets {
 
     void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0, bool enabled = true);
 
-    void input(std::string& value, const std::string& label = "", bool enabled = true, float width = 0);
+    bool input(std::string& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
 
     void tooltip(const std::string& text);
 
     void image(app& app, const std::string& key, size_t width, size_t height);
 
     void spc(size_t repeat = 1);
-    void sl();
+    void sl(float offset = 0);
     void sep();
 
     bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false);

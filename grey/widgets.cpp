@@ -3,6 +3,8 @@
 #include "imgui_internal.h"
 #include "imgui_stdlib.h"
 
+// 3rdparty
+
 using namespace std;
 
 namespace grey::widgets {
@@ -42,13 +44,13 @@ namespace grey::widgets {
 
     // ---- window ----
 
-    window::window(const std::string& title, bool* p_open) {
-        this->title = title;
+    window::window(const std::string& title, bool* p_open) : title{title} {
         this->p_open = p_open;
+        wc.ViewportFlagsOverrideSet = ImGuiViewportFlags_NoAutoMerge;
     }
 
     window& window::size(int width, int height, float scale) {
-        ImGui::SetNextWindowSize(ImVec2(width * scale, height * scale), ImGuiCond_Once);
+        init_size = ImVec2(width * scale, height * scale);
         return *this;
     }
 
@@ -67,28 +69,73 @@ namespace grey::widgets {
         return *this;
     }
 
-    window& window::fullscreen() {
+    window& window::no_scroll() {
+        flags |= ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+        return *this;
+    }
 
-        ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->Pos);
-        ImGui::SetNextWindowSize(viewport->Size);
+    window& window::center(void* monitor_handle) {
+        init_center_monitor = monitor_handle;
+        capture_size = true;
+        init_center = true;
 
         return *this;
     }
 
-    void window::render() {
-        rendered = true;
+    void window::enter() {
         ImGui::SetNextWindowBgAlpha(1.0f);
 
         // set window class to prevent viewports to be merged with main window
-        ImGuiWindowClass wc;
-        wc.ViewportFlagsOverrideSet = ImGuiViewportFlags_NoAutoMerge;
+        ImGui::SetNextWindowClass(&wc);
+
+        if(!rendered_once) {
+            if(init_size.x && init_size.y) {
+                ImGui::SetNextWindowSize(init_size, ImGuiCond_Once);
+            }
+            rendered_once = true;
+        }
+
+        if(init_center && !init_center_done && size_in.x && size_in.y) {
+
+            ImVector<ImGuiPlatformMonitor> monitors = ImGui::GetPlatformIO().Monitors;
+            size_t midx = 0;
+            for(size_t i = 0; i < monitors.Size; i++) {
+                if(monitors[i].PlatformHandle == init_center_monitor) {
+                    midx = i;
+                    break;
+                }
+            }
+
+            ImGuiPlatformMonitor monitor = monitors[midx];
+
+            auto pos = ImVec2(
+                monitor.WorkSize.x / 2 - size_in.x / 2 + monitor.WorkPos.x,
+                monitor.WorkSize.y / 2 - size_in.y / 2 + monitor.WorkPos.y);
+            ImGui::SetNextWindowPos(pos);
+
+            init_center_done = true;
+        }
 
         ImGui::Begin(title.c_str(), p_open, flags);
+
+        if(capture_size)
+            size_in = ImGui::GetWindowSize();
+    }
+
+    void window::leave() {
+        ImGui::End();
+    }
+
+    window& window::fullscreen() {
+
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->Pos, ImGuiCond_Once);
+        ImGui::SetNextWindowSize(viewport->Size, ImGuiCond_Once);
+
+        return *this;
     }
 
     window::~window() {
-        ImGui::End();
     }
 
     // ---- container ----
@@ -96,7 +143,7 @@ namespace grey::widgets {
     container::container(float width, float height) : id{generate_id()}, size{width, height} {
     }
 
-    container::container(const std::string& id) : id{id}, size{0, 0} {
+    container::container(const std::string& id, float width, float height) : id{id}, size{width, height} {
     }
 
     void container::enter() {
@@ -224,14 +271,20 @@ namespace grey::widgets {
         }
     }
 
-    void input(std::string& value, const std::string& label, bool enabled, float width) {
+    bool input(std::string& value, const std::string& label, bool enabled, float width, bool is_readonly) {
+        bool fired;
         if(!enabled) ImGui::BeginDisabled();
         if(width != 0)
             ImGui::PushItemWidth(width);
-        ImGui::InputText(label.c_str(), &value);
+
+        ImGuiInputTextFlags flags{};
+        if(is_readonly) flags |= ImGuiInputTextFlags_ReadOnly;
+        fired = ImGui::InputText(label.c_str(), &value, flags);
+
         if(width != 0)
             ImGui::PopItemWidth();
         if(!enabled) ImGui::EndDisabled();
+        return fired;
     }
 
     // ---- tooltip ----
@@ -280,8 +333,8 @@ namespace grey::widgets {
 
     // ---- same line ----
 
-    void sl() {
-        ImGui::SameLine();
+    void sl(float offset) {
+        ImGui::SameLine(offset);
     }
 
     // ---- separator ----
@@ -458,20 +511,31 @@ namespace grey::widgets {
 
     // ---- status bar ----
 
-    status_bar::status_bar() {
-        // source: https://github.com/ocornut/imgui/issues/3518#issuecomment-807398290
-        ImGuiViewport* win_vp = ImGui::GetWindowViewport();
-        float height = ImGui::GetFrameHeight();
-        ImGuiWindowFlags flags{ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar};
+    status_bar::status_bar() : style{ImGui::GetStyle()}, cursor_before{ImGui::GetCursorPos()} {
+        auto io = ImGui::GetIO();
 
-        if(ImGui::BeginViewportSideBar("##MainStatusBar", win_vp, ImGuiDir_Down, height, flags)) {
-            rendered = ImGui::BeginMenuBar();
-        }
+        float height = io.Fonts->Fonts[0]->FontSize + style.FramePadding.y * 2.0f;
+        
+        ImVec2 ws = ImGui::GetWindowSize();
+
+        ImGui::SetCursorPos(ImVec2(0, ws.y - height));
+        ImGui::BeginChild("##StatusBar", ImVec2(ws.x, height));
+        ImGui::SetCursorPos(ImVec2(style.FramePadding.x, style.FramePadding.y));
     }
 
     status_bar::~status_bar() {
-        if(rendered) ImGui::EndMenuBar();
-        ImGui::End(); // status bar, should be outside of BeginViewportSideBar just like for a normal window
+        ImGui::EndChild();
+
+        auto min = ImGui::GetItemRectMin();
+        auto max = ImGui::GetItemRectMax();
+        ImDrawList* fdl = ImGui::GetWindowDrawList();
+
+        fdl->AddRectFilled(min, max,
+            (ImU32)rgb_colour {
+            style.Colors[ImGuiCol_MenuBarBg]
+        }, style.FrameRounding);
+
+        ImGui::SetCursorPos(cursor_before);
     }
 
     // mouse helpers

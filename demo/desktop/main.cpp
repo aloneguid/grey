@@ -1,12 +1,37 @@
 ﻿//#include "main_wnd.h"
 #include "../grey/app.h"
 #include "../grey/widgets.h"
+#include <imgui_internal.h>
 
 using namespace std;
 namespace w = grey::widgets;
 
 vector<string> items = { "item1", "item2", "item3" };
 size_t current_item = 0;
+bool app_open{true};
+bool show_demo{false};
+string window_title = "Demo app";
+w::window wnd{window_title, &app_open};
+string text;
+w::container scroller{400, 100};
+
+vector<w::menu_item> menu_items{
+    { "File", {
+        { "file_new", "New", ICON_MD_DONUT_LARGE },
+        { "file_open", "Open" },
+        { "file_save", "Save" },
+        { "file_save_as", "Save As" },
+        { "", "-"},
+        { "file_exit", "Exit" },
+        { "Recent", { {"1", "file1.txt" }}}
+        }
+    },
+    { "Theme", w::menu_item::make_ui_theme_items() },
+    { "ImGui", {
+        { "demo", "Show Demo", ICON_MD_DONUT_LARGE }
+    }}
+};
+
 
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
@@ -15,41 +40,21 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
     //backend->run();
 
     auto app = grey::app::make(APP_LONG_NAME);
-    bool app_open{true};
-    bool show_demo{false};
-    string text;
-    w::container scroller{400, 100};
+    float scale = app->scale;
 
-    vector<w::menu_item> menu_items{
-        { "File", {
-            { "file_new", "New", ICON_MD_DONUT_LARGE },
-            { "file_open", "Open" },
-            { "file_save", "Save" },
-            { "file_save_as", "Save As" },
-            { "", "-"},
-            { "file_exit", "Exit" },
-            { "Recent", { {"1", "file1.txt" }}}
-            }
-        },
-        { "Theme", w::menu_item::make_ui_theme_items() },
-        { "ImGui", {
-            { "demo", "Show Demo", ICON_MD_DONUT_LARGE }
-        }}
-    };
+    wnd
+        .size(800, 600, app->scale)
+        .center()
+        .no_scroll()
+        .has_menubar();
 
-    string s;
-
-    app->run([&app_open, &menu_items, &s, &scroller, &show_demo, &text](const grey::app& app) {
-        w::window wnd{"Hello, world!", &app_open};
-        wnd
-            .size(800, 600, app.scale)
-            //.no_focus()
-            .has_menubar()
-            .render();
+    app->run([](const grey::app& app) {
+        
+        w::guard wg{wnd};
 
         // menu
         {
-            w::menu_bar menu{menu_items, [&app_open, &app, &show_demo](const string& id) {
+            w::menu_bar menu{menu_items, [&app](const string& id) {
                 if(id == "file_exit") {
                     app_open = false;
                 } else if(id.starts_with("set_theme_")) {
@@ -60,105 +65,137 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
             }};
         }
 
-        // labels
-        w::label("simple text");
-        w::sl(); w::label(ICON_MD_5G " icon1");
-        w::sl(); w::label("primary", w::emphasis::primary);
-        w::sl(); w::label("error", w::emphasis::error);
-
-        w::sep();
-
-        // buttons
-        w::button("simple");
-        w::sl(); w::button("primary", w::emphasis::primary);
-        w::sl(); w::button("error", w::emphasis::error);
-        w::sl(); w::label(s);
-        if(w::button("add dot")) {
-            s += ".";
-        }
-
+        // top tabs
         {
-            w::guard g{scroller};
+            w::tab_bar tabs{"topTabs"};
 
-            // add 100 buttons
-            for(int i = 0; i < 100; i++) {
-                w::button("button " + to_string(i));
+            // labels
+            {
+                auto tab = tabs.next_tab("Labels");
+                if(tab) {
+                    w::label("simple text");
+                    w::sl(); w::label(ICON_MD_5G " icon1");
+                    w::sl(); w::label("primary", w::emphasis::primary);
+                    w::sl(); w::label("error", w::emphasis::error);
+                }
+            }
+
+            // buttons
+            {
+                auto tab = tabs.next_tab("Buttons");
+                if(tab) {
+                    w::button("simple");
+                    w::sl(); w::button("primary", w::emphasis::primary);
+                    w::sl(); w::button("error", w::emphasis::error);
+                    w::sl(); w::label(text);
+                    if(w::button("add dot")) {
+                        text += ".";
+                    }
+                }
+            }
+
+            // container
+            {
+                auto tab = tabs.next_tab("Container");
+                if(tab) {
+                    w::guard g{scroller};
+
+                    // add 100 buttons
+                    for(int i = 0; i < 100; i++) {
+                        w::button("button " + to_string(i));
+                    }
+                }
+            }
+
+            // group
+            {
+                auto tab = tabs.next_tab("Group");
+                if(tab) {
+                    {
+                        w::group g;
+                        g.render();
+
+                        w::label("group");
+                    }
+
+                    {
+                        w::group g;
+                        g.border(ImGuiCol_FrameBgActive).render();
+
+                        w::label("bordered group");
+                    }
+
+                    {
+                        w::group g;
+                        g.border(ImGuiCol_FrameBgActive).spread_horizontally().render();
+
+                        w::label("full width");
+                    }
+
+                    {
+                        w::group g;
+                        g
+                            .background_hover(ImGuiCol_Border)
+                            .border_hover(ImGuiCol_FrameBgHovered)
+                            .render();
+
+                        w::label("border on hover");
+                    }
+
+                }
+            }
+
+            // accordion
+            {
+                auto tab = tabs.next_tab("Accordion");
+                if(tab) {
+                    if(w::accordion("Content inside")) {
+                        w::label("accordion content");
+                    }
+                }
+            }
+
+            // lists
+            {
+                auto tab = tabs.next_tab("Lists");
+                if(tab) {
+                    w::label(text);
+                    w::input(text, "text");
+
+                    w::label("selected item: "); w::sl(); w::label(items[current_item]);
+                    w::combo("si", items, current_item);
+
+                    if(w::button("center on screen")) {
+                        wnd.center();
+                    }
+                }
             }
         }
 
-        {
-            w::group g;
-            g.render();
+        //w::icon_checkbox(ICON_MD_BATHTUB, show_demo);
 
-            w::label("group");
-        }
+        //ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetWindowViewport();
+        //ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
+        //float height = ImGui::GetFrameHeight();
 
-
-        {
-            w::group g;
-            g.border(ImGuiCol_FrameBgActive).render();
-
-            w::label("bordered group");
-        }
-
-        {
-            w::group g;
-            g.border(ImGuiCol_FrameBgActive).spread_horizontally().render();
-
-            w::label("full width");
-        }
-
-        {
-            w::group g;
-            g
-                .background_hover(ImGuiCol_Border)
-                .border_hover(ImGuiCol_FrameBgHovered)
-                .render();
-
-            w::label("border on hover");
-        }
-
-        w::icon_checkbox(ICON_MD_BATHTUB, show_demo);
-
+        //if(ImGui::BeginViewportSideBar("##MainStatusBar", viewport, ImGuiDir_Down, height, window_flags)) {
+        //    if(ImGui::BeginMenuBar()) {
+        //        ImGui::Text("Happy status bar");
+        //        ImGui::EndMenuBar();
+        //    }
+        //    ImGui::End();
+        //}
 
         {
             w::status_bar sb;
 
-            w::label("status bar");
+            w::label(ICON_MD_HEAT_PUMP, w::emphasis::primary);
+            w::label("|", 0, false);
         }
 
-        // tabs
-        {
-            w::tab_bar tabs{"tabs1"};
-
-            {
-                auto t = tabs.next_tab("tab 1");
-                if(t) {
-                    w::label("tab 1");
-                }
-            }
-
-            {
-                auto t = tabs.next_tab("tab 2");
-                if(t) {
-                    w::button("tab 2");
-                }
-            }
-        }
-
-        if(w::accordion("Content inside")) {
-            w::label("accordion content");
-        }
-
-        w::label(text);
-        w::input(text, "text");
-
-        w::label("selected item: "); w::sl(); w::label(items[current_item]);
-        w::combo("si", items, current_item);
 
         if(show_demo)
             ImGui::ShowDemoWindow();
-
 
         return app_open;
     });
