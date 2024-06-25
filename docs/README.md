@@ -8,6 +8,7 @@ It's basically ImGui shaped into making desktop applications, because ImGui can 
 
 - Supports High DPI out of the box.
 - Replaces default font with Roboto, and adds support for an icon font out of the box.
+- Completely stateless i.e. no widgets, state synchronisation and so on.
 
 ## Technical remarks
 

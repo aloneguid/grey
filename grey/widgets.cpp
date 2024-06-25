@@ -224,9 +224,13 @@ namespace grey::widgets {
         }
     }
 
-    void input(std::string& value, const std::string& label, bool enabled) {
+    void input(std::string& value, const std::string& label, bool enabled, float width) {
         if(!enabled) ImGui::BeginDisabled();
+        if(width != 0)
+            ImGui::PushItemWidth(width);
         ImGui::InputText(label.c_str(), &value);
+        if(width != 0)
+            ImGui::PopItemWidth();
         if(!enabled) ImGui::EndDisabled();
     }
 
@@ -337,6 +341,33 @@ namespace grey::widgets {
         }
 
         return is_checked;
+    }
+
+    void icon_list(const std::vector<std::pair<std::string, string>>& options, size_t& selected) {
+        for(int si = 0; si < options.size(); si++) {
+            if(si > 0) ImGui::SameLine();
+            bool is_selected = selected == si;
+
+            if(is_selected) {
+                ImGui::Text(options[si].first.c_str());
+            } else {
+                ImGui::TextDisabled(options[si].first.c_str());
+
+                // show "hand" cursor for disabled (selectable) options
+                if(ImGui::IsItemHovered()) {
+                    ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+                    // check if mouse is clicked on this item
+                    if(ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+                        selected = si;
+                    }
+                }
+            }
+
+            if(!options[si].second.empty() && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
+                ImGui::SetTooltip("%s", options[si].second.c_str());
+            }
+        }
     }
 
     bool accordion(const std::string& header) {

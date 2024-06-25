@@ -233,7 +233,7 @@ namespace grey::widgets {
 
     void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0, bool enabled = true);
 
-    void input(std::string& value, const std::string& label = "", bool enabled = true);
+    void input(std::string& value, const std::string& label = "", bool enabled = true, float width = 0);
 
     void tooltip(const std::string& text);
 
@@ -246,6 +246,8 @@ namespace grey::widgets {
     bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false);
 
     bool icon_checkbox(const std::string& icon, bool is_checked);
+
+    void icon_list(const std::vector<std::pair<std::string, std::string>>& options, size_t& selected);
 
     bool accordion(const std::string& header);
 
