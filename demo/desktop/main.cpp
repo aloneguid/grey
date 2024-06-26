@@ -14,6 +14,7 @@ string window_title = "Demo app";
 w::window wnd{window_title, &app_open};
 string text;
 w::container scroller{400, 100};
+w::popup status_pop {"status_pop"};
 
 vector<w::menu_item> menu_items{
     { "File", {
@@ -43,9 +44,9 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
     float scale = app->scale;
 
     wnd
-        .size(800, 600, app->scale)
+        .size(800, 600)
         .center()
-        .no_scroll()
+        //.no_scroll()
         .has_menubar();
 
     app->run([](const grey::app& app) {
@@ -77,6 +78,9 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                     w::sl(); w::label(ICON_MD_5G " icon1");
                     w::sl(); w::label("primary", w::emphasis::primary);
                     w::sl(); w::label("error", w::emphasis::error);
+
+                    w::sep();
+                    w::sep("with text");
                 }
             }
 
@@ -190,7 +194,18 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
             w::status_bar sb;
 
             w::label(ICON_MD_HEAT_PUMP, w::emphasis::primary);
+            w::sl();
             w::label("|", 0, false);
+            w::sl();
+            if(w::button("pop!", w::emphasis::none, true, true)) {
+                status_pop.open();
+            }
+            w::sl();
+
+            w::guard g{status_pop};
+            if(status_pop) {
+                w::label("popup content");
+            }
         }
 
 

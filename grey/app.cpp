@@ -2,6 +2,7 @@
 #include "backends/win32dx11app.hpp"
 #include "fonts/font_loader.hpp"
 #include "themes.h"
+#include "widgets.h"
 
 using namespace std;
 
@@ -15,6 +16,7 @@ namespace grey {
     app::app() {
         int dpi = grey::common::win32::os::get_dpi();
         scale = dpi / 96.f;
+        grey::widgets::scale = scale;
     }
 
     void app::on_after_initialised() {

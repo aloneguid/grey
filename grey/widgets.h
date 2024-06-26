@@ -9,6 +9,8 @@
 
 namespace grey::widgets {
 
+    extern float scale;
+
     enum class emphasis {
         none = 0,
         primary = 1,
@@ -64,7 +66,14 @@ namespace grey::widgets {
     public:
         window(const std::string& title, bool* p_open = nullptr);
 
-        window& size(int width, int height, float scale);
+        /**
+         * @brief Set initial window size. The size will be scaled.
+         * @param width 
+         * @param height 
+         * @return 
+         */
+        window& size(int width, int height);
+
         window& has_menubar();
         window& fullscreen();
         window& no_resize();
@@ -227,6 +236,29 @@ namespace grey::widgets {
     };
 
     /**
+     * @brief Popup is a child element that can display extra items on top.
+     *        But unlike raw implementation, this allow to open popups from anywhere in ID-stack.
+     */
+    class popup : public guardable {
+    public:
+        popup(const std::string& id);
+
+        void enter() override;
+        void leave() override;
+
+        void open();
+
+        operator bool() const {
+            return rendered;
+        }
+
+    private:
+        std::string id;
+        bool do_open{false};
+        bool rendered{false};
+    };
+
+    /**
      * @brief Set absolute position. If value is less than zero, no positioning is done for that axis.
      * @param x 
      * @param y 
@@ -252,7 +284,7 @@ namespace grey::widgets {
 
     void spc(size_t repeat = 1);
     void sl(float offset = 0);
-    void sep();
+    void sep(const std::string& text = "");
 
     bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false);
 

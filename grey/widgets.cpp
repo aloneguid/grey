@@ -11,6 +11,7 @@ namespace grey::widgets {
 
     // ---- general ----
 
+    float scale = 1.0f;
     static int incrementing_id;
 
     int generate_int_id() {
@@ -49,7 +50,7 @@ namespace grey::widgets {
         wc.ViewportFlagsOverrideSet = ImGuiViewportFlags_NoAutoMerge;
     }
 
-    window& window::size(int width, int height, float scale) {
+    window& window::size(int width, int height) {
         init_size = ImVec2(width * scale, height * scale);
         return *this;
     }
@@ -339,8 +340,11 @@ namespace grey::widgets {
 
     // ---- separator ----
 
-    void sep() {
-        ImGui::Separator();
+    void sep(const string& text) {
+        if(text.empty())
+            ImGui::Separator();
+        else
+            ImGui::SeparatorText(text.c_str());
     }
 
     // ---- button ----
@@ -570,6 +574,31 @@ namespace grey::widgets {
             ImGui::EndTabItem();
             rendered = false;
         }
+    }
+
+    // ---- popup ----
+
+    popup::popup(const std::string& id) : id{id} {
+    }
+
+    void popup::enter() {
+
+        if(do_open) {
+            ImGui::OpenPopup(id.c_str());
+            do_open = false;
+        }
+
+        rendered = ImGui::BeginPopup(id.c_str());
+    }
+
+    void popup::leave() {
+        if(rendered) {
+            ImGui::EndPopup();
+        }
+    }
+
+    void popup::open() {
+        do_open = true;
     }
 
 }
