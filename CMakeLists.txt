@@ -10,6 +10,9 @@ endif()
 project ("btu" VERSION ${GLOBAL_VERSION})
 
 add_compile_definitions(UNICODE) # required for WIN32 API to use correct versions
+add_compile_definitions(
+    GREY_INCLUDE_IMNODES
+)
 
 # statically link MSVC runtime in thrift to being fully self-contained.
 # this increases .exe size but guarantees working on all windows versions

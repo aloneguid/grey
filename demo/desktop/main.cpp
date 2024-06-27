@@ -15,6 +15,7 @@ w::window wnd{window_title, &app_open};
 string text;
 w::container scroller{400, 100};
 w::popup status_pop {"status_pop"};
+w::node_editor ned;
 
 vector<w::menu_item> menu_items{
     { "File", {
@@ -174,21 +175,79 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                     }
                 }
             }
+
+            // imnodes
+            {
+                auto tab = tabs.next_tab("ImNodes");
+                if(tab) {
+                    w::guard g{ned};
+
+                    {
+                        ned.node(0);
+                    }
+
+                    {
+                        ned.node(1);
+                    }
+
+                    int uniqueId = 10;
+
+                    // Start drawing nodes.
+                    ed::BeginNode(uniqueId++);
+                    ImGui::Text("Node A");
+                    ed::BeginPin(uniqueId++, ed::PinKind::Input);
+                    ImGui::Text("-> In");
+                    ed::EndPin();
+                    ImGui::SameLine();
+                    int pin0 = uniqueId++;
+                    ed::BeginPin(pin0, ed::PinKind::Output);
+                    ImGui::Text("Out ->");
+                    ed::EndPin();
+                    ed::EndNode();
+
+                    ed::BeginNode(uniqueId++);
+                    ImGui::Text("Node B");
+                    ed::BeginPin(uniqueId++, ed::PinKind::Input);
+                    ImGui::Text("-> In");
+                    ed::EndPin();
+                    ImGui::SameLine();
+                    ed::BeginPin(uniqueId++, ed::PinKind::Output);
+                    ImGui::Text("Out ->");
+                    ed::EndPin();
+                    ed::EndNode();
+
+                    auto style = ImGui::GetStyle();
+
+                    ed::PushStyleVar(ed::StyleVar_NodeRounding, style.FrameRounding);
+                    ed::PushStyleVar(ed::StyleVar_NodePadding, ImVec4(5, 5, 5, 5));
+                    ed::BeginNode(uniqueId++);
+
+                    w::label("Rule processor", w::emphasis::primary);
+                    //w::sep();
+                    w::label("pick browser");
+
+                    int pin1 = uniqueId++;
+                    ed::BeginPin(pin1, ed::PinKind::Input);
+                    w::label(ICON_MD_INPUT, w::emphasis::primary);
+                    ed::EndPin();
+
+                    w::sl();
+
+                    ed::BeginPin(uniqueId++, ed::PinKind::Output);
+                    w::label(ICON_MD_OUTPUT, w::emphasis::error);
+                    ed::EndPin();
+
+
+                    ed::EndNode();
+                    ed::PopStyleVar(2);
+
+                    ed::Link(uniqueId++, pin0, pin1);
+
+                }
+            }
         }
 
-        //w::icon_checkbox(ICON_MD_BATHTUB, show_demo);
 
-        //ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetWindowViewport();
-        //ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
-        //float height = ImGui::GetFrameHeight();
-
-        //if(ImGui::BeginViewportSideBar("##MainStatusBar", viewport, ImGuiDir_Down, height, window_flags)) {
-        //    if(ImGui::BeginMenuBar()) {
-        //        ImGui::Text("Happy status bar");
-        //        ImGui::EndMenuBar();
-        //    }
-        //    ImGui::End();
-        //}
 
         {
             w::status_bar sb;

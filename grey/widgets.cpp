@@ -3,8 +3,6 @@
 #include "imgui_internal.h"
 #include "imgui_stdlib.h"
 
-// 3rdparty
-
 using namespace std;
 
 namespace grey::widgets {
@@ -600,5 +598,38 @@ namespace grey::widgets {
     void popup::open() {
         do_open = true;
     }
+
+#ifdef GREY_INCLUDE_IMNODES
+
+    // ---- ImNodes ----
+
+    node_editor::node_editor() {
+        //config.SettingsFile = nullptr;
+        context = ed::CreateEditor(&config);
+    }
+
+    node_editor::~node_editor() {
+        ed::DestroyEditor(context);
+    }
+
+    void node_editor::enter() {
+        ed::SetCurrentEditor(context);
+        ed::Begin("My Editor", ImVec2(0.0, 0.0f));
+    }
+
+    void node_editor::leave() {
+        ed::End();
+        ed::SetCurrentEditor(nullptr);
+    }
+
+    node_editor_node::node_editor_node(int id) {
+        ed::BeginNode(id);
+    }
+
+    node_editor_node::~node_editor_node() {
+        ed::EndNode();
+    }
+
+#endif
 
 }

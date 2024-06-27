@@ -7,6 +7,12 @@
 #include <functional>
 #include "app.h"
 
+// 3rdparty
+#ifdef GREY_INCLUDE_IMNODES
+#include "3rdparty/imgui-node-editor/imgui_node_editor.h"
+namespace ed = ax::NodeEditor;
+#endif // GREY_INCLUDE_IMNODES
+
 namespace grey::widgets {
 
     extern float scale;
@@ -299,4 +305,35 @@ namespace grey::widgets {
     // mouse helpers
 
     bool is_leftclicked();
+
+#ifdef GREY_INCLUDE_IMNODES
+
+    // Node editor
+
+    class node_editor_node {
+    public:
+        node_editor_node(int id);
+        ~node_editor_node();
+    };
+
+    /**
+     * @brief Node editor based on https://github.com/thedmd/imgui-node-editor
+     */
+    class node_editor : public guardable {
+    public:
+        node_editor();
+        ~node_editor();
+
+        void enter() override;
+        void leave() override;
+
+        node_editor_node node(int id) {
+            return node_editor_node{id};
+        }
+    private:
+        ed::Config config;
+        ed::EditorContext* context{nullptr};
+    };
+
+#endif
 }

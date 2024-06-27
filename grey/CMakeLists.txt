@@ -14,7 +14,8 @@ file(GLOB core_src CONFIGURE_DEPENDS "*.cpp"
     "backends/*.cpp"
     "common/*.cpp"
     "common/*.cpp"
-    "common/win32/*.cpp")
+    "common/win32/*.cpp"
+    "3rdparty/imgui-node-editor/*.cpp")
 set(private_libs D3D11.lib implot::implot)
 set(interface_libs imgui::imgui)
 
