@@ -173,6 +173,8 @@ namespace grey::widgets {
         bool full_width{false};
     };
 
+    const std::string SetThemeMenuPrefix{"set_theme_"};
+
     class menu_item {
     public:
         std::string id;
@@ -186,12 +188,13 @@ namespace grey::widgets {
 
         // utility
         static std::vector<menu_item> make_ui_theme_items();
+        static std::string remove_theme_prefix(const std::string& id);
     };
 
     class menu_bar {
     public:
         menu_bar();
-        menu_bar(const std::vector<menu_item>& items, std::function<void(const std::string&)> clicked);
+        menu_bar(const std::vector<menu_item>& items, std::function<void(const std::string)> clicked);
         ~menu_bar();
 
         operator bool() const {
@@ -200,7 +203,7 @@ namespace grey::widgets {
 
     private:
         bool rendered{false};
-        void render(const std::vector<menu_item>& items, std::function<void(const std::string&)> clicked);
+        void render(const std::vector<menu_item>& items, std::function<void(const std::string)> clicked);
     };
 
     class status_bar {

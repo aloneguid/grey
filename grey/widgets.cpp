@@ -169,24 +169,33 @@ namespace grey::widgets {
         vector<menu_item> items;
 
         for(auto& theme : grey::themes::list_themes()) {
-            items.push_back({string{"set_theme_"} + theme.id, theme.name});
+            string id = SetThemeMenuPrefix + theme.id;
+            items.emplace_back(id, theme.name);
         }
 
         return items;
+    }
+
+    std::string menu_item::remove_theme_prefix(const std::string& id) {
+        string r{ id };
+        if(r.starts_with(SetThemeMenuPrefix)) {
+            r = r.substr(SetThemeMenuPrefix.size());
+        }
+        return r;
     }
 
     menu_bar::menu_bar() {
         rendered = ImGui::BeginMenuBar();
     }
 
-    menu_bar::menu_bar(const std::vector<menu_item>& items, std::function<void(const std::string&)> clicked) 
+    menu_bar::menu_bar(const std::vector<menu_item>& items, std::function<void(const std::string)> clicked) 
         : menu_bar::menu_bar() {
         if(rendered) {
             render(items, clicked);
         }
     }
 
-    void menu_bar::render(const std::vector<menu_item>& items, std::function<void(const std::string&)> clicked) {
+    void menu_bar::render(const std::vector<menu_item>& items, std::function<void(const std::string)> clicked) {
         if(rendered) {
 
             bool has_icon = false;

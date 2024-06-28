@@ -7,18 +7,16 @@ namespace grey::themes {
 
     ImVec4 GreyColors[GreyCol_Count];
 
-    std::vector<app_theme> AllThemes {
-        { FollowOsThemeName, "Follow OS" },
-        { "dark", "Dark" },
-        { "light", "Light" },
-        { "microsoft", "Microsoft" },
-        { "cherry", "Cherry" },
-        { "enemymouse", "Enemymouse" },
-        { "gold", "Gold" }
-    };
-
     std::vector<app_theme> list_themes() {
-        return AllThemes;
+        return vector<app_theme> {
+            { FollowOsThemeName, "Follow OS" },
+            {"dark", "Dark"},
+            {"light", "Light"},
+            {"microsoft", "Microsoft"},
+            {"cherry", "Cherry"},
+            {"enemymouse", "Enemymouse"},
+            {"gold", "Gold"}
+        };
     }
 
     void set_theme_dark() {
@@ -359,9 +357,6 @@ namespace grey::themes {
     void set_theme(const std::string& theme_id, float scale) {
 
         string id{theme_id};
-        if(id.starts_with("set_theme_")) {
-            id = id.substr(10);
-        }
 
         if(id == FollowOsThemeName) {
             set_theme_follow_os();

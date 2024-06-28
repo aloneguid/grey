@@ -17,7 +17,7 @@ w::container scroller{400, 100};
 w::popup status_pop {"status_pop"};
 w::node_editor ned;
 
-vector<w::menu_item> menu_items{
+vector<w::menu_item> menu_items {
     { "File", {
         { "file_new", "New", ICON_MD_DONUT_LARGE },
         { "file_open", "Open" },
@@ -59,8 +59,9 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
             w::menu_bar menu{menu_items, [&app](const string& id) {
                 if(id == "file_exit") {
                     app_open = false;
-                } else if(id.starts_with("set_theme_")) {
-                    grey::themes::set_theme(id, app.scale);
+                } else if(id.starts_with(w::SetThemeMenuPrefix)) {
+                    string theme_id = w::menu_item::remove_theme_prefix(id);
+                    grey::themes::set_theme(theme_id, app.scale);
                 } else if(id == "demo") {
                     show_demo = true;
                 }
