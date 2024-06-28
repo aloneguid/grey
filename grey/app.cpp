@@ -32,7 +32,8 @@ namespace grey {
         //io.FontGlobalScale = scale;
         io.DisplayFramebufferScale = {scale, scale};
 
-        grey::themes::set_theme(grey::themes::FollowOsThemeName, scale);
+        string theme_id = initial_theme_id.empty() ? grey::themes::FollowOsThemeName : initial_theme_id;
+        grey::themes::set_theme(theme_id, scale);
 
         grey::load_font(scale);
     }

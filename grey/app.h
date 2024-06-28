@@ -23,6 +23,10 @@ namespace grey {
          */
         static std::unique_ptr<app> make(const std::string& title);
 
+        /**
+         * @brief When set, application will set this theme on startup.
+         */
+        std::string initial_theme_id;
         float scale{1.0f};
 
         app();
