@@ -93,12 +93,15 @@ namespace grey::widgets {
         ~window();
 
     private:
-        bool rendered_once{false};
         bool capture_size{false};
         ImVec2 init_size;
-        bool init_center{false};
-        void* init_center_monitor{nullptr};
-        bool init_center_done{false};
+
+        // centering
+        bool init_center{false};    // whether to center window
+        ImVec2 init_center_pos;     // position to center at (calculated)
+        void* init_center_monitor{nullptr}; // monitor to center at (native handle)
+        ImGuiPlatformMonitor init_center_imgui_monitor; // monitor to center at (imgui handle)
+
         ImVec2 size_in;
         const std::string title;
         bool* p_open{nullptr};
@@ -308,6 +311,12 @@ namespace grey::widgets {
     // mouse helpers
 
     bool is_leftclicked();
+
+    // modal dialogs
+    class message_modal {
+    public:
+        message_modal(const std::string& title, const std::string& message);
+    };
 
 #ifdef GREY_INCLUDE_IMNODES
 

@@ -87,15 +87,10 @@ namespace grey::widgets {
         // set window class to prevent viewports to be merged with main window
         ImGui::SetNextWindowClass(&wc);
 
-        if(!rendered_once) {
-            if(init_size.x && init_size.y) {
-                ImGui::SetNextWindowSize(init_size, ImGuiCond_Once);
-            }
-            rendered_once = true;
-        }
+        if(init_size.x)
+            ImGui::SetNextWindowSize(init_size, ImGuiCond_Once);
 
-        if(init_center && !init_center_done && size_in.x && size_in.y) {
-
+        if(init_center && !init_center_pos.x) {
             ImVector<ImGuiPlatformMonitor> monitors = ImGui::GetPlatformIO().Monitors;
             size_t midx = 0;
             for(size_t i = 0; i < monitors.Size; i++) {
@@ -105,14 +100,15 @@ namespace grey::widgets {
                 }
             }
 
-            ImGuiPlatformMonitor monitor = monitors[midx];
+            init_center_imgui_monitor = monitors[midx];
 
-            auto pos = ImVec2(
-                monitor.WorkSize.x / 2 - size_in.x / 2 + monitor.WorkPos.x,
-                monitor.WorkSize.y / 2 - size_in.y / 2 + monitor.WorkPos.y);
-            ImGui::SetNextWindowPos(pos);
+            init_center_pos = ImVec2(
+                init_center_imgui_monitor.WorkSize.x / 2 - init_size.x / 2 + init_center_imgui_monitor.WorkPos.x,
+                init_center_imgui_monitor.WorkSize.y / 2 - init_size.y / 2 + init_center_imgui_monitor.WorkPos.y);
+        }
 
-            init_center_done = true;
+        if(init_center && init_center_pos.x) {
+            ImGui::SetNextWindowPos(init_center_pos, ImGuiCond_Appearing);
         }
 
         ImGui::Begin(title.c_str(), p_open, flags);
@@ -555,6 +551,7 @@ namespace grey::widgets {
         return ImGui::IsItemHovered() && ImGui::IsMouseDown(ImGuiMouseButton_Left);
     }
 
+
     // ---- tab bar ----
 
     tab_bar::tab_bar(const std::string& id) {
@@ -608,6 +605,11 @@ namespace grey::widgets {
         do_open = true;
     }
 
+    // ---- message modal ----
+
+    message_modal::message_modal(const std::string& title, const std::string& message) {
+    }
+
 #ifdef GREY_INCLUDE_IMNODES
 
     // ---- ImNodes ----
@@ -640,5 +642,6 @@ namespace grey::widgets {
     }
 
 #endif
+
 
 }
