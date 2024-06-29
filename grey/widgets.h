@@ -184,8 +184,9 @@ namespace grey::widgets {
         std::string text;
         std::vector<menu_item> children;
         std::string icon;
+        bool* selected{nullptr};
 
-        menu_item(const std::string& id, const std::string& text, const std::string& icon = "") : id{id}, text{text}, icon{icon} {}
+        menu_item(const std::string& id, const std::string& text, const std::string& icon = "", bool* selected = nullptr) : id{id}, text{text}, icon{icon}, selected{selected} {}
 
         menu_item(const std::string text, const std::vector<menu_item>& children, const std::string& icon = "") : id{""}, text{text}, children{children}, icon{icon} {}
 
@@ -302,11 +303,17 @@ namespace grey::widgets {
 
     bool icon_checkbox(const std::string& icon, bool is_checked);
 
+    bool checkbox(const std::string& label, bool& is_checked);
+
+    bool small_checkbox(const std::string& label, bool& is_checked);
+
     void icon_list(const std::vector<std::pair<std::string, std::string>>& options, size_t& selected);
 
     bool accordion(const std::string& header);
 
     void combo(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width = 0);
+
+    void radio();
 
     // mouse helpers
 

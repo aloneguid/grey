@@ -16,6 +16,8 @@ string text;
 w::container scroller{400, 100};
 w::popup status_pop {"status_pop"};
 w::node_editor ned;
+bool selected{false};
+bool m_selectable{false};
 
 vector<w::menu_item> menu_items {
     { "File", {
@@ -31,6 +33,10 @@ vector<w::menu_item> menu_items {
     { "Theme", w::menu_item::make_ui_theme_items() },
     { "ImGui", {
         { "demo", "Show Demo", ICON_MD_DONUT_LARGE }
+    }},
+    { "Menu", {
+        { "m_normal", "Normal item" },
+        { "m_selectable", "Selectable (click to flip)", "", &m_selectable }
     }}
 };
 
@@ -64,17 +70,28 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                     grey::themes::set_theme(theme_id, app.scale);
                 } else if(id == "demo") {
                     show_demo = true;
+                } else if(id == "m_selectable") {
+                    //m_selectable = !m_selectable;
                 }
             }};
+
+            if(ImGui::BeginMenu("File")) // <-- Append!
+            {
+                static bool b = true;
+                ImGui::Checkbox("SomeOption", &b);
+                ImGui::EndMenu();
+            }
         }
+
+
 
         // top tabs
         {
             w::tab_bar tabs{"topTabs"};
 
-            // labels
+            // basics
             {
-                auto tab = tabs.next_tab("Labels");
+                auto tab = tabs.next_tab("Basics");
                 if(tab) {
                     w::label("simple text");
                     w::sl(); w::label(ICON_MD_5G " icon1");
@@ -82,14 +99,9 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                     w::sl(); w::label("error", w::emphasis::error);
 
                     w::sep();
-                    w::sep("with text");
-                }
-            }
 
-            // buttons
-            {
-                auto tab = tabs.next_tab("Buttons");
-                if(tab) {
+                    w::sep("buttons");
+
                     w::button("simple");
                     w::sl(); w::button("primary", w::emphasis::primary);
                     w::sl(); w::button("error", w::emphasis::error);
@@ -98,7 +110,12 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                         text += ".";
                     }
 
-                    w::message_modal{}
+                    w::sep("radios");
+
+                    w::sep("checkboxes");
+                    w::checkbox("basic", selected);
+
+                    w::small_checkbox("small", selected);
                 }
             }
 

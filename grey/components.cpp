@@ -252,12 +252,6 @@ namespace grey
        return r;
    }
 
-   std::shared_ptr<checkbox> container::make_checkbox(const string& label, bool* value) {
-       auto r = make_shared<checkbox>(label, value);
-       assign_child(r);
-       return r;
-   }
-
    std::shared_ptr<grey::tree> container::make_tree() {
        auto r = make_shared<tree>(tmgr);
        assign_child(r);
@@ -1480,68 +1474,6 @@ namespace grey
        }
    }
 
-   checkbox::checkbox(const string& text, bool* value) : text{ text }, value{ value }
-   {
-      owns_mem = value == nullptr;
-      if (value == nullptr)
-         this->value = new bool();
-   }
-
-   checkbox::~checkbox() {
-      if (owns_mem) {
-         delete value;
-      }
-   }
-
-   const void checkbox::render_visible() {
-       if(is_highlighted) {
-           ImGui::PushStyleColor(
-              ImGuiCol_CheckMark,
-              (ImVec4)ImColor::HSV(5.0f, 255.0f, 255.0f));
-       }
-
-       //if(em != emphasis::none) {
-       //    ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)em_normal);
-       //}
-
-       if(render_as_icon) {
-           if(*value) {
-               ImGui::Text(text.c_str());
-           } else {
-               ImGui::TextDisabled(text.c_str());
-           }
-
-           if(ImGui::IsItemHovered()) {
-               ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-
-               if(ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-                   if(!mouse_was_down) {
-                       *value = !*value;
-                       if(on_value_changed) {
-                           on_value_changed(*value);
-                       }
-                   }
-                   mouse_was_down = true;
-               } else {
-                   mouse_was_down = false;
-               }
-           }
-
-       } else {
-           if(ImGui::Checkbox(sys_label(text).c_str(), value)) {
-               if(on_value_changed)
-                   on_value_changed(*value);
-           }
-       }
-
-       if(is_highlighted) {
-           ImGui::PopStyleColor();
-       }
-
-       //if(em != emphasis::none) {
-       //    ImGui::PopStyleColor();
-       //}
-   }
 
    const void table::render_visible()
    {

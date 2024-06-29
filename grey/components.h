@@ -157,7 +157,6 @@ namespace grey {
     class tree;
     class input;
     class input_int;
-    class checkbox;
     class button;
     class toggle;
     class image;
@@ -214,7 +213,6 @@ namespace grey {
         std::shared_ptr<tree> make_tree();
         std::shared_ptr<input> make_input(const std::string& label, std::string* value = nullptr);
         std::shared_ptr<input_int> make_input_int(const std::string& label, int* value = nullptr);
-        std::shared_ptr<checkbox> make_checkbox(const std::string& label, bool* value = nullptr);
         std::shared_ptr<button> make_button(const std::string& label, bool is_small = false, emphasis e = emphasis::none);
         std::shared_ptr<toggle> make_toggle(bool* value);
         std::shared_ptr<image> make_image_from_file(const std::string& path,
@@ -588,27 +586,6 @@ namespace grey {
         std::string label;
         int* value;
         int step{1};
-    };
-
-    class checkbox : public component {
-    public:
-        std::string text;
-        bool is_checked() { return *value; };
-        void set_checked(bool checked) { *value = checked; }
-        bool is_highlighted{ false };
-        bool render_as_icon{false};
-
-        checkbox(const std::string& text, bool* value = nullptr);
-        ~checkbox();
-
-        std::function<void(bool)> on_value_changed;
-
-        virtual const void render_visible() override;
-
-    private:
-        bool owns_mem;
-        bool* value;
-        bool mouse_was_down{false};
     };
 
     class image : public component {

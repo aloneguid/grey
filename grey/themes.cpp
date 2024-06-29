@@ -373,7 +373,7 @@ namespace grey::themes {
         } else if(id == "enemymouse") {
             set_theme_enemymouse();
         } else {
-             set_theme_follow_os();
+            set_theme_follow_os();
         }
 
         ImGuiStyle& style = ImGui::GetStyle();

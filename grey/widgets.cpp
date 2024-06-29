@@ -209,20 +209,34 @@ namespace grey::widgets {
                     continue;
                 }
 
-                string label = has_icon
-                    ? string{"       "} + item.text
-                    : item.text;
+                if(item.text.starts_with("-") && item.text.ends_with("-")) {
+                    ImGui::SeparatorText(item.text.substr(1, item.text.size() - 2).c_str());
+                    continue;
+                }
+
+                string text_prefix = has_icon ? "       " : "";
 
                 ImVec2 cp = ImGui::GetCursorPos();
 
                 if(item.children.empty()) {
-                    if(ImGui::MenuItem(label.c_str())) {
+
+                    if(item.selected) {
+                        // render selectable items as checkboxes, they look just nicer
+                        ImGui::Text("   "); ImGui::SameLine();
+                        if(checkbox(item.text, *item.selected)) {
+                            if(clicked) {
+                                clicked(item.id);
+                            }
+                        }
+                    }
+                    else if(ImGui::MenuItem((text_prefix + item.text).c_str(), nullptr, item.selected)) {
                         if(clicked) {
                             clicked(item.id);
                         }
                     }
+
                 } else {
-                    if(ImGui::BeginMenu(label.c_str())) {
+                    if(ImGui::BeginMenu((text_prefix + item.text).c_str())) {
 
                         render(item.children, clicked);
 
@@ -403,6 +417,17 @@ namespace grey::widgets {
         return is_checked;
     }
 
+    bool checkbox(const std::string& label, bool& is_checked) {
+        return ImGui::Checkbox(label.c_str(), &is_checked);
+    }
+
+    bool small_checkbox(const std::string& label, bool& is_checked) {
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+        bool r = checkbox(label, is_checked);
+        ImGui::PopStyleVar();
+        return r;
+    }
+
     void icon_list(const std::vector<std::pair<std::string, string>>& options, size_t& selected) {
         for(int si = 0; si < options.size(); si++) {
             if(si > 0) ImGui::SameLine();
@@ -456,6 +481,9 @@ namespace grey::widgets {
 
         if(width != 0)
             ImGui::PopItemWidth();
+    }
+
+    void radio() {
     }
 
     // ---- group ----
