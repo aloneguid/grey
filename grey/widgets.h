@@ -305,6 +305,13 @@ namespace grey::widgets {
 
     bool checkbox(const std::string& label, bool& is_checked);
 
+    /**
+     * @brief 
+     * Small (less height) checkbox, similar to small button.
+     * @param label 
+     * @param is_checked 
+     * @return 
+     */
     bool small_checkbox(const std::string& label, bool& is_checked);
 
     void icon_list(const std::vector<std::pair<std::string, std::string>>& options, size_t& selected);
@@ -313,7 +320,9 @@ namespace grey::widgets {
 
     void combo(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width = 0);
 
-    void radio();
+    bool radio(const std::string& label, bool is_active);
+
+    bool small_radio(const std::string& label, bool is_active);
 
     // mouse helpers
 

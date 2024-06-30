@@ -17,7 +17,6 @@ w::container scroller{400, 100};
 w::popup status_pop {"status_pop"};
 w::node_editor ned;
 bool selected{false};
-bool m_selectable{false};
 
 vector<w::menu_item> menu_items {
     { "File", {
@@ -36,7 +35,10 @@ vector<w::menu_item> menu_items {
     }},
     { "Menu", {
         { "m_normal", "Normal item" },
-        { "m_selectable", "Selectable (click to flip)", "", &m_selectable }
+        { "m_selectable", "Selectable (click to flip)", "", &selected },
+        { "", "With icon", ICON_MD_DOORBELL },
+        { "", "-" }, // Separator
+        {"", "-Separator with text-" }
     }}
 };
 
@@ -111,10 +113,13 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                     }
 
                     w::sep("radios");
+                    w::radio("radio1", selected);
+                    w::radio("radio2", !selected);
+                    w::small_radio("small radio1", selected);
+                    w::small_radio("small radio2", !selected);
 
                     w::sep("checkboxes");
                     w::checkbox("basic", selected);
-
                     w::small_checkbox("small", selected);
                 }
             }

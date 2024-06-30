@@ -223,7 +223,7 @@ namespace grey::widgets {
                     if(item.selected) {
                         // render selectable items as checkboxes, they look just nicer
                         ImGui::Text("   "); ImGui::SameLine();
-                        if(checkbox(item.text, *item.selected)) {
+                        if(small_checkbox(item.text, *item.selected)) {
                             if(clicked) {
                                 clicked(item.id);
                             }
@@ -483,7 +483,15 @@ namespace grey::widgets {
             ImGui::PopItemWidth();
     }
 
-    void radio() {
+    bool radio(const std::string& label, bool is_active) {
+        return ImGui::RadioButton(label.c_str(), is_active);
+    }
+
+    bool small_radio(const std::string& label, bool is_active) {
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+        bool r = radio(label, is_active);
+        ImGui::PopStyleVar();
+        return r;
     }
 
     // ---- group ----
