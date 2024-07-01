@@ -29,6 +29,8 @@ namespace grey {
         std::string initial_theme_id;
         float scale{1.0f};
 
+        std::function<void()> on_initialised;
+
         app();
 
         virtual void run(std::function<bool(const app&)> render_frame) = 0;

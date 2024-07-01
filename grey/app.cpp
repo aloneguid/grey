@@ -36,6 +36,9 @@ namespace grey {
         grey::themes::set_theme(theme_id, scale);
 
         grey::load_font(scale);
+
+        if(on_initialised)
+            on_initialised();
     }
 
     texture app::get_texture(const std::string& key) {

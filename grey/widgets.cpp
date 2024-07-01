@@ -53,6 +53,11 @@ namespace grey::widgets {
         return *this;
     }
 
+    window& window::autosize() {
+        flags |= ImGuiWindowFlags_NoBackground;
+        return *this;
+    }
+
     window& window::has_menubar() {
         flags |= ImGuiWindowFlags_MenuBar;
         return *this;
@@ -60,6 +65,16 @@ namespace grey::widgets {
 
     window& window::no_resize() {
         flags |= ImGuiWindowFlags_NoResize;
+        return *this;
+    }
+
+    window& window::no_titlebar() {
+        flags |= ImGuiWindowFlags_NoTitleBar;
+        return *this;
+    }
+
+    window& window::no_border() {
+        border_size = 0;
         return *this;
     }
 
@@ -83,6 +98,10 @@ namespace grey::widgets {
 
     void window::enter() {
         ImGui::SetNextWindowBgAlpha(1.0f);
+
+        if(border_size >= 0) {
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, border_size);
+        }
 
         // set window class to prevent viewports to be merged with main window
         ImGui::SetNextWindowClass(&wc);
@@ -118,6 +137,8 @@ namespace grey::widgets {
     }
 
     void window::leave() {
+        if(border_size >= 0)
+            ImGui::PopStyleVar();
         ImGui::End();
     }
 
@@ -323,7 +344,12 @@ namespace grey::widgets {
         } else {
             ImGui::SetCursorPos(ImVec2{x, y});
         }
+    }
 
+    void get_pos(float& x, float& y) {
+        ImVec2 p = ImGui::GetCursorPos();
+        x = p.x;
+        y = p.y;
     }
 
     void move_pos(float x, float y) {
@@ -341,6 +367,22 @@ namespace grey::widgets {
             ImGui::Image(tex.data, ImVec2(width, height));
         }
     }
+
+    void rounded_image(app& app, const std::string& key, size_t width, size_t height, float rounding) {
+        auto tex = app.get_texture(key);
+        if(tex.data) {
+            //ImDrawList* dl = ImGui::GetForegroundDrawList();
+            ImDrawList* dl = ImGui::GetWindowDrawList();
+            ImVec2 p_min = ImGui::GetCursorScreenPos();
+            ImVec2 p_max = ImVec2(p_min.x + width, p_min.y + height);
+            ImGui::Dummy(ImVec2(width, height));
+            dl->AddImageRounded(tex.data, p_min, p_max,
+                ImVec2(0, 0), ImVec2(1, 1), ImGui::GetColorU32(ImVec4(1, 1, 1, 1)),
+                rounding);
+            //ImGui::SetCursorPos(p_max);
+        }
+    }
+
 
     // ---- spacing ----
 
@@ -587,6 +629,9 @@ namespace grey::widgets {
         return ImGui::IsItemHovered() && ImGui::IsMouseDown(ImGuiMouseButton_Left);
     }
 
+    bool is_hovered() {
+        return ImGui::IsItemHovered();
+    }
 
     // ---- tab bar ----
 

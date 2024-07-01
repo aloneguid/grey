@@ -79,10 +79,12 @@ namespace grey::widgets {
          * @return 
          */
         window& size(int width, int height);
-
+        window& autosize();
         window& has_menubar();
         window& fullscreen();
         window& no_resize();
+        window& no_titlebar();
+        window& no_border();
         window& no_focus();
         window& no_scroll();
         window& center(void* monitor_handle = nullptr);
@@ -107,6 +109,7 @@ namespace grey::widgets {
         bool* p_open{nullptr};
         ImGuiWindowFlags flags{0};
         ImGuiWindowClass wc;
+        float border_size{-1};
     };
 
     class guard {
@@ -278,6 +281,8 @@ namespace grey::widgets {
      */
     void set_pos(float x, float y);
 
+    void get_pos(float& x, float& y);
+
     /**
      * @brief Move relatively. Supports positive and negative values.
      * @param x 
@@ -294,6 +299,8 @@ namespace grey::widgets {
     void tooltip(const std::string& text);
 
     void image(app& app, const std::string& key, size_t width, size_t height);
+
+    void rounded_image(app& app, const std::string& key, size_t width, size_t height, float rounding);
 
     void spc(size_t repeat = 1);
     void sl(float offset = 0);
@@ -327,6 +334,8 @@ namespace grey::widgets {
     // mouse helpers
 
     bool is_leftclicked();
+
+    bool is_hovered();
 
     // modal dialogs
     class message_modal {
