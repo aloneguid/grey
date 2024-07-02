@@ -79,6 +79,7 @@ namespace grey::widgets {
          * @return 
          */
         window& size(int width, int height);
+        window& resize(float width = 0, float height = 0);
         window& autosize();
         window& has_menubar();
         window& fullscreen();
@@ -96,7 +97,8 @@ namespace grey::widgets {
 
     private:
         bool capture_size{false};
-        ImVec2 init_size;
+        ImVec2 init_size{0, 0};
+        ImVec2 resize_to{0, 0};
 
         // centering
         bool init_center{false};    // whether to center window
@@ -337,11 +339,9 @@ namespace grey::widgets {
 
     bool is_hovered();
 
-    // modal dialogs
-    class message_modal {
-    public:
-        message_modal(const std::string& title, const std::string& message);
-    };
+    // colour helpers
+
+    ImU32 imcol32(ImGuiCol idx);
 
 #ifdef GREY_INCLUDE_IMNODES
 

@@ -53,6 +53,11 @@ namespace grey::widgets {
         return *this;
     }
 
+    window& window::resize(float width, float height) {
+        resize_to = ImVec2(width * scale, height * scale);
+        return *this;
+    }
+
     window& window::autosize() {
         flags |= ImGuiWindowFlags_NoBackground;
         return *this;
@@ -108,6 +113,11 @@ namespace grey::widgets {
 
         if(init_size.x)
             ImGui::SetNextWindowSize(init_size, ImGuiCond_Once);
+
+        if(resize_to.x) {
+            ImGui::SetNextWindowSize(resize_to);
+            resize_to = ImVec2{0, 0};
+        }
 
         if(init_center && !init_center_pos.x) {
             ImVector<ImGuiPlatformMonitor> monitors = ImGui::GetPlatformIO().Monitors;
@@ -633,6 +643,14 @@ namespace grey::widgets {
         return ImGui::IsItemHovered();
     }
 
+    // colour helpers
+
+    ImU32 imcol32(ImGuiCol idx) {
+        ImVec4 color = ImGui::GetStyle().Colors[idx]; // Retrieve the color as ImVec4
+        // Convert from ImVec4 (floats) to ImU32
+        return IM_COL32((int)(color.x * 255.0f), (int)(color.y * 255.0f), (int)(color.z * 255.0f), (int)(color.w * 255.0f));
+    }
+
     // ---- tab bar ----
 
     tab_bar::tab_bar(const std::string& id) {
@@ -684,11 +702,6 @@ namespace grey::widgets {
 
     void popup::open() {
         do_open = true;
-    }
-
-    // ---- message modal ----
-
-    message_modal::message_modal(const std::string& title, const std::string& message) {
     }
 
 #ifdef GREY_INCLUDE_IMNODES
