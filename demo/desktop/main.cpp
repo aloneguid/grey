@@ -18,7 +18,7 @@ w::popup status_pop {"status_pop"};
 w::node_editor ned;
 bool selected{false};
 
-vector<w::menu_item> menu_items {
+vector<w::menu_item> menu_items{
     { "File", {
         { "file_new", "New", ICON_MD_DONUT_LARGE },
         { "file_open", "Open" },
@@ -64,7 +64,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
         // menu
         {
-            w::menu_bar menu{menu_items, [&app](const string& id) {
+            /*w::menu_bar menu{menu_items, [&app](const string& id) {
                 if(id == "file_exit") {
                     app_open = false;
                 } else if(id.starts_with(w::SetThemeMenuPrefix)) {
@@ -75,17 +75,32 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                 } else if(id == "m_selectable") {
                     //m_selectable = !m_selectable;
                 }
-            }};
+            }};*/
 
-            if(ImGui::BeginMenu("File")) // <-- Append!
-            {
-                static bool b = true;
-                ImGui::Checkbox("SomeOption", &b);
-                ImGui::EndMenu();
+            w::menu_bar menu;
+            if(menu) {
+                {
+                    w::menu m("File");
+                    if(m) {
+                        w::mi("New", true, ICON_MD_DONUT_LARGE);
+                        if(w::mi("Exit", true)) {
+                            app_open = false;
+                        }
+                    }
+                }
+
+                w::mi_themes([](const std::string& id) {
+                    w::notify_info("theme changed to " + id);
+                });
+
+                {
+                    w::menu m("Help");
+                    if(m) {
+                        w::mi("About");
+                    }
+                }
             }
         }
-
-
 
         // top tabs
         {
@@ -201,6 +216,18 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                 }
             }
 
+            // notifications
+            {
+                auto tab = tabs.next_tab("Notifications");
+                if(tab) {
+                    if(w::button("info message")) {
+                        w::notify_info("inof");
+                    }
+
+                    w::notify_render_frame();
+                }
+            }
+
             // imnodes
             {
                 auto tab = tabs.next_tab("ImNodes");
@@ -295,6 +322,8 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
         if(show_demo)
             ImGui::ShowDemoWindow();
+
+        w::notify_render_frame();
 
         return app_open;
     });

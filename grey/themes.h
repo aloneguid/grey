@@ -7,6 +7,8 @@ namespace grey::themes {
     struct app_theme {
         const std::string id;
         const std::string name;
+        const bool is_dark;
+        const ImU32 accent;
     };
 
     enum GreyCol_ {
@@ -33,7 +35,9 @@ namespace grey::themes {
     void set_theme_enemymouse();
     void set_theme_gold();
     void set_theme_microsoft();
-
+    void set_theme_darcula();
+    void set_theme_steam();
+    void set_theme_duck_red();
 
     void set_theme(const std::string& theme_id, float scale);
 }

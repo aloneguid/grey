@@ -183,27 +183,35 @@ namespace grey::widgets {
 
     const std::string SetThemeMenuPrefix{"set_theme_"};
 
-    class menu_item {
+    /**
+     * @brief Menu item with optional icon space reservation and icon.
+     * @param text 
+     * @param reserve_icon_space 
+     * @param icon 
+     * @return 
+     */
+    bool mi(const std::string& text, bool reserve_icon_space = false, const std::string& icon = "");
+
+    void mi_themes(std::function<void(const std::string&)> on_changed);
+
+    class menu {
     public:
-        std::string id;
-        std::string text;
-        std::vector<menu_item> children;
+        menu(const std::string& title, bool reserve_icon_space = false, const std::string& icon = "");
+        ~menu();
+
+        operator bool() const {
+            return rendered;
+        }
+
+    private:
+        bool rendered;
+        ImVec2 cp;
         std::string icon;
-        bool* selected{nullptr};
-
-        menu_item(const std::string& id, const std::string& text, const std::string& icon = "", bool* selected = nullptr) : id{id}, text{text}, icon{icon}, selected{selected} {}
-
-        menu_item(const std::string text, const std::vector<menu_item>& children, const std::string& icon = "") : id{""}, text{text}, children{children}, icon{icon} {}
-
-        // utility
-        static std::vector<menu_item> make_ui_theme_items();
-        static std::string remove_theme_prefix(const std::string& id);
     };
 
     class menu_bar {
     public:
         menu_bar();
-        menu_bar(const std::vector<menu_item>& items, std::function<void(const std::string)> clicked);
         ~menu_bar();
 
         operator bool() const {
@@ -212,7 +220,6 @@ namespace grey::widgets {
 
     private:
         bool rendered{false};
-        void render(const std::vector<menu_item>& items, std::function<void(const std::string)> clicked);
     };
 
     class status_bar {
@@ -332,6 +339,9 @@ namespace grey::widgets {
     bool radio(const std::string& label, bool is_active);
 
     bool small_radio(const std::string& label, bool is_active);
+
+    void notify_info(const std::string& message);
+    void notify_render_frame();
 
     // mouse helpers
 

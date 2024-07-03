@@ -2,6 +2,7 @@
 #include "themes.h"
 #include "imgui_internal.h"
 #include "imgui_stdlib.h"
+#include "3rdparty/ImGuiNotify.hpp"
 
 using namespace std;
 
@@ -189,98 +190,78 @@ namespace grey::widgets {
         ImGui::EndChild();
     }
 
-    // ---- menu_bar ----
+    bool mi(const std::string& text, bool reserve_icon_space, const std::string& icon) {
+        bool r;
+        const string IconedPrefix = "       ";
 
-    vector<menu_item> menu_item::make_ui_theme_items() {
-
-        vector<menu_item> items;
-
-        for(auto& theme : grey::themes::list_themes()) {
-            string id = SetThemeMenuPrefix + theme.id;
-            items.emplace_back(id, theme.name);
+        if(reserve_icon_space) {
+            ImVec2 cp = ImGui::GetCursorPos();
+            r = ImGui::MenuItem((IconedPrefix + text).c_str());
+            if(!icon.empty()) {
+                ImGui::SetCursorPos(cp);
+                ImGui::Text(icon.c_str());
+            }
+        } else {
+            r = ImGui::MenuItem(text.c_str());
         }
 
-        return items;
+        return r;
     }
 
-    std::string menu_item::remove_theme_prefix(const std::string& id) {
-        string r{ id };
-        if(r.starts_with(SetThemeMenuPrefix)) {
-            r = r.substr(SetThemeMenuPrefix.size());
+    void mi_themes(std::function<void(const std::string&)> on_changed) {
+        menu m{"Theme", true, ICON_MD_BRUSH};
+        if(m) {
+            ImDrawList* dl = ImGui::GetWindowDrawList();
+
+            for(auto& theme : grey::themes::list_themes()) {
+
+                float sz = ImGui::GetTextLineHeight();
+                ImVec2 p = ImGui::GetCursorScreenPos();
+                
+                // draw a triangle with accent colour in top left corner
+                dl->AddTriangleFilled(p, ImVec2(p.x + sz, p.y), ImVec2(p.x, p.y + sz), theme.accent);
+
+                // draw a triangle with base colour in bottom right corner
+                dl->AddTriangleFilled(ImVec2(p.x + sz, p.y + sz), ImVec2(p.x + sz, p.y), ImVec2(p.x, p.y + sz),
+                    theme.is_dark ? IM_COL32(0, 0, 0, 255) : IM_COL32(255, 255, 255, 255));
+
+                //dl->AddRectFilled(p, ImVec2(p.x + sz, p.y + sz), theme.accent);
+                ImGui::Dummy(ImVec2(sz, sz));
+                sl();
+
+                if(mi(theme.name)) {
+                    grey::themes::set_theme(theme.id, scale);
+                    on_changed(theme.id);
+                }
+            }
         }
-        return r;
+    }
+
+    // ---- menu_bar ----
+
+    menu::menu(const std::string& title, bool reserve_icon_space, const std::string& icon) : icon{icon} {
+        const string IconedPrefix = "       ";
+        if(reserve_icon_space) {
+            cp = ImGui::GetCursorPos();
+            rendered = ImGui::BeginMenu((IconedPrefix + title).c_str());
+        } else {
+            rendered = ImGui::BeginMenu(title.c_str());
+        }
+    }
+
+    menu::~menu() {
+        if(rendered) {
+            ImGui::EndMenu();
+        }
+
+        if(!icon.empty()) {
+            ImGui::SetCursorPos(cp);
+            ImGui::Text(icon.c_str());
+        }
     }
 
     menu_bar::menu_bar() {
         rendered = ImGui::BeginMenuBar();
-    }
-
-    menu_bar::menu_bar(const std::vector<menu_item>& items, std::function<void(const std::string)> clicked) 
-        : menu_bar::menu_bar() {
-        if(rendered) {
-            render(items, clicked);
-        }
-    }
-
-    void menu_bar::render(const std::vector<menu_item>& items, std::function<void(const std::string)> clicked) {
-        if(rendered) {
-
-            bool has_icon = false;
-            for(auto& item : items) {
-                if(!item.icon.empty()) {
-                    has_icon = true;
-                    break;
-                }
-            }
-
-            for(auto& item : items) {
-
-                if(item.text == "-") {
-                    ImGui::Separator();
-                    continue;
-                }
-
-                if(item.text.starts_with("-") && item.text.ends_with("-")) {
-                    ImGui::SeparatorText(item.text.substr(1, item.text.size() - 2).c_str());
-                    continue;
-                }
-
-                string text_prefix = has_icon ? "       " : "";
-
-                ImVec2 cp = ImGui::GetCursorPos();
-
-                if(item.children.empty()) {
-
-                    if(item.selected) {
-                        // render selectable items as checkboxes, they look just nicer
-                        ImGui::Text("   "); ImGui::SameLine();
-                        if(small_checkbox(item.text, *item.selected)) {
-                            if(clicked) {
-                                clicked(item.id);
-                            }
-                        }
-                    }
-                    else if(ImGui::MenuItem((text_prefix + item.text).c_str(), nullptr, item.selected)) {
-                        if(clicked) {
-                            clicked(item.id);
-                        }
-                    }
-
-                } else {
-                    if(ImGui::BeginMenu((text_prefix + item.text).c_str())) {
-
-                        render(item.children, clicked);
-
-                        ImGui::EndMenu();
-                    }
-                }
-
-                if(!item.icon.empty()) {
-                    ImGui::SetCursorPos(cp);
-                    ImGui::Text(item.icon.c_str());
-                }
-            }
-        }
     }
 
     menu_bar::~menu_bar() {
@@ -544,6 +525,30 @@ namespace grey::widgets {
         bool r = radio(label, is_active);
         ImGui::PopStyleVar();
         return r;
+    }
+
+    void notify_info(const std::string& message) {
+        ImGui::InsertNotification({ImGuiToastType::Info, 3000, message.c_str()});
+    }
+
+    void notify_render_frame() {
+        // Notifications style setup
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.f); // Disable round borders
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f); // Disable borders
+
+        // Notifications color setup
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.10f, 0.10f, 0.10f, 1.00f)); // Background color
+
+
+        // Main rendering function
+        ImGui::RenderNotifications();
+
+
+        //——————————————————————————————— WARNING ———————————————————————————————
+        // Argument MUST match the amount of ImGui::PushStyleVar() calls 
+        ImGui::PopStyleVar(2);
+        // Argument MUST match the amount of ImGui::PushStyleColor() calls 
+        ImGui::PopStyleColor(1);
     }
 
     // ---- group ----
