@@ -356,6 +356,8 @@ namespace grey::widgets {
         auto tex = app.get_texture(key);
         if(tex.data) {
             ImGui::Image(tex.data, ImVec2(width, height));
+        } else {
+            ImGui::Dummy(ImVec2(width, height));
         }
     }
 
@@ -374,6 +376,18 @@ namespace grey::widgets {
         }
     }
 
+    bool icon_selector(app& app, const std::string& path, size_t square_size) {
+        group g;
+        g.border_hover(ImGuiCol_ButtonHovered).render();
+
+        if(path.empty()) {
+            ImGui::Dummy(ImVec2(square_size, square_size));
+        } else {
+            app.preload_texture(path, path);
+            rounded_image(app, path, square_size, square_size, square_size / 2);
+        }
+        return is_leftclicked();
+    }
 
     // ---- spacing ----
 
@@ -671,12 +685,15 @@ namespace grey::widgets {
         }
     }
 
-    tab_bar_item tab_bar::next_tab(const string& title) {
-        return tab_bar_item{title + "##" + std::to_string(tab_index++)};
+    tab_bar_item tab_bar::next_tab(const string& title, bool unsaved) {
+        return tab_bar_item{title + "##" + std::to_string(tab_index++), unsaved};
     }
 
-    tab_bar_item::tab_bar_item(const std::string& id) : id{id} {
-        rendered = ImGui::BeginTabItem(id.c_str());
+    tab_bar_item::tab_bar_item(const std::string& id, bool unsaved) : id{id} {
+        if(unsaved) {
+            flags |= ImGuiTabItemFlags_UnsavedDocument;
+        }
+        rendered = ImGui::BeginTabItem(id.c_str(), nullptr, flags);
     }
 
     tab_bar_item::~tab_bar_item() {

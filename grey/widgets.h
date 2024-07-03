@@ -234,7 +234,7 @@ namespace grey::widgets {
 
     class tab_bar_item {
     public:
-        tab_bar_item(const std::string& id);
+        tab_bar_item(const std::string& id, bool unsaved);
         ~tab_bar_item();
 
         operator bool() const {
@@ -243,6 +243,7 @@ namespace grey::widgets {
 
     private:
         std::string id;
+        ImGuiTabItemFlags flags{0};
         bool rendered{false};
     };
 
@@ -251,7 +252,7 @@ namespace grey::widgets {
         tab_bar(const std::string& id);
         ~tab_bar();
 
-        tab_bar_item next_tab(const std::string& title);
+        tab_bar_item next_tab(const std::string& title, bool unsaved = false);
 
     private:
         bool rendered{false};
@@ -310,6 +311,8 @@ namespace grey::widgets {
     void image(app& app, const std::string& key, size_t width, size_t height);
 
     void rounded_image(app& app, const std::string& key, size_t width, size_t height, float rounding);
+
+    bool icon_selector(app& app, const std::string& path, size_t square_size);
 
     void spc(size_t repeat = 1);
     void sl(float offset = 0);
