@@ -18,31 +18,6 @@ w::popup status_pop {"status_pop"};
 w::node_editor ned;
 bool selected{false};
 
-vector<w::menu_item> menu_items{
-    { "File", {
-        { "file_new", "New", ICON_MD_DONUT_LARGE },
-        { "file_open", "Open" },
-        { "file_save", "Save" },
-        { "file_save_as", "Save As" },
-        { "", "-"},
-        { "file_exit", "Exit" },
-        { "Recent", { {"1", "file1.txt" }}}
-        }
-    },
-    { "Theme", w::menu_item::make_ui_theme_items() },
-    { "ImGui", {
-        { "demo", "Show Demo", ICON_MD_DONUT_LARGE }
-    }},
-    { "Menu", {
-        { "m_normal", "Normal item" },
-        { "m_selectable", "Selectable (click to flip)", "", &selected },
-        { "", "With icon", ICON_MD_DOORBELL },
-        { "", "-" }, // Separator
-        {"", "-Separator with text-" }
-    }}
-};
-
-
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
     //auto backend = grey::backend::make_platform_default(APP_LONG_NAME);
@@ -64,19 +39,6 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
         // menu
         {
-            /*w::menu_bar menu{menu_items, [&app](const string& id) {
-                if(id == "file_exit") {
-                    app_open = false;
-                } else if(id.starts_with(w::SetThemeMenuPrefix)) {
-                    string theme_id = w::menu_item::remove_theme_prefix(id);
-                    grey::themes::set_theme(theme_id, app.scale);
-                } else if(id == "demo") {
-                    show_demo = true;
-                } else if(id == "m_selectable") {
-                    //m_selectable = !m_selectable;
-                }
-            }};*/
-
             w::menu_bar menu;
             if(menu) {
                 {

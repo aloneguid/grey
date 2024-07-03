@@ -432,8 +432,9 @@ namespace grey::widgets {
         return clicked;
     }
 
-    bool icon_checkbox(const std::string& icon, bool is_checked) {
-        if(is_checked) {
+    bool icon_checkbox(const std::string& icon, bool& is_checked, bool reversed) {
+
+        if(reversed ? !is_checked : is_checked) {
             ImGui::Text(icon.c_str());
         } else {
             ImGui::TextDisabled(icon.c_str());
@@ -443,11 +444,12 @@ namespace grey::widgets {
             ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
             if(ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                return !is_checked;
+                is_checked = !is_checked;
+                return true;
             }
         }
 
-        return is_checked;
+        return false;
     }
 
     bool checkbox(const std::string& label, bool& is_checked) {

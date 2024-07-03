@@ -317,7 +317,7 @@ namespace grey::widgets {
 
     bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false);
 
-    bool icon_checkbox(const std::string& icon, bool is_checked);
+    bool icon_checkbox(const std::string& icon, bool& is_checked, bool reversed = false);
 
     bool checkbox(const std::string& label, bool& is_checked);
 
