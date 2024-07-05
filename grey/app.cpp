@@ -35,7 +35,7 @@ namespace grey {
         string theme_id = initial_theme_id.empty() ? grey::themes::FollowOsThemeName : initial_theme_id;
         grey::themes::set_theme(theme_id, scale);
 
-        grey::load_font(scale);
+        grey::load_font(scale, load_icon_font);
 
         if(on_initialised)
             on_initialised();

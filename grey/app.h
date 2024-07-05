@@ -27,6 +27,13 @@ namespace grey {
          * @brief When set, application will set this theme on startup.
          */
         std::string initial_theme_id;
+
+        /**
+         * @brief When true, loads icon font on startup. You can set this to "false" after creating the app instance
+         *        (but before running it) to save some memory.
+         */
+        bool load_icon_font{true};
+
         float scale{1.0f};
 
         std::function<void()> on_initialised;
