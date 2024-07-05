@@ -725,6 +725,9 @@ namespace grey::widgets {
             do_open = false;
         }
 
+        if(open_x != 0 && open_y != 0) {
+            ImGui::SetNextWindowPos(ImVec2(open_x, open_y));
+        }
         rendered = ImGui::BeginPopup(id.c_str());
     }
 
@@ -736,6 +739,12 @@ namespace grey::widgets {
 
     void popup::open() {
         do_open = true;
+    }
+
+    void popup::open(float x, float y) {
+        do_open = true;
+        open_x = x;
+        open_y = y;
     }
 
 #ifdef GREY_INCLUDE_IMNODES

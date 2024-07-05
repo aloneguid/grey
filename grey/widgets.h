@@ -275,6 +275,7 @@ namespace grey::widgets {
         void leave() override;
 
         void open();
+        void open(float x, float y);
 
         operator bool() const {
             return rendered;
@@ -283,6 +284,7 @@ namespace grey::widgets {
     private:
         std::string id;
         bool do_open{false};
+        float open_x, open_y;
         bool rendered{false};
     };
 
