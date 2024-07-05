@@ -112,6 +112,8 @@ namespace grey::widgets {
         ImGuiWindowFlags flags{0};
         ImGuiWindowClass wc;
         float border_size{-1};
+
+        bool win32_brought_forward{false};
     };
 
     class guard {

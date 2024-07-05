@@ -3,6 +3,8 @@
 #include "imgui_internal.h"
 #include "imgui_stdlib.h"
 #include "3rdparty/ImGuiNotify.hpp"
+// for Windows-specific hacks
+#include <Windows.h>
 
 using namespace std;
 
@@ -151,6 +153,14 @@ namespace grey::widgets {
         if(border_size >= 0)
             ImGui::PopStyleVar();
         ImGui::End();
+
+        if(!win32_brought_forward) {
+            ImGuiViewport* vp = ImGui::GetWindowViewport();
+            if(vp) {
+                ::SetForegroundWindow((HWND)vp->PlatformHandleRaw);
+                win32_brought_forward = true;
+            }
+        }
     }
 
     window& window::fullscreen() {
