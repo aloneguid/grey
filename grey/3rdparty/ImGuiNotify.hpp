@@ -7,6 +7,11 @@
  *
  * @version 0.0.3 WIP by TyomaVader
  * @date 18.01.2024
+ * 
+ * Modified for Grey Framework:
+ * - 08.07.2024: Removed references to FontAwesome. Made text color for Info taken from theme. Made "close" button smaller.
+ * 
+ * 
  */
 
 #ifndef IMGUI_NOTIFY
@@ -237,16 +242,22 @@ public:
      */
     inline ImVec4 getColor() {
         switch(this->type) {
-            case ImGuiToastType::None:
-                return {255, 255, 255, 255}; // White
+            case ImGuiToastType::None: {
+                ImVec4 textColor = ImGui::GetStyle().Colors[ImGuiCol_Text];
+                return {textColor.x, textColor.y, textColor.z, 255};
+            }
+                //return {255, 255, 255, 255}; // White
             case ImGuiToastType::Success:
                 return {0, 255, 0, 255}; // Green
             case ImGuiToastType::Warning:
                 return {255, 255, 0, 255}; // Yellow
             case ImGuiToastType::Error:
                 return {255, 0, 0, 255}; // Error
-            case ImGuiToastType::Info:
-                return {0, 157, 255, 255}; // Blue
+            case ImGuiToastType::Info: {
+                ImVec4 textColor = ImGui::GetStyle().Colors[ImGuiCol_Text];
+                return {textColor.x, textColor.y, textColor.z, 255};
+            }
+                //return {0, 157, 255, 255}; // Blue
             default:
                 return {255, 255, 255, 255}; // White
         }
@@ -554,7 +565,7 @@ namespace ImGui
                     SetCursorPosX(GetCursorPosX() + (GetWindowSize().x - GetCursorPosX()) * scale);
 
                     // If the button is pressed, we want to remove the notification
-                    if(Button(ICON_MD_CLOSE)) {
+                    if(SmallButton(ICON_MD_CLOSE)) {
                         RemoveNotification(i);
                     }
                 }
