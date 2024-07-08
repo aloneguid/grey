@@ -670,6 +670,10 @@ namespace grey::widgets {
         return ImGui::IsItemHovered() && ImGui::IsMouseDown(ImGuiMouseButton_Left);
     }
 
+    bool is_rightclicked() {
+        return ImGui::IsItemHovered() && ImGui::IsMouseDown(ImGuiMouseButton_Right);
+    }
+
     bool is_hovered() {
         return ImGui::IsItemHovered();
     }

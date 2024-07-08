@@ -354,6 +354,8 @@ namespace grey::widgets {
 
     bool is_leftclicked();
 
+    bool is_rightclicked();
+
     bool is_hovered();
 
     // colour helpers
