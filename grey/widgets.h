@@ -314,6 +314,8 @@ namespace grey::widgets {
 
     void image(app& app, const std::string& key, size_t width, size_t height);
 
+    void icon_image(app& app, const std::string& key);
+
     void rounded_image(app& app, const std::string& key, size_t width, size_t height, float rounding);
 
     bool icon_selector(app& app, const std::string& path, size_t square_size);

@@ -371,6 +371,11 @@ namespace grey::widgets {
         }
     }
 
+    void icon_image(app& app, const std::string& key) {
+        float size = 16 * app.scale;
+        image(app, key, size, size);
+    }
+
     void rounded_image(app& app, const std::string& key, size_t width, size_t height, float rounding) {
         auto tex = app.get_texture(key);
         if(tex.data) {
