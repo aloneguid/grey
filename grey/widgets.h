@@ -310,6 +310,8 @@ namespace grey::widgets {
 
     bool input(std::string& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
 
+    void input_ml(std::string& value, const std::string& label = "", unsigned int line_height = 10, bool autoscroll = false);
+
     void tooltip(const std::string& text);
 
     void image(app& app, const std::string& key, size_t width, size_t height);

@@ -327,6 +327,21 @@ namespace grey::widgets {
         return fired;
     }
 
+    void input_ml(std::string& value, const std::string& label, unsigned int line_height, bool autoscroll) {
+        ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;
+        ImVec2 size{-FLT_MIN, ImGui::GetTextLineHeight() * line_height};
+        ImGui::InputTextMultiline(label.c_str(), &value, size, flags);
+
+        if(autoscroll) {
+            const char* child_window_name = NULL;
+            ImGuiContext* g = ImGui::GetCurrentContext();
+            ImFormatStringToTempBuffer(&child_window_name, NULL, "%s/%s_%08X",
+                g->CurrentWindow->Name, label.c_str(), ImGui::GetID(label.c_str()));
+            ImGuiWindow* child_window = ImGui::FindWindowByName(child_window_name);
+            ImGui::SetScrollY(child_window, child_window->ScrollMax.y);
+        }
+    }
+
     // ---- tooltip ----
 
     void tooltip(const std::string& text) {
