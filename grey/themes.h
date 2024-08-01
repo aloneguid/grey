@@ -1,14 +1,15 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <functional>
 #include "imgui.h"
 
 namespace grey::themes {
     struct app_theme {
-        const std::string id;
-        const std::string name;
-        const bool is_dark;
-        const ImU32 accent;
+        std::string id;
+        std::string name;
+        bool is_dark;
+        ImU32 accent;
     };
 
     enum GreyCol_ {
@@ -24,7 +25,9 @@ namespace grey::themes {
     // extra theming constants
     extern ImVec4 GreyColors[GreyCol_Count];
 
-    const std::string FollowOsThemeName = "follow_os";
+    // theme change callback, called from the app so that the app can apply OS specific theme changes
+
+    const std::string FollowOsThemeId = "follow_os";
 
     std::vector<app_theme> list_themes();
 
@@ -39,5 +42,14 @@ namespace grey::themes {
     void set_theme_steam();
     void set_theme_duck_red();
 
+    app_theme get_theme(const std::string& theme_id);
+
+    /**
+     * @brief Changes ImGui theme to the one specified by theme_id. You should prefer calling set_theme on the app instance instead.
+     * @param theme_id 
+     * @param scale 
+     */
     void set_theme(const std::string& theme_id, float scale);
+
+    bool is_dark_theme(const std::string& theme_id);
 }

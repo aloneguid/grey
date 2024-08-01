@@ -21,7 +21,7 @@ namespace grey {
          * @param title 
          * @return 
          */
-        static std::unique_ptr<app> make(const std::string& title);
+        static std::unique_ptr<app> make(const std::string& title, int width, int height);
 
         /**
          * @brief When set, application will set this theme on startup.
@@ -48,9 +48,43 @@ namespace grey {
 
         bool preload_texture(const std::string& key, const std::string& path);
 
+        /**
+         * @brief Use this to set theme for the application. This will also apply scaling factor to the theme and OS specific customisations if needed.
+         * @param theme_id 
+         */
+        void set_theme(const std::string& theme_id);
+
+
+        /**
+         * @brief Resizes the main viewport of the application. This is the area where the application renders its main content. The width and height parameters will be multiplied by the scale factor.
+         * @param width 
+         * @param height 
+         */
+        virtual void resize_main_viewport(int width, int height) = 0;
+
+        // platform specific flags
+
+#if _WIN32
+        /**
+         * @brief When set to true, will enable dark mode for the application on Windows 10/11.
+         */
+        bool win32_title_bar{true};
+        bool win32_can_resize{true};
+        bool win32_center_on_screen{false};
+        //bool win32_can_maximize{true};
+#endif
+
     protected:
         void on_after_initialised();
+
         virtual void* make_native_texture(grey::common::raw_img& img) = 0;
+
+        /**
+         * @brief Hints if dark mode should be enabled for this application on the OS level. For instance, on Windows 10/11 dark mode will paint window chrome in dark color.
+         * @param enabled
+         */
+        virtual void set_dark_mode(bool enabled) = 0;
+
 
     private:
         std::map<std::string, texture> textures;

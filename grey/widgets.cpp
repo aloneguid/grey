@@ -76,6 +76,11 @@ namespace grey::widgets {
         return *this;
     }
 
+    window& window::no_collapse() {
+        flags |= ImGuiWindowFlags_NoCollapse;
+        return *this;
+    }
+
     window& window::no_titlebar() {
         flags |= ImGuiWindowFlags_NoTitleBar;
         return *this;
@@ -104,6 +109,11 @@ namespace grey::widgets {
         return *this;
     }
 
+    window& window::fill_viewport() {
+        fill_viewport_enabled = true;
+        return *this;
+    }
+
     void window::enter() {
         ImGui::SetNextWindowBgAlpha(1.0f);
 
@@ -112,7 +122,7 @@ namespace grey::widgets {
         }
 
         // set window class to prevent viewports to be merged with main window
-        ImGui::SetNextWindowClass(&wc);
+        //ImGui::SetNextWindowClass(&wc);
 
         if(init_size.x)
             ImGui::SetNextWindowSize(init_size, ImGuiCond_Once);
@@ -143,6 +153,20 @@ namespace grey::widgets {
             ImGui::SetNextWindowPos(init_center_pos, ImGuiCond_Appearing);
         }
 
+        if(fill_viewport_enabled) {
+#ifdef IMGUI_HAS_VIEWPORT
+            ImGuiViewport* viewport = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(viewport->WorkPos);
+            ImGui::SetNextWindowSize(viewport->WorkSize);
+            ImGui::SetNextWindowViewport(viewport->ID);
+#else 
+            ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+            ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+#endif
+            // window rounding will be handled by parent viewport, therefore we need to disable it
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        }
+
         ImGui::Begin(title.c_str(), p_open, flags);
 
         if(capture_size)
@@ -160,6 +184,10 @@ namespace grey::widgets {
                 ::SetForegroundWindow((HWND)vp->PlatformHandleRaw);
                 win32_brought_forward = true;
             }
+        }
+
+        if(fill_viewport_enabled) {
+            ImGui::PopStyleVar(1);
         }
     }
 
@@ -240,7 +268,7 @@ namespace grey::widgets {
                 sl();
 
                 if(mi(theme.name)) {
-                    grey::themes::set_theme(theme.id, scale);
+                    //grey::themes::set_theme(theme.id, scale);
                     on_changed(theme.id);
                 }
             }

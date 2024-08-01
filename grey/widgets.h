@@ -84,11 +84,13 @@ namespace grey::widgets {
         window& has_menubar();
         window& fullscreen();
         window& no_resize();
+        window& no_collapse();
         window& no_titlebar();
         window& no_border();
         window& no_focus();
         window& no_scroll();
         window& center(void* monitor_handle = nullptr);
+        window& fill_viewport();
 
         void enter() override;
         void leave() override;
@@ -112,6 +114,7 @@ namespace grey::widgets {
         ImGuiWindowFlags flags{0};
         ImGuiWindowClass wc;
         float border_size{-1};
+        bool fill_viewport_enabled{false};
 
         bool win32_brought_forward{false};
     };

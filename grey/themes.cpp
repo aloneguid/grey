@@ -9,7 +9,7 @@ namespace grey::themes {
 
     std::vector<app_theme> list_themes() {
         return vector<app_theme> {
-            { FollowOsThemeName, "Follow OS", false, IM_COL32(0, 0, 0, 255) },
+            { FollowOsThemeId, "Follow OS", false, IM_COL32(0, 0, 0, 255) },
             {"dark", "Dark", true, IM_COL32(0, 0, 0, 255)},
             {"light", "Light", false, IM_COL32(255, 255, 255, 255)},
             {"microsoft", "Microsoft", false, IM_COL32(40, 73, 122, 255)},
@@ -542,11 +542,32 @@ namespace grey::themes {
 
     }
 
+    app_theme get_theme(const std::string& theme_id) {
+        auto themes = list_themes();
+        app_theme r = themes[0];
+
+        // find theme by id
+        for(const app_theme& t : themes) {
+            if(t.id == theme_id) {
+                r = t;
+                break;
+            }
+        }
+
+        if(r.id == FollowOsThemeId) {
+            bool is_light;
+            grey::common::win32::os::is_app_light_theme(is_light);
+            r.is_dark = !is_light;
+        }
+
+        return r;
+    }
+
     void set_theme(const std::string& theme_id, float scale) {
 
         string id{theme_id};
 
-        if(id == FollowOsThemeName) {
+        if(id == FollowOsThemeId) {
             set_theme_follow_os();
         } else if(id == "dark") {
             set_theme_dark();
@@ -576,5 +597,16 @@ namespace grey::themes {
             style.ChildRounding =
             style.TabRounding =
             3 * scale;
+    }
+
+    bool is_dark_theme(const string& theme_id) {
+        bool is_dark = false;
+        for(auto& theme : list_themes()) {
+            if(theme.id == theme_id) {
+                is_dark = theme.is_dark;
+                break;
+            }
+        }
+        return is_dark;
     }
 }

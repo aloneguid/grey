@@ -7,8 +7,8 @@
 using namespace std;
 
 namespace grey {
-    std::unique_ptr<grey::app> app::make(const string& title) {
-        auto app = make_unique<grey::backends::win32dx11app>(title);
+    std::unique_ptr<grey::app> app::make(const string& title, int width, int height) {
+        auto app = make_unique<grey::backends::win32dx11app>(title, width, height);
 
         return app;
     }
@@ -32,13 +32,19 @@ namespace grey {
         //io.FontGlobalScale = scale;
         io.DisplayFramebufferScale = {scale, scale};
 
-        string theme_id = initial_theme_id.empty() ? grey::themes::FollowOsThemeName : initial_theme_id;
-        grey::themes::set_theme(theme_id, scale);
+        string theme_id = initial_theme_id.empty() ? grey::themes::FollowOsThemeId : initial_theme_id;
+        set_theme(theme_id);
 
         grey::load_font(scale, load_icon_font);
 
         if(on_initialised)
             on_initialised();
+    }
+
+    void app::set_theme(const std::string& theme_id) {
+        auto theme = grey::themes::get_theme(theme_id);
+        grey::themes::set_theme(theme_id, scale);
+        set_dark_mode(theme.is_dark);
     }
 
     texture app::get_texture(const std::string& key) {

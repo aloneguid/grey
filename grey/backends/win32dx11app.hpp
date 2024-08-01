@@ -4,6 +4,7 @@
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
 #include <d3d11.h>
+#include <dwmapi.h>
 #include "../common/win32/os.h"
 #include "../common/str.h"
 
@@ -130,12 +131,59 @@ namespace grey::backends {
     }
 
     class win32dx11app : public grey::app {
+    private:
+        HWND hwnd{0};
     public:
 
         string title;
+        int window_left{-1};
+        int window_top{-1};
+        int window_width{-1};
+        int window_height{-1};
 
-        win32dx11app(const std::string& title) {
-            this->title = title;
+        win32dx11app(const std::string& title, int width, int height) :
+            title{title}, window_width{width}, window_height{height} {
+
+            if(window_width == -1 || window_height == -1) {
+                window_width = window_height = CW_USEDEFAULT;
+            } else {
+                // apply scaling factor
+                window_width = (int)(window_width * scale);
+                window_height = (int)(window_height * scale);
+            }
+        }
+
+        void set_dark_mode(bool enabled) {
+            BOOL win32_immersive_dark_mode = enabled;
+            ::DwmSetWindowAttribute(
+                hwnd, DWMWINDOWATTRIBUTE::DWMWA_USE_IMMERSIVE_DARK_MODE,
+                &win32_immersive_dark_mode, sizeof(win32_immersive_dark_mode));
+        }
+
+        void get_screen_center(int width, int height, int& x, int& y) {
+            int sw = ::GetSystemMetrics(SM_CXFULLSCREEN);
+            int sh = ::GetSystemMetrics(SM_CYFULLSCREEN);
+
+            x = sw / 2 - width / 2;
+            y = sh / 2 - height / 2;
+        }
+
+        void resize_main_viewport(int width, int height) {
+            // apply scaling factor
+            window_width = (int)(width * scale);
+            window_height = (int)(height * scale);
+
+            if(hwnd) {
+                UINT uFlags{0};
+
+                if(win32_center_on_screen) {
+                    get_screen_center(window_width, window_height, window_left, window_top);
+                } else {
+                    uFlags |= SWP_NOMOVE;
+                }
+
+                ::SetWindowPos(hwnd, nullptr, window_left, window_top, window_width, window_height, uFlags);
+            }
         }
 
         void run(std::function<bool(const app& app)> render_frame) {
@@ -154,18 +202,28 @@ namespace grey::backends {
             ::RegisterClassExW(&wc);
 
             wstring w_title = grey::common::str::to_wstr(title);
-            //HWND hwnd = ::CreateWindowW(wc.lpszClassName, w_title.c_str(), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, nullptr, nullptr, wc.hInstance, nullptr);
-            HWND hwnd = ::CreateWindowW(wc.lpszClassName, w_title.c_str(), WS_OVERLAPPED, 0, 0, 3000, 2000, nullptr, nullptr, wc.hInstance, nullptr);
-            //HWND hwnd = ::CreateWindowExW(
-            //    WS_EX_APPWINDOW,
-            //    wc.lpszClassName,
-            //    w_title.c_str(),
-            //    WS_POPUP,
-            //    100, 100, 1280, 800,
-            //    nullptr, nullptr,
-            //    wc.hInstance,
-            //    nullptr);
 
+            DWORD dwStyle = WS_OVERLAPPEDWINDOW;// | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME;
+            //DWORD dwStyle = WS_POPUP;
+            if(!win32_can_resize) {
+                // remove resize frame and maximize button
+                dwStyle &= ~WS_THICKFRAME;
+                dwStyle &= ~WS_MAXIMIZEBOX;
+            }
+            //if(can_minimise) dwStyle |= WS_MINIMIZEBOX;
+
+            if(win32_center_on_screen) {
+                get_screen_center(window_width, window_height, window_left, window_top);
+            } else {
+                window_left = window_top = CW_USEDEFAULT;
+            }
+
+            hwnd = ::CreateWindowW(wc.lpszClassName,
+                w_title.c_str(), dwStyle,
+                window_left, window_top,
+                window_width, window_height,
+                nullptr, nullptr,
+                wc.hInstance, nullptr);
 
             // Initialize Direct3D
             if(!CreateDeviceD3D(hwnd)) {
@@ -175,9 +233,9 @@ namespace grey::backends {
             }
 
             // Show the window
-            ::ShowWindow(hwnd, SW_MINIMIZE);
-            //::ShowWindow(hwnd, SW_SHOWNORMAL);
-            ::ShowWindow(hwnd, SW_HIDE);
+            //::ShowWindow(hwnd, SW_SHOWMINIMIZED);
+            ::ShowWindow(hwnd, SW_SHOWNORMAL);
+            //::ShowWindow(hwnd, SW_HIDE);
             ::UpdateWindow(hwnd);
 
             // Setup Dear ImGui context
