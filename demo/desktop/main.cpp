@@ -16,6 +16,7 @@ string text;
 w::container scroller{400, 100};
 w::popup status_pop {"status_pop"};
 w::node_editor ned;
+w::text_editor ted;
 bool selected{false};
 
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
@@ -24,14 +25,19 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
     //auto wnd = backend->make_window<demo::main_wnd>();
     //backend->run();
 
-    auto app = grey::app::make(APP_LONG_NAME);
+    auto app = grey::app::make(APP_LONG_NAME, 800, 600);
     float scale = app->scale;
 
     wnd
-        .size(800, 600)
-        .center()
-        //.no_scroll()
+        .no_titlebar()
+        .no_scroll()
+        .no_resize()
+        .fill_viewport()
+        .no_border()
         .has_menubar();
+
+    ted.set_text("-- add your Lua code here");
+
 
     app->run([](const grey::app& app) {
         
@@ -257,6 +263,19 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
                     ed::Link(uniqueId++, pin0, pin1);
 
+                }
+            }
+
+            // ImGuiColorTextEdit
+
+            {
+                auto tab = tabs.next_tab("Lua Editor");
+                if(tab) {
+                    if(ted) {
+                        w::label("code changed");
+                    }
+
+                    w::guard g{ted};
                 }
             }
         }

@@ -16,7 +16,7 @@ file(GLOB core_src CONFIGURE_DEPENDS "*.cpp"
     "common/*.cpp"
     "common/win32/*.cpp"
     "3rdparty/imgui-node-editor/*.cpp"
-    "3rdparty/adobe-spectrum/*.cpp")
+    "3rdparty/ImGuiColorTextEdit/*.cpp")
 set(private_libs D3D11.lib implot::implot)
 set(interface_libs imgui::imgui)
 

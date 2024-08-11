@@ -12,6 +12,7 @@ add_executable (${APP_NAME} WIN32 ${core_src} "main.cpp" main.rc)
 target_compile_definitions(${APP_NAME} PRIVATE
     APP_SHORT_NAME="${APP_NAME}"
     APP_LONG_NAME="${APP_LONG_NAME}"
+    GREY_INCLUDE_IMNODES
 )
 
 target_link_libraries(demo libgrey)

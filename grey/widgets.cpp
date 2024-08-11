@@ -802,7 +802,7 @@ namespace grey::widgets {
         open_y = y;
     }
 
-#ifdef GREY_INCLUDE_IMNODES
+//#ifdef GREY_INCLUDE_IMNODES
 
     // ---- ImNodes ----
 
@@ -833,7 +833,33 @@ namespace grey::widgets {
         ed::EndNode();
     }
 
-#endif
+//#endif
 
+    // ImGuiColorTextEdit
+
+    text_editor::text_editor() : 
+        id{generate_id("TextEditor")},
+        lang{TextEditor::LanguageDefinition::Lua()} {
+        editor.SetLanguageDefinition(lang);
+    }
+
+    void text_editor::set_text(const std::string& text) {
+        editor.SetText(text);
+    }
+
+    std::string text_editor::get_text() {
+        return editor.GetText();
+    }
+
+    void text_editor::enter() {
+        editor.Render(id.c_str());
+    }
+
+    void text_editor::leave() {
+    }
+
+    text_editor::operator bool() {
+        return editor.IsTextChanged();
+    }
 
 }

@@ -8,10 +8,11 @@
 #include "app.h"
 
 // 3rdparty
-#ifdef GREY_INCLUDE_IMNODES
+//#ifdef GREY_INCLUDE_IMNODES
 #include "3rdparty/imgui-node-editor/imgui_node_editor.h"
 namespace ed = ax::NodeEditor;
-#endif // GREY_INCLUDE_IMNODES
+//#endif // GREY_INCLUDE_IMNODES
+#include "3rdparty/ImGuiColorTextEdit/TextEditor.h"
 
 namespace grey::widgets {
 
@@ -369,7 +370,7 @@ namespace grey::widgets {
 
     ImU32 imcol32(ImGuiCol idx);
 
-#ifdef GREY_INCLUDE_IMNODES
+//#ifdef GREY_INCLUDE_IMNODES
 
     // Node editor
 
@@ -398,5 +399,27 @@ namespace grey::widgets {
         ed::EditorContext* context{nullptr};
     };
 
-#endif
+//#endif
+
+    // ImGuiColorTextEdit
+    class text_editor : public guardable {
+    public:
+        text_editor();
+
+        void set_text(const std::string& text);
+        std::string get_text();
+
+        void enter() override;
+        void leave() override;
+
+        /**
+         * @brief Returns true if text has changed. This flag is cleared on each frame render and before enter(), so best to check it after leave()
+        */
+        operator bool();
+    private:
+        std::string id;
+        TextEditor editor;
+        const TextEditor::LanguageDefinition& lang;
+    };
+
 }
