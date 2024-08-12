@@ -81,14 +81,12 @@ namespace grey::widgets {
          */
         window& size(int width, int height);
         window& resize(float width = 0, float height = 0);
-        window& autosize();
         window& has_menubar();
         window& fullscreen();
         window& no_resize();
         window& no_collapse();
         window& no_titlebar();
-        window& no_border();
-        window& no_focus();
+        window& border(float width);
         window& no_scroll();
         window& center(void* monitor_handle = nullptr);
         window& fill_viewport();
@@ -99,7 +97,6 @@ namespace grey::widgets {
         ~window();
 
     private:
-        bool capture_size{false};
         ImVec2 init_size{0, 0};
         ImVec2 resize_to{0, 0};
 
@@ -109,7 +106,6 @@ namespace grey::widgets {
         void* init_center_monitor{nullptr}; // monitor to center at (native handle)
         ImGuiPlatformMonitor init_center_imgui_monitor; // monitor to center at (imgui handle)
 
-        ImVec2 size_in;
         const std::string title;
         bool* p_open{nullptr};
         ImGuiWindowFlags flags{0};
@@ -402,20 +398,18 @@ namespace grey::widgets {
 //#endif
 
     // ImGuiColorTextEdit
-    class text_editor : public guardable {
+    class text_editor {
     public:
         text_editor();
 
         void set_text(const std::string& text);
         std::string get_text();
 
-        void enter() override;
-        void leave() override;
-
         /**
-         * @brief Returns true if text has changed. This flag is cleared on each frame render and before enter(), so best to check it after leave()
-        */
-        operator bool();
+         * @brief Renders text editor and returns true if text has changed.
+         * @return 
+         */
+        bool render();
     private:
         std::string id;
         TextEditor editor;

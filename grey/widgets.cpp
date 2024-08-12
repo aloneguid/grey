@@ -61,11 +61,6 @@ namespace grey::widgets {
         return *this;
     }
 
-    window& window::autosize() {
-        flags |= ImGuiWindowFlags_NoBackground;
-        return *this;
-    }
-
     window& window::has_menubar() {
         flags |= ImGuiWindowFlags_MenuBar;
         return *this;
@@ -86,13 +81,8 @@ namespace grey::widgets {
         return *this;
     }
 
-    window& window::no_border() {
-        border_size = 0;
-        return *this;
-    }
-
-    window& window::no_focus() {
-        flags |= ImGuiWindowFlags_NoFocusOnAppearing;
+    window& window::border(float width) {
+        border_size = width;
         return *this;
     }
 
@@ -103,7 +93,6 @@ namespace grey::widgets {
 
     window& window::center(void* monitor_handle) {
         init_center_monitor = monitor_handle;
-        capture_size = true;
         init_center = true;
 
         return *this;
@@ -111,11 +100,12 @@ namespace grey::widgets {
 
     window& window::fill_viewport() {
         fill_viewport_enabled = true;
+        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
         return *this;
     }
 
     void window::enter() {
-        ImGui::SetNextWindowBgAlpha(1.0f);
+        //ImGui::SetNextWindowBgAlpha(1.0f);
 
         if(border_size >= 0) {
             ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, border_size);
@@ -168,9 +158,6 @@ namespace grey::widgets {
         }
 
         ImGui::Begin(title.c_str(), p_open, flags);
-
-        if(capture_size)
-            size_in = ImGui::GetWindowSize();
     }
 
     void window::leave() {
@@ -187,7 +174,7 @@ namespace grey::widgets {
         }
 
         if(fill_viewport_enabled) {
-            ImGui::PopStyleVar(1);
+            ImGui::PopStyleVar();
         }
     }
 
@@ -851,15 +838,8 @@ namespace grey::widgets {
         return editor.GetText();
     }
 
-    void text_editor::enter() {
+    bool text_editor::render() {
         editor.Render(id.c_str());
-    }
-
-    void text_editor::leave() {
-    }
-
-    text_editor::operator bool() {
         return editor.IsTextChanged();
     }
-
 }
