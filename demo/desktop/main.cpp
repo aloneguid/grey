@@ -33,7 +33,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
         .no_scroll()
         .no_resize()
         .fill_viewport()
-        .no_border()
+        .border(0)
         .has_menubar();
 
     ted.set_text("-- add your Lua code here");
@@ -271,11 +271,9 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
             {
                 auto tab = tabs.next_tab("Lua Editor");
                 if(tab) {
-                    if(ted) {
+                    if(ted.render()) {
                         w::label("code changed");
                     }
-
-                    w::guard g{ted};
                 }
             }
         }
