@@ -372,8 +372,13 @@ namespace grey::widgets {
 
     class node_editor_node {
     public:
+        ImVec2 size;
+
         node_editor_node(int id);
         ~node_editor_node();
+
+    private:
+        int id;
     };
 
     /**
@@ -381,7 +386,7 @@ namespace grey::widgets {
      */
     class node_editor : public guardable {
     public:
-        node_editor();
+        node_editor(bool select_on_hover = false);
         ~node_editor();
 
         void enter() override;
@@ -390,7 +395,17 @@ namespace grey::widgets {
         node_editor_node node(int id) {
             return node_editor_node{id};
         }
+
+        void set_node_pos(int node_id, float x, float y);
+        void pin_in(int pin_id, const std::string& text);
+        void pin_out(int pin_id, const std::string& text);
+        void link(int link_id, int from_pin_id, int to_pin_id, bool flow = false);
+
+        void get_node_size(int node_id, float& width, float& height);
+
     private:
+        std::string id;
+        bool select_on_hover;
         ed::Config config;
         ed::EditorContext* context{nullptr};
     };

@@ -793,8 +793,8 @@ namespace grey::widgets {
 
     // ---- ImNodes ----
 
-    node_editor::node_editor() {
-        //config.SettingsFile = nullptr;
+    node_editor::node_editor(bool select_on_hover) : id{generate_id()}, select_on_hover{select_on_hover} {
+        config.SettingsFile = nullptr;
         context = ed::CreateEditor(&config);
     }
 
@@ -804,21 +804,59 @@ namespace grey::widgets {
 
     void node_editor::enter() {
         ed::SetCurrentEditor(context);
-        ed::Begin("My Editor", ImVec2(0.0, 0.0f));
+        ed::Begin(id.c_str(), ImVec2(0.0, 0.0f));
     }
 
     void node_editor::leave() {
         ed::End();
-        ed::SetCurrentEditor(nullptr);
+        ed::SetCurrentEditor(context);
+        if(select_on_hover) {
+            auto hid = ed::GetHoveredNode();
+            if(hid) {
+                ed::SelectNode(hid);
+            }
+        }
     }
 
-    node_editor_node::node_editor_node(int id) {
+    void node_editor::set_node_pos(int node_id, float x, float y) {
+        ed::SetNodePosition(node_id, ImVec2(x, y));
+    }
+
+    void node_editor::pin_in(int pin_id, const std::string& text) {
+        ed::BeginPin(pin_id, ed::PinKind::Input);
+        ImGui::Text(text.c_str());
+        ed::EndPin();
+    }
+
+    void node_editor::pin_out(int pin_id, const std::string& text) {
+        ed::BeginPin(pin_id, ed::PinKind::Output);
+        ImGui::Text(text.c_str());
+        ed::EndPin();
+    }
+
+    void node_editor::link(int link_id, int from_pin_id, int to_pin_id, bool flow) {
+        ed::Link(link_id, from_pin_id, to_pin_id);
+        if(flow) {
+            ed::Flow(link_id, ed::FlowDirection::Forward);
+        }
+    }
+
+    void node_editor::get_node_size(int node_id, float& width, float& height) {
+        ImVec2 size = ed::GetNodeSize(node_id);
+        width = size.x;
+        height = size.y;
+
+        //ed::GetSelectedNodes
+    }
+
+    node_editor_node::node_editor_node(int id) : id{id} {
         ed::BeginNode(id);
     }
 
     node_editor_node::~node_editor_node() {
         ed::EndNode();
     }
+
 
 //#endif
 
