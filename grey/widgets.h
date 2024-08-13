@@ -403,6 +403,18 @@ namespace grey::widgets {
 
         void get_node_size(int node_id, float& width, float& height);
 
+        /**
+         * @brief If a node is selected, returns node ID, otherwise returns -1.
+         * @return 
+         */
+        int get_selected_node_id();
+
+        /**
+         * @brief If a node is hovered, returns node ID, otherwise returns -1.
+         * @return 
+         */
+        int get_hovered_node_id();
+
     private:
         std::string id;
         bool select_on_hover;

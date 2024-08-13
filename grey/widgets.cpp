@@ -845,8 +845,28 @@ namespace grey::widgets {
         ImVec2 size = ed::GetNodeSize(node_id);
         width = size.x;
         height = size.y;
+    }
 
-        //ed::GetSelectedNodes
+    int node_editor::get_selected_node_id() {
+        int count = ed::GetSelectedObjectCount();
+        if(count == 0) return -1;
+
+        vector<ed::NodeId> selected_nodes;
+        selected_nodes.resize(count);
+        int snc = ed::GetSelectedNodes(selected_nodes.data(), static_cast<int>(selected_nodes.size()));
+        if(snc > 0) {
+            auto& node_id = selected_nodes[0];
+            return static_cast<uintptr_t>(node_id);
+        }
+
+        return -1;
+    }
+
+    int node_editor::get_hovered_node_id() {
+        ed::NodeId id = ed::GetHoveredNode();
+        return id
+            ? static_cast<uintptr_t>(id)
+            : -1;
     }
 
     node_editor_node::node_editor_node(int id) : id{id} {
