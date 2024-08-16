@@ -362,6 +362,8 @@ namespace grey::widgets {
 
     bool is_hovered();
 
+    bool tree_node(const std::string& label, ImGuiTreeNodeFlags flags = 0, emphasis emp = emphasis::none);
+
     // colour helpers
 
     ImU32 imcol32(ImGuiCol idx);

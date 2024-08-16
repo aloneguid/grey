@@ -716,6 +716,24 @@ namespace grey::widgets {
         return ImGui::IsItemHovered();
     }
 
+    bool tree_node(const std::string& label, ImGuiTreeNodeFlags flags, emphasis emp) {
+        bool ok;
+        if(emp == emphasis::none) {
+            ok = ImGui::TreeNodeEx(label.c_str(), flags);
+        } else {
+            ImVec4 normal, hovered, active;
+            if(set_emphasis_colours(emp, normal, hovered, active)) {
+                ImGui::PushStyleColor(ImGuiCol_Text, normal);
+                ok = ImGui::TreeNodeEx(label.c_str(), flags);
+                ImGui::PopStyleColor();
+            } else {
+                ok = ImGui::TreeNodeEx(label.c_str(), flags);
+            }
+        }
+
+        return ok;
+    }
+
     // colour helpers
 
     ImU32 imcol32(ImGuiCol idx) {
