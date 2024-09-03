@@ -317,7 +317,9 @@ namespace grey::widgets {
 
     bool input(std::string& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
 
-    void input_ml(std::string& value, const std::string& label = "", unsigned int line_height = 10, bool autoscroll = false);
+    void input_ml(const std::string& id, std::string& value, unsigned int line_height = 10, bool autoscroll = false);
+
+    void input_ml(const std::string& id, std::string& value, float height, bool autoscroll = false);
 
     void tooltip(const std::string& text);
 
@@ -352,6 +354,14 @@ namespace grey::widgets {
 
     bool accordion(const std::string& header);
 
+    /**
+     * @brief 
+     * @param label 
+     * @param options 
+     * @param selected 
+     * @param width Unscaled width
+     * @return 
+     */
     bool combo(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width = 0);
 
     bool radio(const std::string& label, bool is_active);
@@ -445,7 +455,7 @@ namespace grey::widgets {
          * @brief Renders text editor and returns true if text has changed.
          * @return 
          */
-        bool render();
+        bool render(float width = 0.0f, float height = 0.0f);
     private:
         std::string id;
         TextEditor editor;

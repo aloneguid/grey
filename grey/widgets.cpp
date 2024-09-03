@@ -342,19 +342,36 @@ namespace grey::widgets {
         return fired;
     }
 
-    void input_ml(std::string& value, const std::string& label, unsigned int line_height, bool autoscroll) {
-        ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;
-        ImVec2 size{-FLT_MIN, ImGui::GetTextLineHeight() * line_height};
-        ImGui::InputTextMultiline(label.c_str(), &value, size, flags);
-
-        if(autoscroll) {
-            const char* child_window_name = NULL;
-            ImGuiContext* g = ImGui::GetCurrentContext();
-            ImFormatStringToTempBuffer(&child_window_name, NULL, "%s/%s_%08X",
-                g->CurrentWindow->Name, label.c_str(), ImGui::GetID(label.c_str()));
-            ImGuiWindow* child_window = ImGui::FindWindowByName(child_window_name);
+    void autoscroll_input_ml(const string& id) {
+        const char* child_window_name = NULL;
+        ImGuiContext* g = ImGui::GetCurrentContext();
+        ImFormatStringToTempBuffer(&child_window_name, NULL, "%s/%s_%08X",
+            g->CurrentWindow->Name, id.c_str(), ImGui::GetID(id.c_str()));
+        ImGuiWindow* child_window = ImGui::FindWindowByName(child_window_name);
+        if(child_window) {
             ImGui::SetScrollY(child_window, child_window->ScrollMax.y);
         }
+    }
+
+    void input_ml(const string& id, string& value, unsigned int line_height, bool autoscroll) {
+        ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;
+        ImVec2 size{-FLT_MIN, ImGui::GetTextLineHeight() * line_height};
+        ImGui::InputTextMultiline(id.c_str(), &value, size, flags);
+
+        if(autoscroll) {
+            autoscroll_input_ml(id);
+        }
+    }
+
+    void input_ml(const string& id, string& value, float height, bool autoscroll) {
+        ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;
+        ImVec2 size{-FLT_MIN, height};
+        ImGui::InputTextMultiline(id.c_str(), &value, size, flags);
+
+        if(autoscroll) {
+            autoscroll_input_ml(id);
+        }
+
     }
 
     // ---- tooltip ----
@@ -924,8 +941,8 @@ namespace grey::widgets {
         return editor.GetText();
     }
 
-    bool text_editor::render() {
-        editor.Render(id.c_str());
+    bool text_editor::render(float width, float height) {
+        editor.Render(id.c_str(), ImVec2(width, height));
         return editor.IsTextChanged();
     }
 }
