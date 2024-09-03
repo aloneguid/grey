@@ -573,16 +573,18 @@ namespace grey::widgets {
     bool combo(const string& label, const std::vector<std::string>& options, size_t& selected, float width) {
         bool ret{false};
 
-        if(options.empty()) return false;
-
-        if(selected >= options.size()) selected = options.size() - 1;
-
         if(width != 0) {
             width *= scale;
             ImGui::PushItemWidth(width);
         }
 
-        if(ImGui::BeginCombo(label.c_str(), options[selected].c_str())) {
+        if(selected >= options.size()) {
+            selected = options.empty() ? 0 : options.size() - 1;
+        }
+
+        string preview_value = options.empty() ? "" : options[selected];
+
+        if(ImGui::BeginCombo(label.c_str(), preview_value.c_str())) {
             for(size_t i = 0; i < options.size(); i++) {
                 bool is_selected = selected == i;
                 if(ImGui::Selectable(options[i].c_str(), is_selected)) {
