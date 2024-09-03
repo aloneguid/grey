@@ -141,7 +141,14 @@ namespace grey::widgets {
         container(const std::string& id, float width = 0.0F, float height = 0.0F);
 
         container& border() {
-            has_border = true; return *this; }
+            flags |= ImGuiChildFlags_Border;
+            return *this;
+        }
+
+        container& auto_size_y() {
+            flags |= ImGuiChildFlags_AutoResizeY;
+            return *this;
+        }
 
         void enter() override;
         void leave() override;
@@ -149,7 +156,7 @@ namespace grey::widgets {
     private:
         std::string id;
         ImVec2 size;
-        bool has_border{false};
+        ImGuiChildFlags flags{0};
     };
 
     class group {
@@ -345,7 +352,7 @@ namespace grey::widgets {
 
     bool accordion(const std::string& header);
 
-    void combo(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width = 0);
+    bool combo(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width = 0);
 
     bool radio(const std::string& label, bool is_active);
 

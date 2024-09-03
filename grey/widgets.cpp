@@ -208,7 +208,7 @@ namespace grey::widgets {
             tsz = ImVec2(tsz.x, wsz.y + size.y);
         }
 
-        ImGui::BeginChild(id.c_str(), size, has_border ? ImGuiChildFlags_Border : 0);
+        ImGui::BeginChild(id.c_str(), size, flags);
     }
 
     void container::leave() {
@@ -553,16 +553,24 @@ namespace grey::widgets {
         return ImGui::CollapsingHeader(header.c_str());
     }
 
-    void combo(const string& label, const std::vector<std::string>& options, size_t& selected, float width) {
+    bool combo(const string& label, const std::vector<std::string>& options, size_t& selected, float width) {
+        bool ret{false};
 
-        if(width != 0)
+        if(options.empty()) return false;
+
+        if(selected >= options.size()) selected = options.size() - 1;
+
+        if(width != 0) {
+            width *= scale;
             ImGui::PushItemWidth(width);
+        }
 
         if(ImGui::BeginCombo(label.c_str(), options[selected].c_str())) {
             for(size_t i = 0; i < options.size(); i++) {
                 bool is_selected = selected == i;
                 if(ImGui::Selectable(options[i].c_str(), is_selected)) {
                     selected = i;
+                    ret = true;
                 }
 
                 if(is_selected) {
@@ -575,6 +583,8 @@ namespace grey::widgets {
 
         if(width != 0)
             ImGui::PopItemWidth();
+
+        return ret;
     }
 
     bool radio(const std::string& label, bool is_active) {

@@ -182,7 +182,7 @@ namespace grey::backends {
                     uFlags |= SWP_NOMOVE;
                 }
 
-                ::SetWindowPos(hwnd, nullptr, window_left, window_top, window_width, window_height, uFlags);
+                ::SetWindowPos(hwnd, HWND_TOP, window_left, window_top, window_width, window_height, uFlags);
             }
         }
 
@@ -203,7 +203,7 @@ namespace grey::backends {
 
             wstring w_title = grey::common::str::to_wstr(title);
 
-            DWORD dwStyle = WS_OVERLAPPEDWINDOW;// | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME;
+            DWORD dwStyle = WS_OVERLAPPEDWINDOW | WS_VISIBLE;// | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME;
             //DWORD dwStyle = WS_POPUP;
             if(!win32_can_resize) {
                 // remove resize frame and maximize button
