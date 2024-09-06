@@ -1,4 +1,5 @@
 #pragma once
+#if _WIN32
 #include "../app.h"
 #include "imgui.h"
 #include "imgui_impl_win32.h"
@@ -22,6 +23,7 @@ namespace grey::backends {
     static bool                     g_SwapChainOccluded = false;
     static UINT                     g_ResizeWidth = 0, g_ResizeHeight = 0;
     static ID3D11RenderTargetView* g_mainRenderTargetView = nullptr;
+    static bool g_win32_close_on_focus_lost{false};
 
     // Forward declarations of helper functions
     bool CreateDeviceD3D(HWND hWnd);
@@ -126,6 +128,11 @@ namespace grey::backends {
                     ::SetWindowPos(hWnd, nullptr, suggested_rect->left, suggested_rect->top, suggested_rect->right - suggested_rect->left, suggested_rect->bottom - suggested_rect->top, SWP_NOZORDER | SWP_NOACTIVATE);
                 }
                 break;
+            case WM_KILLFOCUS:
+                if(g_win32_close_on_focus_lost) {
+                    ::PostQuitMessage(0);
+                }
+                break;
         }
         return ::DefWindowProcW(hWnd, msg, wParam, lParam);
     }
@@ -190,6 +197,9 @@ namespace grey::backends {
             // Create application window
             //ImGui_ImplWin32_EnableDpiAwareness();
 
+            // apply win32 customisations
+            g_win32_close_on_focus_lost = win32_close_on_focus_lost;
+
             WNDCLASSEXW wc = {
                 sizeof(wc),
                 CS_CLASSDC,
@@ -237,6 +247,7 @@ namespace grey::backends {
             ::ShowWindow(hwnd, SW_SHOWNORMAL);
             //::ShowWindow(hwnd, SW_HIDE);
             ::UpdateWindow(hwnd);
+            ::SetForegroundWindow(hwnd);    // just as an extra precaution
 
             // Setup Dear ImGui context
             IMGUI_CHECKVERSION();
@@ -395,3 +406,4 @@ namespace grey::backends {
         }
     };
 }
+#endif

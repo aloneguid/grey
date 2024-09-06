@@ -71,7 +71,10 @@ namespace grey {
         bool win32_title_bar{true};
         bool win32_can_resize{true};
         bool win32_center_on_screen{false};
-        //bool win32_can_maximize{true};
+        /**
+         * @brief When window loses focus, it will be closed. This is useful for modal windows. Needs to be set before application starts up to take effect.
+         */
+        bool win32_close_on_focus_lost{false};
 #endif
 
     protected:
