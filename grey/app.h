@@ -75,6 +75,11 @@ namespace grey {
          * @brief When window loses focus, it will be closed. This is useful for modal windows. Needs to be set before application starts up to take effect.
          */
         bool win32_close_on_focus_lost{false};
+
+        /**
+         * @brief When set to true, window will be always on top.
+         */
+        bool win32_always_on_top{false};
 #endif
 
     protected:

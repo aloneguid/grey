@@ -249,6 +249,10 @@ namespace grey::backends {
             ::UpdateWindow(hwnd);
             ::SetForegroundWindow(hwnd);    // just as an extra precaution
 
+            if(win32_always_on_top) {
+                ::SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+            }
+
             // Setup Dear ImGui context
             IMGUI_CHECKVERSION();
             ImGui::CreateContext();
