@@ -364,6 +364,8 @@ namespace grey::widgets {
      */
     bool combo(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width = 0);
 
+    bool list(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width = 0);
+
     bool radio(const std::string& label, bool is_active);
 
     bool small_radio(const std::string& label, bool is_active);

@@ -606,6 +606,42 @@ namespace grey::widgets {
         return ret;
     }
 
+    bool list(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width) {
+        bool ret{false};
+
+        if(width != 0) {
+            width *= scale;
+            ImGui::PushItemWidth(width);
+        }
+
+        if(selected >= options.size()) {
+            selected = options.empty() ? 0 : options.size() - 1;
+        }
+
+        string preview_value = options.empty() ? "" : options[selected];
+
+        if(ImGui::BeginListBox(label.c_str())) {
+            for(size_t i = 0; i < options.size(); i++) {
+                bool is_selected = selected == i;
+                if(ImGui::Selectable(options[i].c_str(), is_selected)) {
+                    selected = i;
+                    ret = true;
+                }
+
+                if(is_selected) {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+
+            ImGui::EndListBox();
+        }
+
+        if(width != 0)
+            ImGui::PopItemWidth();
+
+        return ret;
+    }
+
     bool radio(const std::string& label, bool is_active) {
         return ImGui::RadioButton(label.c_str(), is_active);
     }
@@ -814,7 +850,7 @@ namespace grey::widgets {
             do_open = false;
         }
 
-        if(open_x != 0 && open_y != 0) {
+        if(rendered && open_x != 0 && open_y != 0) {
             ImGui::SetNextWindowPos(ImVec2(open_x, open_y));
         }
         rendered = ImGui::BeginPopup(id.c_str());
