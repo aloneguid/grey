@@ -809,7 +809,11 @@ namespace grey::widgets {
 
     // ---- tab bar ----
 
-    tab_bar::tab_bar(const std::string& id) {
+    tab_bar::tab_bar(const std::string& id, bool tab_list_popup, bool scroll) {
+        if(tab_list_popup)
+            flags |= ImGuiTabBarFlags_TabListPopupButton;
+        if(scroll)
+            flags |= ImGuiTabBarFlags_FittingPolicyScroll;
         rendered = ImGui::BeginTabBar(id.c_str(), flags);
         tab_index = 0;
     }

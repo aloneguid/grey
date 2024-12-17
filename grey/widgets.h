@@ -254,7 +254,7 @@ namespace grey::widgets {
 
     class tab_bar {
     public:
-        tab_bar(const std::string& id);
+        tab_bar(const std::string& id, bool tab_list_popup = false, bool scroll = false);
         ~tab_bar();
 
         tab_bar_item next_tab(const std::string& title, bool unsaved = false);
@@ -263,7 +263,7 @@ namespace grey::widgets {
         bool rendered{false};
         std::string id;
         size_t tab_index{0};
-        ImGuiTabBarFlags flags{0};
+        ImGuiTabBarFlags flags{ImGuiTabBarFlags_DrawSelectedOverline};
     };
 
     /**
