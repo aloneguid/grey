@@ -15,7 +15,6 @@ w::window wnd{window_title, &app_open};
 string text;
 w::container scroller{400, 100};
 w::popup status_pop {"status_pop"};
-w::node_editor ned;
 bool ned_initialised{false};
 w::text_editor ted;
 bool selected{false};
@@ -194,57 +193,6 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                     }
 
                     w::notify_render_frame();
-                }
-            }
-
-            // imnodes
-            {
-                auto tab = tabs.next_tab("ImNodes");
-                if(tab) {
-                    w::button("line up");
-                    w::tooltip("line them up");
-
-                    w::guard g{ned};
-
-                    {
-                        auto node = ned.node(10);
-                        w::label("node 10");
-                        ed::BeginPin(102, ed::PinKind::Output);
-                        ImGui::Text("Out ->");
-                        ed::EndPin();
-                    }
-
-                    {
-                        auto node = ned.node(20);
-
-                        w::label("node 20 with aligned pins");
-
-                        ed::BeginPin(201, ed::PinKind::Input);
-                        //ImGui::Text("-> In");
-                        w::label(ICON_MD_INBOX);
-                        ed::EndPin();
-
-                        ed::BeginPin(202, ed::PinKind::Output);
-                        w::label(ICON_MD_OUTBOX);
-                        ed::EndPin();
-                    }
-
-                    {
-                        auto node = ned.node(30);
-                        w::label("browsers");
-                        w::tooltip("t0");
-                    }
-                    w::tooltip("all the browsers");
-
-                    if(!ned_initialised) {
-                        ned.set_node_pos(10, 0, 0);
-                        ned.set_node_pos(20, 300, 0);
-                        ned.set_node_pos(30, 500, 0);
-                        ned_initialised = true;
-                    }
-
-                    ed::Link(1, 102, 201);
-                    ed::Flow(1, ed::FlowDirection::Forward);
                 }
             }
 

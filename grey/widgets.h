@@ -8,10 +8,6 @@
 #include "app.h"
 
 // 3rdparty
-//#ifdef GREY_INCLUDE_IMNODES
-#include "3rdparty/imgui-node-editor/imgui_node_editor.h"
-namespace ed = ax::NodeEditor;
-//#endif // GREY_INCLUDE_IMNODES
 #include "3rdparty/ImGuiColorTextEdit/TextEditor.h"
 
 namespace grey::widgets {
@@ -401,49 +397,6 @@ namespace grey::widgets {
     private:
         int id;
     };
-
-    /**
-     * @brief Node editor based on https://github.com/thedmd/imgui-node-editor
-     */
-    class node_editor : public guardable {
-    public:
-        node_editor(bool select_on_hover = false);
-        ~node_editor();
-
-        void enter() override;
-        void leave() override;
-
-        node_editor_node node(int id) {
-            return node_editor_node{id};
-        }
-
-        void set_node_pos(int node_id, float x, float y);
-        void pin_in(int pin_id, const std::string& text);
-        void pin_out(int pin_id, const std::string& text);
-        void link(int link_id, int from_pin_id, int to_pin_id, bool flow = false);
-
-        void get_node_size(int node_id, float& width, float& height);
-
-        /**
-         * @brief If a node is selected, returns node ID, otherwise returns -1.
-         * @return 
-         */
-        int get_selected_node_id();
-
-        /**
-         * @brief If a node is hovered, returns node ID, otherwise returns -1.
-         * @return 
-         */
-        int get_hovered_node_id();
-
-    private:
-        std::string id;
-        bool select_on_hover;
-        ed::Config config;
-        ed::EditorContext* context{nullptr};
-    };
-
-//#endif
 
     // ImGuiColorTextEdit
     class text_editor {

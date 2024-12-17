@@ -412,7 +412,7 @@ namespace grey::widgets {
     void image(app& app, const std::string& key, size_t width, size_t height) {
         auto tex = app.get_texture(key);
         if(tex.data) {
-            ImGui::Image(tex.data, ImVec2(width, height));
+            ImGui::Image((ImTextureID)tex.data, ImVec2(width, height));
         } else {
             ImGui::Dummy(ImVec2(width, height));
         }
@@ -431,7 +431,7 @@ namespace grey::widgets {
             ImVec2 p_min = ImGui::GetCursorScreenPos();
             ImVec2 p_max = ImVec2(p_min.x + width, p_min.y + height);
             ImGui::Dummy(ImVec2(width, height));
-            dl->AddImageRounded(tex.data, p_min, p_max,
+            dl->AddImageRounded((ImTextureID)tex.data, p_min, p_max,
                 ImVec2(0, 0), ImVec2(1, 1), ImGui::GetColorU32(ImVec4(1, 1, 1, 1)),
                 rounding);
             //ImGui::SetCursorPos(p_max);
@@ -871,97 +871,6 @@ namespace grey::widgets {
         open_x = x;
         open_y = y;
     }
-
-//#ifdef GREY_INCLUDE_IMNODES
-
-    // ---- ImNodes ----
-
-    node_editor::node_editor(bool select_on_hover) : id{generate_id()}, select_on_hover{select_on_hover} {
-        config.SettingsFile = nullptr;
-        context = ed::CreateEditor(&config);
-    }
-
-    node_editor::~node_editor() {
-        ed::DestroyEditor(context);
-    }
-
-    void node_editor::enter() {
-        ed::SetCurrentEditor(context);
-        ed::Begin(id.c_str(), ImVec2(0.0, 0.0f));
-    }
-
-    void node_editor::leave() {
-        ed::End();
-        ed::SetCurrentEditor(context);
-        if(select_on_hover) {
-            auto hid = ed::GetHoveredNode();
-            if(hid) {
-                ed::SelectNode(hid);
-            }
-        }
-    }
-
-    void node_editor::set_node_pos(int node_id, float x, float y) {
-        ed::SetNodePosition(node_id, ImVec2(x, y));
-    }
-
-    void node_editor::pin_in(int pin_id, const std::string& text) {
-        ed::BeginPin(pin_id, ed::PinKind::Input);
-        ImGui::Text(text.c_str());
-        ed::EndPin();
-    }
-
-    void node_editor::pin_out(int pin_id, const std::string& text) {
-        ed::BeginPin(pin_id, ed::PinKind::Output);
-        ImGui::Text(text.c_str());
-        ed::EndPin();
-    }
-
-    void node_editor::link(int link_id, int from_pin_id, int to_pin_id, bool flow) {
-        ed::Link(link_id, from_pin_id, to_pin_id);
-        if(flow) {
-            ed::Flow(link_id, ed::FlowDirection::Forward);
-        }
-    }
-
-    void node_editor::get_node_size(int node_id, float& width, float& height) {
-        ImVec2 size = ed::GetNodeSize(node_id);
-        width = size.x;
-        height = size.y;
-    }
-
-    int node_editor::get_selected_node_id() {
-        int count = ed::GetSelectedObjectCount();
-        if(count == 0) return -1;
-
-        vector<ed::NodeId> selected_nodes;
-        selected_nodes.resize(count);
-        int snc = ed::GetSelectedNodes(selected_nodes.data(), static_cast<int>(selected_nodes.size()));
-        if(snc > 0) {
-            auto& node_id = selected_nodes[0];
-            return static_cast<uintptr_t>(node_id);
-        }
-
-        return -1;
-    }
-
-    int node_editor::get_hovered_node_id() {
-        ed::NodeId id = ed::GetHoveredNode();
-        return id
-            ? static_cast<uintptr_t>(id)
-            : -1;
-    }
-
-    node_editor_node::node_editor_node(int id) : id{id} {
-        ed::BeginNode(id);
-    }
-
-    node_editor_node::~node_editor_node() {
-        ed::EndNode();
-    }
-
-
-//#endif
 
     // ImGuiColorTextEdit
 
