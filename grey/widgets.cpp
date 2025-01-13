@@ -302,7 +302,7 @@ namespace grey::widgets {
             ImGui::PushTextWrapPos(text_wrap_pos);
 
         if(enabled)
-            ImGui::Text(text.c_str());
+            ImGui::TextUnformatted(text.c_str());
         else
             ImGui::TextDisabled(text.c_str());
 
@@ -353,25 +353,38 @@ namespace grey::widgets {
         }
     }
 
-    void input_ml(const string& id, string& value, unsigned int line_height, bool autoscroll) {
+    bool input_ml(const string& id, string& value, unsigned int line_height, bool autoscroll, bool enabled) {
         ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;
         ImVec2 size{-FLT_MIN, ImGui::GetTextLineHeight() * line_height};
-        ImGui::InputTextMultiline(id.c_str(), &value, size, flags);
+
+        if(!enabled) ImGui::BeginDisabled();
+
+        bool ret = ImGui::InputTextMultiline(id.c_str(), &value, size, flags);
+
+        if(!enabled) ImGui::EndDisabled();
 
         if(autoscroll) {
             autoscroll_input_ml(id);
         }
+
+        return ret;
     }
 
-    void input_ml(const string& id, string& value, float height, bool autoscroll) {
+    bool input_ml(const string& id, string& value, float height, bool autoscroll, bool enabled) {
         ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;
         ImVec2 size{-FLT_MIN, height};
-        ImGui::InputTextMultiline(id.c_str(), &value, size, flags);
+
+        if(!enabled) ImGui::BeginDisabled();
+
+        bool ret = ImGui::InputTextMultiline(id.c_str(), &value, size, flags);
+
+        if(!enabled) ImGui::EndDisabled();
 
         if(autoscroll) {
             autoscroll_input_ml(id);
         }
 
+        return ret;
     }
 
     // ---- tooltip ----

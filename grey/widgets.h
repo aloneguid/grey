@@ -313,9 +313,9 @@ namespace grey::widgets {
 
     bool input(std::string& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
 
-    void input_ml(const std::string& id, std::string& value, unsigned int line_height = 10, bool autoscroll = false);
+    bool input_ml(const std::string& id, std::string& value, unsigned int line_height = 10, bool autoscroll = false, bool enabled = true);
 
-    void input_ml(const std::string& id, std::string& value, float height, bool autoscroll = false);
+    bool input_ml(const std::string& id, std::string& value, float height, bool autoscroll = false, bool enabled = true);
 
     void tooltip(const std::string& text);
 
@@ -361,6 +361,8 @@ namespace grey::widgets {
     bool combo(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width = 0);
 
     bool list(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width = 0);
+
+    //bool list(const std::string& label, std::ranges::range auto&& options, size_t& selected, size_t& hovered, float width = 0);
 
     bool radio(const std::string& label, bool is_active);
 
