@@ -891,8 +891,9 @@ namespace grey::widgets {
 
     // ImGuiColorTextEdit
 
-    text_editor::text_editor() : 
+    text_editor::text_editor(bool border) : 
         id{generate_id("TextEditor")},
+        border{border},
         lang{TextEditor::LanguageDefinition::Lua()} {
         editor.SetLanguageDefinition(lang);
     }
@@ -906,7 +907,7 @@ namespace grey::widgets {
     }
 
     bool text_editor::render(float width, float height) {
-        editor.Render(id.c_str(), ImVec2(width, height));
+        editor.Render(id.c_str(), ImVec2(width, height), border);
         return editor.IsTextChanged();
     }
 }

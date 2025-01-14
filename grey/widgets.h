@@ -403,7 +403,7 @@ namespace grey::widgets {
     // ImGuiColorTextEdit
     class text_editor {
     public:
-        text_editor();
+        text_editor(bool border = false);
 
         void set_text(const std::string& text);
         std::string get_text();
@@ -415,6 +415,7 @@ namespace grey::widgets {
         bool render(float width = 0.0f, float height = 0.0f);
     private:
         std::string id;
+        bool border;
         TextEditor editor;
         const TextEditor::LanguageDefinition& lang;
     };
