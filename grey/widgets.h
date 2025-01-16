@@ -346,7 +346,7 @@ namespace grey::widgets {
      */
     bool small_checkbox(const std::string& label, bool& is_checked);
 
-    void icon_list(const std::vector<std::pair<std::string, std::string>>& options, size_t& selected);
+    bool icon_list(const std::vector<std::pair<std::string, std::string>>& options, size_t& selected);
 
     bool accordion(const std::string& header);
 

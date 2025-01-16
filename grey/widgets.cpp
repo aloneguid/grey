@@ -552,7 +552,8 @@ namespace grey::widgets {
         return r;
     }
 
-    void icon_list(const std::vector<std::pair<std::string, string>>& options, size_t& selected) {
+    bool icon_list(const std::vector<std::pair<std::string, string>>& options, size_t& selected) {
+        bool changed{false};
         for(int si = 0; si < options.size(); si++) {
             if(si > 0) ImGui::SameLine();
             bool is_selected = selected == si;
@@ -569,6 +570,7 @@ namespace grey::widgets {
                     // check if mouse is clicked on this item
                     if(ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
                         selected = si;
+                        changed = true;
                     }
                 }
             }
@@ -577,6 +579,7 @@ namespace grey::widgets {
                 ImGui::SetTooltip("%s", options[si].second.c_str());
             }
         }
+        return changed;
     }
 
     bool accordion(const std::string& header) {
