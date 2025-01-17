@@ -582,8 +582,10 @@ namespace grey::widgets {
         return changed;
     }
 
-    bool accordion(const std::string& header) {
-        return ImGui::CollapsingHeader(header.c_str());
+    bool accordion(const std::string& header, bool default_open) {
+        ImGuiTreeNodeFlags flags = 0;
+        if(default_open) flags |= ImGuiTreeNodeFlags_DefaultOpen;
+        return ImGui::CollapsingHeader(header.c_str(), flags);
     }
 
     bool combo(const string& label, const std::vector<std::string>& options, size_t& selected, float width) {

@@ -146,6 +146,16 @@ namespace grey::widgets {
             return *this;
         }
 
+        container& resize_y() {
+            flags |= ImGuiChildFlags_ResizeY;
+            return *this;
+        }
+
+        container& resize_x() {
+            flags |= ImGuiChildFlags_ResizeX;
+            return *this;
+        }
+
         void enter() override;
         void leave() override;
 
@@ -348,7 +358,7 @@ namespace grey::widgets {
 
     bool icon_list(const std::vector<std::pair<std::string, std::string>>& options, size_t& selected);
 
-    bool accordion(const std::string& header);
+    bool accordion(const std::string& header, bool default_open = false);
 
     /**
      * @brief 
