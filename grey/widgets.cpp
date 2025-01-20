@@ -342,6 +342,22 @@ namespace grey::widgets {
         return fired;
     }
 
+    bool input(int& value, const std::string& label, bool enabled, float width, bool is_readonly) {
+        bool fired;
+        if(!enabled) ImGui::BeginDisabled();
+        if(width != 0)
+            ImGui::PushItemWidth(width);
+
+        ImGuiInputTextFlags flags{};
+        if(is_readonly) flags |= ImGuiInputTextFlags_ReadOnly;
+        fired = ImGui::InputInt(label.c_str(), &value, 1, 100, flags);
+
+        if(width != 0)
+            ImGui::PopItemWidth();
+        if(!enabled) ImGui::EndDisabled();
+        return fired;
+    }
+
     void autoscroll_input_ml(const string& id) {
         const char* child_window_name = NULL;
         ImGuiContext* g = ImGui::GetCurrentContext();

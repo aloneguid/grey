@@ -327,6 +327,8 @@ namespace grey::widgets {
 
     bool input_ml(const std::string& id, std::string& value, float height, bool autoscroll = false, bool enabled = true);
 
+    bool input(int& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
+
     void tooltip(const std::string& text);
 
     void image(app& app, const std::string& key, size_t width, size_t height);
@@ -394,8 +396,6 @@ namespace grey::widgets {
     // colour helpers
 
     ImU32 imcol32(ImGuiCol idx);
-
-//#ifdef GREY_INCLUDE_IMNODES
 
     // Node editor
 
