@@ -38,6 +38,8 @@ namespace grey {
 
         std::function<void()> on_initialised;
 
+        std::function<void(int, const std::string&)> on_user_message;
+
         app();
 
         virtual void run(std::function<bool(const app&)> render_frame) = 0;
@@ -71,6 +73,8 @@ namespace grey {
         bool win32_title_bar{true};
         bool win32_can_resize{true};
         bool win32_center_on_screen{false};
+        std::string win32_window_class_name{"GreyDX11"};
+
         /**
          * @brief When window loses focus, it will be closed. This is useful for modal windows. Needs to be set before application starts up to take effect.
          */

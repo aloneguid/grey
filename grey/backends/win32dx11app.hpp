@@ -133,6 +133,17 @@ namespace grey::backends {
                     ::PostQuitMessage(0);
                 }
                 break;
+            case WM_COPYDATA:
+            {
+                // get "this" pointer
+                grey::app* me = reinterpret_cast<grey::app*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
+                if(me && me->on_user_message) {
+                    COPYDATASTRUCT* pcds = (COPYDATASTRUCT*)lParam;
+                    string message{(char*)pcds->lpData};
+                    me->on_user_message((int)pcds->dwData, message);
+                }
+            }
+            break;
         }
         return ::DefWindowProcW(hWnd, msg, wParam, lParam);
     }
@@ -200,13 +211,14 @@ namespace grey::backends {
             // apply win32 customisations
             g_win32_close_on_focus_lost = win32_close_on_focus_lost;
 
+            wstring class_name = grey::common::str::to_wstr(win32_window_class_name);
             WNDCLASSEXW wc = {
                 sizeof(wc),
                 CS_CLASSDC,
                 WndProc, 0L, 0L,
                 GetModuleHandle(nullptr),
                 nullptr, nullptr, nullptr, nullptr,
-                L"GreyDX11",
+                class_name.c_str(),
                 nullptr};
 
             ::RegisterClassExW(&wc);
@@ -234,6 +246,8 @@ namespace grey::backends {
                 window_width, window_height,
                 nullptr, nullptr,
                 wc.hInstance, nullptr);
+
+            ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
             // Initialize Direct3D
             if(!CreateDeviceD3D(hwnd)) {
