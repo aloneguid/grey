@@ -429,5 +429,4 @@ namespace grey::widgets {
         TextEditor editor;
         const TextEditor::LanguageDefinition& lang;
     };
-
 }

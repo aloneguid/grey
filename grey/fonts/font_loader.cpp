@@ -1,6 +1,4 @@
-#pragma once
-
-#include "roboto.inl"
+#include "font_loader.h"
 
 //#include "font_awesome_6_regular_400.inl"
 //#include "font_awesome_6.h"
@@ -16,13 +14,48 @@
 
 #include "imgui.h"
 
-namespace grey {
-    void load_font(float scale, bool load_fa = true) {
-        ImGuiIO io = ImGui::GetIO();
+#if WIN32
+#include "../common/win32/os.h"
+#else
+#include "roboto.inl"
+#endif
 
+using namespace std;
+
+namespace grey::fonts {
+
+    ImFont* font_loader::fixed_size_font{nullptr};
+
+    ImFont* font_loader::load_system_font(ImGuiIO& io, float scale) {
+#if WIN32
+        string path = grey::common::win32::os::get_system_fonts_path();
+        // Segoe UI is the default UI font for Windows 10 and 11.
+        path += "\\segoeui.ttf";
+        ImFont* f = io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f * scale);
+#else
         ImFont* f = io.Fonts->AddFontFromMemoryCompressedTTF(
             Roboto_compressed_data, Roboto_compressed_size,
             16.0f * scale);
+#endif
+        return f;
+
+    }
+
+    ImFont* font_loader::load_fixed_font(ImGuiIO& io, float scale) {
+#if WIN32
+        string path = grey::common::win32::os::get_system_fonts_path();
+        // Segoe UI is the default UI font for Windows 10 and 11.
+        path += "\\consola.ttf";
+        return io.Fonts->AddFontFromFileTTF(path.c_str(), 16.0f * scale);
+#else
+        return nullptr;
+#endif
+    }
+
+    void font_loader::load_font(float scale, bool load_fa, bool load_fixed) {
+        ImGuiIO& io = ImGui::GetIO();
+
+        ImFont* f = load_system_font(io, scale);
 
         if(f && load_fa) {
 
@@ -89,5 +122,13 @@ namespace grey {
             }*/
 
         }
+
+        if(load_fixed) {
+            fixed_size_font = load_fixed_font(io, scale);
+        }
+    }
+
+    ImFont* font_loader::get_fixed_size_font(float scale) {
+        return fixed_size_font;
     }
 }

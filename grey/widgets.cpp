@@ -3,6 +3,7 @@
 #include "imgui_internal.h"
 #include "imgui_stdlib.h"
 #include "3rdparty/ImGuiNotify.hpp"
+#include "fonts/font_loader.h"
 // for Windows-specific hacks
 #include <Windows.h>
 
@@ -928,7 +929,17 @@ namespace grey::widgets {
     }
 
     bool text_editor::render(float width, float height) {
+        ImFont* f = fonts::font_loader::get_fixed_size_font(scale);
+        if(f) {
+            ImGui::PushFont(f);
+        }
+
         editor.Render(id.c_str(), ImVec2(width, height), border);
+
+        if(f) {
+            ImGui::PopFont();
+        }
+        
         return editor.IsTextChanged();
     }
 }

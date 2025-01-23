@@ -1,7 +1,10 @@
 #include "os.h"
 #include <string>
-#include "windows.h"
+#include <Windows.h>
+#include <ShlObj_core.h>
+#include <shellapi.h>
 #include "reg.h"
+#include "../str.h"
 
 using namespace std;
 
@@ -29,5 +32,15 @@ namespace grey::common::win32::os {
 
     unsigned int get_dpi() {
         return ::GetDpiForSystem();
+    }
+
+    std::string get_system_fonts_path() {
+        wchar_t path[MAX_PATH];
+        if (SUCCEEDED(::SHGetFolderPath(NULL, CSIDL_FONTS, NULL, 0, path))) {
+            return grey::common::str::to_str(path);
+        }
+        else {
+            return "";
+        }
     }
 }

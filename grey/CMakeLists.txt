@@ -12,6 +12,7 @@ find_path(STB_INCLUDE_DIRS "stb.h")
 
 file(GLOB core_src CONFIGURE_DEPENDS "*.cpp"
     "backends/*.cpp"
+    "fonts/*.cpp"
     "common/*.cpp"
     "common/*.cpp"
     "common/win32/*.cpp"

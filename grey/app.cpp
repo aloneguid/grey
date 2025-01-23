@@ -1,6 +1,6 @@
 #include "app.h"
 #include "backends/win32dx11app.hpp"
-#include "fonts/font_loader.hpp"
+#include "fonts/font_loader.h"
 #include "themes.h"
 #include "widgets.h"
 
@@ -35,7 +35,7 @@ namespace grey {
         string theme_id = initial_theme_id.empty() ? grey::themes::FollowOsThemeId : initial_theme_id;
         set_theme(theme_id);
 
-        grey::load_font(scale, load_icon_font);
+        grey::fonts::font_loader::load_font(scale, load_icon_font, load_fixed_font);
 
         if(on_initialised)
             on_initialised();

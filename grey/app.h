@@ -34,6 +34,8 @@ namespace grey {
          */
         bool load_icon_font{true};
 
+        bool load_fixed_font{false};
+
         float scale{1.0f};
 
         std::function<void()> on_initialised;
