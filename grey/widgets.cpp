@@ -390,13 +390,21 @@ namespace grey::widgets {
         return ret;
     }
 
-    bool input_ml(const string& id, string& value, float height, bool autoscroll, bool enabled) {
+    bool input_ml(const string& id, string& value, float height, bool autoscroll, bool enabled, bool use_fixed_font) {
         ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;
         ImVec2 size{-FLT_MIN, height};
 
         if(!enabled) ImGui::BeginDisabled();
 
+        ImFont* f = use_fixed_font ? grey::fonts::font_loader::get_fixed_size_font(scale) : nullptr;
+
+        if(f) {
+            ImGui::PushFont(f);
+        }
         bool ret = ImGui::InputTextMultiline(id.c_str(), &value, size, flags);
+        if(f) {
+            ImGui::PopFont();
+        }
 
         if(!enabled) ImGui::EndDisabled();
 
