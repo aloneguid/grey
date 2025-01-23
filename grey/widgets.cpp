@@ -921,6 +921,9 @@ namespace grey::widgets {
         border{border},
         lang{grey::thirdparty::langdefs::lua()} {
         editor.SetLanguageDefinition(lang);
+        //editor.SetShowWhitespaces(true);
+        editor.SetTabSize(2);
+        editor.SetShowKeywordTooltips(false);
     }
 
     void text_editor::set_text(const std::string& text) {
