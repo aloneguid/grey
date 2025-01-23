@@ -7,6 +7,9 @@
 // for Windows-specific hacks
 #include <Windows.h>
 
+// 3rdparty
+#include "3rdparty/ImGuiColorTextEdit/langdefs.h"
+
 using namespace std;
 
 namespace grey::widgets {
@@ -916,7 +919,7 @@ namespace grey::widgets {
     text_editor::text_editor(bool border) : 
         id{generate_id("TextEditor")},
         border{border},
-        lang{TextEditor::LanguageDefinition::Lua()} {
+        lang{grey::thirdparty::langdefs::lua()} {
         editor.SetLanguageDefinition(lang);
     }
 
