@@ -6,7 +6,6 @@
 #include "imgui_impl_dx11.h"
 #include <d3d11.h>
 #include <dwmapi.h>
-#include "../common/win32/os.h"
 #include "../common/str.h"
 
 // Forward declare message handler from imgui_impl_win32.cpp
@@ -225,7 +224,7 @@ namespace grey::backends {
 
             wstring w_title = grey::common::str::to_wstr(title);
 
-            DWORD dwStyle = WS_OVERLAPPEDWINDOW | WS_VISIBLE;// | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME;
+            DWORD dwStyle = WS_OVERLAPPEDWINDOW;// | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME;
             //DWORD dwStyle = WS_POPUP;
             if(!win32_can_resize) {
                 // remove resize frame and maximize button
@@ -256,12 +255,11 @@ namespace grey::backends {
                 return;
             }
 
-            // Show the window
-            //::ShowWindow(hwnd, SW_SHOWMINIMIZED);
-            ::ShowWindow(hwnd, SW_SHOWNORMAL);
-            //::ShowWindow(hwnd, SW_HIDE);
-            ::UpdateWindow(hwnd);
-            ::SetForegroundWindow(hwnd);    // just as an extra precaution
+            // We don't want to show the window immediately until at least one frame is rendered,
+            // Because it may result in unwanted visual artifacts while the window is being created.
+            //::ShowWindow(hwnd, SW_SHOWNORMAL);
+            //::UpdateWindow(hwnd);
+            //::SetForegroundWindow(hwnd);    // just as an extra precaution
 
             if(win32_always_on_top) {
                 ::SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
@@ -316,9 +314,11 @@ namespace grey::backends {
 
             // Our state
             ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+            //ImVec4 clear_color = ImVec4(0.1f, 0.1f, 0.1f, 1.00f);
 
             // Main loop
-            bool done = false;
+            bool done{false};
+            bool shown{false};
 
             // one time initialisation
             on_after_initialised();
@@ -376,6 +376,12 @@ namespace grey::backends {
                 HRESULT hr = g_pSwapChain->Present(1, 0);   // Present with vsync
                 //HRESULT hr = g_pSwapChain->Present(0, 0); // Present without vsync
                 g_SwapChainOccluded = (hr == DXGI_STATUS_OCCLUDED);
+
+                // show after first frame is rendered
+                if(!shown) {
+                    ::ShowWindow(hwnd, SW_SHOWNORMAL);
+                    shown = true;
+                }
             }
 
             // Cleanup

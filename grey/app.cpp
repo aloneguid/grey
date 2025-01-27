@@ -3,6 +3,7 @@
 #include "fonts/font_loader.h"
 #include "themes.h"
 #include "widgets.h"
+#include "common/win32/os.h"
 
 using namespace std;
 
