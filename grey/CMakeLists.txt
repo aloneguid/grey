@@ -44,7 +44,7 @@ target_link_libraries(${STATIC_NAME}
 # https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html#generator-expression-reference
 
 # dotnet binary - only execute when DOTNET_RID environment variable is set
-if("$ENV{DOTNET_RID}")
+if(DEFINED ENV{DOTNET_RID})
     add_custom_command(
         TARGET ${DYNAMIC_NAME} 
         POST_BUILD
