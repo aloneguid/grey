@@ -150,7 +150,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       name: Collect Artifacts
       with:
-        name: managed
+        name: dotnet
         compression-level: 9
         if-no-files-found: error
         path: |
@@ -171,11 +171,15 @@ jobs:
       - name: ⬇️ Download Library binaries
         uses: actions/download-artifact@v4
         with:
-          name: bin
-          path: bin
+          name: dotnet
+          path: dotnet
+
+      - name: debug
+        run: ls -R
+        working-directory: dotnet
 
       - name: print release notes
-        run: cat bin/release-notes.md
+        run: cat dotnet/release-notes.md
 
       - name: 📦 Publish to NuGet
-        run: dotnet nuget push bin/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push dotnet/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
