@@ -14,7 +14,7 @@ namespace grey::widgets {
 
     extern float scale;
 
-    enum class emphasis {
+    enum class emphasis : int32_t {
         none = 0,
         primary = 1,
         error = 2
@@ -268,6 +268,12 @@ namespace grey::widgets {
         ~tab_bar();
 
         tab_bar_item next_tab(const std::string& title, bool unsaved = false);
+
+        /**
+         * @brief Increments tab index
+         * @return Index before increment 
+         */
+        size_t increment_tab_index() { return tab_index++; }
 
     private:
         bool rendered{false};

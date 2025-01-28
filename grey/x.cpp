@@ -4,6 +4,8 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include <stack>
+#include <iostream>
 
 using namespace std;
 namespace w = grey::widgets;
@@ -58,17 +60,59 @@ EXPORTED void app_run(
     });
 }
 
+EXPORTED void sl(float offset) {
+    w::sl(offset);
+}
+
 EXPORTED void label(const char* c_text) {
     string text{c_text};
     w::label(text);
 }
 
-EXPORTED bool button(const char* c_text) {
+EXPORTED bool button(const char* c_text, int32_t emphasis) {
     string text{c_text};
-    return w::button(text);
+    return w::button(text, (w::emphasis)emphasis);
 }
 
 EXPORTED void sep(const char* c_text) {
     string text{c_text};
     w::sep(text);
+}
+
+stack<w::tab_bar> tab_bars;
+stack<w::tab_bar_item> tab_items;
+
+EXPORTED bool push_tab_bar(const char* c_id) {
+
+    //cout << "push_tab_bar: " << c_id << endl;
+    tab_bars.emplace(c_id);
+    return true;
+}
+
+EXPORTED void pop_tab_bar() {
+    //cout << "pop_tab_bar " << tab_bars.size() << endl;
+    tab_bars.pop();
+}
+
+
+EXPORTED bool push_next_tab(const char* c_title) {
+
+    //cout << "push_next_tab: " << c_title << endl;
+
+    if(tab_bars.empty()) {
+        return false;
+    }
+
+    w::tab_bar& bar = tab_bars.top();
+    string id = string{c_title} + "##" + std::to_string(bar.increment_tab_index());
+    tab_items.emplace(id, false);
+
+    auto& item = tab_items.top();
+    return item;
+}
+
+EXPORTED void pop_next_tab() {
+    //cout << "pop_next_tab" << endl;
+
+    tab_items.pop();
 }

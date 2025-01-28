@@ -6,12 +6,16 @@
             Native.app_run(ref isRunning, title, width, height, hasMenuBar, callback);
         }
 
+        public static void SL(float offset = 0) {
+            Native.sl(offset);
+        }
+
         public static void Label(string text) {
             Native.label(text);
         }
 
-        public static bool Button(string text) {
-            return Native.button(text);
+        public static bool Button(string text, Emphasis emphasis = Emphasis.None) {
+            return Native.button(text, emphasis);
         }
 
         public static void Sep(string text = "") {

@@ -21,12 +21,29 @@ namespace Grey {
             RenderFrameCallback callback);
 
         [DllImport(LibName)]
+        internal static extern void sl(float offset);
+
+        [DllImport(LibName)]
         internal static extern void label([MarshalAs(UnmanagedType.LPUTF8Str)] string text);
 
         [DllImport(LibName)]
-        internal static extern bool button([MarshalAs(UnmanagedType.LPUTF8Str)] string text);
+        internal static extern bool button(
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string text,
+            Emphasis emphasis);
 
         [DllImport(LibName)]
         internal static extern void sep([MarshalAs(UnmanagedType.LPUTF8Str)] string text);
+
+        [DllImport(LibName)]
+        internal static extern bool push_tab_bar([MarshalAs(UnmanagedType.LPUTF8Str)] string id);
+
+        [DllImport(LibName)]
+        internal static extern void pop_tab_bar();
+
+        [DllImport(LibName)]
+        internal static extern bool push_next_tab([MarshalAs(UnmanagedType.LPUTF8Str)] string title);
+
+        [DllImport(LibName)]
+        internal static extern void pop_next_tab();
     }
 }

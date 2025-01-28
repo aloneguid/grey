@@ -4,6 +4,7 @@
 #include "imgui_stdlib.h"
 #include "3rdparty/ImGuiNotify.hpp"
 #include "fonts/font_loader.h"
+#include <iostream>
 // for Windows-specific hacks
 #include <Windows.h>
 
@@ -875,6 +876,7 @@ namespace grey::widgets {
     }
 
     tab_bar_item::tab_bar_item(const std::string& id, bool unsaved) : id{id} {
+        //cout << "tab_bar_item::tab_bar_item " << id << endl;
         if(unsaved) {
             flags |= ImGuiTabItemFlags_UnsavedDocument;
         }
@@ -882,6 +884,7 @@ namespace grey::widgets {
     }
 
     tab_bar_item::~tab_bar_item() {
+        //cout << "tab_bar_item::~tab_bar_item " << id << endl;
         if(rendered) {
             ImGui::EndTabItem();
             rendered = false;

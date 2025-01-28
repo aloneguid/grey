@@ -26,9 +26,19 @@ extern "C"
         bool has_menubar,
         RenderFrameCallback c_frame_callback);
 
+    EXPORTED void sl(float offset);
+
     EXPORTED void label(const char* c_text);
 
-    EXPORTED bool button(const char* c_text);
+    EXPORTED bool button(const char* c_text, int32_t emphasis);
 
     EXPORTED void sep(const char* c_text);
+
+    EXPORTED bool push_tab_bar(const char* c_id);
+
+    EXPORTED void pop_tab_bar();
+
+    EXPORTED bool push_next_tab(const char* c_title);
+
+    EXPORTED void pop_next_tab();
 }

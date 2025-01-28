@@ -158,3 +158,24 @@ jobs:
           docs/release-notes.md
           docs/version-notes.md
           docs/version.txt
+
+  release:
+    name: '🕋 Release library'
+    runs-on: ubuntu-latest 
+    needs:
+    - build-managed
+    if: github.ref == 'refs/heads/master'
+
+    steps:
+
+      - name: ⬇️ Download Library binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: bin
+          path: bin
+
+      - name: print release notes
+        run: cat bin/release-notes.md
+
+      - name: 📦 Publish to NuGet
+        run: dotnet nuget push bin/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

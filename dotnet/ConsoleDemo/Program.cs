@@ -6,20 +6,32 @@ string message = "1";
 
 Grey.App.Run(ref isRunning, "Grey# Demo", () => {
 
-    Label("Simple label followed by sep");
-    Sep();
-    Sep("sep with text");
+    using(new TabBar()) {
+        using(var ti = new TabItem("Basics")) {
+            if(ti) {
+                Label("Simple label followed by sep");
+                Sep();
+                Sep("sep with text");
 
-    Label($"icons: {Icon.Num10k}");
+                Label(message);
 
-    Label(message);
+                if(Button("get current date")) {
+                    message = DateTime.Now.ToString();
+                }
 
-    if(Button("Exit")) {
-        isRunning = false;
-    }
+                Button("no emphasis", Emphasis.None);
+                SL();
+                Button("primary", Emphasis.Primary);
+                SL();
+                Button("error", Emphasis.Error);
+            }
+        }
 
-    if(Button("msg+")) {
-        message += "1";
+        using(var ti = new TabItem("Icons")) {
+            if(ti) {
+                Label($"{Icon.Num10k} {Icon.Fireplace}");
+            }
+        }
     }
 
 }, height: 400);
