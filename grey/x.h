@@ -23,9 +23,12 @@ extern "C"
         const char* c_title,
         int32_t width,
         int32_t height,
+        bool has_menubar,
         RenderFrameCallback c_frame_callback);
 
     EXPORTED void label(const char* c_text);
 
     EXPORTED bool button(const char* c_text);
+
+    EXPORTED void sep(const char* c_text);
 }

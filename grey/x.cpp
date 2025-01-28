@@ -23,6 +23,7 @@ EXPORTED void app_run(
     const char* c_title,
     int32_t width,
     int32_t height,
+    bool has_menubar,
     RenderFrameCallback c_frame_callback) {
 
     platform_init();
@@ -37,6 +38,10 @@ EXPORTED void app_run(
         .no_resize()
         .fill_viewport()
         .border(0);
+
+    if(has_menubar) {
+        wnd.has_menubar();
+    }
 
     auto app = grey::app::make(title, width, height);
     app->win32_can_resize = true;
@@ -61,4 +66,9 @@ EXPORTED void label(const char* c_text) {
 EXPORTED bool button(const char* c_text) {
     string text{c_text};
     return w::button(text);
+}
+
+EXPORTED void sep(const char* c_text) {
+    string text{c_text};
+    w::sep(text);
 }

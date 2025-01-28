@@ -1,10 +1,17 @@
-﻿using static Grey.App;
+﻿using Grey;
+using static Grey.App;
 
 bool isRunning = true;
 string message = "1";
 
-Grey.App.Run(ref isRunning, "Hello, World!", () => {
-    Label("hohoo");
+Grey.App.Run(ref isRunning, "Grey# Demo", () => {
+
+    Label("Simple label followed by sep");
+    Sep();
+    Sep("sep with text");
+
+    Label($"icons: {Icon.Num10k}");
+
     Label(message);
 
     if(Button("Exit")) {

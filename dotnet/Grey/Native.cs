@@ -17,6 +17,7 @@ namespace Grey {
             [MarshalAs(UnmanagedType.LPUTF8Str)] string title,
             int width,
             int height,
+            bool has_menubar,
             RenderFrameCallback callback);
 
         [DllImport(LibName)]
@@ -24,5 +25,8 @@ namespace Grey {
 
         [DllImport(LibName)]
         internal static extern bool button([MarshalAs(UnmanagedType.LPUTF8Str)] string text);
+
+        [DllImport(LibName)]
+        internal static extern void sep([MarshalAs(UnmanagedType.LPUTF8Str)] string text);
     }
 }

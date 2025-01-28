@@ -109,3 +109,52 @@ jobs:
         if-no-files-found: error
         path: |
           xbin/**/*
+
+  build-managed:
+    needs: make-fat-native
+    runs-on: ubuntu-latest
+    name: 'Build managed + nuget'
+    steps:
+
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - uses: actions/download-artifact@v4
+      with:
+        name: native-fat
+        path: xbin/
+
+    - name: debug
+      run: ls -R
+      working-directory: .
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+          9.0.x
+
+    - name: Build
+      run: dotnet build dotnet/Grey.sln -c release /p:Version=${{ env.VERSION }}${{ env.PACKAGE_SUFFIX }} /p:FileVersion=$VERSION /p:AssemblyVersion=$ASM_VERSION
+
+    - name: version
+      run: echo $VERSION >> docs/version.txt
+
+    - name: 🔢 prep release notes
+      run: |
+        grep -m 2 -B 1000 '^## ' docs/release-notes.md | tail -n +3 | head -n -2 > docs/version-notes.md
+        cat docs/version-notes.md
+
+    - uses: actions/upload-artifact@v4
+      name: Collect Artifacts
+      with:
+        name: managed
+        compression-level: 9
+        if-no-files-found: error
+        path: |
+          dotnet/Grey/bin/Release/**/*nupkg
+          docs/release-notes.md
+          docs/version-notes.md
+          docs/version.txt
