@@ -182,4 +182,4 @@ jobs:
         run: cat dotnet/release-notes.md
 
       - name: 📦 Publish to NuGet
-        run: dotnet nuget push dotnet/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push dotnet/Grey/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
