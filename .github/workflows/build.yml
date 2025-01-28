@@ -74,7 +74,7 @@ jobs:
 
     - name: debug
       run: ls -R
-      working-directory: build
+      working-directory: .
 
     - uses: actions/upload-artifact@v4
       name: Collect Artifacts
