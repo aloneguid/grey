@@ -32,6 +32,35 @@ Grey.App.Run(ref isRunning, "Grey# Demo", () => {
                 Label($"{Icon.Num10k} {Icon.Fireplace}");
             }
         }
+
+        using(var ti = new TabItem("Tables")) {
+            if(ti) {
+                int totalRows = 1000000;
+                Label($"Large table with {totalRows} rows");
+
+                using(var tbl = new Table("x", 3, totalRows)) {
+                    if(tbl) {
+                        tbl.SetupColumn("id");
+                        tbl.SetupColumn("name");
+                        tbl.SetupColumn("description", true);
+                        tbl.HeadersRow();
+
+                        while(tbl.Step(out int ds, out int de)) {
+                            for(int i = ds; i < de; i++) {
+                                tbl.NextRow();
+
+                                tbl.ToCol(0);
+                                Label(i.ToString());
+                                tbl.ToCol(1);
+                                Label($"name {i}");
+                                tbl.ToCol(2);
+                                Label($"description {i}");
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }, height: 400);

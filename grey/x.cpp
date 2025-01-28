@@ -116,3 +116,47 @@ EXPORTED void pop_next_tab() {
 
     tab_items.pop();
 }
+
+stack<w::table> tables;
+
+EXPORTED bool push_table(const char* c_id, int32_t column_count, int32_t row_count, float outer_width, float outer_height) {
+    string id = c_id;
+    tables.emplace(id, column_count, row_count, ImVec2(outer_width, outer_height));
+    auto& t = tables.top();
+    return t;
+}
+
+EXPORTED void pop_table() {
+    tables.pop();
+}
+
+EXPORTED void table_col(const char* c_label, bool is_stretch) {
+    string label = c_label;
+    auto& t = tables.top();
+    if (is_stretch) {
+        t.col_stretch(label);
+    }
+    else {
+        t.col_fixed(label);
+    }
+}
+
+EXPORTED void table_headers_row() {
+    auto& t = tables.top();
+    t.headers_row();
+}
+
+EXPORTED bool table_step(int& display_start, int& display_end) {
+    auto& t = tables.top();
+    return t.step(display_start, display_end);
+}
+
+EXPORTED void table_next_row() {
+    auto& t = tables.top();
+    t.next_row();
+}
+
+EXPORTED void table_to_col(int32_t i) {
+    auto& t = tables.top();
+    t.to_col(i);
+}

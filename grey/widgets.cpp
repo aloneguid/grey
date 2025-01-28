@@ -31,19 +31,19 @@ namespace grey::widgets {
     //inline std::string sys_label(const std::string& label) { return label + "##" + id; }
 
     bool set_emphasis_colours(emphasis em, ImVec4& normal, ImVec4& hovered, ImVec4& active) {
-        if(em == emphasis::none) return false;
+        if (em == emphasis::none) return false;
 
-        switch(em) {
-            case emphasis::primary:
-                normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisPrimary];
-                hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisPrimaryHovered];
-                active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisPrimaryActive];
-                return true;
-            case emphasis::error:
-                normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisError];
-                hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisErrorHovered];
-                active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisErrorActive];
-                return true;
+        switch (em) {
+        case emphasis::primary:
+            normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisPrimary];
+            hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisPrimaryHovered];
+            active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisPrimaryActive];
+            return true;
+        case emphasis::error:
+            normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisError];
+            hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisErrorHovered];
+            active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisErrorActive];
+            return true;
         }
 
         return false;
@@ -51,7 +51,7 @@ namespace grey::widgets {
 
     // ---- window ----
 
-    window::window(const std::string& title, bool* p_open) : title{title} {
+    window::window(const std::string& title, bool* p_open) : title{ title } {
         this->p_open = p_open;
         wc.ViewportFlagsOverrideSet = ImGuiViewportFlags_NoAutoMerge;
     }
@@ -112,26 +112,26 @@ namespace grey::widgets {
     void window::enter() {
         //ImGui::SetNextWindowBgAlpha(1.0f);
 
-        if(border_size >= 0) {
+        if (border_size >= 0) {
             ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, border_size);
         }
 
         // set window class to prevent viewports to be merged with main window
         //ImGui::SetNextWindowClass(&wc);
 
-        if(init_size.x)
+        if (init_size.x)
             ImGui::SetNextWindowSize(init_size, ImGuiCond_Once);
 
-        if(resize_to.x) {
+        if (resize_to.x) {
             ImGui::SetNextWindowSize(resize_to);
-            resize_to = ImVec2{0, 0};
+            resize_to = ImVec2{ 0, 0 };
         }
 
-        if(init_center && !init_center_pos.x) {
+        if (init_center && !init_center_pos.x) {
             ImVector<ImGuiPlatformMonitor> monitors = ImGui::GetPlatformIO().Monitors;
             size_t midx = 0;
-            for(size_t i = 0; i < monitors.Size; i++) {
-                if(monitors[i].PlatformHandle == init_center_monitor) {
+            for (size_t i = 0; i < monitors.Size; i++) {
+                if (monitors[i].PlatformHandle == init_center_monitor) {
                     midx = i;
                     break;
                 }
@@ -144,11 +144,11 @@ namespace grey::widgets {
                 init_center_imgui_monitor.WorkSize.y / 2 - init_size.y / 2 + init_center_imgui_monitor.WorkPos.y);
         }
 
-        if(init_center && init_center_pos.x) {
+        if (init_center && init_center_pos.x) {
             ImGui::SetNextWindowPos(init_center_pos, ImGuiCond_Appearing);
         }
 
-        if(fill_viewport_enabled) {
+        if (fill_viewport_enabled) {
 #ifdef IMGUI_HAS_VIEWPORT
             ImGuiViewport* viewport = ImGui::GetMainViewport();
             ImGui::SetNextWindowPos(viewport->WorkPos);
@@ -166,19 +166,19 @@ namespace grey::widgets {
     }
 
     void window::leave() {
-        if(border_size >= 0)
+        if (border_size >= 0)
             ImGui::PopStyleVar();
         ImGui::End();
 
-        if(!win32_brought_forward) {
+        if (!win32_brought_forward) {
             ImGuiViewport* vp = ImGui::GetWindowViewport();
-            if(vp) {
+            if (vp) {
                 ::SetForegroundWindow((HWND)vp->PlatformHandleRaw);
                 win32_brought_forward = true;
             }
         }
 
-        if(fill_viewport_enabled) {
+        if (fill_viewport_enabled) {
             ImGui::PopStyleVar();
         }
     }
@@ -197,17 +197,17 @@ namespace grey::widgets {
 
     // ---- container ----
 
-    container::container(float width, float height) : id{generate_id()}, size{width, height} {
+    container::container(float width, float height) : id{ generate_id() }, size{ width, height } {
     }
 
-    container::container(const std::string& id, float width, float height) : id{id}, size{width, height} {
+    container::container(const std::string& id, float width, float height) : id{ id }, size{ width, height } {
     }
 
     void container::enter() {
 
         ImVec2 tsz = size;
 
-        if(size.y < 0) {
+        if (size.y < 0) {
             // pad from the bottom
             ImVec2 wsz = ImGui::GetWindowSize();
             tsz = ImVec2(tsz.x, wsz.y + size.y);
@@ -224,14 +224,15 @@ namespace grey::widgets {
         bool r;
         const string IconedPrefix = "       ";
 
-        if(reserve_icon_space) {
+        if (reserve_icon_space) {
             ImVec2 cp = ImGui::GetCursorPos();
             r = ImGui::MenuItem((IconedPrefix + text).c_str());
-            if(!icon.empty()) {
+            if (!icon.empty()) {
                 ImGui::SetCursorPos(cp);
                 ImGui::Text(icon.c_str());
             }
-        } else {
+        }
+        else {
             r = ImGui::MenuItem(text.c_str());
         }
 
@@ -239,15 +240,15 @@ namespace grey::widgets {
     }
 
     void mi_themes(std::function<void(const std::string&)> on_changed) {
-        menu m{"Theme", true, ICON_MD_BRUSH};
-        if(m) {
+        menu m{ "Theme", true, ICON_MD_BRUSH };
+        if (m) {
             ImDrawList* dl = ImGui::GetWindowDrawList();
 
-            for(auto& theme : grey::themes::list_themes()) {
+            for (auto& theme : grey::themes::list_themes()) {
 
                 float sz = ImGui::GetTextLineHeight();
                 ImVec2 p = ImGui::GetCursorScreenPos();
-                
+
                 // draw a triangle with accent colour in top left corner
                 dl->AddTriangleFilled(p, ImVec2(p.x + sz, p.y), ImVec2(p.x, p.y + sz), theme.accent);
 
@@ -259,7 +260,7 @@ namespace grey::widgets {
                 ImGui::Dummy(ImVec2(sz, sz));
                 sl();
 
-                if(mi(theme.name)) {
+                if (mi(theme.name)) {
                     //grey::themes::set_theme(theme.id, scale);
                     on_changed(theme.id);
                 }
@@ -269,22 +270,23 @@ namespace grey::widgets {
 
     // ---- menu_bar ----
 
-    menu::menu(const std::string& title, bool reserve_icon_space, const std::string& icon) : icon{icon} {
+    menu::menu(const std::string& title, bool reserve_icon_space, const std::string& icon) : icon{ icon } {
         const string IconedPrefix = "       ";
-        if(reserve_icon_space) {
+        if (reserve_icon_space) {
             cp = ImGui::GetCursorPos();
             rendered = ImGui::BeginMenu((IconedPrefix + title).c_str());
-        } else {
+        }
+        else {
             rendered = ImGui::BeginMenu(title.c_str());
         }
     }
 
     menu::~menu() {
-        if(rendered) {
+        if (rendered) {
             ImGui::EndMenu();
         }
 
-        if(!icon.empty()) {
+        if (!icon.empty()) {
             ImGui::SetCursorPos(cp);
             ImGui::Text(icon.c_str());
         }
@@ -295,7 +297,7 @@ namespace grey::widgets {
     }
 
     menu_bar::~menu_bar() {
-        if(rendered) {
+        if (rendered) {
             ImGui::EndMenuBar();
         }
     }
@@ -303,29 +305,31 @@ namespace grey::widgets {
     // ---- label ----
 
     void label(const std::string& text, size_t text_wrap_pos, bool enabled) {
-        if(text_wrap_pos > 0)
+        if (text_wrap_pos > 0)
             ImGui::PushTextWrapPos(text_wrap_pos);
 
-        if(enabled)
+        if (enabled)
             ImGui::TextUnformatted(text.c_str());
         else
             ImGui::TextDisabled(text.c_str());
 
-        if(text_wrap_pos > 0)
+        if (text_wrap_pos > 0)
             ImGui::PopTextWrapPos();
     }
 
     void label(const std::string& text, emphasis emp, size_t text_wrap_pos, bool enabled) {
 
-        if(emp == emphasis::none || !enabled) {
+        if (emp == emphasis::none || !enabled) {
             label(text, text_wrap_pos);
-        } else {
+        }
+        else {
             ImVec4 normal, hovered, active;
-            if(set_emphasis_colours(emp, normal, hovered, active)) {
+            if (set_emphasis_colours(emp, normal, hovered, active)) {
                 ImGui::PushStyleColor(ImGuiCol_Text, normal);
                 label(text, text_wrap_pos);
                 ImGui::PopStyleColor();
-            } else {
+            }
+            else {
                 label(text, text_wrap_pos);
             }
         }
@@ -333,33 +337,33 @@ namespace grey::widgets {
 
     bool input(std::string& value, const std::string& label, bool enabled, float width, bool is_readonly) {
         bool fired;
-        if(!enabled) ImGui::BeginDisabled();
-        if(width != 0)
+        if (!enabled) ImGui::BeginDisabled();
+        if (width != 0)
             ImGui::PushItemWidth(width);
 
         ImGuiInputTextFlags flags{};
-        if(is_readonly) flags |= ImGuiInputTextFlags_ReadOnly;
+        if (is_readonly) flags |= ImGuiInputTextFlags_ReadOnly;
         fired = ImGui::InputText(label.c_str(), &value, flags);
 
-        if(width != 0)
+        if (width != 0)
             ImGui::PopItemWidth();
-        if(!enabled) ImGui::EndDisabled();
+        if (!enabled) ImGui::EndDisabled();
         return fired;
     }
 
     bool input(int& value, const std::string& label, bool enabled, float width, bool is_readonly) {
         bool fired;
-        if(!enabled) ImGui::BeginDisabled();
-        if(width != 0)
+        if (!enabled) ImGui::BeginDisabled();
+        if (width != 0)
             ImGui::PushItemWidth(width);
 
         ImGuiInputTextFlags flags{};
-        if(is_readonly) flags |= ImGuiInputTextFlags_ReadOnly;
+        if (is_readonly) flags |= ImGuiInputTextFlags_ReadOnly;
         fired = ImGui::InputInt(label.c_str(), &value, 1, 100, flags);
 
-        if(width != 0)
+        if (width != 0)
             ImGui::PopItemWidth();
-        if(!enabled) ImGui::EndDisabled();
+        if (!enabled) ImGui::EndDisabled();
         return fired;
     }
 
@@ -369,22 +373,22 @@ namespace grey::widgets {
         ImFormatStringToTempBuffer(&child_window_name, NULL, "%s/%s_%08X",
             g->CurrentWindow->Name, id.c_str(), ImGui::GetID(id.c_str()));
         ImGuiWindow* child_window = ImGui::FindWindowByName(child_window_name);
-        if(child_window) {
+        if (child_window) {
             ImGui::SetScrollY(child_window, child_window->ScrollMax.y);
         }
     }
 
     bool input_ml(const string& id, string& value, unsigned int line_height, bool autoscroll, bool enabled) {
         ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;
-        ImVec2 size{-FLT_MIN, ImGui::GetTextLineHeight() * line_height};
+        ImVec2 size{ -FLT_MIN, ImGui::GetTextLineHeight() * line_height };
 
-        if(!enabled) ImGui::BeginDisabled();
+        if (!enabled) ImGui::BeginDisabled();
 
         bool ret = ImGui::InputTextMultiline(id.c_str(), &value, size, flags);
 
-        if(!enabled) ImGui::EndDisabled();
+        if (!enabled) ImGui::EndDisabled();
 
-        if(autoscroll) {
+        if (autoscroll) {
             autoscroll_input_ml(id);
         }
 
@@ -393,23 +397,23 @@ namespace grey::widgets {
 
     bool input_ml(const string& id, string& value, float height, bool autoscroll, bool enabled, bool use_fixed_font) {
         ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;
-        ImVec2 size{-FLT_MIN, height};
+        ImVec2 size{ -FLT_MIN, height };
 
-        if(!enabled) ImGui::BeginDisabled();
+        if (!enabled) ImGui::BeginDisabled();
 
         ImFont* f = use_fixed_font ? grey::fonts::font_loader::get_fixed_size_font(scale) : nullptr;
 
-        if(f) {
+        if (f) {
             ImGui::PushFont(f);
         }
         bool ret = ImGui::InputTextMultiline(id.c_str(), &value, size, flags);
-        if(f) {
+        if (f) {
             ImGui::PopFont();
         }
 
-        if(!enabled) ImGui::EndDisabled();
+        if (!enabled) ImGui::EndDisabled();
 
-        if(autoscroll) {
+        if (autoscroll) {
             autoscroll_input_ml(id);
         }
 
@@ -419,7 +423,7 @@ namespace grey::widgets {
     // ---- tooltip ----
 
     void tooltip(const std::string& text) {
-        if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
             ImGui::SetTooltip("%s", text.c_str());
         }
     }
@@ -427,12 +431,14 @@ namespace grey::widgets {
     // ---- position ----
 
     void set_pos(float x, float y) {
-        if(x < 0 && y >= 0) {
+        if (x < 0 && y >= 0) {
             ImGui::SetCursorPosY(y);
-        } else if(x >= 0 && y < 0) {
+        }
+        else if (x >= 0 && y < 0) {
             ImGui::SetCursorPosX(x);
-        } else {
-            ImGui::SetCursorPos(ImVec2{x, y});
+        }
+        else {
+            ImGui::SetCursorPos(ImVec2{ x, y });
         }
     }
 
@@ -453,9 +459,10 @@ namespace grey::widgets {
 
     void image(app& app, const std::string& key, size_t width, size_t height) {
         auto tex = app.get_texture(key);
-        if(tex.data) {
+        if (tex.data) {
             ImGui::Image((ImTextureID)tex.data, ImVec2(width, height));
-        } else {
+        }
+        else {
             ImGui::Dummy(ImVec2(width, height));
         }
     }
@@ -467,7 +474,7 @@ namespace grey::widgets {
 
     void rounded_image(app& app, const std::string& key, size_t width, size_t height, float rounding) {
         auto tex = app.get_texture(key);
-        if(tex.data) {
+        if (tex.data) {
             //ImDrawList* dl = ImGui::GetForegroundDrawList();
             ImDrawList* dl = ImGui::GetWindowDrawList();
             ImVec2 p_min = ImGui::GetCursorScreenPos();
@@ -484,9 +491,10 @@ namespace grey::widgets {
         group g;
         g.border_hover(ImGuiCol_ButtonHovered).render();
 
-        if(path.empty()) {
+        if (path.empty()) {
             ImGui::Dummy(ImVec2(square_size, square_size));
-        } else {
+        }
+        else {
             app.preload_texture(path, path);
             rounded_image(app, path, square_size, square_size, square_size / 2);
         }
@@ -496,7 +504,7 @@ namespace grey::widgets {
     // ---- spacing ----
 
     void spc(size_t repeat) {
-        for(int i = 0; i < repeat; i++)
+        for (int i = 0; i < repeat; i++)
             ImGui::Spacing();
     }
 
@@ -509,7 +517,7 @@ namespace grey::widgets {
     // ---- separator ----
 
     void sep(const string& text) {
-        if(text.empty())
+        if (text.empty())
             ImGui::Separator();
         else
             ImGui::SeparatorText(text.c_str());
@@ -519,13 +527,13 @@ namespace grey::widgets {
 
     bool button(const std::string& text, emphasis emp, bool is_enabled, bool is_small) {
 
-        if(!is_enabled) {
+        if (!is_enabled) {
             ImGui::BeginDisabled(true);
         }
 
         bool clicked;
 
-        if(emp != emphasis::none) {
+        if (emp != emphasis::none) {
             ImVec4 normal, hovered, active;
             set_emphasis_colours(emp, normal, hovered, active);
             ImGui::PushStyleColor(ImGuiCol_Button, normal);
@@ -533,17 +541,18 @@ namespace grey::widgets {
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, active);
         }
 
-        if(is_small) {
+        if (is_small) {
             clicked = ImGui::SmallButton(text.c_str());
-        } else {
+        }
+        else {
             clicked = ImGui::Button(text.c_str());
         }
 
-        if(emp != emphasis::none) {
+        if (emp != emphasis::none) {
             ImGui::PopStyleColor(3);
         }
 
-        if(!is_enabled) {
+        if (!is_enabled) {
             ImGui::EndDisabled();
         }
 
@@ -552,16 +561,17 @@ namespace grey::widgets {
 
     bool icon_checkbox(const std::string& icon, bool& is_checked, bool reversed) {
 
-        if(reversed ? !is_checked : is_checked) {
+        if (reversed ? !is_checked : is_checked) {
             ImGui::Text(icon.c_str());
-        } else {
+        }
+        else {
             ImGui::TextDisabled(icon.c_str());
         }
 
-        if(ImGui::IsItemHovered()) {
+        if (ImGui::IsItemHovered()) {
             ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
-            if(ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+            if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
                 is_checked = !is_checked;
                 return true;
             }
@@ -582,29 +592,30 @@ namespace grey::widgets {
     }
 
     bool icon_list(const std::vector<std::pair<std::string, string>>& options, size_t& selected) {
-        bool changed{false};
-        for(int si = 0; si < options.size(); si++) {
-            if(si > 0) ImGui::SameLine();
+        bool changed{ false };
+        for (int si = 0; si < options.size(); si++) {
+            if (si > 0) ImGui::SameLine();
             bool is_selected = selected == si;
 
-            if(is_selected) {
+            if (is_selected) {
                 ImGui::Text(options[si].first.c_str());
-            } else {
+            }
+            else {
                 ImGui::TextDisabled(options[si].first.c_str());
 
                 // show "hand" cursor for disabled (selectable) options
-                if(ImGui::IsItemHovered()) {
+                if (ImGui::IsItemHovered()) {
                     ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
                     // check if mouse is clicked on this item
-                    if(ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+                    if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
                         selected = si;
                         changed = true;
                     }
                 }
             }
 
-            if(!options[si].second.empty() && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
+            if (!options[si].second.empty() && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
                 ImGui::SetTooltip("%s", options[si].second.c_str());
             }
         }
@@ -613,33 +624,33 @@ namespace grey::widgets {
 
     bool accordion(const std::string& header, bool default_open) {
         ImGuiTreeNodeFlags flags = 0;
-        if(default_open) flags |= ImGuiTreeNodeFlags_DefaultOpen;
+        if (default_open) flags |= ImGuiTreeNodeFlags_DefaultOpen;
         return ImGui::CollapsingHeader(header.c_str(), flags);
     }
 
     bool combo(const string& label, const std::vector<std::string>& options, size_t& selected, float width) {
-        bool ret{false};
+        bool ret{ false };
 
-        if(width != 0) {
+        if (width != 0) {
             width *= scale;
             ImGui::PushItemWidth(width);
         }
 
-        if(selected >= options.size()) {
+        if (selected >= options.size()) {
             selected = options.empty() ? 0 : options.size() - 1;
         }
 
         string preview_value = options.empty() ? "" : options[selected];
 
-        if(ImGui::BeginCombo(label.c_str(), preview_value.c_str())) {
-            for(size_t i = 0; i < options.size(); i++) {
+        if (ImGui::BeginCombo(label.c_str(), preview_value.c_str())) {
+            for (size_t i = 0; i < options.size(); i++) {
                 bool is_selected = selected == i;
-                if(ImGui::Selectable(options[i].c_str(), is_selected)) {
+                if (ImGui::Selectable(options[i].c_str(), is_selected)) {
                     selected = i;
                     ret = true;
                 }
 
-                if(is_selected) {
+                if (is_selected) {
                     ImGui::SetItemDefaultFocus();
                 }
             }
@@ -647,35 +658,35 @@ namespace grey::widgets {
             ImGui::EndCombo();
         }
 
-        if(width != 0)
+        if (width != 0)
             ImGui::PopItemWidth();
 
         return ret;
     }
 
     bool list(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width) {
-        bool ret{false};
+        bool ret{ false };
 
-        if(width != 0) {
+        if (width != 0) {
             width *= scale;
             ImGui::PushItemWidth(width);
         }
 
-        if(selected >= options.size()) {
+        if (selected >= options.size()) {
             selected = options.empty() ? 0 : options.size() - 1;
         }
 
         string preview_value = options.empty() ? "" : options[selected];
 
-        if(ImGui::BeginListBox(label.c_str())) {
-            for(size_t i = 0; i < options.size(); i++) {
+        if (ImGui::BeginListBox(label.c_str())) {
+            for (size_t i = 0; i < options.size(); i++) {
                 bool is_selected = selected == i;
-                if(ImGui::Selectable(options[i].c_str(), is_selected)) {
+                if (ImGui::Selectable(options[i].c_str(), is_selected)) {
                     selected = i;
                     ret = true;
                 }
 
-                if(is_selected) {
+                if (is_selected) {
                     ImGui::SetItemDefaultFocus();
                 }
             }
@@ -683,7 +694,7 @@ namespace grey::widgets {
             ImGui::EndListBox();
         }
 
-        if(width != 0)
+        if (width != 0)
             ImGui::PopItemWidth();
 
         return ret;
@@ -701,7 +712,7 @@ namespace grey::widgets {
     }
 
     void notify_info(const std::string& message) {
-        ImGui::InsertNotification({ImGuiToastType::Info, 5000, message.c_str()});
+        ImGui::InsertNotification({ ImGuiToastType::Info, 5000, message.c_str() });
     }
 
     void notify_render_frame() {
@@ -730,7 +741,7 @@ namespace grey::widgets {
     // ---- group ----
 
     group::group() {
-        
+
     }
 
     void group::render() {
@@ -739,7 +750,7 @@ namespace grey::widgets {
 
     group::~group() {
 
-        if(full_width) {
+        if (full_width) {
             float max_width = ImGui::GetWindowWidth();
             ImGui::SetCursorPosX(0.0);
             ImGui::InvisibleButton("ib", ImVec2(max_width, 0.1));
@@ -748,7 +759,7 @@ namespace grey::widgets {
 
         ImGui::EndGroup();
 
-        if(bdr_ci || bdr_hover_ci || bg_ci || bg_hover_ci) {
+        if (bdr_ci || bdr_hover_ci || bg_ci || bg_hover_ci) {
             auto& style = ImGui::GetStyle();
 
             auto min = ImGui::GetItemRectMin();
@@ -756,28 +767,36 @@ namespace grey::widgets {
             ImDrawList* fdl = ImGui::GetWindowDrawList();
             ImDrawList* bdl = ImGui::GetBackgroundDrawList();
 
-            if(bg_ci > 0) {
+            if (bg_ci > 0) {
                 bdl->AddRectFilled(min, max,
-                    (ImU32)rgb_colour { style.Colors[bg_ci] },
+                    (ImU32)rgb_colour {
+                    style.Colors[bg_ci]
+                },
                     style.FrameRounding);
             }
 
-            if(bdr_ci > 0) {
+            if (bdr_ci > 0) {
                 fdl->AddRect(min, max,
-                    (ImU32)rgb_colour { style.Colors[bdr_ci] },
+                    (ImU32)rgb_colour {
+                    style.Colors[bdr_ci]
+                },
                     style.FrameRounding);
             }
 
-            if(ImGui::IsItemHovered()) {
-                if(bg_hover_ci > 0) {
+            if (ImGui::IsItemHovered()) {
+                if (bg_hover_ci > 0) {
                     bdl->AddRectFilled(min, max,
-                        (ImU32)rgb_colour { style.Colors[bg_hover_ci] },
+                        (ImU32)rgb_colour {
+                        style.Colors[bg_hover_ci]
+                    },
                         style.FrameRounding);
                 }
 
-                if(bdr_hover_ci > 0) {
+                if (bdr_hover_ci > 0) {
                     fdl->AddRect(min, max,
-                        (ImU32)rgb_colour { style.Colors[bdr_hover_ci] },
+                        (ImU32)rgb_colour {
+                        style.Colors[bdr_hover_ci]
+                    },
                         style.FrameRounding);
                 }
             }
@@ -787,11 +806,11 @@ namespace grey::widgets {
 
     // ---- status bar ----
 
-    status_bar::status_bar() : style{ImGui::GetStyle()}, cursor_before{ImGui::GetCursorPos()} {
+    status_bar::status_bar() : style{ ImGui::GetStyle() }, cursor_before{ ImGui::GetCursorPos() } {
         auto io = ImGui::GetIO();
 
         float height = io.Fonts->Fonts[0]->FontSize + style.FramePadding.y * 2.0f;
-        
+
         ImVec2 ws = ImGui::GetWindowSize();
 
         ImGui::SetCursorPos(ImVec2(0, ws.y - height));
@@ -830,15 +849,17 @@ namespace grey::widgets {
 
     bool tree_node(const std::string& label, ImGuiTreeNodeFlags flags, emphasis emp) {
         bool ok;
-        if(emp == emphasis::none) {
+        if (emp == emphasis::none) {
             ok = ImGui::TreeNodeEx(label.c_str(), flags);
-        } else {
+        }
+        else {
             ImVec4 normal, hovered, active;
-            if(set_emphasis_colours(emp, normal, hovered, active)) {
+            if (set_emphasis_colours(emp, normal, hovered, active)) {
                 ImGui::PushStyleColor(ImGuiCol_Text, normal);
                 ok = ImGui::TreeNodeEx(label.c_str(), flags);
                 ImGui::PopStyleColor();
-            } else {
+            }
+            else {
                 ok = ImGui::TreeNodeEx(label.c_str(), flags);
             }
         }
@@ -857,27 +878,27 @@ namespace grey::widgets {
     // ---- tab bar ----
 
     tab_bar::tab_bar(const std::string& id, bool tab_list_popup, bool scroll) {
-        if(tab_list_popup)
+        if (tab_list_popup)
             flags |= ImGuiTabBarFlags_TabListPopupButton;
-        if(scroll)
+        if (scroll)
             flags |= ImGuiTabBarFlags_FittingPolicyScroll;
         rendered = ImGui::BeginTabBar(id.c_str(), flags);
         tab_index = 0;
     }
 
     tab_bar::~tab_bar() {
-        if(rendered) {
+        if (rendered) {
             ImGui::EndTabBar();
         }
     }
 
     tab_bar_item tab_bar::next_tab(const string& title, bool unsaved) {
-        return tab_bar_item{title + "##" + std::to_string(tab_index++), unsaved};
+        return tab_bar_item{ title + "##" + std::to_string(tab_index++), unsaved };
     }
 
-    tab_bar_item::tab_bar_item(const std::string& id, bool unsaved) : id{id} {
+    tab_bar_item::tab_bar_item(const std::string& id, bool unsaved) : id{ id } {
         //cout << "tab_bar_item::tab_bar_item " << id << endl;
-        if(unsaved) {
+        if (unsaved) {
             flags |= ImGuiTabItemFlags_UnsavedDocument;
         }
         rendered = ImGui::BeginTabItem(id.c_str(), nullptr, flags);
@@ -885,7 +906,7 @@ namespace grey::widgets {
 
     tab_bar_item::~tab_bar_item() {
         //cout << "tab_bar_item::~tab_bar_item " << id << endl;
-        if(rendered) {
+        if (rendered) {
             ImGui::EndTabItem();
             rendered = false;
         }
@@ -893,24 +914,24 @@ namespace grey::widgets {
 
     // ---- popup ----
 
-    popup::popup(const std::string& id) : id{id} {
+    popup::popup(const std::string& id) : id{ id } {
     }
 
     void popup::enter() {
 
-        if(do_open) {
+        if (do_open) {
             ImGui::OpenPopup(id.c_str());
             do_open = false;
         }
 
-        if(rendered && open_x != 0 && open_y != 0) {
+        if (rendered && open_x != 0 && open_y != 0) {
             ImGui::SetNextWindowPos(ImVec2(open_x, open_y));
         }
         rendered = ImGui::BeginPopup(id.c_str());
     }
 
     void popup::leave() {
-        if(rendered) {
+        if (rendered) {
             ImGui::EndPopup();
         }
     }
@@ -927,10 +948,10 @@ namespace grey::widgets {
 
     // ImGuiColorTextEdit
 
-    text_editor::text_editor(bool border) : 
-        id{generate_id("TextEditor")},
-        border{border},
-        lang{grey::thirdparty::langdefs::lua()} {
+    text_editor::text_editor(bool border) :
+        id{ generate_id("TextEditor") },
+        border{ border },
+        lang{ grey::thirdparty::langdefs::lua() } {
         editor.SetLanguageDefinition(lang);
         //editor.SetShowWhitespaces(true);
         editor.SetTabSize(2);
@@ -947,16 +968,58 @@ namespace grey::widgets {
 
     bool text_editor::render(float width, float height) {
         ImFont* f = fonts::font_loader::get_fixed_size_font(scale);
-        if(f) {
+        if (f) {
             ImGui::PushFont(f);
         }
 
         editor.Render(id.c_str(), ImVec2(width, height), border);
 
-        if(f) {
+        if (f) {
             ImGui::PopFont();
         }
-        
+
         return editor.IsTextChanged();
+    }
+
+    table::table(const std::string& id, int column_count, int row_count, ImVec2 outer_size) {
+        rendered = ImGui::BeginTable(id.c_str(), column_count, flags, outer_size);
+        if (rendered) {
+            clipper.Begin(row_count, 10);
+        }
+    }
+
+    table::~table() {
+        if (rendered) {
+            ImGui::EndTable();
+        }
+    }
+
+    void table::col_stretch(const std::string& label) {
+        ImGui::TableSetupColumn(label.c_str(), ImGuiTableColumnFlags_WidthStretch);
+    }
+
+    void table::col_fixed(const std::string& label) {
+        ImGui::TableSetupColumn(label.c_str(), ImGuiTableColumnFlags_WidthFixed);
+    }
+
+    void table::headers_row() {
+        ImGui::TableHeadersRow();
+    }
+
+    bool table::step(int& display_start, int& display_end) {
+        if (clipper.Step()) {
+            display_start = clipper.DisplayStart;
+            display_end = clipper.DisplayEnd;
+            return true;
+        }
+        return false;
+    }
+
+    void table::next_row() {
+        ImGui::TableNextRow();
+    }
+
+    void table::to_col(int i) {
+        ImGui::TableSetColumnIndex(i);
     }
 }

@@ -45,5 +45,32 @@ namespace Grey {
 
         [DllImport(LibName)]
         internal static extern void pop_next_tab();
+
+        [DllImport(LibName)]
+        internal static extern bool push_table([MarshalAs(UnmanagedType.LPUTF8Str)] string id,
+            int column_count,
+            int row_count,
+            float outer_width,
+            float outer_height);
+
+        [DllImport(LibName)]
+        internal static extern void pop_table();
+
+        [DllImport(LibName)]
+        internal static extern void table_col(
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
+            bool is_stretch);
+
+        [DllImport(LibName)]
+        internal static extern void table_headers_row();
+
+        [DllImport(LibName)]
+        internal static extern bool table_step(ref int display_start, ref int display_end);
+
+        [DllImport(LibName)]
+        internal static extern void table_next_row();
+
+        [DllImport(LibName)]
+        internal static extern void table_to_col(int i);
     }
 }

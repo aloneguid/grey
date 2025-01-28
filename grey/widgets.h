@@ -435,4 +435,33 @@ namespace grey::widgets {
         TextEditor editor;
         const TextEditor::LanguageDefinition& lang;
     };
+
+    // tables
+
+    class table {
+    public:
+        table(const std::string& id, int column_count, int row_count, ImVec2 outer_size);
+        ~table();
+
+        operator bool() const {
+            return rendered;
+        }
+
+        void col_stretch(const std::string& label);
+        void col_fixed(const std::string& label);
+        void headers_row();
+
+        bool step(int& display_start, int& display_end);
+        void next_row();
+        void to_col(int i);
+
+    private:
+        bool rendered{false};
+        ImGuiTableFlags flags{ ImGuiTableFlags_Borders |
+            ImGuiTableFlags_NoBordersInBodyUntilResize |
+            ImGuiTableFlags_HighlightHoveredColumn |
+            ImGuiTableFlags_Resizable |
+            ImGuiTableFlags_ScrollY};
+        ImGuiListClipper clipper;
+    };
 }

@@ -202,6 +202,38 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                 }
             }
 
+            // tables
+            {
+                auto tab = tabs.next_tab("Tables");
+                if(tab) {
+                    int row_count = 1000000;
+                    w::table t{"table1", 3, row_count, ImVec2(0, -20 * app.scale)};
+                    if(t) {
+                        t.col_fixed("id");
+                        t.col_fixed("name");
+                        t.col_stretch("description");
+                        t.headers_row();
+
+                        int start, end;
+                        while(t.step(start, end)) {
+
+                            for(int i = start; i < end; i++) {
+                                t.next_row();
+
+                                t.to_col(0);
+                                w::label(to_string(i));
+
+                                t.to_col(1);
+                                w::label("name " + to_string(i));
+
+                                t.to_col(2);
+                                w::label("description " + to_string(i));
+                            }
+                        }
+                    }
+                }
+            }
+
             // ImGuiColorTextEdit
 
             {
