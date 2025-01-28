@@ -7,18 +7,21 @@ using System.Threading.Tasks;
 namespace Grey {
     public class Table : IDisposable {
 
+        public record Column(string Name, bool Stretch = false);
+
         private readonly bool _rendered;
+        private int _col;
 
-        public Table(string id, int columnCount, int rowCount, float outerWidth = 0, float outerHeight = 0) {
-            _rendered = Native.push_table(id, columnCount, rowCount, outerWidth, outerHeight);
-        }
+        public Table(string id, Column[] columns, int rowCount, float outerWidth = 0, float outerHeight = 0) {
+            _rendered = Native.push_table(id, columns.Length, rowCount, outerWidth, outerHeight);
 
-        public void SetupColumn(string label, bool stretch = false) {
-            Native.table_col(label, stretch);
-        }
+            if(_rendered) {
+                foreach(Column col in columns) {
+                    Native.table_col(col.Name ?? "", col.Stretch);
+                }
 
-        public void HeadersRow() {
-            Native.table_headers_row();
+                Native.table_headers_row();
+            }
         }
 
         public bool Step(out int displayStart, out int displayEnd) {
@@ -32,10 +35,13 @@ namespace Grey {
 
         public void NextRow() {
             Native.table_next_row();
+            _col = 0;
+            Native.table_to_col(_col);
         }
 
-        public void ToCol(int i) {
-            Native.table_to_col(i);
+        public void NextCol() {
+            _col++;
+            Native.table_to_col(_col);
         }
 
         public void Dispose() {

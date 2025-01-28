@@ -38,22 +38,22 @@ Grey.App.Run(ref isRunning, "Grey# Demo", () => {
                 int totalRows = 1000000;
                 Label($"Large table with {totalRows} rows");
 
-                using(var tbl = new Table("x", 3, totalRows)) {
+                using(var tbl = new Table("x", [
+                    new Table.Column("id"),
+                    new Table.Column("name"),
+                    new Table.Column("description", true)
+                ], totalRows)) {
                     if(tbl) {
-                        tbl.SetupColumn("id");
-                        tbl.SetupColumn("name");
-                        tbl.SetupColumn("description", true);
-                        tbl.HeadersRow();
 
                         while(tbl.Step(out int ds, out int de)) {
                             for(int i = ds; i < de; i++) {
                                 tbl.NextRow();
 
-                                tbl.ToCol(0);
                                 Label(i.ToString());
-                                tbl.ToCol(1);
+
+                                tbl.NextCol();
                                 Label($"name {i}");
-                                tbl.ToCol(2);
+                                tbl.NextCol();
                                 Label($"description {i}");
                             }
                         }

@@ -984,6 +984,7 @@ namespace grey::widgets {
     table::table(const std::string& id, int column_count, int row_count, ImVec2 outer_size) {
         rendered = ImGui::BeginTable(id.c_str(), column_count, flags, outer_size);
         if (rendered) {
+            ImGui::TableSetupScrollFreeze(column_count, 1);
             clipper.Begin(row_count, 10);
         }
     }
