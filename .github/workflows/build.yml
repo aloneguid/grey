@@ -1,0 +1,111 @@
+﻿name: '🏦 Build'
+
+env:
+  VERSION: 0.0.0
+  PACKAGE_SUFFIX: '-pre.1'
+  # PACKAGE_SUFFIX: ''
+  ASM_VERSION: 0.0.0
+  BUILD_TYPE: Release
+  VCPKG_HASH: 0f88ecb8528605f91980b90a2c5bad88e3cb565f
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+jobs:
+  # builds native binary for all supported OSes
+  build-native:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            name: Windows x64
+            arch: x64
+            vcpkg_triplet: x64-windows-static
+            vcpkg_config: Release
+            dotnet_rid: win-x64
+
+      fail-fast: false
+    name: 'build: ${{ matrix.name }}'
+
+    env:
+      VCPKG_DEFAULT_VCPKG_TRIPLET: ${{ matrix.vcpkg_triplet }}
+      VCPKG_TRIPLET: ${{ matrix.vcpkg_triplet }}
+      VCPKG_CONFIG: ${{ matrix.vcpkg_config }}
+      DOTNET_RID: ${{ matrix.dotnet_rid }}
+      NO_NATIVE_SNAPPY: ${{ matrix.no_native_snappy }}
+      NO_NATIVE_ZSTD: ${{ matrix.no_native_zstd }}
+      CMAKE_OPTIONS: ${{ matrix.cmake_options }}
+
+    steps:
+      
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Linux ARM
+      if: runner.os == 'Linux' && matrix.arch == 'arm64'
+      run: |
+        sudo apt-get update
+        sudo apt-get --yes install g++-aarch64-linux-gnu pkg-config-aarch64-linux-gnu
+
+    - uses: friendlyanon/setup-vcpkg@v1
+      # seems like the absense of commit hash expects vcpkg submodule, i don't want that
+      with:
+        committish: ${{ env.VCPKG_HASH }} 
+        # set to false to clear any cache in case of build errors
+        cache: false
+
+    - name: configure
+      run: cmake -B build -S . -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -D "CMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake" -D "VCPKG_TARGET_TRIPLET=${{ env.VCPKG_TRIPLET }}" ${{ env.CMAKE_OPTIONS }}
+      working-directory: .
+
+    - name: build
+      run: cmake --build build --config ${{ env.VCPKG_CONFIG }}
+      working-directory: .
+
+    - name: debug
+      run: ls -R
+      working-directory: build
+
+    - uses: actions/upload-artifact@v4
+      name: Collect Artifacts
+      with:
+        name: native-${{ matrix.dotnet_rid }}
+        path: |
+          xbin/**/*
+        if-no-files-found: error
+
+  # create a unified fat native binary
+  make-fat-native:
+    runs-on: ubuntu-latest
+    needs: build-native
+    name: '🎡 fat artifact'
+    steps:
+
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: native-*
+        path: xbin/
+        merge-multiple: true
+
+    - name: debug
+      run: ls -R
+      working-directory: .
+
+    - uses: actions/upload-artifact@v4
+      name: Collect Artifacts
+      with:
+        name: native-fat
+        compression-level: 9
+        if-no-files-found: error
+        path: |
+          xbin/**/*

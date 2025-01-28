@@ -3,10 +3,13 @@
 #include <Windows.h>
 #include <ShlObj_core.h>
 #include <shellapi.h>
+#include <shellscalingapi.h>
 #include "reg.h"
 #include "../str.h"
 
 using namespace std;
+
+#pragma comment(lib, "Shcore.lib")
 
 namespace grey::common::win32::os {
     bool is_app_light_theme(bool& value) {
@@ -42,5 +45,9 @@ namespace grey::common::win32::os {
         else {
             return "";
         }
+    }
+
+    void set_dpi_awareness() {
+        ::SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
     }
 }

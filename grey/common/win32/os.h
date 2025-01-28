@@ -15,4 +15,6 @@ namespace grey::common::win32::os {
      * @return 
      */
     std::string get_system_fonts_path();
+
+    void set_dpi_awareness();
 }
