@@ -176,10 +176,10 @@ jobs:
 
       - name: debug
         run: ls -R
-        working-directory: dotnet
+        working-directory: .
 
       - name: print release notes
-        run: cat docs/release-notes.md
+        run: cat dotnet/docs/release-notes.md
 
       - name: 📦 Publish to NuGet
-        run: dotnet nuget push dotnet/Grey/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push dotnet/dotnet/Grey/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
