@@ -39,7 +39,7 @@
         </Content>
 
         <!-- Linux x64 -->
-        <Content Include="..\..\xbin\runtimes\linux-x64\native\xgrey.so" Link="xgrey.dll" PackagePath="runtimes/linux-x64/native">
+        <Content Include="..\..\xbin\runtimes\linux-x64\native\xgrey.so" Link="libxgrey.so" PackagePath="runtimes/linux-x64/native">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
 
