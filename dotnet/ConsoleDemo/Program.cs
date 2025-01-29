@@ -43,14 +43,14 @@ Grey.App.Run(ref isRunning, "Grey# Demo", () => {
 
         using(var ti = new TabItem("Tables")) {
             if(ti) {
+
                 int totalRows = 1000000;
                 Label($"Large table with {totalRows} rows");
-
-                using(var tbl = new Table("x", [
+                using(var tbl = new Table("t0", [
                     new Table.Column("id"),
                     new Table.Column("name"),
                     new Table.Column("description", true)
-                ], totalRows)) {
+                ], totalRows, 0, 200)) {
                     if(tbl) {
 
                         while(tbl.Step(out int ds, out int de)) {
@@ -63,6 +63,24 @@ Grey.App.Run(ref isRunning, "Grey# Demo", () => {
                                 Label($"name {i}");
                                 tbl.NextCol();
                                 Label($"description {i}");
+                            }
+                        }
+                    }
+                }
+
+                int totalColumns = 100;
+                Label($"Large table with {totalColumns} columns");
+                Table.Column[] cols = Enumerable.Range(0, totalColumns).Select(i => new Table.Column($"column {i}")).ToArray();
+                using(var tbl = new Table("t1", cols, totalRows)) {
+                    if(tbl) {
+                        while(tbl.Step(out int ds, out int de)) {
+                            for(int i = ds; i < de; i++) {
+                                tbl.NextRow();
+                                for(int j = 0; j < totalColumns; j++) {
+                                    if(j >0)
+                                        tbl.NextCol();
+                                    Label($"{i}x{j}");
+                                }
                             }
                         }
                     }

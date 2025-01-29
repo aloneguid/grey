@@ -456,11 +456,14 @@ namespace grey::widgets {
 
     private:
         bool rendered{false};
-        ImGuiTableFlags flags{ ImGuiTableFlags_Borders |
+        ImGuiTableFlags flags {
+            ImGuiTableFlags_Borders |
             ImGuiTableFlags_NoBordersInBodyUntilResize |
             ImGuiTableFlags_HighlightHoveredColumn |
+            ImGuiTableFlags_Hideable |
             ImGuiTableFlags_Resizable |
-            ImGuiTableFlags_ScrollY};
+            ImGuiTableFlags_ScrollY |
+            ImGuiTableFlags_ScrollX };
         ImGuiListClipper clipper;
     };
 }
