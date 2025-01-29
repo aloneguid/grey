@@ -355,6 +355,8 @@ namespace grey::widgets {
 
     bool checkbox(const std::string& label, bool& is_checked);
 
+    bool hyperlink(const std::string& text, const std::string& url_to_open = "");
+
     /**
      * @brief 
      * Small (less height) checkbox, similar to small button.

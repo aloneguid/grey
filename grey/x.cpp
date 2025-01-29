@@ -57,6 +57,8 @@ EXPORTED void app_run(
             c_frame_callback();
         }
 
+        w::notify_render_frame();
+
         return *is_running;
     });
 }
@@ -83,6 +85,17 @@ EXPORTED void sep(const char* c_text) {
 EXPORTED bool accordion(const char* c_header, bool default_open) {
     string header{c_header};
     return w::accordion(header, default_open);
+}
+
+EXPORTED bool hyperlink(const char* c_text, const char* c_url_to_open) {
+    string text{ c_text };
+    string url = c_url_to_open ? c_url_to_open : "";
+    return w::hyperlink(text, url);
+}
+
+EXPORTED void notify(const char* c_message) {
+    string message{ c_message };
+    w::notify_info(message);
 }
 
 stack<w::tab_bar> tab_bars;

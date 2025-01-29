@@ -115,6 +115,12 @@ int main(int argc, char* argv[]) {
                     w::sep("checkboxes");
                     w::checkbox("basic", selected);
                     w::small_checkbox("small", selected);
+
+                    if(w::hyperlink("click me")) {
+                        w::notify_info("hyperlink clicked");
+                    }
+
+                    w::hyperlink("blog", "https://www.aloneguid.uk/posts/");
                 }
             }
 

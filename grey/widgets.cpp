@@ -588,6 +588,15 @@ namespace grey::widgets {
         return ImGui::Checkbox(label.c_str(), &is_checked);
     }
 
+    bool hyperlink(const std::string& text, const std::string& url_to_open) {
+        if(!url_to_open.empty()) {
+            ImGui::TextLinkOpenURL(text.c_str(), url_to_open.c_str());
+            return false;
+        }
+
+        return ImGui::TextLink(text.c_str());
+    }
+
     bool small_checkbox(const std::string& label, bool& is_checked) {
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
         bool r = checkbox(label, is_checked);

@@ -32,6 +32,11 @@ Grey.App.Run(ref isRunning, "Grey# Demo", () => {
                 if(Accordion("Open accordion", true)) {
                     Label("accordion content (open)");
                 }
+                if(Hyperlink("click me")) {
+                    Notify("hyperlink clicked");
+                }
+
+                Hyperlink("blog", "https://www.aloneguid.uk/posts/");
             }
         }
 

@@ -25,5 +25,13 @@
         public static bool Accordion(string header, bool defaultOpen = false) {
             return Native.accordion(header, defaultOpen);
         }
+
+        public static bool Hyperlink(string text, string? urlToOpen = null) {
+            return Native.hyperlink(text, urlToOpen);
+        }
+
+        public static void Notify(string message) {
+            Native.notify(message);
+        }
     }
 }

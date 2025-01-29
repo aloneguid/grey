@@ -37,6 +37,14 @@ namespace Grey {
         [DllImport(LibName)]
         internal static extern bool accordion([MarshalAs(UnmanagedType.LPUTF8Str)] string header, bool default_open);
 
+        [DllImport(LibName)]
+        internal static extern bool hyperlink(
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string text,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string? url_to_open);
+
+        [DllImport(LibName)]
+        internal static extern void notify([MarshalAs(UnmanagedType.LPUTF8Str)] string message);
+
         // -- tabs
 
         [DllImport(LibName)]

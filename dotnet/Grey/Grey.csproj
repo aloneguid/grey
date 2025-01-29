@@ -6,10 +6,12 @@
         <Nullable>enable</Nullable>
         <!-- Because "grey" seems to be taken on nuget.org -->
         <PackageId>GreyMatter</PackageId>
-        <Description>Grey matter arghhh</Description>
+        <Description>Blazing fast, small, disposable UI for developers that makes their grey matter to be spent to actual problems.</Description>
         <PackageProjectUrl>https://github.com/aloneguid/grey</PackageProjectUrl>
         <ApplicationIcon>icon.ico</ApplicationIcon>
         <PackageIcon>icon64.png</PackageIcon>
+        <Authors>aloneguid</Authors>
+        <RepositoryUrl>https://github.com/aloneguid/grey</RepositoryUrl>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Release'">

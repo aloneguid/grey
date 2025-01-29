@@ -38,6 +38,10 @@ extern "C"
 
     EXPORTED bool accordion(const char* c_header, bool default_open);
 
+    EXPORTED bool hyperlink(const char* c_text, const char* c_url_to_open);
+
+    EXPORTED void notify(const char* c_message);
+
     // -- tab bars
 
     EXPORTED bool push_tab_bar(const char* c_id);
