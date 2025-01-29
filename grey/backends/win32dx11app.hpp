@@ -7,6 +7,7 @@
 #include <d3d11.h>
 #include <dwmapi.h>
 #include "../common/str.h"
+#include <iostream>
 
 // Forward declare message handler from imgui_impl_win32.cpp
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -14,6 +15,18 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 namespace grey::backends {
 
     using namespace std;
+
+    // Helpers
+    static LPCWSTR g_firstIconName{nullptr};
+    BOOL CALLBACK EnumIconsProc(HMODULE hModule, LPCWSTR lpType, LPWSTR lpName, LONG_PTR lParam) {
+        g_firstIconName = lpName;
+        return FALSE;
+    }
+
+    void FindFirstIcon() {
+        HMODULE hModule = ::GetModuleHandle(nullptr);
+        ::EnumResourceNames(hModule, RT_GROUP_ICON, EnumIconsProc, 0);
+    }
 
     // Data
     static ID3D11Device* g_pd3dDevice = nullptr;
@@ -109,11 +122,14 @@ namespace grey::backends {
             case WM_CREATE:
                 // load main icon and set as window icon
                 {
-                    HINSTANCE hInstance = ((LPCREATESTRUCT)lParam)->hInstance;
-                    //HANDLE hMainIcon = ::LoadImage(hInstance, MAKEINTRESOURCE(1033), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE);
-                    HICON hMainIcon = ::LoadIcon(hInstance, L"IDI_ICON1");
-                    if(hMainIcon)
-                        ::SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hMainIcon);
+                    FindFirstIcon();
+                    if(g_firstIconName) {
+                        HINSTANCE hInstance = ((LPCREATESTRUCT)lParam)->hInstance;
+                        HICON hMainIcon = ::LoadIcon(hInstance, g_firstIconName);
+                        if(hMainIcon) {
+                            ::SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hMainIcon);
+                        }
+                    }
                 }
                 return 0;
             case WM_DESTROY:

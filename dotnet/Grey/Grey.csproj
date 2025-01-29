@@ -6,6 +6,9 @@
         <Nullable>enable</Nullable>
         <!-- Because "grey" seems to be taken on nuget.org -->
         <PackageId>GreyMatter</PackageId>
+        <Description>Grey matter arghhh</Description>
+        <PackageProjectUrl>https://github.com/aloneguid/grey</PackageProjectUrl>
+        <ApplicationIcon>icon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -33,5 +36,9 @@
         <Content Include="..\..\xbin\runtimes\win-x64\native\xgrey.dll" Link="xgrey.dll" PackagePath="runtimes/win-x64/native">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="icon.ico" />
     </ItemGroup>
 </Project>
