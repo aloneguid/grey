@@ -35,6 +35,11 @@ namespace Grey {
         internal static extern void sep([MarshalAs(UnmanagedType.LPUTF8Str)] string text);
 
         [DllImport(LibName)]
+        internal static extern bool accordion([MarshalAs(UnmanagedType.LPUTF8Str)] string header, bool default_open);
+
+        // -- tabs
+
+        [DllImport(LibName)]
         internal static extern bool push_tab_bar([MarshalAs(UnmanagedType.LPUTF8Str)] string id);
 
         [DllImport(LibName)]
@@ -45,6 +50,8 @@ namespace Grey {
 
         [DllImport(LibName)]
         internal static extern void pop_next_tab();
+
+        // -- tables
 
         [DllImport(LibName)]
         internal static extern bool push_table([MarshalAs(UnmanagedType.LPUTF8Str)] string id,

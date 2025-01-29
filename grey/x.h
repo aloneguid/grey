@@ -34,6 +34,10 @@ extern "C"
 
     EXPORTED void sep(const char* c_text);
 
+    EXPORTED bool accordion(const char* c_header, bool default_open);
+
+    // -- tab bars
+
     EXPORTED bool push_tab_bar(const char* c_id);
 
     EXPORTED void pop_tab_bar();
@@ -41,6 +45,8 @@ extern "C"
     EXPORTED bool push_next_tab(const char* c_title);
 
     EXPORTED void pop_next_tab();
+
+    // -- tables
 
     EXPORTED bool push_table(const char* c_id, int32_t column_count, int32_t row_count, float outer_width, float outer_height);
 

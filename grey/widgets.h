@@ -447,8 +447,7 @@ namespace grey::widgets {
             return rendered;
         }
 
-        void col_stretch(const std::string& label);
-        void col_fixed(const std::string& label);
+        void col(const std::string& label, bool stretch = false);
         void headers_row();
 
         bool step(int& display_start, int& display_end);

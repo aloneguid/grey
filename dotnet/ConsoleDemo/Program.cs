@@ -24,6 +24,14 @@ Grey.App.Run(ref isRunning, "Grey# Demo", () => {
                 Button("primary", Emphasis.Primary);
                 SL();
                 Button("error", Emphasis.Error);
+
+                if(Accordion("Normal accordion")) {
+                    Label("accordion content");
+                }
+
+                if(Accordion("Open accordion", true)) {
+                    Label("accordion content (open)");
+                }
             }
         }
 

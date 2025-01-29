@@ -995,12 +995,9 @@ namespace grey::widgets {
         }
     }
 
-    void table::col_stretch(const std::string& label) {
-        ImGui::TableSetupColumn(label.c_str(), ImGuiTableColumnFlags_WidthStretch);
-    }
-
-    void table::col_fixed(const std::string& label) {
-        ImGui::TableSetupColumn(label.c_str(), ImGuiTableColumnFlags_WidthFixed);
+    void table::col(const std::string& label, bool stretch) {
+        ImGui::TableSetupColumn(label.c_str(),
+            stretch ? ImGuiTableColumnFlags_WidthStretch : ImGuiTableColumnFlags_WidthFixed);
     }
 
     void table::headers_row() {

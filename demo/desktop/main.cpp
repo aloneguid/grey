@@ -209,9 +209,9 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                     int row_count = 1000000;
                     w::table t{"table1", 3, row_count, ImVec2(0, -20 * app.scale)};
                     if(t) {
-                        t.col_fixed("id");
-                        t.col_fixed("name");
-                        t.col_stretch("description");
+                        t.col("id");
+                        t.col("name");
+                        t.col("description", true);
                         t.headers_row();
 
                         int start, end;

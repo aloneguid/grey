@@ -79,6 +79,11 @@ EXPORTED void sep(const char* c_text) {
     w::sep(text);
 }
 
+EXPORTED bool accordion(const char* c_header, bool default_open) {
+    string header{c_header};
+    return w::accordion(header, default_open);
+}
+
 stack<w::tab_bar> tab_bars;
 stack<w::tab_bar_item> tab_items;
 
@@ -133,12 +138,7 @@ EXPORTED void pop_table() {
 EXPORTED void table_col(const char* c_label, bool is_stretch) {
     string label = c_label;
     auto& t = tables.top();
-    if (is_stretch) {
-        t.col_stretch(label);
-    }
-    else {
-        t.col_fixed(label);
-    }
+    t.col(label, is_stretch);
 }
 
 EXPORTED void table_headers_row() {

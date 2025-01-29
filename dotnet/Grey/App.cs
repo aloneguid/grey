@@ -21,5 +21,9 @@
         public static void Sep(string text = "") {
             Native.sep(text);
         }
+
+        public static bool Accordion(string header, bool defaultOpen = false) {
+            return Native.accordion(header, defaultOpen);
+        }
     }
 }
