@@ -6,7 +6,9 @@
 #include "fonts/font_loader.h"
 #include <iostream>
 // for Windows-specific hacks
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 
 // 3rdparty
 #include "3rdparty/ImGuiColorTextEdit/langdefs.h"
@@ -170,6 +172,7 @@ namespace grey::widgets {
             ImGui::PopStyleVar();
         ImGui::End();
 
+#ifdef _WIN32
         if (!win32_brought_forward) {
             ImGuiViewport* vp = ImGui::GetWindowViewport();
             if (vp) {
@@ -177,6 +180,7 @@ namespace grey::widgets {
                 win32_brought_forward = true;
             }
         }
+#endif
 
         if (fill_viewport_enabled) {
             ImGui::PopStyleVar();

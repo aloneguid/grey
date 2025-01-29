@@ -1,22 +1,36 @@
 #include "app.h"
-#include "backends/win32dx11app.hpp"
 #include "fonts/font_loader.h"
 #include "themes.h"
 #include "widgets.h"
+
+#if _WIN32
+#include "backends/win32dx11app.hpp"
 #include "common/win32/os.h"
+#else
+#include "backends/glfw_gl3.hpp"
+#endif
 
 using namespace std;
 
 namespace grey {
     std::unique_ptr<grey::app> app::make(const string& title, int width, int height) {
+
+#if _WIN32
         auto app = make_unique<grey::backends::win32dx11app>(title, width, height);
+#else
+        auto app = make_unique<grey::backends::glfw_gl3_app>(title, width, height);
+#endif
 
         return app;
     }
 
     app::app() {
+#if _WIN32
         int dpi = grey::common::win32::os::get_dpi();
         scale = dpi / 96.f;
+#else
+        scale = 1.0f;
+#endif
         grey::widgets::scale = scale;
     }
 

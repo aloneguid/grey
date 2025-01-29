@@ -1,5 +1,7 @@
 #include "themes.h"
+#if WIN32
 #include "common/win32/os.h"
+#endif
 
 using namespace std;
 
@@ -113,7 +115,9 @@ namespace grey::themes {
 
     void set_theme_follow_os() {
         bool is_light{false};
+#if WIN32
         grey::common::win32::os::is_app_light_theme(is_light);
+#endif
         if(is_light) {
             set_theme_light();
         } else {
@@ -556,7 +560,11 @@ namespace grey::themes {
 
         if(r.id == FollowOsThemeId) {
             bool is_light;
+#if WIN32
             grey::common::win32::os::is_app_light_theme(is_light);
+#else
+            is_light = false;
+#endif
             r.is_dark = !is_light;
         }
 

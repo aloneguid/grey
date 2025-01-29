@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.20)
+cmake_minimum_required (VERSION 3.28)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -27,8 +27,6 @@ if(MSVC AND CMAKE_BUILD_TYPE MATCHES Debug)
     add_link_options("/INCREMENTAL")
 endif()
 
-if(WIN32)
-    add_subdirectory(grey)
-    add_subdirectory(demo/desktop)
-    add_subdirectory(demo/pure)
-endif()
+add_subdirectory(grey)
+add_subdirectory(demo/desktop)
+add_subdirectory(demo/pure)

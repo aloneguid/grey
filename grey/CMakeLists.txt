@@ -5,7 +5,11 @@ set (DYNAMIC_NAME xgrey)
 
 find_package(imgui CONFIG REQUIRED)
 find_package(implot CONFIG REQUIRED)
-#find_package(fmt CONFIG REQUIRED)
+
+if(UNIX AND NOT APPLE)
+    find_package(OpenGL REQUIRED)
+    find_package(glfw3 CONFIG REQUIRED)
+ endif()
 
 find_path(STB_INCLUDE_DIRS "stb.h")
 
@@ -13,11 +17,19 @@ file(GLOB core_src CONFIGURE_DEPENDS "*.cpp"
     "backends/*.cpp"
     "fonts/*.cpp"
     "common/*.cpp"
-    "common/*.cpp"
-    "common/win32/*.cpp"
     "3rdparty/imgui-node-editor/*.cpp"
     "3rdparty/ImGuiColorTextEdit/*.cpp")
-set(private_libs D3D11.lib implot::implot)
+
+if (WIN32)
+    file(GLOB core_src CONFIGURE_DEPENDS ${core_src} "common/win32/*.cpp")
+endif()
+
+if (WIN32)
+    set(private_libs implot::implot D3D11.lib)
+else()
+    set(private_libs implot::implot glfw OpenGL::GL)
+endif()
+
 set(interface_libs imgui::imgui)
 
 add_library(${DYNAMIC_NAME} SHARED ${core_src} "x.cpp")

@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <windows.h>
+#include <Windows.h>
 
 namespace grey::common::win32
 {

@@ -2,6 +2,7 @@
 #include "../grey/app.h"
 #include "../grey/widgets.h"
 #include <imgui_internal.h>
+#include <vector>
 
 using namespace std;
 namespace w = grey::widgets;
@@ -19,7 +20,11 @@ bool ned_initialised{false};
 w::text_editor ted;
 bool selected{false};
 
+#if WIN32
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
+#else
+int main(int argc, char* argv[]) {
+#endif
 
     //auto backend = grey::backend::make_platform_default(APP_LONG_NAME);
     //auto wnd = backend->make_window<demo::main_wnd>();
