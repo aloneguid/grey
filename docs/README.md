@@ -1,25 +1,22 @@
-# grey
+# Grey
 
-Minimalistic cross-platform UI framework based on [ImGui](https://github.com/ocornut/imgui) at first but is slowly diverging into something else.
+![logo](icon64.png)
 
-It's basically ImGui shaped into making desktop applications, because ImGui can be used for anything, and this library simply makes it simple to start off with desktop.
+Grey is a minimalistic, blazing fast, disposable, cross-platform, zero configuration UI library for C++ and C# that frees up developers' grey matter to do something that matters.
+
+Grey is designed to display user interface in one line of code with no ceremony at all.
+
+It's based on the awesome [ImGui](https://github.com/ocornut/imgui) framework and follows it's design principles.
 
 ## Features
 
+- Cross-platform - currently supports **Windows x64** and **Linux x64**.
 - Supports High DPI out of the box.
-- Replaces default font with Roboto, and adds support for an icon font out of the box.
+- Looks beautiful by default.
 - Completely stateless i.e. no widgets, state synchronisation and so on.
 
-## Technical remarks
+## Getting started
 
-### Font choices
+To get started in C++, simply include this repository as a git submodule and follow the examples. For a real-life, production sample, check out [bt](https://github.com/aloneguid/bt).
 
-Grey uses [Google Material Icons](https://fonts.google.com/icons?icon.set=Material+Icons). Initially, I was using FontAwesome, and then ForkAwesome. The last wasn't updated for quite some time, and I had issues with the first.
-
-[This repo](https://github.com/juliettef/IconFontCppHeaders) contains convenient headers, which can be copied into *fonts* subfolder. To generate the inline, use:
-
-```
-.\binary_to_compressed.exe .\fa-regular-400.ttf font_awesome_regular_400 > font_awesome_6_regular_400.inl
-```
-
-The rest of the code in `font_loader.hpp` shows how to use it.
+To get started in C#, reference [GreyMatter](https://www.nuget.org/packages/GreyMatter/) package, which includes C# interface and pre-built binaries for Windows and Linux.
