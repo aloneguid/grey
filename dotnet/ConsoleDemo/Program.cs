@@ -1,4 +1,5 @@
-﻿using Grey;
+﻿using System.Text;
+using Grey;
 using static Grey.App;
 
 bool isRunning = true;
@@ -37,6 +38,10 @@ Grey.App.Run(ref isRunning, "Grey# Demo", () => {
                 }
 
                 Hyperlink("blog", "https://www.aloneguid.uk/posts/");
+
+                if(Input(ref message, "input1", true, 200, false)) {
+                    Notify("input changed");
+                }
             }
         }
 

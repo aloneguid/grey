@@ -42,6 +42,9 @@ extern "C"
 
     EXPORTED void notify(const char* c_message);
 
+    EXPORTED bool input(char* c_value, int32_t value_max_length,
+            const char* c_label, bool enabled, float width, bool is_readonly);
+
     // -- tab bars
 
     EXPORTED bool push_tab_bar(const char* c_id);

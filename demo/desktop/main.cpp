@@ -121,6 +121,8 @@ int main(int argc, char* argv[]) {
                     }
 
                     w::hyperlink("blog", "https://www.aloneguid.uk/posts/");
+
+                    w::input(text, "##input1");
                 }
             }
 

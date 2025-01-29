@@ -355,6 +355,22 @@ namespace grey::widgets {
         return fired;
     }
 
+    bool input(char* value, int value_length, const std::string& label, bool enabled, float width, bool is_readonly) {
+        bool fired;
+        if(!enabled) ImGui::BeginDisabled();
+        if(width != 0)
+            ImGui::PushItemWidth(width);
+
+        ImGuiInputTextFlags flags{};
+        if(is_readonly) flags |= ImGuiInputTextFlags_ReadOnly;
+        fired = ImGui::InputText(label.c_str(), value, value_length, flags);
+
+        if(width != 0)
+            ImGui::PopItemWidth();
+        if(!enabled) ImGui::EndDisabled();
+        return fired;
+    }
+
     bool input(int& value, const std::string& label, bool enabled, float width, bool is_readonly) {
         bool fired;
         if (!enabled) ImGui::BeginDisabled();

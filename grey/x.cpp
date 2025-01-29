@@ -14,6 +14,8 @@ namespace w = grey::widgets;
 #include "common/win32/os.h"
 #endif
 
+float scale = 1.0f;
+
 void platform_init() {
 #if _WIN32
     grey::common::win32::os::set_dpi_awareness();
@@ -50,6 +52,8 @@ EXPORTED void app_run(
     app->win32_can_resize = true;
 #endif
     app->run([c_frame_callback, &is_running, &wnd](const grey::app& app) {
+
+        scale = app.scale;
 
         w::guard g{wnd};
 
@@ -96,6 +100,11 @@ EXPORTED bool hyperlink(const char* c_text, const char* c_url_to_open) {
 EXPORTED void notify(const char* c_message) {
     string message{ c_message };
     w::notify_info(message);
+}
+
+EXPORTED bool input(char* c_value, int32_t value_max_length, const char* c_label, bool enabled, float width, bool is_readonly) {
+    string label{ c_label };
+    return w::input(c_value, value_max_length, label, enabled, width * scale, is_readonly);
 }
 
 stack<w::tab_bar> tab_bars;

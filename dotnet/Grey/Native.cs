@@ -45,6 +45,14 @@ namespace Grey {
         [DllImport(LibName)]
         internal static extern void notify([MarshalAs(UnmanagedType.LPUTF8Str)] string message);
 
+        [DllImport(LibName)]
+        internal static extern bool input(
+            [MarshalAs(UnmanagedType.LPUTF8Str)] StringBuilder value,
+            int value_max_length,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
+            bool enabled, float width, bool is_readonly);
+
+
         // -- tabs
 
         [DllImport(LibName)]

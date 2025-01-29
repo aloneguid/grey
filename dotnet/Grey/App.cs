@@ -1,4 +1,6 @@
-﻿namespace Grey {
+﻿using System.Text;
+
+namespace Grey {
     public static class App {
         public static void Run(ref bool isRunning, string title, Action renderFrame,
             int width = 800, int height = 600, bool hasMenuBar = false) {
@@ -32,6 +34,21 @@
 
         public static void Notify(string message) {
             Native.notify(message);
+        }
+
+        public static bool Input(StringBuilder value, string label,
+            bool enabled = true, float width = 0, bool is_readonly = false) {
+            return Native.input(value, value.Capacity, label, enabled, width, is_readonly);
+        }
+
+        public static bool Input(ref string value, string label,
+            bool enabled = true, float width = 0, bool is_readonly = false) {
+            var sb = new StringBuilder(value, Math.Max(10, value.Length * 2));
+            bool ret = Native.input(sb, sb.Capacity, label, enabled, width, is_readonly);
+            if(ret) {
+                value = sb.ToString();
+            }
+            return ret;
         }
     }
 }
