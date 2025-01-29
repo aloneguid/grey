@@ -55,6 +55,12 @@ jobs:
       with:
         submodules: true
 
+    - name: Linux x64
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get --yes install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
+
     - uses: friendlyanon/setup-vcpkg@v1
       # seems like the absense of commit hash expects vcpkg submodule, i don't want that
       with:
