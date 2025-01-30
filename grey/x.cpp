@@ -158,9 +158,9 @@ EXPORTED void pop_next_tab() {
 
 stack<w::table> tables;
 
-EXPORTED bool push_table(const char* c_id, int32_t column_count, int32_t row_count, float outer_width, float outer_height) {
+EXPORTED bool push_table(const char* c_id, int32_t column_count, float outer_width, float outer_height) {
     string id = c_id;
-    tables.emplace(id, column_count, row_count, ImVec2(outer_width, outer_height));
+    tables.emplace(id, column_count, outer_width, outer_height);
     auto& t = tables.top();
     return t;
 }
@@ -169,28 +169,23 @@ EXPORTED void pop_table() {
     tables.pop();
 }
 
-EXPORTED void table_col(const char* c_label, bool is_stretch) {
+EXPORTED void table_col(const char* c_label) {
     string label = c_label;
     auto& t = tables.top();
-    t.col(label, is_stretch);
+    t.columns.push_back(label);
 }
 
-EXPORTED void table_headers_row() {
+EXPORTED void table_begin_data() {
     auto& t = tables.top();
-    t.headers_row();
+    t.begin_data();
 }
 
-EXPORTED bool table_step(int& display_start, int& display_end) {
+EXPORTED void table_begin_row() {
     auto& t = tables.top();
-    return t.step(display_start, display_end);
+    t.begin_row();
 }
 
-EXPORTED void table_next_row() {
+EXPORTED void table_begin_col() {
     auto& t = tables.top();
-    t.next_row();
-}
-
-EXPORTED void table_to_col(int32_t i) {
-    auto& t = tables.top();
-    t.to_col(i);
+    t.begin_col();
 }

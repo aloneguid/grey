@@ -10,38 +10,25 @@ namespace Grey {
         public record Column(string Name, bool Stretch = false);
 
         private readonly bool _rendered;
-        private int _col;
 
-        public Table(string id, Column[] columns, int rowCount, float outerWidth = 0, float outerHeight = 0) {
-            _rendered = Native.push_table(id, columns.Length, rowCount, outerWidth, outerHeight);
+        public Table(string id, string[] columns, float outerWidth = 0, float outerHeight = 0) {
+            _rendered = Native.push_table(id, columns.Length, outerWidth, outerHeight);
 
             if(_rendered) {
-                foreach(Column col in columns) {
-                    Native.table_col(col.Name ?? "", col.Stretch);
+                foreach(string col in columns) {
+                    Native.table_col(col);
                 }
 
-                Native.table_headers_row();
+                Native.table_begin_data();
             }
         }
 
-        public bool Step(out int displayStart, out int displayEnd) {
-            int ds = 0;
-            int de = 0;
-            bool ret = Native.table_step(ref ds, ref de);
-            displayStart = ds;
-            displayEnd = de;
-            return ret;
+        public void BeginRow() {
+            Native.table_begin_row();
         }
 
-        public void NextRow() {
-            Native.table_next_row();
-            _col = 0;
-            Native.table_to_col(_col);
-        }
-
-        public void NextCol() {
-            _col++;
-            Native.table_to_col(_col);
+        public void BeginCol() {
+            Native.table_begin_col();
         }
 
         public void Dispose() {

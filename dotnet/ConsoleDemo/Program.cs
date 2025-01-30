@@ -72,44 +72,21 @@ Grey.App.Run("Grey# Demo", () => {
         using(var ti = new TabItem("Tables")) {
             if(ti) {
 
-                int totalRows = 1000000;
-                Label($"Large table with {totalRows} rows");
-                using(var tbl = new Table("t0", [
-                    new Table.Column("id"),
-                    new Table.Column("name"),
-                    new Table.Column("description", true)
-                ], totalRows, 0, 200)) {
+                int totalRows = 100;
+                Label($"Simple table with {totalRows} rows");
+                using(var tbl = new Table("t0", ["id", "name", "description+"])) {
                     if(tbl) {
 
-                        while(tbl.Step(out int ds, out int de)) {
-                            for(int i = ds; i < de; i++) {
-                                tbl.NextRow();
+                        for(int i = 0; i < totalRows; i++) {
+                            tbl.BeginRow();
 
-                                Label(i.ToString());
+                            tbl.BeginCol();
+                            Label(i.ToString());
 
-                                tbl.NextCol();
-                                Label($"name {i}");
-                                tbl.NextCol();
-                                Label($"description {i}");
-                            }
-                        }
-                    }
-                }
-
-                int totalColumns = 100;
-                Label($"Large table with {totalColumns} columns");
-                Table.Column[] cols = Enumerable.Range(0, totalColumns).Select(i => new Table.Column($"column {i}")).ToArray();
-                using(var tbl = new Table("t1", cols, totalRows)) {
-                    if(tbl) {
-                        while(tbl.Step(out int ds, out int de)) {
-                            for(int i = ds; i < de; i++) {
-                                tbl.NextRow();
-                                for(int j = 0; j < totalColumns; j++) {
-                                    if(j >0)
-                                        tbl.NextCol();
-                                    Label($"{i}x{j}");
-                                }
-                            }
+                            tbl.BeginCol();
+                            Label($"name {i}");
+                            tbl.BeginCol();
+                            Label($"description {i}");
                         }
                     }
                 }

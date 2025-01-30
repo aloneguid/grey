@@ -444,8 +444,42 @@ namespace grey::widgets {
 
     class table {
     public:
-        table(const std::string& id, int column_count, int row_count, ImVec2 outer_size);
+        table(const std::string& id, int column_count, float outer_width = 0, float outer_height = 0);
         ~table();
+
+        std::vector<std::string> columns;
+
+        operator bool() const {
+            return rendered;
+        }
+
+        void begin_data();
+        void begin_row();
+        void begin_col();
+
+    private:
+        bool rendered{false};
+        bool header_rendered{false};
+        ImGuiTableFlags flags{
+            ImGuiTableFlags_Borders |
+            ImGuiTableFlags_NoBordersInBodyUntilResize |
+            ImGuiTableFlags_HighlightHoveredColumn |
+            ImGuiTableFlags_Hideable |
+            ImGuiTableFlags_Resizable |
+            ImGuiTableFlags_ScrollY |
+            ImGuiTableFlags_ScrollX };
+
+        void render_headers();
+    };
+
+    /**
+     * @brief Table that will allow displaying enormous amounts of data.
+              Experimental, needs refining the clipping functionality
+     */
+    class big_table {
+    public:
+        big_table(const std::string& id, int column_count, int row_count, ImVec2 outer_size);
+        ~big_table();
 
         operator bool() const {
             return rendered;

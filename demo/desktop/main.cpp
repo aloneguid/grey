@@ -217,29 +217,25 @@ int main(int argc, char* argv[]) {
             {
                 auto tab = tabs.next_tab("Tables");
                 if(tab) {
-                    int row_count = 1000000;
-                    w::table t{"table1", 3, row_count, ImVec2(0, -20 * app.scale)};
+                    int row_count = 1000;
+                    w::table t{"table1", 3, 0, -20 * app.scale};
                     if(t) {
-                        t.col("id");
-                        t.col("name");
-                        t.col("description", true);
-                        t.headers_row();
+                        t.columns.push_back("id");
+                        t.columns.push_back("name");
+                        t.columns.push_back("description+");
+                      
+                        t.begin_data();
+                        for(int i = 0; i < row_count; i++) {
+                            t.begin_row();
 
-                        int start, end;
-                        while(t.step(start, end)) {
+                            t.begin_col();
+                            w::label(to_string(i));
 
-                            for(int i = start; i < end; i++) {
-                                t.next_row();
+                            t.begin_col();
+                            w::label("name " + to_string(i));
 
-                                t.to_col(0);
-                                w::label(to_string(i));
-
-                                t.to_col(1);
-                                w::label("name " + to_string(i));
-
-                                t.to_col(2);
-                                w::label("description " + to_string(i));
-                            }
+                            t.begin_col();
+                            w::label("description " + to_string(i));
                         }
                     }
                 }

@@ -1009,7 +1009,49 @@ namespace grey::widgets {
         return editor.IsTextChanged();
     }
 
-    table::table(const std::string& id, int column_count, int row_count, ImVec2 outer_size) {
+    table::table(const std::string& id, int column_count, float outer_width, float outer_height) {
+        rendered = ImGui::BeginTable(id.c_str(), column_count, flags, ImVec2(outer_width, outer_height));
+    }
+
+    table::~table() {
+        if(rendered) {
+            render_headers();
+            ImGui::EndTable();
+        }
+    }
+
+    void table::begin_data() {
+        render_headers();
+    }
+
+    void table::begin_row() {
+        ImGui::TableNextRow();
+    }
+
+    void table::begin_col() {
+        ImGui::TableNextColumn();
+    }
+
+    void table::render_headers() {
+        if(header_rendered || !rendered) return;
+
+        ImGui::TableSetupScrollFreeze(0, 1);
+
+        for(const string& cn : columns) {
+            if(cn.empty() || !cn.ends_with("+")) {
+                ImGui::TableSetupColumn(cn.c_str());
+            } else {
+                string n = cn.substr(0, cn.size() - 1);
+                ImGui::TableSetupColumn(n.c_str(), ImGuiTableColumnFlags_WidthStretch);
+            }
+        }
+
+        ImGui::TableHeadersRow();
+
+        header_rendered = true;
+    }
+
+    big_table::big_table(const std::string& id, int column_count, int row_count, ImVec2 outer_size) {
         rendered = ImGui::BeginTable(id.c_str(), column_count, flags, outer_size);
         if (rendered) {
             ImGui::TableSetupScrollFreeze(column_count, 1);
@@ -1017,22 +1059,22 @@ namespace grey::widgets {
         }
     }
 
-    table::~table() {
+    big_table::~big_table() {
         if (rendered) {
             ImGui::EndTable();
         }
     }
 
-    void table::col(const std::string& label, bool stretch) {
+    void big_table::col(const std::string& label, bool stretch) {
         ImGui::TableSetupColumn(label.c_str(),
             stretch ? ImGuiTableColumnFlags_WidthStretch : ImGuiTableColumnFlags_WidthFixed);
     }
 
-    void table::headers_row() {
+    void big_table::headers_row() {
         ImGui::TableHeadersRow();
     }
 
-    bool table::step(int& display_start, int& display_end) {
+    bool big_table::step(int& display_start, int& display_end) {
         if (clipper.Step()) {
             display_start = clipper.DisplayStart;
             display_end = clipper.DisplayEnd;
@@ -1041,11 +1083,13 @@ namespace grey::widgets {
         return false;
     }
 
-    void table::next_row() {
+    void big_table::next_row() {
         ImGui::TableNextRow();
     }
 
-    void table::to_col(int i) {
+    void big_table::to_col(int i) {
         ImGui::TableSetColumnIndex(i);
     }
+
+
 }
