@@ -210,8 +210,6 @@ int main(int argc, char* argv[]) {
                     if(w::button("info message")) {
                         w::notify_info("inof");
                     }
-
-                    w::notify_render_frame();
                 }
             }
 
