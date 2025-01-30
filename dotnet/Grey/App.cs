@@ -1,23 +1,27 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace Grey {
     public static class App {
         public static void Run(ref bool isRunning, string title, Action renderFrame,
-            int width = 800, int height = 600, bool hasMenuBar = false) {
+            int width = 800, int height = 600,
+            bool hasMenuBar = false,
+            bool isScrollable = true,
+            bool centerOnScreen = false) {
             var callback = new Native.RenderFrameCallback(renderFrame);
-            Native.app_run(ref isRunning, title, width, height, hasMenuBar, callback);
+            Native.app_run(ref isRunning, title, width, height, hasMenuBar, isScrollable, centerOnScreen, callback);
         }
 
         public static void SL(float offset = 0) {
             Native.sl(offset);
         }
-
-        public static void Label(string text) {
-            Native.label(text);
+        public static void Label(string text, Emphasis emphasis = Emphasis.None, int textWrapPos = 0, bool isEnabled = true) {
+            Native.label(text, emphasis, textWrapPos, isEnabled);
         }
 
-        public static bool Button(string text, Emphasis emphasis = Emphasis.None) {
-            return Native.button(text, emphasis);
+        public static bool Button(string text, Emphasis emphasis = Emphasis.None,
+            bool isEnabled = true, bool isSmall = false) {
+            return Native.button(text, emphasis, isEnabled, isSmall);
         }
 
         public static void Sep(string text = "") {

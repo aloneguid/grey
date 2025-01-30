@@ -324,9 +324,8 @@ namespace grey::widgets {
     void label(const std::string& text, emphasis emp, size_t text_wrap_pos, bool enabled) {
 
         if (emp == emphasis::none || !enabled) {
-            label(text, text_wrap_pos);
-        }
-        else {
+            label(text, text_wrap_pos, enabled);
+        } else {
             ImVec4 normal, hovered, active;
             if (set_emphasis_colours(emp, normal, hovered, active)) {
                 ImGui::PushStyleColor(ImGuiCol_Text, normal);

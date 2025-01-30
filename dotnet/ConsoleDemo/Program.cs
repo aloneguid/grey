@@ -10,7 +10,13 @@ Grey.App.Run(ref isRunning, "Grey# Demo", () => {
     using(new TabBar()) {
         using(var ti = new TabItem("Basics")) {
             if(ti) {
-                Label("Simple label followed by sep");
+                Label("simple label");
+                SL();
+                Label("primary", Emphasis.Primary);
+                SL();
+                Label("error", Emphasis.Error);
+                SL();
+                Label("disabled label", isEnabled: false);
                 Sep();
                 Sep("sep with text");
 
@@ -25,6 +31,10 @@ Grey.App.Run(ref isRunning, "Grey# Demo", () => {
                 Button("primary", Emphasis.Primary);
                 SL();
                 Button("error", Emphasis.Error);
+                SL();
+                Button("disabled", isEnabled: false);
+                SL();
+                Button("small", isSmall: true);
 
                 if(Accordion("Normal accordion")) {
                     Label("accordion content");
@@ -39,9 +49,13 @@ Grey.App.Run(ref isRunning, "Grey# Demo", () => {
 
                 Hyperlink("blog", "https://www.aloneguid.uk/posts/");
 
-                if(Input(ref message, "input1", true, 200, false)) {
+                if(Input(ref message, "default input")) {
                     Notify("input changed");
                 }
+
+                Input(ref message, "disabled input", false);
+                Input(ref message, "readonly input", is_readonly: true);
+                Input(ref message, "width explicitly set to 400", width: 400);
             }
         }
 
@@ -99,4 +113,4 @@ Grey.App.Run(ref isRunning, "Grey# Demo", () => {
         }
     }
 
-}, height: 400);
+}, height: 800, centerOnScreen: true);

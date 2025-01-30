@@ -26,13 +26,15 @@ extern "C"
         int32_t width,
         int32_t height,
         bool has_menubar,
+        bool can_scroll,
+        bool center_on_screen,
         RenderFrameCallback c_frame_callback);
 
     EXPORTED void sl(float offset);
 
-    EXPORTED void label(const char* c_text);
+    EXPORTED void label(const char* c_text, int32_t emphasis, int32_t text_wrap_pos, bool enabled);
 
-    EXPORTED bool button(const char* c_text, int32_t emphasis);
+    EXPORTED bool button(const char* c_text, int32_t emphasis, bool is_enabled, bool is_small);
 
     EXPORTED void sep(const char* c_text);
 

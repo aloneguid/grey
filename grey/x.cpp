@@ -28,6 +28,8 @@ EXPORTED void app_run(
     int32_t width,
     int32_t height,
     bool has_menubar,
+    bool can_scroll,
+    bool center_on_screen,
     RenderFrameCallback c_frame_callback) {
 
     platform_init();
@@ -38,13 +40,20 @@ EXPORTED void app_run(
     w::window wnd{title, is_running};
     wnd
         .no_titlebar()
-        .no_scroll()
         .no_resize()
         .fill_viewport()
         .border(0);
 
     if(has_menubar) {
         wnd.has_menubar();
+    }
+
+    if(!can_scroll) {
+        wnd.no_scroll();
+    }
+
+    if(center_on_screen) {
+        wnd.center();
     }
 
     auto app = grey::app::make(title, width, height);
@@ -71,14 +80,14 @@ EXPORTED void sl(float offset) {
     w::sl(offset);
 }
 
-EXPORTED void label(const char* c_text) {
+EXPORTED void label(const char* c_text, int32_t emphasis, int32_t text_wrap_pos, bool enabled) {
     string text{c_text};
-    w::label(text);
+    w::label(text, (w::emphasis)emphasis, text_wrap_pos, enabled);
 }
 
-EXPORTED bool button(const char* c_text, int32_t emphasis) {
+EXPORTED bool button(const char* c_text, int32_t emphasis, bool is_enabled, bool is_small) {
     string text{c_text};
-    return w::button(text, (w::emphasis)emphasis);
+    return w::button(text, (w::emphasis)emphasis, is_enabled, is_small);
 }
 
 EXPORTED void sep(const char* c_text) {

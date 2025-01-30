@@ -18,18 +18,23 @@ namespace Grey {
             int width,
             int height,
             bool has_menubar,
+            bool can_scroll,
+            bool center_on_screen,
             RenderFrameCallback callback);
 
         [DllImport(LibName)]
         internal static extern void sl(float offset);
 
         [DllImport(LibName)]
-        internal static extern void label([MarshalAs(UnmanagedType.LPUTF8Str)] string text);
+        internal static extern void label([MarshalAs(UnmanagedType.LPUTF8Str)] string text,
+            Emphasis emphasis, int text_wrap_pos, bool enabled);
 
         [DllImport(LibName)]
         internal static extern bool button(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string text,
-            Emphasis emphasis);
+            Emphasis emphasis,
+            bool is_enabled,
+            bool is_small);
 
         [DllImport(LibName)]
         internal static extern void sep([MarshalAs(UnmanagedType.LPUTF8Str)] string text);
