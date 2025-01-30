@@ -9,11 +9,10 @@ namespace Grey {
     static class Native {
         const string LibName = "xgrey";
 
-        public delegate void RenderFrameCallback();
+        public delegate bool RenderFrameCallback();
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void app_run(
-            [MarshalAs(UnmanagedType.Bool)] ref bool is_running,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string title,
             int width,
             int height,

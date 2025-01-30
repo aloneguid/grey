@@ -23,7 +23,6 @@ void platform_init() {
 }
 
 EXPORTED void app_run(
-    bool* is_running,
     const char* c_title,
     int32_t width,
     int32_t height,
@@ -37,7 +36,8 @@ EXPORTED void app_run(
     string title = c_title;
 
     // main window
-    w::window wnd{title, is_running};
+    bool is_running = true;
+    w::window wnd{title, &is_running};
     wnd
         .no_titlebar()
         .no_resize()
@@ -67,12 +67,14 @@ EXPORTED void app_run(
         w::guard g{wnd};
 
         if(c_frame_callback) {
-            c_frame_callback();
+            if(!c_frame_callback()) {
+                return false;
+            }
         }
 
         w::notify_render_frame();
 
-        return *is_running;
+        return true;
     });
 }
 

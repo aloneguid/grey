@@ -3,13 +3,13 @@ using System.Text;
 
 namespace Grey {
     public static class App {
-        public static void Run(ref bool isRunning, string title, Action renderFrame,
+        public static void Run(string title, Func<bool> renderFrame,
             int width = 800, int height = 600,
             bool hasMenuBar = false,
             bool isScrollable = true,
             bool centerOnScreen = false) {
             var callback = new Native.RenderFrameCallback(renderFrame);
-            Native.app_run(ref isRunning, title, width, height, hasMenuBar, isScrollable, centerOnScreen, callback);
+            Native.app_run(title, width, height, hasMenuBar, isScrollable, centerOnScreen, callback);
         }
 
         public static void SL(float offset = 0) {

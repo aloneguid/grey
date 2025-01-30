@@ -5,7 +5,7 @@ using static Grey.App;
 bool isRunning = true;
 string message = "1";
 
-Grey.App.Run(ref isRunning, "Grey# Demo", () => {
+Grey.App.Run("Grey# Demo", () => {
 
     using(new TabBar()) {
         using(var ti = new TabItem("Basics")) {
@@ -35,6 +35,10 @@ Grey.App.Run(ref isRunning, "Grey# Demo", () => {
                 Button("disabled", isEnabled: false);
                 SL();
                 Button("small", isSmall: true);
+
+                if(Button("Quit")) {
+                    isRunning = false;
+                }
 
                 if(Accordion("Normal accordion")) {
                     Label("accordion content");
@@ -111,6 +115,9 @@ Grey.App.Run(ref isRunning, "Grey# Demo", () => {
                 }
             }
         }
+
     }
+
+    return isRunning;
 
 }, height: 800, centerOnScreen: true);

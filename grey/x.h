@@ -8,7 +8,7 @@
 #define EXPORTED
 #endif
 
-typedef void (*RenderFrameCallback)();
+typedef bool (*RenderFrameCallback)();
 
 extern "C"
 {
@@ -21,7 +21,6 @@ extern "C"
      * @return 
      */
     EXPORTED void app_run(
-        bool* is_running,
         const char* c_title,
         int32_t width,
         int32_t height,
