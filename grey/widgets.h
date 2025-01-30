@@ -337,6 +337,8 @@ namespace grey::widgets {
 
     bool input(int& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
 
+    bool slider(float& value, float min, float max, const std::string& label = "");
+
     void tooltip(const std::string& text);
 
     void image(app& app, const std::string& key, size_t width, size_t height);
@@ -389,6 +391,15 @@ namespace grey::widgets {
     bool radio(const std::string& label, bool is_active);
 
     bool small_radio(const std::string& label, bool is_active);
+
+    /**
+     * @brief Progress spinner in "HBO" style.
+     * @param radius 
+     * @param thickness 
+     * @param speed 
+     * @param dot_count 
+     */
+    void spinner_hbo_dots(float radius = 16, float thickness = 4, float speed = 1.0f, size_t dot_count = 6);
 
     void notify_info(const std::string& message);
     void notify_render_frame();

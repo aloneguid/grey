@@ -241,6 +241,22 @@ int main(int argc, char* argv[]) {
                 }
             }
 
+            // Spinners
+            {
+                auto tab = tabs.next_tab("Spinners");
+                if(tab) {
+                    static float radius = 50;
+                    static float thickness = 4;
+                    static float speed = 1;
+                    static int dot_count = 8;
+                    w::slider(radius, 5, 500, "radius");
+                    w::slider(thickness, 1, 50, "thickness");
+                    w::slider(speed, 0.1, 10, "speed");
+                    w::input(dot_count, "dot count");
+                    w::spinner_hbo_dots(radius, thickness, speed, dot_count);
+                }
+            }
+
             // ImGuiColorTextEdit
 
             {

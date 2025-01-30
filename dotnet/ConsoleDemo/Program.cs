@@ -4,6 +4,7 @@ using static Grey.App;
 
 bool isRunning = true;
 string message = "1";
+float spinnerRadius = 16;
 
 Grey.App.Run("Grey# Demo", () => {
 
@@ -66,6 +67,14 @@ Grey.App.Run("Grey# Demo", () => {
         using(var ti = new TabItem("Icons")) {
             if(ti) {
                 Label($"{Icon.Num10k} {Icon.Fireplace}");
+            }
+        }
+
+        // Spinner
+        using(var ti = new TabItem("Spinner")) {
+            if(ti) {
+                Slider(ref spinnerRadius, 1, 100, "radius");
+                SpinnerHboDots(spinnerRadius);
             }
         }
 

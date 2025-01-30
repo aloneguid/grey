@@ -3,6 +3,7 @@
 #include "imgui_internal.h"
 #include "imgui_stdlib.h"
 #include "3rdparty/ImGuiNotify.hpp"
+#include "3rdparty/imspinner.h"
 #include "fonts/font_loader.h"
 #include <iostream>
 // for Windows-specific hacks
@@ -386,6 +387,11 @@ namespace grey::widgets {
         return fired;
     }
 
+    bool slider(float& value, float min, float max, const std::string& label) {
+        bool fired = ImGui::SliderFloat(label.c_str(), &value, min, max);
+        return fired;
+    }
+
     void autoscroll_input_ml(const string& id) {
         const char* child_window_name = NULL;
         ImGuiContext* g = ImGui::GetCurrentContext();
@@ -737,6 +743,11 @@ namespace grey::widgets {
         bool r = radio(label, is_active);
         ImGui::PopStyleVar();
         return r;
+    }
+
+    void spinner_hbo_dots(float radius, float thickness, float speed, size_t dot_count) {
+        //ImSpinner::demoSpinners();
+        ImSpinner::SpinnerHboDots("SpinnerHboDots", radius, thickness, ImSpinner::white, 0.1f, 0.5f, speed, dot_count, 0);
     }
 
     void notify_info(const std::string& message) {

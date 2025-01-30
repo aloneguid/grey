@@ -56,6 +56,12 @@ namespace Grey {
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
             bool enabled, float width, bool is_readonly);
 
+        [DllImport(LibName)]
+        internal static extern void spinner_hbo_dots(float radius, float thickness, float speed, int dot_count);
+
+        [DllImport(LibName)]
+        internal static extern void slider(ref float value, float min, float max,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string label);
 
         // -- tabs
 

@@ -54,5 +54,13 @@ namespace Grey {
             }
             return ret;
         }
+
+        public static void SpinnerHboDots(float radius = 16, float thickness = 4, float speed = 1, int dotCount = 6) {
+            Native.spinner_hbo_dots(radius, thickness, speed, dotCount);
+        }
+
+        public static void Slider(ref float value, float min, float max, string label) {
+            Native.slider(ref value, min, max, label);
+        }
     }
 }

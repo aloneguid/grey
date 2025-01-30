@@ -56,6 +56,10 @@ extern "C"
 
     EXPORTED void pop_next_tab();
 
+    EXPORTED void spinner_hbo_dots(float radius, float thickness, float speed, int32_t dot_count);
+
+    EXPORTED bool slider(float* value, float min, float max, const char* c_label);
+
     // -- tables
 
     EXPORTED bool push_table(const char* c_id, int32_t column_count, float outer_width, float outer_height);

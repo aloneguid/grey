@@ -156,6 +156,15 @@ EXPORTED void pop_next_tab() {
     tab_items.pop();
 }
 
+EXPORTED void spinner_hbo_dots(float radius, float thickness, float speed, int32_t dot_count) {
+    w::spinner_hbo_dots(radius, thickness, speed, dot_count);
+}
+
+EXPORTED bool slider(float* value, float min, float max, const char* c_label) {
+    string label{ c_label };
+    return w::slider(*value, min, max, label);
+}
+
 stack<w::table> tables;
 
 EXPORTED bool push_table(const char* c_id, int32_t column_count, float outer_width, float outer_height) {
