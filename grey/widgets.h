@@ -329,15 +329,18 @@ namespace grey::widgets {
 
     bool input(std::string& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
 
+    bool input(int& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
+
     bool input(char* value, int value_length, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
 
     bool input_ml(const std::string& id, std::string& value, unsigned int line_height = 10, bool autoscroll = false, bool enabled = true);
 
     bool input_ml(const std::string& id, std::string& value, float height, bool autoscroll = false, bool enabled = true, bool use_fixed_font = false);
 
-    bool input(int& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
 
     bool slider(float& value, float min, float max, const std::string& label = "");
+
+    bool slider(int& value, int min, int max, const std::string& label = "");
 
     void tooltip(const std::string& text);
 

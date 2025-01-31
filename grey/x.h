@@ -43,8 +43,12 @@ extern "C"
 
     EXPORTED void notify(const char* c_message);
 
-    EXPORTED bool input(char* c_value, int32_t value_max_length,
+    EXPORTED bool input_string(char* c_value, int32_t value_max_length,
             const char* c_label, bool enabled, float width, bool is_readonly);
+
+    EXPORTED bool input_int(int32_t* value,
+        const char* c_label, bool enabled, float width, bool is_readonly);
+
 
     // -- tab bars
 
@@ -58,7 +62,8 @@ extern "C"
 
     EXPORTED void spinner_hbo_dots(float radius, float thickness, float speed, int32_t dot_count);
 
-    EXPORTED bool slider(float* value, float min, float max, const char* c_label);
+    EXPORTED bool slider_float(float* value, float min, float max, const char* c_label);
+    EXPORTED bool slider_int(int32_t* value, int32_t min, int32_t max, const char* c_label);
 
     // -- tables
 

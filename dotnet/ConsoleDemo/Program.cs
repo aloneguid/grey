@@ -4,7 +4,12 @@ using static Grey.App;
 
 bool isRunning = true;
 string message = "1";
+int number = 42;
 float spinnerRadius = 16;
+float spinnerThickness = 4;
+float spinnerSpeed = 1;
+int spinnerDotCount = 8;
+
 
 Grey.App.Run("Grey# Demo", () => {
 
@@ -61,6 +66,7 @@ Grey.App.Run("Grey# Demo", () => {
                 Input(ref message, "disabled input", false);
                 Input(ref message, "readonly input", is_readonly: true);
                 Input(ref message, "width explicitly set to 400", width: 400);
+                Input(ref number, "number input");
             }
         }
 
@@ -74,7 +80,10 @@ Grey.App.Run("Grey# Demo", () => {
         using(var ti = new TabItem("Spinner")) {
             if(ti) {
                 Slider(ref spinnerRadius, 1, 100, "radius");
-                SpinnerHboDots(spinnerRadius);
+                Slider(ref spinnerThickness, 1, 50, "thickness");
+                Slider(ref spinnerSpeed, 0.1f, 10, "speed");
+                Slider(ref spinnerDotCount, 1, 100, "dot count");
+                SpinnerHboDots(spinnerRadius, spinnerThickness, spinnerSpeed, spinnerDotCount);
             }
         }
 

@@ -42,17 +42,22 @@ namespace Grey {
 
         public static bool Input(StringBuilder value, string label,
             bool enabled = true, float width = 0, bool is_readonly = false) {
-            return Native.input(value, value.Capacity, label, enabled, width, is_readonly);
+            return Native.input_string(value, value.Capacity, label, enabled, width, is_readonly);
         }
 
         public static bool Input(ref string value, string label,
             bool enabled = true, float width = 0, bool is_readonly = false) {
             var sb = new StringBuilder(value, Math.Max(10, value.Length * 2));
-            bool ret = Native.input(sb, sb.Capacity, label, enabled, width, is_readonly);
+            bool ret = Native.input_string(sb, sb.Capacity, label, enabled, width, is_readonly);
             if(ret) {
                 value = sb.ToString();
             }
             return ret;
+        }
+
+        public static bool Input(ref int value, string label,
+            bool enabled = true, float width = 0, bool is_readonly = false) {
+            return Native.input_int(ref value, label, enabled, width, is_readonly);
         }
 
         public static void SpinnerHboDots(float radius = 16, float thickness = 4, float speed = 1, int dotCount = 6) {
@@ -60,7 +65,11 @@ namespace Grey {
         }
 
         public static void Slider(ref float value, float min, float max, string label) {
-            Native.slider(ref value, min, max, label);
+            Native.slider_float(ref value, min, max, label);
+        }
+
+        public static void Slider(ref int value, int min, int max, string label) {
+            Native.slider_int(ref value, min, max, label);
         }
     }
 }

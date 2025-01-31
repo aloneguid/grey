@@ -339,7 +339,8 @@ namespace grey::widgets {
         }
     }
 
-    bool input(std::string& value, const std::string& label, bool enabled, float width, bool is_readonly) {
+    template<typename T>
+    bool input(T& value, int value_length, const std::string& label, bool enabled, float width, bool is_readonly) {
         bool fired;
         if (!enabled) ImGui::BeginDisabled();
         if (width != 0)
@@ -347,49 +348,58 @@ namespace grey::widgets {
 
         ImGuiInputTextFlags flags{};
         if (is_readonly) flags |= ImGuiInputTextFlags_ReadOnly;
-        fired = ImGui::InputText(label.c_str(), &value, flags);
+
+        if constexpr (std::is_same_v<T, std::string>) {
+            fired = ImGui::InputText(label.c_str(), &value, flags);
+        }
+        else if constexpr (std::is_same_v<T, char*>) {
+            fired = ImGui::InputText(label.c_str(), value, value_length, flags);
+        }
+        else if constexpr (std::is_same_v<T, int>) {
+            fired = ImGui::InputInt(label.c_str(), &value, 1, 100, flags);
+        }
 
         if (width != 0)
             ImGui::PopItemWidth();
         if (!enabled) ImGui::EndDisabled();
         return fired;
+    }
+
+    bool input(std::string& value, const std::string& label, bool enabled, float width, bool is_readonly) {
+        return input<std::string>(value, 0, label, enabled, width, is_readonly);
     }
 
     bool input(char* value, int value_length, const std::string& label, bool enabled, float width, bool is_readonly) {
-        bool fired;
-        if(!enabled) ImGui::BeginDisabled();
-        if(width != 0)
-            ImGui::PushItemWidth(width);
-
-        ImGuiInputTextFlags flags{};
-        if(is_readonly) flags |= ImGuiInputTextFlags_ReadOnly;
-        fired = ImGui::InputText(label.c_str(), value, value_length, flags);
-
-        if(width != 0)
-            ImGui::PopItemWidth();
-        if(!enabled) ImGui::EndDisabled();
-        return fired;
+        return input<char*>(value, value_length, label, enabled, width, is_readonly);
     }
 
     bool input(int& value, const std::string& label, bool enabled, float width, bool is_readonly) {
+        return input<int>(value, 0, label, enabled, width, is_readonly);
+    }
+
+    template<typename T>
+    bool slider(T& value, T min, T max, const std::string& label) {
+
         bool fired;
-        if (!enabled) ImGui::BeginDisabled();
-        if (width != 0)
-            ImGui::PushItemWidth(width);
 
-        ImGuiInputTextFlags flags{};
-        if (is_readonly) flags |= ImGuiInputTextFlags_ReadOnly;
-        fired = ImGui::InputInt(label.c_str(), &value, 1, 100, flags);
+        if constexpr (std::is_same_v<T, float>) {
+            fired = ImGui::SliderFloat(label.c_str(), &value, min, max);
+        }
+        else if constexpr (std::is_same_v<T, int>) {
+            fired = ImGui::SliderInt(label.c_str(), &value, min, max);
+        } else {
+            fired = false;
+        }
 
-        if (width != 0)
-            ImGui::PopItemWidth();
-        if (!enabled) ImGui::EndDisabled();
         return fired;
     }
 
     bool slider(float& value, float min, float max, const std::string& label) {
-        bool fired = ImGui::SliderFloat(label.c_str(), &value, min, max);
-        return fired;
+        return slider<float>(value, min, max, label);
+    }
+
+    bool slider(int& value, int min, int max, const std::string& label) {
+        return slider<int>(value, min, max, label);
     }
 
     void autoscroll_input_ml(const string& id) {

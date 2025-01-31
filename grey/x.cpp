@@ -113,9 +113,14 @@ EXPORTED void notify(const char* c_message) {
     w::notify_info(message);
 }
 
-EXPORTED bool input(char* c_value, int32_t value_max_length, const char* c_label, bool enabled, float width, bool is_readonly) {
+EXPORTED bool input_string(char* c_value, int32_t value_max_length, const char* c_label, bool enabled, float width, bool is_readonly) {
     string label{ c_label };
     return w::input(c_value, value_max_length, label, enabled, width * scale, is_readonly);
+}
+
+EXPORTED bool input_int(int32_t* value, const char* c_label, bool enabled, float width, bool is_readonly) {
+    string label{ c_label };
+    return w::input(*value, label, enabled, width * scale, is_readonly);
 }
 
 stack<w::tab_bar> tab_bars;
@@ -160,7 +165,12 @@ EXPORTED void spinner_hbo_dots(float radius, float thickness, float speed, int32
     w::spinner_hbo_dots(radius, thickness, speed, dot_count);
 }
 
-EXPORTED bool slider(float* value, float min, float max, const char* c_label) {
+EXPORTED bool slider_float(float* value, float min, float max, const char* c_label) {
+    string label{ c_label };
+    return w::slider(*value, min, max, label);
+}
+
+EXPORTED bool slider_int(int32_t* value, int32_t min, int32_t max, const char* c_label) {
     string label{ c_label };
     return w::slider(*value, min, max, label);
 }

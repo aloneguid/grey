@@ -50,9 +50,15 @@ namespace Grey {
         internal static extern void notify([MarshalAs(UnmanagedType.LPUTF8Str)] string message);
 
         [DllImport(LibName)]
-        internal static extern bool input(
+        internal static extern bool input_string(
             [MarshalAs(UnmanagedType.LPUTF8Str)] StringBuilder value,
             int value_max_length,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
+            bool enabled, float width, bool is_readonly);
+
+        [DllImport(LibName)]
+        internal static extern bool input_int(
+            ref int value,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
             bool enabled, float width, bool is_readonly);
 
@@ -60,8 +66,13 @@ namespace Grey {
         internal static extern void spinner_hbo_dots(float radius, float thickness, float speed, int dot_count);
 
         [DllImport(LibName)]
-        internal static extern void slider(ref float value, float min, float max,
+        internal static extern void slider_float(ref float value, float min, float max,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label);
+
+        [DllImport(LibName)]
+        internal static extern void slider_int(ref int value, int min, int max,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string label);
+
 
         // -- tabs
 

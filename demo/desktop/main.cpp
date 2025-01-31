@@ -252,7 +252,7 @@ int main(int argc, char* argv[]) {
                     w::slider(radius, 5, 500, "radius");
                     w::slider(thickness, 1, 50, "thickness");
                     w::slider(speed, 0.1, 10, "speed");
-                    w::input(dot_count, "dot count");
+                    w::slider(dot_count, 1, 100, "dot count");
                     w::spinner_hbo_dots(radius, thickness, speed, dot_count);
                 }
             }
