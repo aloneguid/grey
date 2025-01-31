@@ -131,7 +131,7 @@ EXPORTED bool input_int(int32_t* value, const char* c_label, bool enabled, float
 
 EXPORTED bool input_multiline(const char* c_id, char* c_value, int32_t value_max_length, float height, bool autoscroll, bool enabled, bool use_fixed_font) {
     string id{ c_id };
-    cout << "fixed font: " << use_fixed_font << endl;
+    //cout << "fixed font: " << use_fixed_font << endl;
     return w::input_ml(id, c_value, value_max_length, height, autoscroll, enabled, use_fixed_font);
 }
 
