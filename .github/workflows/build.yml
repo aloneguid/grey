@@ -42,7 +42,7 @@ jobs:
             name: Linux ARM
             arch: arm64
             vcpkg_triplet: arm64-linux
-            vcpkg_config: MinSizeRel
+            vcpkg_config: RelWithDebInfo
             dotnet_rid: linux-arm64
             cmake_options: -D CMAKE_SYSTEM_PROCESSOR=aarch64 -D CMAKE_C_COMPILER=$(which aarch64-linux-gnu-gcc) -D CMAKE_CXX_COMPILER=$(which aarch64-linux-gnu-g++)
 
@@ -69,7 +69,7 @@ jobs:
         sudo apt-get --yes install g++-aarch64-linux-gnu pkg-config-aarch64-linux-gnu
         sudo apt-get --yes install cmake
 
-    - name: Linux GLFS depdendencies
+    - name: Linux GLFW depdendencies
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
