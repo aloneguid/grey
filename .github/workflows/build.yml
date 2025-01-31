@@ -67,7 +67,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get --yes install g++-aarch64-linux-gnu pkg-config-aarch64-linux-gnu
-        sudo apt-get --yes install cmake
+        sudo apt-get --yes install cmake make
 
     - name: Linux GLFW depdendencies
       if: runner.os == 'Linux'
