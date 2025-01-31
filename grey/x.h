@@ -84,4 +84,8 @@ extern "C"
     EXPORTED void table_begin_row();
 
     EXPORTED void table_begin_col();
+
+    // -- system debug
+
+    EXPORTED void label_fps();
 }

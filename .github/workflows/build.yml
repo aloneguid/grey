@@ -38,6 +38,13 @@ jobs:
             vcpkg_triplet: x64-linux
             vcpkg_config: MinSizeRel
             dotnet_rid: linux-x64
+          - os: ubuntu-20.04
+            name: Linux ARM
+            arch: arm64
+            vcpkg_triplet: arm64-linux
+            vcpkg_config: MinSizeRel
+            dotnet_rid: linux-arm64
+            cmake_options: -D CMAKE_SYSTEM_PROCESSOR=aarch64 -D CMAKE_C_COMPILER=$(which aarch64-linux-gnu-gcc) -D CMAKE_CXX_COMPILER=$(which aarch64-linux-gnu-g++)
 
       fail-fast: false
     name: 'build: ${{ matrix.name }}'
@@ -60,6 +67,12 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get --yes install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
+
+    - name: Linux ARM
+      if: runner.os == 'Linux' && matrix.arch == 'arm64'
+      run: |
+        sudo apt-get update
+        sudo apt-get --yes install g++-aarch64-linux-gnu pkg-config-aarch64-linux-gnu
 
     - uses: friendlyanon/setup-vcpkg@v1
       # seems like the absense of commit hash expects vcpkg submodule, i don't want that

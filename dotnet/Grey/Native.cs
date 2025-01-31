@@ -125,5 +125,10 @@ namespace Grey {
         [DllImport(LibName)]
         internal static extern void table_begin_col();
 
+        // system debug
+
+        [DllImport(LibName)]
+        internal static extern void label_fps();
+
     }
 }

@@ -83,5 +83,9 @@ namespace Grey {
         public static void Slider(ref int value, int min, int max, string label) {
             Native.slider_int(ref value, min, max, label);
         }
+
+        public static void PrintFps() {
+            Native.label_fps();
+        }
     }
 }

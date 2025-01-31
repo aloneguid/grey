@@ -17,6 +17,8 @@ bool mlUseFixedFont = false;
 
 Grey.App.Run("Grey# Demo", () => {
 
+    Label("fps:"); SL(); PrintFps();
+
     using(new TabBar()) {
         using(var ti = new TabItem("Basics")) {
             if(ti) {
