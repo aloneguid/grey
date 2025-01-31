@@ -50,6 +50,11 @@ target_link_libraries(${STATIC_NAME}
    PRIVATE ${private_libs}
    INTERFACE ${interface_libs})
 
+# Set GCC-specific flags for dynamic library
+#if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_BUILD_TYPE MATCHES Release)
+#    target_compile_options(${DYNAMIC_NAME} PRIVATE -Os)
+#endif()
+
 # target_include_directories(${APP_NAME} PRIVATE "../common")
 
 # dynamic library should be copied for the consumption to external bindings
