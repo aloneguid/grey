@@ -39,7 +39,7 @@ jobs:
             vcpkg_config: MinSizeRel
             dotnet_rid: linux-x64
           - os: ubuntu-latest
-            name: Linux ARM
+            name: Linux ARM64
             arch: arm64
             vcpkg_triplet: arm64-linux
             vcpkg_config: RelWithDebInfo
@@ -67,6 +67,10 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y gcc make gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu g++-aarch64-linux-gnu
+        echo "C compiler"
+        which aarch64-linux-gnu-gcc
+        echo "C++ compiler"
+        which aarch64-linux-gnu-g++
 
     - name: Linux GLFW depdendencies
       if: runner.os == 'Linux'
