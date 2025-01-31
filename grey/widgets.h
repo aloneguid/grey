@@ -335,7 +335,19 @@ namespace grey::widgets {
 
     bool input_ml(const std::string& id, std::string& value, unsigned int line_height = 10, bool autoscroll = false, bool enabled = true);
 
-    bool input_ml(const std::string& id, std::string& value, float height, bool autoscroll = false, bool enabled = true, bool use_fixed_font = false);
+    /**
+     * @brief Multiline edit
+     * @param id 
+     * @param value 
+     * @param height Height in pixels, if zero, it will be taking the remaining space. If negative, it will be taking the remaining space minus the value.
+     * @param autoscroll Whether to scroll to the bottom when new text is added.
+     * @param enabled Controls whether the input is enabled.
+     * @param use_fixed_font Use fixed font for the text editor if possible.
+     * @return 
+     */
+    bool input_ml(const std::string& id, std::string& value, float height = 0, bool autoscroll = false, bool enabled = true, bool use_fixed_font = false);
+
+    bool input_ml(const std::string& id, char* value, int value_length, float height = 0, bool autoscroll = false, bool enabled = true, bool use_fixed_font = false);
 
 
     bool slider(float& value, float min, float max, const std::string& label = "");

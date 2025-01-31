@@ -19,6 +19,10 @@ namespace Grey {
             Native.label(text, emphasis, textWrapPos, isEnabled);
         }
 
+        public static bool Checkbox(string label, ref bool isChecked) {
+            return Native.checkbox(label, ref isChecked);
+        }
+
         public static bool Button(string text, Emphasis emphasis = Emphasis.None,
             bool isEnabled = true, bool isSmall = false) {
             return Native.button(text, emphasis, isEnabled, isSmall);
@@ -58,6 +62,14 @@ namespace Grey {
         public static bool Input(ref int value, string label,
             bool enabled = true, float width = 0, bool is_readonly = false) {
             return Native.input_int(ref value, label, enabled, width, is_readonly);
+        }
+
+        public static bool InputMultiline(string id, StringBuilder value,
+            float height = 0,
+            bool autoscroll = false,
+            bool isEnabled = true,
+            bool useFixedFont = false) {
+            return Native.input_multiline(id, value, value.Capacity, height, autoscroll, isEnabled, useFixedFont);
         }
 
         public static void SpinnerHboDots(float radius = 16, float thickness = 4, float speed = 1, int dotCount = 6) {

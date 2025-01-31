@@ -60,6 +60,7 @@ EXPORTED void app_run(
 #ifdef _WIN32
     app->win32_can_resize = true;
 #endif
+    app->load_fixed_font = true;
     app->run([c_frame_callback, &is_running, &wnd](const grey::app& app) {
 
         scale = app.scale;
@@ -85,6 +86,11 @@ EXPORTED void sl(float offset) {
 EXPORTED void label(const char* c_text, int32_t emphasis, int32_t text_wrap_pos, bool enabled) {
     string text{c_text};
     w::label(text, (w::emphasis)emphasis, text_wrap_pos, enabled);
+}
+
+EXPORTED bool checkbox(const char* c_label, bool* is_checked) {
+    string label{ c_label };
+    return w::checkbox(label, *is_checked);
 }
 
 EXPORTED bool button(const char* c_text, int32_t emphasis, bool is_enabled, bool is_small) {
@@ -121,6 +127,12 @@ EXPORTED bool input_string(char* c_value, int32_t value_max_length, const char* 
 EXPORTED bool input_int(int32_t* value, const char* c_label, bool enabled, float width, bool is_readonly) {
     string label{ c_label };
     return w::input(*value, label, enabled, width * scale, is_readonly);
+}
+
+EXPORTED bool input_multiline(const char* c_id, char* c_value, int32_t value_max_length, float height, bool autoscroll, bool enabled, bool use_fixed_font) {
+    string id{ c_id };
+    cout << "fixed font: " << use_fixed_font << endl;
+    return w::input_ml(id, c_value, value_max_length, height, autoscroll, enabled, use_fixed_font);
 }
 
 stack<w::tab_bar> tab_bars;

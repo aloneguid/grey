@@ -29,6 +29,9 @@ namespace Grey {
             Emphasis emphasis, int text_wrap_pos, bool enabled);
 
         [DllImport(LibName)]
+        internal static extern bool checkbox([MarshalAs(UnmanagedType.LPUTF8Str)] string label, ref bool is_checked);
+
+        [DllImport(LibName)]
         internal static extern bool button(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string text,
             Emphasis emphasis,
@@ -61,6 +64,16 @@ namespace Grey {
             ref int value,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
             bool enabled, float width, bool is_readonly);
+
+        [DllImport(LibName)]
+        internal static extern bool input_multiline(
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string id,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] StringBuilder value,
+            int value_max_length,
+            float height,
+            bool autoscroll,
+            bool enabled,
+            bool use_fixed_font);
 
         [DllImport(LibName)]
         internal static extern void spinner_hbo_dots(float radius, float thickness, float speed, int dot_count);

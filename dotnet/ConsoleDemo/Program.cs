@@ -9,6 +9,10 @@ float spinnerRadius = 16;
 float spinnerThickness = 4;
 float spinnerSpeed = 1;
 int spinnerDotCount = 8;
+StringBuilder multilineText = new StringBuilder("initial text\nanother line", 1000);
+float mlHeight = 0;
+bool mlEnabled = true;
+bool mlUseFixedFont = false;
 
 
 Grey.App.Run("Grey# Demo", () => {
@@ -84,6 +88,19 @@ Grey.App.Run("Grey# Demo", () => {
                 Slider(ref spinnerSpeed, 0.1f, 10, "speed");
                 Slider(ref spinnerDotCount, 1, 100, "dot count");
                 SpinnerHboDots(spinnerRadius, spinnerThickness, spinnerSpeed, spinnerDotCount);
+            }
+        }
+
+        // Multiline editor
+        using(var ti = new TabItem("Editor")) {
+            if(ti) {
+                Slider(ref mlHeight, -1000, 1000, "height");
+                Checkbox("enabled", ref mlEnabled);
+                Checkbox("use fixed font", ref mlUseFixedFont);
+
+                if(InputMultiline("multiline", multilineText, mlHeight, false, mlEnabled, mlUseFixedFont)) {
+                    Notify("multiline changed");
+                }
             }
         }
 

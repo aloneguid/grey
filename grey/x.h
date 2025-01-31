@@ -33,6 +33,8 @@ extern "C"
 
     EXPORTED void label(const char* c_text, int32_t emphasis, int32_t text_wrap_pos, bool enabled);
 
+    EXPORTED bool checkbox(const char* c_label, bool* is_checked);
+
     EXPORTED bool button(const char* c_text, int32_t emphasis, bool is_enabled, bool is_small);
 
     EXPORTED void sep(const char* c_text);
@@ -49,6 +51,10 @@ extern "C"
     EXPORTED bool input_int(int32_t* value,
         const char* c_label, bool enabled, float width, bool is_readonly);
 
+    EXPORTED bool input_multiline(const char* c_id,
+        char* c_value, int32_t value_max_length,
+        float height,
+        bool autoscroll, bool enabled, bool use_fixed_font);
 
     // -- tab bars
 

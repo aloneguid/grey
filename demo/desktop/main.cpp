@@ -19,6 +19,13 @@ w::popup status_pop {"status_pop"};
 bool ned_initialised{false};
 w::text_editor ted;
 bool selected{false};
+// multiline string with sample for text editor
+string text_editor_text = R"(
+-- This is a comment
+function foo()
+    print("Hello, world!")
+end
+)";
 
 #if WIN32
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
@@ -254,6 +261,22 @@ int main(int argc, char* argv[]) {
                     w::slider(speed, 0.1, 10, "speed");
                     w::slider(dot_count, 1, 100, "dot count");
                     w::spinner_hbo_dots(radius, thickness, speed, dot_count);
+                }
+            }
+
+            // Multiline edit
+            {
+                auto tab = tabs.next_tab("Editor");
+                if(tab) {
+                    static float height = 0;
+                    static bool autoscroll = false;
+                    static bool enabled = true;
+                    static bool use_fixed_font = false;
+                    w::slider(height, -500, 500, "height");
+                    w::checkbox("autoscroll", autoscroll);
+                    w::checkbox("enabled", enabled);
+                    w::checkbox("fixed font", use_fixed_font);
+                    w::input_ml("##ml", text_editor_text, height == 0 ? -FLT_MIN : height, autoscroll, enabled, use_fixed_font);
                 }
             }
 

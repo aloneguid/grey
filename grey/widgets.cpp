@@ -430,9 +430,10 @@ namespace grey::widgets {
         return ret;
     }
 
-    bool input_ml(const string& id, string& value, float height, bool autoscroll, bool enabled, bool use_fixed_font) {
+    template<typename T>
+    bool input_ml(const string& id, T value, int value_length, float height, bool autoscroll, bool enabled, bool use_fixed_font) {
         ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;
-        ImVec2 size{ -FLT_MIN, height };
+        ImVec2 size{ -FLT_MIN, height == 0 ? -FLT_MIN : height };
 
         if (!enabled) ImGui::BeginDisabled();
 
@@ -441,7 +442,16 @@ namespace grey::widgets {
         if (f) {
             ImGui::PushFont(f);
         }
-        bool ret = ImGui::InputTextMultiline(id.c_str(), &value, size, flags);
+
+        bool ret;
+        if constexpr(std::is_same_v<T, std::string&>) {
+            ret = ImGui::InputTextMultiline(id.c_str(), &value, size, flags);
+        } else if constexpr(std::is_same_v<T, char*>) {
+            ret = ImGui::InputTextMultiline(id.c_str(), value, value_length, size, flags);
+        } else {
+            ret = false;
+        }
+
         if (f) {
             ImGui::PopFont();
         }
@@ -453,6 +463,14 @@ namespace grey::widgets {
         }
 
         return ret;
+    }
+
+    bool input_ml(const string& id, string& value, float height, bool autoscroll, bool enabled, bool use_fixed_font) {
+        return input_ml<string&>(id, value, 0, height, autoscroll, enabled, use_fixed_font);
+    }
+
+    bool input_ml(const std::string& id, char* value, int value_length, float height, bool autoscroll, bool enabled, bool use_fixed_font) {
+        return input_ml<char*>(id, value, value_length, height, autoscroll, enabled, use_fixed_font);
     }
 
     // ---- tooltip ----
