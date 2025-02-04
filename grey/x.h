@@ -71,6 +71,12 @@ extern "C"
     EXPORTED bool slider_float(float* value, float min, float max, const char* c_label);
     EXPORTED bool slider_int(int32_t* value, int32_t min, int32_t max, const char* c_label);
 
+    // -- status bar
+
+    EXPORTED void push_status_bar();
+
+    EXPORTED void pop_status_bar();
+
     // -- tables
 
     EXPORTED bool push_table(const char* c_id, int32_t column_count, float outer_width, float outer_height);
@@ -84,6 +90,18 @@ extern "C"
     EXPORTED void table_begin_row();
 
     EXPORTED void table_begin_col();
+
+    // -- application menus
+
+    EXPORTED bool push_menu_bar();
+
+    EXPORTED void pop_menu_bar();
+
+    EXPORTED bool push_menu(const char* c_title);
+
+    EXPORTED void pop_menu();
+
+    EXPORTED bool menu_item(const char* c_text, bool reserve_icon_space, const char* c_icon = "");
 
     // -- system debug
 

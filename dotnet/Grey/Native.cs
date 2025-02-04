@@ -101,6 +101,14 @@ namespace Grey {
         [DllImport(LibName)]
         internal static extern void pop_next_tab();
 
+        // -- status bar
+
+        [DllImport(LibName)]
+        internal static extern void push_status_bar();
+
+        [DllImport(LibName)]
+        internal static extern void pop_status_bar();
+
         // -- tables
 
         [DllImport(LibName)]
@@ -124,6 +132,26 @@ namespace Grey {
 
         [DllImport(LibName)]
         internal static extern void table_begin_col();
+
+        // application menus
+
+        [DllImport(LibName)]
+        internal static extern bool push_menu_bar();
+
+        [DllImport(LibName)]
+        internal static extern void pop_menu_bar();
+
+        [DllImport(LibName)]
+        internal static extern bool push_menu([MarshalAs(UnmanagedType.LPUTF8Str)] string label);
+
+        [DllImport(LibName)]
+        internal static extern void pop_menu();
+
+        [DllImport(LibName)]
+        internal static extern bool menu_item(
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string c_text,
+            bool reserve_icon_space,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string c_icon);
 
         // system debug
 

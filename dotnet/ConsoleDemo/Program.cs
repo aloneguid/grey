@@ -17,6 +17,19 @@ bool mlUseFixedFont = false;
 
 Grey.App.Run("Grey# Demo", () => {
 
+    // top menu
+    using(var bar = new MenuBar()) {
+        if(bar) {
+            using(MenuBar.Menu mFile = bar.M("File")) {
+                if(mFile) {
+                    if(mFile.Item("Quit")) {
+                        isRunning = false;
+                    }
+                }
+            }
+        }
+    }
+
     Label("fps:"); SL(); PrintFps();
 
     using(new TabBar()) {
@@ -130,8 +143,13 @@ Grey.App.Run("Grey# Demo", () => {
             }
         }
 
+        // Status bar
+        using(new StatusBar()) {
+            Label("status bar content");
+        }
+
     }
 
     return isRunning;
 
-}, height: 800, centerOnScreen: true);
+}, height: 800, centerOnScreen: true, isScrollable: false, hasMenuBar: true);

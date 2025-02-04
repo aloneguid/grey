@@ -187,6 +187,20 @@ EXPORTED bool slider_int(int32_t* value, int32_t min, int32_t max, const char* c
     return w::slider(*value, min, max, label);
 }
 
+// -- status bar
+
+vector<w::status_bar> status_bars;
+
+EXPORTED void push_status_bar() {
+    status_bars.emplace_back();
+}
+
+EXPORTED void pop_status_bar() {
+    status_bars.pop_back();
+}
+
+// -- tables
+
 stack<w::table> tables;
 
 EXPORTED bool push_table(const char* c_id, int32_t column_count, float outer_width, float outer_height) {
@@ -219,6 +233,40 @@ EXPORTED void table_begin_row() {
 EXPORTED void table_begin_col() {
     auto& t = tables.top();
     t.begin_col();
+}
+
+// -- application menus
+
+stack<w::menu_bar> menu_bars;
+
+EXPORTED bool push_menu_bar() {
+    menu_bars.emplace();
+    auto& t = menu_bars.top();
+    return t;
+}
+
+EXPORTED void pop_menu_bar() {
+    menu_bars.pop();
+}
+
+stack<w::menu> menus;
+
+EXPORTED bool push_menu(const char* c_title) {
+    string title = c_title;
+    menus.emplace(title);
+    auto& t = menus.top();
+    return t;
+}
+
+EXPORTED void pop_menu() {
+    menus.pop();
+}
+
+EXPORTED bool menu_item(const char* c_text, bool reserve_icon_space, const char* c_icon) {
+    string text{c_text};
+    string icon{c_icon ? c_icon : ""};
+    auto& m = menus.top();
+    return w::mi(text, reserve_icon_space, icon);
 }
 
 EXPORTED void label_fps() {
