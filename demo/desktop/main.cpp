@@ -97,6 +97,7 @@ int main(int argc, char* argv[]) {
                 auto tab = tabs.next_tab("Basics");
                 if(tab) {
                     w::label("simple text");
+                    w::tooltip("simple tooltip");
                     w::sl(); w::label(ICON_MD_5G " icon1");
                     w::sl(); w::label("primary", w::emphasis::primary);
                     w::sl(); w::label("error", w::emphasis::error);

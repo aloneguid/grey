@@ -187,6 +187,10 @@ EXPORTED bool slider_int(int32_t* value, int32_t min, int32_t max, const char* c
     return w::slider(*value, min, max, label);
 }
 
+EXPORTED void tooltip(const char* text) {
+    w::tooltip(text);
+}
+
 // -- status bar
 
 vector<w::status_bar> status_bars;

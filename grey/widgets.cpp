@@ -481,6 +481,12 @@ namespace grey::widgets {
         }
     }
 
+    void tooltip(const char* text) {
+        if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
+            ImGui::SetTooltip("%s", text);
+        }
+    }
+
     // ---- position ----
 
     void set_pos(float x, float y) {

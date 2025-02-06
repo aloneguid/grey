@@ -36,6 +36,7 @@ Grey.App.Run("Grey# Demo", () => {
         using(var ti = new TabItem("Basics")) {
             if(ti) {
                 Label("simple label");
+                Tooltip("simple text tooltip");
                 SL();
                 Label("primary", Emphasis.Primary);
                 SL();

@@ -356,6 +356,8 @@ namespace grey::widgets {
 
     void tooltip(const std::string& text);
 
+    void tooltip(const char* text);
+
     void image(app& app, const std::string& key, size_t width, size_t height);
 
     void icon_image(app& app, const std::string& key);

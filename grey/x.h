@@ -56,6 +56,12 @@ extern "C"
         float height,
         bool autoscroll, bool enabled, bool use_fixed_font);
 
+    EXPORTED bool slider_float(float* value, float min, float max, const char* c_label);
+
+    EXPORTED bool slider_int(int32_t* value, int32_t min, int32_t max, const char* c_label);
+
+    EXPORTED void tooltip(const char* text);
+
     // -- tab bars
 
     EXPORTED bool push_tab_bar(const char* c_id);
@@ -67,9 +73,6 @@ extern "C"
     EXPORTED void pop_next_tab();
 
     EXPORTED void spinner_hbo_dots(float radius, float thickness, float speed, int32_t dot_count);
-
-    EXPORTED bool slider_float(float* value, float min, float max, const char* c_label);
-    EXPORTED bool slider_int(int32_t* value, int32_t min, int32_t max, const char* c_label);
 
     // -- status bar
 

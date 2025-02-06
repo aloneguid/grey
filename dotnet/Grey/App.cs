@@ -84,6 +84,14 @@ namespace Grey {
             Native.slider_int(ref value, min, max, label);
         }
 
+        /// <summary>
+        /// A text-only tooltip appearing on curren item's hover
+        /// </summary>
+        /// <param name="text"></param>
+        public static void Tooltip(string text) {
+            Native.tooltip(text);
+        }
+
         public static void PrintFps() {
             Native.label_fps();
         }

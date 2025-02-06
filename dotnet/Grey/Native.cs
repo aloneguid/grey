@@ -86,6 +86,9 @@ namespace Grey {
         internal static extern void slider_int(ref int value, int min, int max,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label);
 
+        [DllImport(LibName)]
+        internal static extern void tooltip([MarshalAs(UnmanagedType.LPUTF8Str)] string text);
+
 
         // -- tabs
 
