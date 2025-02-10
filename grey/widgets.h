@@ -435,6 +435,9 @@ namespace grey::widgets {
 
     ImU32 imcol32(ImGuiCol idx);
 
+    // system debug info
+    void label_debug_info();
+
     // Node editor
 
     class node_editor_node {

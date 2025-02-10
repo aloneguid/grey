@@ -13,25 +13,32 @@
 using namespace std;
 
 namespace grey {
-    std::unique_ptr<grey::app> app::make(const string& title, int width, int height) {
+    std::unique_ptr<grey::app> app::make(const string& title, int width, int height, float scale) {
 
 #if _WIN32
-        auto app = make_unique<grey::backends::win32dx11app>(title, width, height);
+        auto app = make_unique<grey::backends::win32dx11app>(title, width, height, scale);
 #else
-        auto app = make_unique<grey::backends::glfw_gl3_app>(title, width, height);
+        auto app = make_unique<grey::backends::glfw_gl3_app>(title, width, height, scale);
 #endif
 
         return app;
     }
 
-    app::app() {
+    app::app(float scale) {
 #if _WIN32
-        int dpi = grey::common::win32::os::get_dpi();
-        scale = dpi / 96.f;
+        if (scale == 0.0f) {
+            int dpi = grey::common::win32::os::get_dpi();
+            scale = dpi / 96.f;
+        }
 #else
-        scale = 1.0f;
+        if (scale == 0.0f)
+            scale = 1.0f;
 #endif
+        this->scale = scale;
+
         grey::widgets::scale = scale;
+
+        set_target_fps(40);
     }
 
     void app::on_after_initialised() {
@@ -60,6 +67,10 @@ namespace grey {
         auto theme = grey::themes::get_theme(theme_id);
         grey::themes::set_theme(theme_id, scale);
         set_dark_mode(theme.is_dark);
+    }
+
+    void app::set_target_fps(int fps) {
+        max_frame_interval_ms = 1000.0f / fps;
     }
 
     texture app::get_texture(const std::string& key) {

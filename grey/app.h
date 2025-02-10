@@ -21,7 +21,7 @@ namespace grey {
          * @param title 
          * @return 
          */
-        static std::unique_ptr<app> make(const std::string& title, int width, int height);
+        static std::unique_ptr<app> make(const std::string& title, int width, int height, float scale = 0.0f);
 
         /**
          * @brief When set, application will set this theme on startup.
@@ -42,7 +42,7 @@ namespace grey {
 
         std::function<void(int, const std::string&)> on_user_message;
 
-        app();
+        app(float scale = 0.0f);
 
         virtual void run(std::function<bool(const app&)> render_frame) = 0;
 
@@ -65,6 +65,12 @@ namespace grey {
          * @param height 
          */
         virtual void resize_main_viewport(int width, int height) = 0;
+
+        /**
+         * @brief Limits maximum FPS for the application. This is useful when you want to limit the CPU usage of the application.
+         * @param fps 
+         */
+        void set_target_fps(int fps);
 
         // platform specific flags
 
@@ -99,6 +105,7 @@ namespace grey {
          */
         virtual void set_dark_mode(bool enabled) = 0;
 
+        float max_frame_interval_ms;
 
     private:
         std::map<std::string, texture> textures;

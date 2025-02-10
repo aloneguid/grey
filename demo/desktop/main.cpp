@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
     ted.set_text("-- add your Lua code here");
 
 
-    app->run([](const grey::app& app) {
+    app->run([&app](const grey::app& c_app) {
         
         w::guard wg{wnd};
 
@@ -73,8 +73,9 @@ int main(int argc, char* argv[]) {
                 {
                     w::menu m("View");
                     if(m) {
-                        w::mi_themes([](const std::string& id) {
+                        w::mi_themes([&app](const std::string& id) {
                             w::notify_info("theme changed to " + id);
+                            app->set_theme(id);
                         });
                     }
                 }
@@ -226,7 +227,7 @@ int main(int argc, char* argv[]) {
                 auto tab = tabs.next_tab("Tables");
                 if(tab) {
                     int row_count = 1000;
-                    w::table t{"table1", 3, 0, -20 * app.scale};
+                    w::table t{"table1", 3, 0, -20 * c_app.scale};
                     if(t) {
                         t.columns.push_back("id");
                         t.columns.push_back("name");
@@ -311,6 +312,9 @@ int main(int argc, char* argv[]) {
             if(status_pop) {
                 w::label("popup content");
             }
+
+            w::sl(); w::label("|", 0, false);
+            w::sl(); w::label_debug_info();
         }
 
 

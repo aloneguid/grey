@@ -8,6 +8,8 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include <chrono>
+#include <thread>
 #include <stdio.h>
 #define GL_SILENCE_DEPRECATION
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -79,8 +81,9 @@ namespace grey::backends {
     class glfw_gl3_app : public grey::app {
 
     public:
-        glfw_gl3_app(const std::string& title, int width, int height)
-            : title{title}, window_width{width}, window_height{height} {
+        glfw_gl3_app(const std::string& title, int width, int height, float scale)
+            : grey::app{scale}, title{title}, window_width{width}, window_height{height} {
+            last_frame_time = std::chrono::high_resolution_clock::now();
             gl_init();
         }
 
@@ -90,7 +93,7 @@ namespace grey::backends {
             if(window == nullptr)
                 return;
             glfwMakeContextCurrent(window);
-            glfwSwapInterval(1); // Enable vsync
+            glfwSwapInterval(6); // Enable vsync
 
             // Setup Dear ImGui context
             IMGUI_CHECKVERSION();
@@ -197,7 +200,18 @@ namespace grey::backends {
                     glfwMakeContextCurrent(backup_current_context);
                 }
 
+                // Manual FPS control
+                // see how much time has passed since last render
+                auto b_now = std::chrono::high_resolution_clock::now();
+                auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(b_now - last_frame_time).count();
+                if(duration_ms < max_frame_interval_ms) {
+                    float sleep_time = max_frame_interval_ms - duration_ms;
+                    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(sleep_time)));
+                }
+
                 glfwSwapBuffers(window);
+
+                last_frame_time = b_now;
             }
 #ifdef __EMSCRIPTEN__
             EMSCRIPTEN_MAINLOOP_END;
@@ -228,6 +242,7 @@ namespace grey::backends {
         int window_top{-1};
         int window_width{-1};
         int window_height{-1};
+        std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_time;
     };
 }
 #endif

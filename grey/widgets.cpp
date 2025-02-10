@@ -948,6 +948,20 @@ namespace grey::widgets {
         return IM_COL32((int)(color.x * 255.0f), (int)(color.y * 255.0f), (int)(color.z * 255.0f), (int)(color.w * 255.0f));
     }
 
+    void label_debug_info() {
+        // FPS
+        float fps = ImGui::GetIO().Framerate;
+        char buf[32];
+        sprintf(buf, "%.2f", fps);
+        label("fps: ");
+        sl();
+        label(buf);
+
+        // scale
+        sl(); label(", scale: ");
+        sl(); label(std::to_string(scale));
+    }
+
     // ---- tab bar ----
 
     tab_bar::tab_bar(const std::string& id, bool tab_list_popup, bool scroll) {

@@ -174,15 +174,15 @@ namespace grey::backends {
         int window_width{-1};
         int window_height{-1};
 
-        win32dx11app(const std::string& title, int width, int height) :
-            title{title}, window_width{width}, window_height{height} {
+        win32dx11app(const std::string& title, int width, int height, float scale) :
+            grey::app{scale}, title{title}, window_width{width}, window_height{height} {
 
             if(window_width == -1 || window_height == -1) {
                 window_width = window_height = CW_USEDEFAULT;
             } else {
                 // apply scaling factor
-                window_width = (int)(window_width * scale);
-                window_height = (int)(window_height * scale);
+                window_width = (int)(window_width * this->scale);
+                window_height = (int)(window_height * this->scale);
             }
         }
 
