@@ -10,6 +10,10 @@
 // 3rdparty
 #include "3rdparty/ImGuiColorTextEdit/TextEditor.h"
 
+#if GREY_INCLUDE_IMPLOT
+#include "implot.h"
+#endif
+
 namespace grey::widgets {
 
     extern float scale;
@@ -247,6 +251,8 @@ namespace grey::widgets {
         ImVec2 cursor_before;
     };
 
+#define with_status_bar(...) { grey::widgets::status_bar sb; __VA_ARGS__ }
+
     class tab_bar_item {
     public:
         tab_bar_item(const std::string& id, bool unsaved);
@@ -281,6 +287,8 @@ namespace grey::widgets {
         size_t tab_index{0};
         ImGuiTabBarFlags flags{ImGuiTabBarFlags_DrawSelectedOverline};
     };
+
+#define with_tab(tb, title, ...) { auto tab = tb.next_tab(title); if(tab) { __VA_ARGS__  } }
 
     /**
      * @brief Popup is a child element that can display extra items on top.
@@ -535,4 +543,10 @@ namespace grey::widgets {
             ImGuiTableFlags_ScrollX };
         ImGuiListClipper clipper;
     };
+
+    // plotting
+
+#if GREY_INCLUDE_IMPLOT
+    void plot_demo();
+#endif
 }

@@ -1150,5 +1150,24 @@ namespace grey::widgets {
         ImGui::TableSetColumnIndex(i);
     }
 
+    // -- plotting
+
+#if GREY_INCLUDE_IMPLOT
+
+    int bar_data[4] = {10, 20, 30, 40};
+    const char* labels[] = {"A", "B", "C", "D"};
+   
+
+    void plot_demo() {
+        if(ImPlot::BeginPlot("##plot")) {
+
+            ImPlot::SetupAxisTicks(ImAxis_Y1, 0, 3, 4, labels, false);
+            ImPlot::PlotBars("##bars", bar_data, 4, 0.67, 0, ImPlotBarsFlags_Horizontal);
+
+            ImPlot::EndPlot();
+        }
+
+    }
+#endif
 
 }

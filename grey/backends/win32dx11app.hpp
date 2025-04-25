@@ -7,7 +7,9 @@
 #include <d3d11.h>
 #include <dwmapi.h>
 #include "../common/str.h"
-#include <iostream>
+#if GREY_INCLUDE_IMPLOT
+#include "implot.h"
+#endif
 
 // Forward declare message handler from imgui_impl_win32.cpp
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -284,6 +286,9 @@ namespace grey::backends {
             // Setup Dear ImGui context
             IMGUI_CHECKVERSION();
             ImGui::CreateContext();
+#if GREY_INCLUDE_IMPLOT
+            ImPlot::CreateContext();
+#endif
             ImGuiIO& io = ImGui::GetIO(); (void)io;
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
             //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -403,6 +408,9 @@ namespace grey::backends {
             // Cleanup
             ImGui_ImplDX11_Shutdown();
             ImGui_ImplWin32_Shutdown();
+#if GREY_INCLUDE_IMPLOT
+            ImPlot::DestroyContext();
+#endif
             ImGui::DestroyContext();
 
             CleanupDeviceD3D();
