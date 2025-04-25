@@ -3,6 +3,7 @@
 #include "../grey/widgets.h"
 #include <imgui_internal.h>
 #include <vector>
+#include <iostream>
 
 using namespace std;
 namespace w = grey::widgets;
@@ -26,6 +27,10 @@ function foo()
     print("Hello, world!")
 end
 )";
+
+void plot_demo() {
+
+}
 
 #if WIN32
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
@@ -283,22 +288,18 @@ int main(int argc, char* argv[]) {
             }
 
             // ImGuiColorTextEdit
+            with_tab(tabs, "Lua Editor",
+                if(ted.render()) {
+                    w::label("code changed");
+                })
 
-            {
-                auto tab = tabs.next_tab("Lua Editor");
-                if(tab) {
-                    if(ted.render()) {
-                        w::label("code changed");
-                    }
-                }
-            }
+            // ImPlot
+            with_tab(tabs, "Plots",
+                w::plot_demo(); plot_demo();)
         }
 
 
-
-        {
-            w::status_bar sb;
-
+        with_status_bar(
             w::label(ICON_MD_HEAT_PUMP, w::emphasis::primary);
             w::sl();
             w::label("|", 0, false);
@@ -315,7 +316,7 @@ int main(int argc, char* argv[]) {
 
             w::sl(); w::label("|", 0, false);
             w::sl(); w::label_debug_info();
-        }
+        )
 
 
         if(show_demo)

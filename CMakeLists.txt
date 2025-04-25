@@ -12,6 +12,7 @@ project ("btu" VERSION ${GLOBAL_VERSION})
 add_compile_definitions(UNICODE) # required for WIN32 API to use correct versions
 add_compile_definitions(
     GREY_INCLUDE_IMNODES
+    GREY_INCLUDE_IMPLOT
 )
 
 # statically link MSVC runtime in thrift to being fully self-contained.
