@@ -295,7 +295,8 @@ int main(int argc, char* argv[]) {
 
             // ImPlot
             with_tab(tabs, "Plots",
-                w::plot_demo(); plot_demo();)
+                //w::plot_demo();
+                plot_demo();)
         }
 
 
