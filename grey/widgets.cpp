@@ -218,7 +218,7 @@ namespace grey::widgets {
             tsz = ImVec2(tsz.x, wsz.y + size.y);
         }
 
-        ImGui::BeginChild(id.c_str(), size, flags);
+        ImGui::BeginChild(id.c_str(), size, flags, window_flags);
     }
 
     void container::leave() {

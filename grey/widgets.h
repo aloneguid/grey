@@ -130,6 +130,8 @@ namespace grey::widgets {
         guardable& g;
     };
 
+#define with_window(w, ...) { { grey::widgets::guard wg{w}; __VA_ARGS__ }}
+
     class container : public guardable {
     public:
         /**
@@ -160,6 +162,16 @@ namespace grey::widgets {
             return *this;
         }
 
+        container& horizontal_scrollbar() {
+            window_flags |= ImGuiWindowFlags_HorizontalScrollbar;
+            return *this;
+        }
+
+        container& resize(float x, float y) {
+            size = ImVec2(x, y);
+            return *this;
+        }
+
         void enter() override;
         void leave() override;
 
@@ -167,6 +179,7 @@ namespace grey::widgets {
         std::string id;
         ImVec2 size;
         ImGuiChildFlags flags{0};
+        ImGuiWindowFlags window_flags{0};
     };
 
     class group {
@@ -240,6 +253,9 @@ namespace grey::widgets {
     private:
         bool rendered{false};
     };
+
+#define with_menu_bar(...) { { grey::widgets::menu_bar mb; if(mb) { __VA_ARGS__ } } }
+#define with_menu_item(title, ...) { { grey::widgets::menu mi{title}; if(mi) { __VA_ARGS__ } }}
 
     class status_bar {
     public:
