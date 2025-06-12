@@ -182,6 +182,8 @@ namespace grey::widgets {
         ImGuiWindowFlags window_flags{0};
     };
 
+#define with_container(c, ...) { { grey::widgets::guard cg{c}; __VA_ARGS__ }}
+
     class group {
     public:
         group();
