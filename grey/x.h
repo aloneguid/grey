@@ -9,6 +9,7 @@
 #endif
 
 typedef bool (*RenderFrameCallback)();
+typedef void (*RenderTableCellCallback)(int32_t row_index, int32_t col_index);
 
 extern "C"
 {
@@ -80,19 +81,9 @@ extern "C"
 
     EXPORTED void pop_status_bar();
 
-    // -- tables
-
-    EXPORTED bool push_table(const char* c_id, int32_t column_count, float outer_width, float outer_height);
-
-    EXPORTED void pop_table();
-
-    EXPORTED void table_col(const char* c_label);
-
-    EXPORTED void table_begin_data();
-
-    EXPORTED void table_begin_row();
-
-    EXPORTED void table_begin_col();
+    EXPORTED void table(const char* c_id, const char** c_columns, int32_t c_columns_size, int32_t row_count,
+        float outer_width, float outer_height,
+        RenderTableCellCallback c_cell_callback);
 
     // -- application menus
 

@@ -92,6 +92,14 @@ namespace Grey {
             Native.tooltip(text);
         }
 
+        public static void Table(string id, string[] columns, int rowCount, Action<int, int> cellRender) {
+            Native.table(id, columns, columns.Length, rowCount,
+                0, 0,
+                (rowIndex, columnIndex) => {
+                    cellRender(rowIndex, columnIndex);
+                });
+        }
+
         public static void PrintFps() {
             Native.label_fps();
         }

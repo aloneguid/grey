@@ -1110,11 +1110,25 @@ namespace grey::widgets {
         header_rendered = true;
     }
 
-    big_table::big_table(const std::string& id, int column_count, int row_count, ImVec2 outer_size) {
-        rendered = ImGui::BeginTable(id.c_str(), column_count, flags, outer_size);
+    big_table::big_table(const std::string& id, const vector<string>& columns, size_t row_count,
+        float outer_width,
+        float outer_height) : columns_size{columns.size()} {
+        rendered = ImGui::BeginTable(id.c_str(), columns.size(), flags, ImVec2(outer_width, outer_height));
         if (rendered) {
-            ImGui::TableSetupScrollFreeze(column_count, 1);
-            clipper.Begin(row_count, 10);
+            ImGui::TableSetupScrollFreeze(columns.size(), 1);
+            clipper.Begin(row_count);
+
+            // setup columns
+            for (const string& cn : columns) {
+                if (cn.empty() || !cn.ends_with("+")) {
+                    ImGui::TableSetupColumn(cn.c_str());
+                }
+                else {
+                    string n = cn.substr(0, cn.size() - 1);
+                    ImGui::TableSetupColumn(n.c_str(), ImGuiTableColumnFlags_WidthStretch);
+                }
+            }
+            ImGui::TableHeadersRow();
         }
     }
 
@@ -1124,30 +1138,21 @@ namespace grey::widgets {
         }
     }
 
-    void big_table::col(const std::string& label, bool stretch) {
-        ImGui::TableSetupColumn(label.c_str(),
-            stretch ? ImGuiTableColumnFlags_WidthStretch : ImGuiTableColumnFlags_WidthFixed);
-    }
+    void big_table::render_data(std::function<void(int, int)> cell_render) {
+        if(!rendered) return;
 
-    void big_table::headers_row() {
-        ImGui::TableHeadersRow();
-    }
+        while(clipper.Step()) {
+            for(int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
+                ImGui::TableNextRow();
+                for (int col = 0; col < columns_size; col++) {
+                    ImGui::TableSetColumnIndex(col);
 
-    bool big_table::step(int& display_start, int& display_end) {
-        if (clipper.Step()) {
-            display_start = clipper.DisplayStart;
-            display_end = clipper.DisplayEnd;
-            return true;
+                    if (cell_render) {
+                        cell_render(row, col);
+                    }
+                }
+            }
         }
-        return false;
-    }
-
-    void big_table::next_row() {
-        ImGui::TableNextRow();
-    }
-
-    void big_table::to_col(int i) {
-        ImGui::TableSetColumnIndex(i);
     }
 
     // -- plotting

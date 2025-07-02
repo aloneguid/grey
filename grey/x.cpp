@@ -3,7 +3,6 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include <map>
 #include <stack>
 #include <iostream>
 
@@ -203,40 +202,21 @@ EXPORTED void pop_status_bar() {
     status_bars.pop_back();
 }
 
-// -- tables
+EXPORTED void table(const char* c_id,
+    const char** c_columns, int32_t c_columns_size, int32_t row_count,
+    float outer_width, float outer_height,
+    RenderTableCellCallback c_cell_callback)
+{
+    vector<string> cols;
+    // copy columns into cols vector
+    for (int i = 0; i < c_columns_size; i++) {
+        cols.push_back(c_columns[i]);
+    }
 
-stack<w::table> tables;
-
-EXPORTED bool push_table(const char* c_id, int32_t column_count, float outer_width, float outer_height) {
-    string id = c_id;
-    tables.emplace(id, column_count, outer_width, outer_height);
-    auto& t = tables.top();
-    return t;
-}
-
-EXPORTED void pop_table() {
-    tables.pop();
-}
-
-EXPORTED void table_col(const char* c_label) {
-    string label = c_label;
-    auto& t = tables.top();
-    t.columns.push_back(label);
-}
-
-EXPORTED void table_begin_data() {
-    auto& t = tables.top();
-    t.begin_data();
-}
-
-EXPORTED void table_begin_row() {
-    auto& t = tables.top();
-    t.begin_row();
-}
-
-EXPORTED void table_begin_col() {
-    auto& t = tables.top();
-    t.begin_col();
+    w::big_table t{ c_id, cols, static_cast<size_t>(row_count), outer_width, outer_height };
+    t.render_data([c_cell_callback](int row_idx, int column_idx) {
+            c_cell_callback(row_idx, column_idx);
+        });
 }
 
 // -- application menus

@@ -535,21 +535,22 @@ namespace grey::widgets {
      */
     class big_table {
     public:
-        big_table(const std::string& id, int column_count, int row_count, ImVec2 outer_size);
+        big_table(const std::string& id, const std::vector<std::string>& columns, size_t row_count,
+            float outer_width = 0, float outer_height = 0);
         ~big_table();
 
         operator bool() const {
             return rendered;
         }
 
-        void col(const std::string& label, bool stretch = false);
-        void headers_row();
-
-        bool step(int& display_start, int& display_end);
-        void next_row();
-        void to_col(int i);
+        /**
+         * @brief Call to initialize table data rendering. Accepts lambda callback to be invoked for each cell.
+         * @param cell_render Callback that will be called for each cell in the table. Row and column indices are passed as parameters.
+         */
+        void render_data(std::function<void(int, int)> cell_render);
 
     private:
+        size_t columns_size;
         bool rendered{false};
         ImGuiTableFlags flags {
             ImGuiTableFlags_Borders |

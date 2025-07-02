@@ -122,25 +122,10 @@ Grey.App.Run("Grey# Demo", () => {
 
         using(var ti = new TabItem("Tables")) {
             if(ti) {
-
-                int totalRows = 100;
-                Label($"Simple table with {totalRows} rows");
-                using(var tbl = new Table("t0", ["id", "name", "description+"])) {
-                    if(tbl) {
-
-                        for(int i = 0; i < totalRows; i++) {
-                            tbl.BeginRow();
-
-                            tbl.BeginCol();
-                            Label(i.ToString());
-
-                            tbl.BeginCol();
-                            Label($"name {i}");
-                            tbl.BeginCol();
-                            Label($"description {i}");
-                        }
-                    }
-                }
+                Table("t0", new[] { "id", "name", "description+" }, 100000,
+                    (int row, int column) => {
+                        Label($"{row}x{column}");
+                    });
             }
         }
 

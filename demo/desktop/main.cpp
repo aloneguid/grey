@@ -229,7 +229,7 @@ int main(int argc, char* argv[]) {
 
             // tables
             {
-                auto tab = tabs.next_tab("Tables");
+                auto tab = tabs.next_tab("Table");
                 if(tab) {
                     int row_count = 1000;
                     w::table t{"table1", 3, 0, -20 * c_app.scale};
@@ -254,6 +254,23 @@ int main(int argc, char* argv[]) {
                     }
                 }
             }
+            {
+                auto tab = tabs.next_tab("Big Table");
+                if(tab) {
+                    size_t row_count = 1000000;
+                    w::big_table t{"table2", { "id", "name", "description+" }, row_count, 0, -20 * w::scale};
+                    if(t) {
+                        t.render_data([](int row, int col) {
+                            if(col == 0) {
+                                w::label(to_string(row));
+                            } else {
+                                w::label(to_string(row) + "x" + to_string(col));
+                            }
+                        });
+                    }
+                }
+            }
+
 
             // Spinners
             {
@@ -317,6 +334,9 @@ int main(int argc, char* argv[]) {
 
             w::sl(); w::label("|", 0, false);
             w::sl(); w::label_debug_info();
+
+            w::sl(); w::label("|", 0, false);
+            w::sl(); w::label(ImGui::GetVersion());
         )
 
 
