@@ -86,6 +86,7 @@ namespace grey::widgets {
         window& no_resize();
         window& no_collapse();
         window& no_titlebar();
+        window& no_background();
         window& border(float width);
         window& no_scroll();
         window& center(void* monitor_handle = nullptr);

@@ -18,6 +18,13 @@ namespace grey::backends {
 
     using namespace std;
 
+    static const ImVec4 ClearColorIV4 = ImVec4(0.1f, 0.1f, 0.1f, 1.00f);
+    static const float ClearColorF4[4] = {
+        ClearColorIV4.x * ClearColorIV4.w,
+        ClearColorIV4.y * ClearColorIV4.w,
+        ClearColorIV4.z * ClearColorIV4.w,
+        ClearColorIV4.w};
+
     // Helpers
     static LPCWSTR g_firstIconName{nullptr};
     BOOL CALLBACK EnumIconsProc(HMODULE hModule, LPCWSTR lpType, LPWSTR lpName, LONG_PTR lParam) {
@@ -168,6 +175,7 @@ namespace grey::backends {
     class win32dx11app : public grey::app {
     private:
         HWND hwnd{0};
+
     public:
 
         string title;
@@ -266,6 +274,18 @@ namespace grey::backends {
 
             ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
+            if(win32_transparent) {
+                // Set the layered window extended style
+                LONG_PTR exStyle = ::GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+                if(!(exStyle & WS_EX_LAYERED)) {
+                    ::SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
+                }
+
+                // Set the transparency level
+                COLORREF crKey = RGB(ClearColorIV4.x * 255, ClearColorIV4.y * 255, ClearColorIV4.z * 255);
+                ::SetLayeredWindowAttributes(hwnd, crKey, 0, LWA_COLORKEY);
+            }
+
             // Initialize Direct3D
             if(!CreateDeviceD3D(hwnd)) {
                 CleanupDeviceD3D();
@@ -334,7 +354,7 @@ namespace grey::backends {
             //IM_ASSERT(font != nullptr);
 
             // Our state
-            ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+            //ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
             //ImVec4 clear_color = ImVec4(0.1f, 0.1f, 0.1f, 1.00f);
 
             // Main loop
@@ -345,6 +365,7 @@ namespace grey::backends {
             on_after_initialised();
 
             while(!done) {
+
                 // Poll and handle messages (inputs, window resize, etc.)
                 // See the WndProc() function below for our to dispatch events to the Win32 backend.
                 MSG msg;
@@ -382,9 +403,8 @@ namespace grey::backends {
 
                 // Rendering
                 ImGui::Render();
-                const float clear_color_with_alpha[4] = {clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w};
                 g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, nullptr);
-                g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color_with_alpha);
+                g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, ClearColorF4);
                 ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
                 // Update and Render additional Platform Windows

@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
     //auto wnd = backend->make_window<demo::main_wnd>();
     //backend->run();
 
-    auto app = grey::app::make(APP_LONG_NAME, 800, 600);
+    auto app = grey::app::make("demo", 800, 600);
     app->load_fixed_font = true;
     float scale = app->scale;
 

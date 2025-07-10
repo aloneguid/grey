@@ -89,6 +89,11 @@ namespace grey::widgets {
         return *this;
     }
 
+    window& window::no_background() {
+        flags |= ImGuiWindowFlags_NoBackground;
+        return *this;
+    }
+
     window& window::border(float width) {
         border_size = width;
         return *this;
@@ -98,6 +103,7 @@ namespace grey::widgets {
         flags |= ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
         return *this;
     }
+
 
     window& window::center(void* monitor_handle) {
         init_center_monitor = monitor_handle;

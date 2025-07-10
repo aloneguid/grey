@@ -81,6 +81,7 @@ namespace grey {
         bool win32_title_bar{true};
         bool win32_can_resize{true};
         bool win32_center_on_screen{false};
+        bool win32_transparent{false};
         std::string win32_window_class_name{"GreyDX11"};
 
         /**
