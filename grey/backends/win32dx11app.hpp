@@ -250,7 +250,7 @@ namespace grey::backends {
 
             wstring w_title = grey::common::str::to_wstr(title);
 
-            DWORD dwStyle = WS_OVERLAPPEDWINDOW;// | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME;
+            DWORD dwStyle = WS_OVERLAPPEDWINDOW;
             //DWORD dwStyle = WS_POPUP;
             if(!win32_can_resize) {
                 // remove resize frame and maximize button
@@ -258,6 +258,9 @@ namespace grey::backends {
                 dwStyle &= ~WS_MAXIMIZEBOX;
             }
             //if(can_minimise) dwStyle |= WS_MINIMIZEBOX;
+            //dwStyle &= ~WS_CAPTION;
+            //dwStyle &= ~WS_SYSMENU; // remove system menu
+            //dwStyle &= ~WS_BORDER;
 
             if(win32_center_on_screen) {
                 get_screen_center(window_width, window_height, window_left, window_top);
@@ -275,6 +278,9 @@ namespace grey::backends {
             ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
             if(win32_transparent) {
+                // remove all styles, so that window has no title, borders etc.
+                ::SetWindowLong(hwnd, GWL_STYLE, 0);
+
                 // Set the layered window extended style
                 LONG_PTR exStyle = ::GetWindowLongPtr(hwnd, GWL_EXSTYLE);
                 if(!(exStyle & WS_EX_LAYERED)) {
