@@ -513,6 +513,24 @@ namespace grey::widgets {
         y = p.y;
     }
 
+    void cur_get(float& x, float& y) {
+        ImVec2 p = ImGui::GetCursorScreenPos();
+        x = p.x;
+        y = p.y;
+    }
+
+    ImVec2 cur_get() {
+        return ImGui::GetCursorScreenPos();
+    }
+
+    void cur_set(float x, float y) {
+        ImGui::SetCursorScreenPos(ImVec2{x, y});
+    }
+
+    void cur_set(const ImVec2& pos) {
+        ImGui::SetCursorScreenPos(pos);
+    }
+
     void move_pos(float x, float y) {
         ImVec2 mv = ImGui::GetCursorPos();
         mv.x += x;
