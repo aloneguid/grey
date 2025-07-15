@@ -18,13 +18,6 @@ namespace grey::backends {
 
     using namespace std;
 
-    static const ImVec4 ClearColorIV4 = ImVec4(0.1f, 0.1f, 0.1f, 1.00f);
-    static const float ClearColorF4[4] = {
-        ClearColorIV4.x * ClearColorIV4.w,
-        ClearColorIV4.y * ClearColorIV4.w,
-        ClearColorIV4.z * ClearColorIV4.w,
-        ClearColorIV4.w};
-
     // Helpers
     static LPCWSTR g_firstIconName{nullptr};
     BOOL CALLBACK EnumIconsProc(HMODULE hModule, LPCWSTR lpType, LPWSTR lpName, LONG_PTR lParam) {
@@ -176,6 +169,12 @@ namespace grey::backends {
     private:
         HWND hwnd{0};
 
+        const float ClearColorF4[4] = {
+            ClearColor[0] * ClearColor[3],
+            ClearColor[1] * ClearColor[3],
+            ClearColor[2] * ClearColor[3],
+            ClearColor[3]};
+
     public:
 
         string title;
@@ -288,7 +287,7 @@ namespace grey::backends {
                 }
 
                 // Set the transparency level
-                COLORREF crKey = RGB(ClearColorIV4.x * 255, ClearColorIV4.y * 255, ClearColorIV4.z * 255);
+                COLORREF crKey = RGB(ClearColor[0] * 255, ClearColor[1] * 255, ClearColor[2] * 255);
                 ::SetLayeredWindowAttributes(hwnd, crKey, 0, LWA_COLORKEY);
             }
 

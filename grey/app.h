@@ -72,6 +72,12 @@ namespace grey {
          */
         void set_target_fps(int fps);
 
+        /**
+         * @brief Returns the clear color of the application as RGBA array of floats (0-1).
+         * @return 
+         */
+        std::array<float, 4> get_clear_color() const;
+
         // platform specific flags
 
 #if _WIN32
@@ -96,6 +102,10 @@ namespace grey {
 #endif
 
     protected:
+
+        // clear color as RGBA array of floats (0-1)
+        const float ClearColor[4] = {0.1f, 0.1f, 0.1f, 1.00f};
+
         void on_after_initialised();
 
         virtual void* make_native_texture(grey::common::raw_img& img) = 0;

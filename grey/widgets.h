@@ -479,19 +479,6 @@ namespace grey::widgets {
     // system debug info
     void label_debug_info();
 
-    // Node editor
-
-    class node_editor_node {
-    public:
-        ImVec2 size;
-
-        node_editor_node(int id);
-        ~node_editor_node();
-
-    private:
-        int id;
-    };
-
     // ImGuiColorTextEdit
     class text_editor {
     public:

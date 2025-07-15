@@ -73,6 +73,10 @@ namespace grey {
         max_frame_interval_ms = 1000.0f / fps;
     }
 
+    std::array<float, 4> app::get_clear_color() const {
+        return { ClearColor[0], ClearColor[1], ClearColor[2], ClearColor[3] };
+    }
+
     texture app::get_texture(const std::string& key) {
         auto entry = textures.find(key);
         if(entry == textures.end()) {
