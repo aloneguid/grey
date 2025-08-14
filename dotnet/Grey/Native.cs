@@ -100,6 +100,7 @@ namespace Grey {
             int row_count,
             float outer_width,
             float outer_height,
+            bool alternate_row_bg,
             RenderTableCellCallback cell_callback);
 
 

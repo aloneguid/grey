@@ -81,8 +81,13 @@ extern "C"
 
     EXPORTED void pop_status_bar();
 
+    /**
+     * @brief Table call in a single function call.
+     * @param c_cell_callback Callback function that is called for each cell in the table, and receives row and column indices.
+     */
     EXPORTED void table(const char* c_id, const char** c_columns, int32_t c_columns_size, int32_t row_count,
         float outer_width, float outer_height,
+        bool alternate_row_bg,
         RenderTableCellCallback c_cell_callback);
 
     // -- application menus

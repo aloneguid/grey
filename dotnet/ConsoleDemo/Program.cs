@@ -13,6 +13,7 @@ StringBuilder multilineText = new StringBuilder("initial text\nanother line", 10
 float mlHeight = 0;
 bool mlEnabled = true;
 bool mlUseFixedFont = false;
+bool alternateTableRowBg = false;
 
 
 Grey.App.Run("Grey# Demo", () => {
@@ -122,10 +123,13 @@ Grey.App.Run("Grey# Demo", () => {
 
         using(var ti = new TabItem("Tables")) {
             if(ti) {
+                Checkbox("alg bg", ref alternateTableRowBg);
+
                 Table("t0", new[] { "id", "name", "description+" }, 100000,
                     (int row, int column) => {
                         Label($"{row}x{column}");
-                    });
+                    },
+                    alternateTableRowBg);
             }
         }
 

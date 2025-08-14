@@ -257,8 +257,24 @@ int main(int argc, char* argv[]) {
             {
                 auto tab = tabs.next_tab("Big Table");
                 if(tab) {
-                    size_t row_count = 1000000;
-                    w::big_table t{"table2", { "id", "name", "description+" }, row_count, 0, -20 * w::scale};
+                    static int row_count = 1000;
+                    static int col_count = 3;
+
+                    w::slider(row_count, 0, 1000000000, "row count");
+                    w::slider(col_count, 1, 100, "col count");
+
+                    static vector<string> columns;
+                    if(col_count != columns.size()) {
+                        columns.clear();
+                        for(int i = 0; i < col_count; i++) {
+                            columns.push_back("col " + to_string(i));
+                        }
+                    }
+
+                    static bool row_bg = false;
+                    w::checkbox("alternate row bg", row_bg);
+
+                    w::big_table t{"table2", columns, (size_t)row_count, 0.0f, -20 * w::scale, row_bg};
                     if(t) {
                         t.render_data([](int row, int col) {
                             if(col == 0) {

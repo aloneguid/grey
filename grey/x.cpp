@@ -205,6 +205,7 @@ EXPORTED void pop_status_bar() {
 EXPORTED void table(const char* c_id,
     const char** c_columns, int32_t c_columns_size, int32_t row_count,
     float outer_width, float outer_height,
+    bool alternate_row_bg,
     RenderTableCellCallback c_cell_callback)
 {
     vector<string> cols;
@@ -213,7 +214,7 @@ EXPORTED void table(const char* c_id,
         cols.push_back(c_columns[i]);
     }
 
-    w::big_table t{ c_id, cols, static_cast<size_t>(row_count), outer_width, outer_height };
+    w::big_table t{ c_id, cols, static_cast<size_t>(row_count), outer_width, outer_height, alternate_row_bg };
     t.render_data([c_cell_callback](int row_idx, int column_idx) {
             c_cell_callback(row_idx, column_idx);
         });

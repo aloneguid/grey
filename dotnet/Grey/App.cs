@@ -92,9 +92,11 @@ namespace Grey {
             Native.tooltip(text);
         }
 
-        public static void Table(string id, string[] columns, int rowCount, Action<int, int> cellRender) {
+        public static void Table(string id, string[] columns, int rowCount, Action<int, int> cellRender,
+            bool alternateRowBg = false) {
             Native.table(id, columns, columns.Length, rowCount,
                 0, 0,
+                alternateRowBg,
                 (rowIndex, columnIndex) => {
                     cellRender(rowIndex, columnIndex);
                 });

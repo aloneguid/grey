@@ -1136,10 +1136,14 @@ namespace grey::widgets {
 
     big_table::big_table(const std::string& id, const vector<string>& columns, size_t row_count,
         float outer_width,
-        float outer_height) : columns_size{columns.size()} {
-        rendered = ImGui::BeginTable(id.c_str(), columns.size(), flags, ImVec2(outer_width, outer_height));
+        float outer_height,
+        bool alternate_row_bg) : columns_size{columns.size()}, outer_size{outer_width, outer_height} {
+        if(alternate_row_bg) {
+            flags |= ImGuiTableFlags_RowBg;
+        }
+        rendered = ImGui::BeginTable(id.c_str(), columns.size(), flags, outer_size);
         if (rendered) {
-            ImGui::TableSetupScrollFreeze(columns.size(), 1);
+            ImGui::TableSetupScrollFreeze(0, 1);
             clipper.Begin(row_count);
 
             // setup columns
@@ -1169,7 +1173,10 @@ namespace grey::widgets {
             for(int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
                 ImGui::TableNextRow();
                 for (int col = 0; col < columns_size; col++) {
-                    ImGui::TableSetColumnIndex(col);
+                    if(!ImGui::TableSetColumnIndex(col)) {
+                        // don't bother rendering invisible columns
+                        continue;
+                    }
 
                     if (cell_render) {
                         cell_render(row, col);

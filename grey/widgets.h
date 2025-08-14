@@ -538,7 +538,8 @@ namespace grey::widgets {
     class big_table {
     public:
         big_table(const std::string& id, const std::vector<std::string>& columns, size_t row_count,
-            float outer_width = 0, float outer_height = 0);
+            float outer_width = 0.0f, float outer_height = 0.0f,
+            bool alternate_row_bg = false);
         ~big_table();
 
         operator bool() const {
@@ -554,6 +555,7 @@ namespace grey::widgets {
     private:
         size_t columns_size;
         bool rendered{false};
+        ImVec2 outer_size;
         ImGuiTableFlags flags {
             ImGuiTableFlags_Borders |
             ImGuiTableFlags_NoBordersInBodyUntilResize |

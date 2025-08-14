@@ -2,11 +2,11 @@
 
 env:
   VERSION: 0.0.0
-  PACKAGE_SUFFIX: '-pre.20'
+  PACKAGE_SUFFIX: '-pre.21'
   # PACKAGE_SUFFIX: ''
   ASM_VERSION: 0.0.0
   BUILD_TYPE: Release
-  VCPKG_HASH: d712dcd4e6a5db73f3734aec5f0012ccb8d0dfe3
+  VCPKG_HASH: 104e1e4f08745fd4518adefd9f651deee6f35d78
 
 on:
   push:
