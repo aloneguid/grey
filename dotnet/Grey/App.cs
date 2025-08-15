@@ -93,9 +93,10 @@ namespace Grey {
         }
 
         public static void Table(string id, string[] columns, int rowCount, Action<int, int> cellRender,
+            float outer_width = 0, float outerHeight = 0,
             bool alternateRowBg = false) {
             Native.table(id, columns, columns.Length, rowCount,
-                0, 0,
+                outer_width, outerHeight,
                 alternateRowBg,
                 (rowIndex, columnIndex) => {
                     cellRender(rowIndex, columnIndex);
