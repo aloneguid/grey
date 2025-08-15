@@ -184,7 +184,7 @@ jobs:
       fail-fast: false
     name: 'demo app: ${{ matrix.name }}'
     needs:
-      - build-managed
+      - make-fat-native
 
     steps:
       - uses: actions/checkout@v4
@@ -204,7 +204,7 @@ jobs:
             9.0.x
 
       - name: Publish
-        run: dotnet publish dotnet/ConsoleDemo/ -r ${{ matrix.dotnet_rid }} --self-contained true
+        run: dotnet publish dotnet/ConsoleDemo/ -r ${{ matrix.dotnet_rid }} --self-contained true -p:PublishSingleFile=true
 
       - uses: actions/upload-artifact@v4
         name: Collect Artifacts
@@ -213,7 +213,7 @@ jobs:
           compression-level: 9
           if-no-files-found: error
           path: |
-            dotnet/ConsoleDemo/bin/Release/**/*nupkg
+            dotnet/ConsoleDemo/bin/Release/net9.0/${{ matrix.dotnet_rid }}/publish/*
             
 
   release:
