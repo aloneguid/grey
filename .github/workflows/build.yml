@@ -163,6 +163,59 @@ jobs:
           docs/version-notes.md
           docs/version.txt
 
+  build-demo-apps:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            name: Windows x64
+            arch: x64
+            vcpkg_triplet: x64-windows-static
+            vcpkg_config: Release
+            dotnet_rid: win-x64
+          - os: ubuntu-latest
+            name: Linux x64
+            arch: x64
+            vcpkg_triplet: x64-linux
+            vcpkg_config: MinSizeRel
+            dotnet_rid: linux-x64
+
+      fail-fast: false
+    name: 'demo app: ${{ matrix.name }}'
+    needs:
+      - build-managed
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: native-fat
+          path: xbin/
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+
+      - name: Publish
+        run: dotnet publish dotnet/ConsoleDemo/ -r ${{ matrix.dotnet_rid }} --self-contained true
+
+      - uses: actions/upload-artifact@v4
+        name: Collect Artifacts
+        with:
+          name: dotnet-demo-${{ matrix.dotnet_rid }}
+          compression-level: 9
+          if-no-files-found: error
+          path: |
+            dotnet/ConsoleDemo/bin/Release/**/*nupkg
+            
+
   release:
     name: '🕋 Release library'
     runs-on: ubuntu-latest 
