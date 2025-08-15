@@ -129,7 +129,7 @@ Grey.App.Run("Grey# Demo", () => {
                     (int row, int column) => {
                         Label($"{row}x{column}");
                     },
-                    alternateTableRowBg);
+                    alternateRowBg: alternateTableRowBg);
             }
         }
 
