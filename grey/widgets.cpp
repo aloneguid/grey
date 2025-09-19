@@ -1003,14 +1003,17 @@ namespace grey::widgets {
         }
     }
 
-    tab_bar_item tab_bar::next_tab(const string& title, bool unsaved) {
-        return tab_bar_item{ title + "##" + std::to_string(tab_index++), unsaved };
+    tab_bar_item tab_bar::next_tab(const string& title, bool unsaved, bool selected) {
+        return tab_bar_item{ title + "##" + std::to_string(tab_index++), unsaved, selected };
     }
 
-    tab_bar_item::tab_bar_item(const std::string& id, bool unsaved) : id{ id } {
+    tab_bar_item::tab_bar_item(const std::string& id, bool unsaved, bool selected) : id{ id } {
         //cout << "tab_bar_item::tab_bar_item " << id << endl;
         if (unsaved) {
             flags |= ImGuiTabItemFlags_UnsavedDocument;
+        }
+        if(selected) {
+            flags |= ImGuiTabItemFlags_SetSelected;
         }
         rendered = ImGui::BeginTabItem(id.c_str(), nullptr, flags);
     }

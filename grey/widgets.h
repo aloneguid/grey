@@ -274,7 +274,7 @@ namespace grey::widgets {
 
     class tab_bar_item {
     public:
-        tab_bar_item(const std::string& id, bool unsaved);
+        tab_bar_item(const std::string& id, bool unsaved, bool selected);
         ~tab_bar_item();
 
         operator bool() const {
@@ -292,7 +292,7 @@ namespace grey::widgets {
         tab_bar(const std::string& id, bool tab_list_popup = false, bool scroll = false);
         ~tab_bar();
 
-        tab_bar_item next_tab(const std::string& title, bool unsaved = false);
+        tab_bar_item next_tab(const std::string& title, bool unsaved = false, bool selected = false);
 
         /**
          * @brief Increments tab index

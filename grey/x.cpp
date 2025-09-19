@@ -160,7 +160,7 @@ EXPORTED bool push_next_tab(const char* c_title) {
 
     w::tab_bar& bar = tab_bars.top();
     string id = string{c_title} + "##" + std::to_string(bar.increment_tab_index());
-    tab_items.emplace(id, false);
+    tab_items.emplace(id, false, false);
 
     auto& item = tab_items.top();
     return item;
