@@ -6,7 +6,7 @@ env:
   # PACKAGE_SUFFIX: ''
   ASM_VERSION: 0.0.0
   BUILD_TYPE: Release
-  VCPKG_HASH: 104e1e4f08745fd4518adefd9f651deee6f35d78
+  VCPKG_HASH: 9824d05f8d9548720ba3331f4baba3e2d6c1693b
 
 on:
   push:
