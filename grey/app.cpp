@@ -77,6 +77,40 @@ namespace grey {
         return { ClearColor[0], ClearColor[1], ClearColor[2], ClearColor[3] };
     }
 
+    int app::find_monitor_for_main_viewport() {
+        ImGuiViewport* vp = ImGui::GetMainViewport();
+        if (!vp) return -1;
+        const ImVec2 v_min = vp->Pos;
+        const ImVec2 v_max = ImVec2(vp->Pos.x + vp->Size.x, vp->Pos.y + vp->Size.y);
+
+        const ImGuiPlatformIO& pio = ImGui::GetPlatformIO();
+        if (pio.Monitors.empty()) return -1;
+
+        int best = 0;
+        float best_area = -1.0f;
+
+        for (int i = 0; i < pio.Monitors.Size; ++i) {
+            const ImGuiPlatformMonitor& m = pio.Monitors[i];
+            const ImVec2 m_min = m.MainPos;
+            const ImVec2 m_max = ImVec2(m.MainPos.x + m.MainSize.x, m.MainPos.y + m.MainSize.y);
+
+            const float ix_min = (v_min.x > m_min.x ? v_min.x : m_min.x);
+            const float iy_min = (v_min.y > m_min.y ? v_min.y : m_min.y);
+            const float ix_max = (v_max.x < m_max.x ? v_max.x : m_max.x);
+            const float iy_max = (v_max.y < m_max.y ? v_max.y : m_max.y);
+
+            const float iw = ix_max - ix_min;
+            const float ih = iy_max - iy_min;
+            const float area = (iw > 0.0f && ih > 0.0f) ? (iw * ih) : 0.0f;
+
+            if (area > best_area) {
+                best_area = area;
+                best = i;
+            }
+        }
+        return best;
+    }
+
     texture app::get_texture(const std::string& key) {
         auto entry = textures.find(key);
         if(entry == textures.end()) {

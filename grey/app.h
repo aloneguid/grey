@@ -78,6 +78,13 @@ namespace grey {
          */
         std::array<float, 4> get_clear_color() const;
 
+        /**
+         * @brief Find the monitor with the largest overlap with the given viewport.
+         * @param vp 
+         * @return Monitor index, or -1 if no monitors are found.
+         */
+        int find_monitor_for_main_viewport();
+
         // platform specific flags
 
 #if _WIN32

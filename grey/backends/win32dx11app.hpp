@@ -224,6 +224,16 @@ namespace grey::backends {
                     uFlags |= SWP_NOMOVE;
                 }
 
+                // take into account window decorations (chrome etc.) because SetWindowPos expects the full window size
+                {
+                    RECT rc{0, 0, window_width, window_height};
+                    const DWORD style = static_cast<DWORD>(::GetWindowLongPtr(hwnd, GWL_STYLE));
+                    const DWORD exstyle = static_cast<DWORD>(::GetWindowLongPtr(hwnd, GWL_EXSTYLE));
+                    ::AdjustWindowRectEx(&rc, style, FALSE, exstyle);
+                    window_width = rc.right - rc.left;
+                    window_height = rc.bottom - rc.top;
+                }
+
                 ::SetWindowPos(hwnd, HWND_TOP, window_left, window_top, window_width, window_height, uFlags);
             }
         }

@@ -148,6 +148,15 @@ namespace grey::widgets {
             return *this;
         }
 
+        container& background(bool present) {
+            if(present) {
+                window_flags &= ~ImGuiWindowFlags_NoBackground;
+            } else {
+                window_flags |= ImGuiWindowFlags_NoBackground;
+            }
+            return *this;
+        }
+
         container& auto_size_y() {
             flags |= ImGuiChildFlags_AutoResizeY;
             return *this;
@@ -173,12 +182,19 @@ namespace grey::widgets {
             return *this;
         }
 
+        container& padding(float x, float y) {
+            window_flags |= ImGuiWindowFlags_AlwaysUseWindowPadding;
+            pad = ImVec2{x, y};
+            return *this;
+        }
+
         void enter() override;
         void leave() override;
 
     private:
         std::string id;
         ImVec2 size;
+        ImVec2 pad{0, 0};
         ImGuiChildFlags flags{0};
         ImGuiWindowFlags window_flags{0};
     };
@@ -395,8 +411,16 @@ namespace grey::widgets {
 
     bool slider(int& value, int min, int max, const std::string& label = "");
 
+    /**
+     * @brief Checks if the last rendered item is hovered, and if so, shows a tooltip with the given text.
+     * @param text 
+     */
     void tooltip(const std::string& text);
 
+    /**
+     * @brief Checks if the last rendered item is hovered, and if so, shows a tooltip with the given text.
+     * @param text 
+     */
     void tooltip(const char* text);
 
     void image(app& app, const std::string& key, size_t width, size_t height);
@@ -411,7 +435,7 @@ namespace grey::widgets {
     void sl(float offset = 0);
     void sep(const std::string& text = "");
 
-    bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false);
+    bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false, const std::string& tooltip_text = "");
 
     bool icon_checkbox(const std::string& icon, bool& is_checked, bool reversed = false);
 

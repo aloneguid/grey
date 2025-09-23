@@ -215,20 +215,24 @@ namespace grey::widgets {
     }
 
     void container::enter() {
-
-        ImVec2 tsz = size;
-
         if (size.y < 0) {
+            ImVec2 tsz = size;
             // pad from the bottom
             ImVec2 wsz = ImGui::GetWindowSize();
             tsz = ImVec2(tsz.x, wsz.y + size.y);
         }
 
+        if(pad.x > 0 || pad.y > 0) {
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, pad);
+        }
         ImGui::BeginChild(id.c_str(), size, flags, window_flags);
     }
 
     void container::leave() {
         ImGui::EndChild();
+        if(pad.x > 0 || pad.y > 0) {
+            ImGui::PopStyleVar();
+        }
     }
 
     bool mi(const std::string& text, bool reserve_icon_space, const std::string& icon) {
@@ -608,7 +612,7 @@ namespace grey::widgets {
 
     // ---- button ----
 
-    bool button(const std::string& text, emphasis emp, bool is_enabled, bool is_small) {
+    bool button(const std::string & text, emphasis emp, bool is_enabled, bool is_small, const string& tooltip_text) {
 
         if (!is_enabled) {
             ImGui::BeginDisabled(true);
@@ -637,6 +641,10 @@ namespace grey::widgets {
 
         if (!is_enabled) {
             ImGui::EndDisabled();
+        }
+
+        if(!tooltip_text.empty()) {
+            tooltip(tooltip_text);
         }
 
         return clicked;
