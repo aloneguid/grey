@@ -67,6 +67,13 @@ namespace grey {
         virtual void resize_main_viewport(int width, int height) = 0;
 
         /**
+         * @brief Moves the main viewport of the application to the specified position on the screen. This is monitor/platform dependent and may not work on all platforms.
+         * @param x 
+         * @param y 
+         */
+        virtual void move_main_viewport(int x, int y) = 0;
+
+        /**
          * @brief Limits maximum FPS for the application. This is useful when you want to limit the CPU usage of the application.
          * @param fps 
          */
@@ -95,6 +102,7 @@ namespace grey {
         bool win32_can_resize{true};
         bool win32_center_on_screen{false};
         bool win32_transparent{false};
+        bool win32_hide_from_taskbar{false};
         std::string win32_window_class_name{"GreyDX11"};
 
         /**

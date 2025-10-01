@@ -238,6 +238,15 @@ namespace grey::backends {
             }
         }
 
+        void move_main_viewport(int x, int y) {
+            window_left = (int)(x * scale);
+            window_top = (int)(y * scale);
+            if(hwnd) {
+                UINT uFlags = SWP_NOSIZE;
+                ::SetWindowPos(hwnd, HWND_TOP, window_left, window_top, 0, 0, uFlags);
+            }
+        }
+
         void run(std::function<bool(const app& app)> render_frame) {
             // Create application window
             //ImGui_ImplWin32_EnableDpiAwareness();
@@ -285,6 +294,18 @@ namespace grey::backends {
                 wc.hInstance, nullptr);
 
             ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+
+            // Hide from taskbar if requested
+            if(win32_hide_from_taskbar) {
+                LONG_PTR ex = ::GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+                // Remove WS_EX_APPWINDOW if present, add WS_EX_TOOLWINDOW
+                ex &= ~WS_EX_APPWINDOW;
+                ex |= WS_EX_TOOLWINDOW;
+                ::SetWindowLongPtr(hwnd, GWL_EXSTYLE, ex);
+                // Ensure non-client metrics recalculated
+                ::SetWindowPos(hwnd, nullptr, 0, 0, 0, 0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+            }
 
             if(win32_transparent) {
                 // remove all styles, so that window has no title, borders etc.
