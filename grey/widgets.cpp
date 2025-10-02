@@ -952,6 +952,10 @@ namespace grey::widgets {
         return ImGui::IsItemHovered();
     }
 
+    void mouse_cursor(mouse_cursor_type mct) {
+        ImGui::SetMouseCursor((ImGuiMouseCursor_)mct);
+    }
+
     bool tree_node(const std::string& label, ImGuiTreeNodeFlags flags, emphasis emp) {
         bool ok;
         if (emp == emphasis::none) {

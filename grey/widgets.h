@@ -494,6 +494,21 @@ namespace grey::widgets {
 
     bool is_hovered();
 
+    enum class mouse_cursor_type {
+        none = -1,
+        arrow = 0,
+        text_input,
+        resize_all,
+        resize_ns,
+        resize_ew,
+        resize_nesw,
+        resize_nwse,
+        hand,
+        not_allowed
+    };
+
+    void mouse_cursor(mouse_cursor_type mct);
+
     bool tree_node(const std::string& label, ImGuiTreeNodeFlags flags = 0, emphasis emp = emphasis::none);
 
     // colour helpers
