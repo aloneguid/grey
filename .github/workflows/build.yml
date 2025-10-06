@@ -210,7 +210,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get --yes install xvfb scrot
+          sudo apt-get install -y xvfb scrot xterm
           
       - name: Run app and capture screenshot (Linux)
         if: runner.os == 'Linux'
@@ -218,7 +218,9 @@ jobs:
           # Start Xvfb
           Xvfb :99 -screen 0 1920x1080x24 &
           export DISPLAY=:99
-          sleep 2
+
+          # Start xterm (optional, for debugging)
+          xterm &
           
           # Run the app in background
           chmod +x dotnet/ConsoleDemo/bin/Release/net9.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo
