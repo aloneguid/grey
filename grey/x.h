@@ -63,6 +63,8 @@ extern "C"
 
     EXPORTED void tooltip(const char* text);
 
+    EXPORTED bool combo(const char* c_label, const char** options, int32_t options_size, size_t* selected, float width);
+
     // -- tab bars
 
     EXPORTED bool push_tab_bar(const char* c_id);

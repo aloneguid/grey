@@ -89,6 +89,14 @@ namespace Grey {
         [DllImport(LibName)]
         internal static extern void tooltip([MarshalAs(UnmanagedType.LPUTF8Str)] string text);
 
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool combo(
+            [MarshalAs(UnmanagedType.LPUTF8Str)]  string label,
+            [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] options,
+            int options_size,
+            ref nuint selected,
+            float width);
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void RenderTableCellCallback(int row, int col);
 

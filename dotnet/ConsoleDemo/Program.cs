@@ -14,6 +14,8 @@ float mlHeight = 0;
 bool mlEnabled = true;
 bool mlUseFixedFont = false;
 bool alternateTableRowBg = false;
+string[] choices = ["one", "two", "three"];
+int currentChoice = 0;
 
 
 Grey.App.Run("Grey# Demo", () => {
@@ -88,6 +90,15 @@ Grey.App.Run("Grey# Demo", () => {
                 Input(ref message, "readonly input", is_readonly: true);
                 Input(ref message, "width explicitly set to 400", width: 400);
                 Input(ref number, "number input");
+            }
+        }
+
+        using(var ti = new TabItem("Lists")) {
+            if(ti) {
+                if(Combo("combo", choices, ref currentChoice)) {
+                    Notify($"choice changed to {choices[currentChoice]}");
+                }
+                Label($"current: {currentChoice}");
             }
         }
 

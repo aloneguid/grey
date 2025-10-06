@@ -457,12 +457,12 @@ namespace grey::widgets {
     bool accordion(const std::string& header, bool default_open = false);
 
     /**
-     * @brief 
-     * @param label 
-     * @param options 
-     * @param selected 
+     * @brief Combo box selection widget
+     * @param label Label to display
+     * @param options List of options
+     * @param selected Selected index 
      * @param width Unscaled width
-     * @return 
+     * @return True if selection has changed.
      */
     bool combo(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width = 0);
 

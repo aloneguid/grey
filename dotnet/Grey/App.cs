@@ -92,6 +92,21 @@ namespace Grey {
             Native.tooltip(text);
         }
 
+        /// <summary>
+        /// Combo selection widget
+        /// </summary>
+        /// <param name="label">Label to display</param>
+        /// <param name="items">List of selection items</param>
+        /// <param name="currentItem">Reference to currently selected item index</param>
+        /// <param name="width"></param>
+        /// <returns>True if selection has changed</returns>
+        public static bool Combo(string label, string[] items, ref uint currentItem, float width = 0) {
+            nuint c = (nuint)currentItem;
+            bool r = Native.combo(label, items, items.Length, ref c, width);
+            currentItem = (uint)c;
+            return r;
+        }
+
         public static void Table(string id, string[] columns, int rowCount, Action<int, int> cellRender,
             float outer_width = 0, float outerHeight = 0,
             bool alternateRowBg = false) {
