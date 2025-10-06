@@ -205,9 +205,6 @@ int main(int argc, char* argv[]) {
             {
                 auto tab = tabs.next_tab("Lists");
                 if(tab) {
-                    w::label(text);
-                    w::input(text, "text");
-
                     w::label("selected item: "); w::sl(); w::label(items[current_item]);
                     w::combo("si", items, current_item);
 

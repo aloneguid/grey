@@ -76,12 +76,12 @@ namespace Grey {
             Native.spinner_hbo_dots(radius, thickness, speed, dotCount);
         }
 
-        public static void Slider(ref float value, float min, float max, string label) {
-            Native.slider_float(ref value, min, max, label);
+        public static bool Slider(ref float value, float min, float max, string label) {
+            return Native.slider_float(ref value, min, max, label);
         }
 
-        public static void Slider(ref int value, int min, int max, string label) {
-            Native.slider_int(ref value, min, max, label);
+        public static bool Slider(ref int value, int min, int max, string label) {
+            return Native.slider_int(ref value, min, max, label);
         }
 
         /// <summary>

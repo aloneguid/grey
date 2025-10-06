@@ -15,7 +15,7 @@ bool mlEnabled = true;
 bool mlUseFixedFont = false;
 bool alternateTableRowBg = false;
 string[] choices = ["one", "two", "three"];
-int currentChoice = 0;
+uint currentChoice = 0;
 
 
 Grey.App.Run("Grey# Demo", () => {

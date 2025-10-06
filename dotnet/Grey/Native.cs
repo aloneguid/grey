@@ -79,11 +79,11 @@ namespace Grey {
         internal static extern void spinner_hbo_dots(float radius, float thickness, float speed, int dot_count);
 
         [DllImport(LibName)]
-        internal static extern void slider_float(ref float value, float min, float max,
+        internal static extern bool slider_float(ref float value, float min, float max,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label);
 
         [DllImport(LibName)]
-        internal static extern void slider_int(ref int value, int min, int max,
+        internal static extern bool slider_int(ref int value, int min, int max,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label);
 
         [DllImport(LibName)]
