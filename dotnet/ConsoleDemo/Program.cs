@@ -96,7 +96,10 @@ Grey.App.Run("Grey# Demo", () => {
         using(var ti = new TabItem("Lists")) {
             if(ti) {
                 if(Combo("combo", choices, ref currentChoice)) {
-                    Notify($"choice changed to {choices[currentChoice]}");
+                    Notify($"COMBO choice changed to {choices[currentChoice]}");
+                }
+                if(List("list", choices, ref currentChoice)) {
+                    Notify($"LIST choice changed to {choices[currentChoice]}");
                 }
                 Label($"current: {currentChoice}");
             }

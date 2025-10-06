@@ -466,7 +466,7 @@ namespace grey::widgets {
      */
     bool combo(const std::string& label, const std::vector<std::string>& options, unsigned int& selected, float width = 0);
 
-    bool list(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width = 0);
+    bool list(const std::string& label, const std::vector<std::string>& options, unsigned int& selected, float width = 0);
 
     //bool list(const std::string& label, std::ranges::range auto&& options, size_t& selected, size_t& hovered, float width = 0);
 

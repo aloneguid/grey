@@ -104,6 +104,10 @@ namespace Grey {
             return Native.combo(label, items, items.Length, ref currentItem, width);
         }
 
+        public static bool List(string label, string[] items, ref uint currentItem, float width = 0) {
+            return Native.list(label, items, items.Length, ref currentItem, width);
+        }
+
         public static void Table(string id, string[] columns, int rowCount, Action<int, int> cellRender,
             float outer_width = 0, float outerHeight = 0,
             bool alternateRowBg = false) {

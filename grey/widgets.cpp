@@ -764,7 +764,7 @@ namespace grey::widgets {
         return ret;
     }
 
-    bool list(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width) {
+    bool list(const std::string& label, const std::vector<std::string>& options, unsigned int& selected, float width) {
         bool ret{ false };
 
         if (width != 0) {
@@ -781,7 +781,7 @@ namespace grey::widgets {
         if (ImGui::BeginListBox(label.c_str())) {
             for (size_t i = 0; i < options.size(); i++) {
                 bool is_selected = selected == i;
-                if (ImGui::Selectable(options[i].c_str(), is_selected)) {
+                if (ImGui::Selectable(options[i].c_str(), is_selected, is_selected ? ImGuiSelectableFlags_Highlight : 0)) {
                     selected = i;
                     ret = true;
                 }

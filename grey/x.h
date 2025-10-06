@@ -65,6 +65,8 @@ extern "C"
 
     EXPORTED bool combo(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width);
 
+    EXPORTED bool list(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width);
+
     // -- tab bars
 
     EXPORTED bool push_tab_bar(const char* c_id);

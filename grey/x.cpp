@@ -194,6 +194,10 @@ EXPORTED bool combo(const char* c_label, const char** options, int32_t options_s
     return w::combo(c_label, vector<string>(options, options + options_size), *selected, width * scale);
 }
 
+EXPORTED bool list(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width) {
+    return w::list(c_label, vector<string>(options, options + options_size), *selected, width * scale);
+}
+
 // -- status bar
 
 vector<w::status_bar> status_bars;

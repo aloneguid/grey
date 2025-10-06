@@ -205,8 +205,13 @@ int main(int argc, char* argv[]) {
             {
                 auto tab = tabs.next_tab("Lists");
                 if(tab) {
+                    w::combo("combo", items, current_item);
+                    w::list("list", items, current_item);
+
                     w::label("selected item: "); w::sl(); w::label(items[current_item]);
-                    w::combo("si", items, current_item);
+                    w::label("selected index: "); w::sl(); w::label(to_string(current_item));
+
+
 
                     if(w::button("center on screen")) {
                         wnd.center();
