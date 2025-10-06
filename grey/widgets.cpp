@@ -728,7 +728,7 @@ namespace grey::widgets {
         return ImGui::CollapsingHeader(header.c_str(), flags);
     }
 
-    bool combo(const string& label, const std::vector<std::string>& options, size_t& selected, float width) {
+    bool combo(const string& label, const std::vector<std::string>& options, unsigned int& selected, float width) {
         bool ret{ false };
 
         if (width != 0) {

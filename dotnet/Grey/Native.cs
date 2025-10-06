@@ -94,7 +94,7 @@ namespace Grey {
             [MarshalAs(UnmanagedType.LPUTF8Str)]  string label,
             [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] options,
             int options_size,
-            ref nuint selected,
+            ref uint selected,
             float width);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

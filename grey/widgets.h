@@ -464,7 +464,7 @@ namespace grey::widgets {
      * @param width Unscaled width
      * @return True if selection has changed.
      */
-    bool combo(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width = 0);
+    bool combo(const std::string& label, const std::vector<std::string>& options, unsigned int& selected, float width = 0);
 
     bool list(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width = 0);
 

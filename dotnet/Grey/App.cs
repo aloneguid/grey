@@ -101,10 +101,7 @@ namespace Grey {
         /// <param name="width"></param>
         /// <returns>True if selection has changed</returns>
         public static bool Combo(string label, string[] items, ref uint currentItem, float width = 0) {
-            nuint c = (nuint)currentItem;
-            bool r = Native.combo(label, items, items.Length, ref c, width);
-            currentItem = (uint)c;
-            return r;
+            return Native.combo(label, items, items.Length, ref currentItem, width);
         }
 
         public static void Table(string id, string[] columns, int rowCount, Action<int, int> cellRender,

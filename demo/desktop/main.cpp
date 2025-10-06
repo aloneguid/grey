@@ -9,7 +9,7 @@ using namespace std;
 namespace w = grey::widgets;
 
 vector<string> items = { "item1", "item2", "item3" };
-size_t current_item = 0;
+unsigned int current_item = 0;
 bool app_open{true};
 bool show_demo{false};
 string window_title = "Demo app";
