@@ -210,7 +210,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb scrot mesa-utils libgl1-mesa-dri libgl1-mesa-glx xterm
+          sudo apt-get install -y xvfb scrot mesa-utils libgl1-mesa-dri libegl1-mesa libglu1-mesa xterm
           
           
       - name: Run app and capture screenshot (Linux)
