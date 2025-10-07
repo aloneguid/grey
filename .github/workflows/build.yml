@@ -210,21 +210,32 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb scrot xterm
+          sudo apt-get install -y xvfb scrot mesa-utils libgl1-mesa-dri libgl1-mesa-glx xterm
+          
           
       - name: Run app and capture screenshot (Linux)
         if: runner.os == 'Linux'
         run: |
-          # Start Xvfb
-          Xvfb :99 -screen 0 1920x1080x24 &
+          # Start Xvfb with GLX extension
+          Xvfb :99 -screen 0 1920x1080x24 +extension GLX +render -noreset &
           export DISPLAY=:99
+          
+          # Use software rendering
+          export LIBGL_ALWAYS_SOFTWARE=1
+          export MESA_GL_VERSION_OVERRIDE=3.3
+
+          # Wait for Xvfb to be ready
+          sleep 2
+          
+          # Verify display is working
+          glxinfo | head -20 || echo "GLX not available"
 
           # Start xterm (optional, for debugging)
           xterm &
           
           # Run the app in background
           chmod +x dotnet/ConsoleDemo/bin/Release/net9.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo
-          dotnet/ConsoleDemo/bin/Release/net9.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo &
+                    dotnet/ConsoleDemo/bin/Release/net9.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo 2>&1 | tee app.log &
           APP_PID=$!
           
           # Wait for app to render
@@ -233,6 +244,9 @@ jobs:
           # Capture screenshot
           mkdir -p screenshots
           scrot screenshots/demo-${{ matrix.dotnet_rid }}.png
+
+          # Show app logs
+          cat app.log || true
           
           # Kill the app
           kill $APP_PID || true
