@@ -119,6 +119,12 @@ namespace Grey {
                 });
         }
 
+        public static void StatusBar(Action render) {
+            Native.status_bar(() => {
+                render();
+            });
+        }
+
         public static void PrintFps() {
             Native.label_fps();
         }

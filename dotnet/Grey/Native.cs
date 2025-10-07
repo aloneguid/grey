@@ -11,6 +11,8 @@ namespace Grey {
 
         public delegate bool RenderFrameCallback();
 
+        public delegate void RenderCallback();
+
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void app_run(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string title,
@@ -134,13 +136,8 @@ namespace Grey {
         [DllImport(LibName)]
         internal static extern void pop_next_tab();
 
-        // -- status bar
-
         [DllImport(LibName)]
-        internal static extern void push_status_bar();
-
-        [DllImport(LibName)]
-        internal static extern void pop_status_bar();
+        internal static extern void status_bar(RenderCallback c_callback);
 
         // application menus
 

@@ -198,16 +198,9 @@ EXPORTED bool list(const char* c_label, const char** options, int32_t options_si
     return w::list(c_label, vector<string>(options, options + options_size), *selected, width * scale);
 }
 
-// -- status bar
-
-vector<w::status_bar> status_bars;
-
-EXPORTED void push_status_bar() {
-    status_bars.emplace_back();
-}
-
-EXPORTED void pop_status_bar() {
-    status_bars.pop_back();
+EXPORTED void status_bar(RenderCallback c_render_callback) {
+    w::status_bar sb;
+    c_render_callback();
 }
 
 EXPORTED void table(const char* c_id,

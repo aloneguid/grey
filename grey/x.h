@@ -9,7 +9,9 @@
 #endif
 
 typedef bool (*RenderFrameCallback)();
+typedef void (*RenderCallback)();
 typedef void (*RenderTableCellCallback)(int32_t row_index, int32_t col_index);
+
 
 extern "C"
 {
@@ -79,11 +81,7 @@ extern "C"
 
     EXPORTED void spinner_hbo_dots(float radius, float thickness, float speed, int32_t dot_count);
 
-    // -- status bar
-
-    EXPORTED void push_status_bar();
-
-    EXPORTED void pop_status_bar();
+    EXPORTED void status_bar(RenderCallback c_render_callback);
 
     /**
      * @brief Table call in a single function call.

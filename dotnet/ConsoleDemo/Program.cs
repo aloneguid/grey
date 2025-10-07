@@ -148,10 +148,9 @@ Grey.App.Run("Grey# Demo", () => {
         }
 
         // Status bar
-        using(new StatusBar()) {
+        StatusBar(() => {
             Label("status bar content");
-        }
-
+        });
     }
 
     return isRunning;
