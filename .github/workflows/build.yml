@@ -278,16 +278,23 @@ jobs:
           Stop-Process -Id $app.Id -Force -ErrorAction SilentlyContinue
 
 
+      - name: Flatten files for artifact upload
+        shell: bash
+        run: |
+          mkdir -p flat-output
+          # Copy published binaries
+          find dotnet/ConsoleDemo/bin/Release/net9.0/${{ matrix.dotnet_rid }}/publish/ -type f -exec cp {} flat-output/ \;
+          # Copy screenshots if they exist
+          find screenshots/ -type f -exec cp {} flat-output/ \; 2>/dev/null || true
+          ls -la flat-output/
+
       - uses: actions/upload-artifact@v4
         name: Collect Artifacts
         with:
           name: dotnet-demo-${{ matrix.dotnet_rid }}
           compression-level: 9
           if-no-files-found: error
-          path: |
-            dotnet/ConsoleDemo/bin/Release/net9.0/${{ matrix.dotnet_rid }}/publish/*
-            screenshots/*.png
-            
+          path: flat-output/
 
   release:
     name: '🕋 Release library'
