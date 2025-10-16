@@ -499,18 +499,6 @@ namespace grey::widgets {
 
     // ---- position ----
 
-    void set_pos(float x, float y) {
-        if (x < 0 && y >= 0) {
-            ImGui::SetCursorPosY(y);
-        }
-        else if (x >= 0 && y < 0) {
-            ImGui::SetCursorPosX(x);
-        }
-        else {
-            ImGui::SetCursorPos(ImVec2{ x, y });
-        }
-    }
-
     void get_pos(float& x, float& y) {
         ImVec2 p = ImGui::GetCursorPos();
         x = p.x;
@@ -535,11 +523,12 @@ namespace grey::widgets {
         ImGui::SetCursorScreenPos(pos);
     }
 
-    void move_pos(float x, float y) {
-        ImVec2 mv = ImGui::GetCursorPos();
-        mv.x += x;
-        mv.y += y;
-        ImGui::SetCursorPos(mv);
+    float avail_x() {
+        return ImGui::GetContentRegionAvail().x;
+    }
+
+    float avail_y() {
+        return ImGui::GetContentRegionAvail().y;
     }
 
     // ---- image ----

@@ -350,26 +350,6 @@ namespace grey::widgets {
         bool rendered{false};
     };
 
-    // todo: deprecate this in favor of absolute positioning
-
-    /**
-     * @brief Set absolute position. If value is less than zero, no positioning is done for that axis.
-     * @param x 
-     * @param y 
-     */
-    void set_pos(float x, float y);
-
-    void get_pos(float& x, float& y);
-
-    /**
-     * @brief Move relatively. Supports positive and negative values.
-     * @param x 
-     * @param y 
-     */
-    void move_pos(float x, float y);
-
-    // -- deprecate above
-
     /**
      * @brief Get cursor position
      * @param x 
@@ -379,6 +359,9 @@ namespace grey::widgets {
     ImVec2 cur_get();
     void cur_set(float x, float y);
     void cur_set(const ImVec2& pos);
+
+    float avail_x();
+    float avail_y();
 
     void label(const std::string& text, size_t text_wrap_pos = 0, bool enabled = true);
 
