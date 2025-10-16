@@ -86,13 +86,61 @@ namespace grey::common::win32
         delete ico;
     }
 
+    HICON extract_ico_highest_res(const std::string& ico_path) {
+        const int sizes[] = {256, 128, 96, 64, 48, 32, 16};
+        HICON bestIcon = nullptr;
+        int bestSize = 0;
+
+        for(int size : sizes) {
+            HICON hIcon = nullptr;
+            UINT piconid = 0;
+            UINT result = ::PrivateExtractIcons(
+                str::to_wstr(ico_path).c_str(),
+                0, size, size,
+                &hIcon, &piconid, 1, 0
+            );
+
+            if(result > 0 && hIcon) {
+                ICONINFO iconInfo;
+                if(::GetIconInfo(hIcon, &iconInfo)) {
+                    BITMAP bm;
+                    ::GetObject(iconInfo.hbmColor ? iconInfo.hbmColor : iconInfo.hbmMask, sizeof(bm), &bm);
+
+                    if(iconInfo.hbmColor) ::DeleteObject(iconInfo.hbmColor);
+                    if(iconInfo.hbmMask) ::DeleteObject(iconInfo.hbmMask);
+
+                    if(bm.bmWidth > bestSize) {
+                        if(bestIcon) ::DestroyIcon(bestIcon);
+                        bestIcon = hIcon;
+                        bestSize = bm.bmWidth;
+                    } else {
+                        ::DestroyIcon(hIcon);
+                    }
+                } else {
+                    ::DestroyIcon(hIcon);
+                }
+            }
+        }
+
+        return bestIcon;
+    }
+
     unsigned char* gdi::ico_to_png(const std::string& ico_path, size_t& buf_size) {
-        Gdiplus::Image* ico = Gdiplus::Image::FromFile(str::to_wstr(ico_path).c_str());
-        if(!ico) return nullptr;
+        HICON hIcon = extract_ico_highest_res(ico_path);
 
-        unsigned char* buf = get_raw_bytes(ico, buf_size, &png_clsid);
+        if(!hIcon) {
+            // Fallback: use GDI+ (may be low-res)
+            Gdiplus::Image* ico = Gdiplus::Image::FromFile(str::to_wstr(ico_path).c_str());
+            if(!ico) return nullptr;
+            unsigned char* buf = get_raw_bytes(ico, buf_size, &png_clsid);
+            delete ico;
+            return buf;
+        }
 
-        delete ico;
+        Gdiplus::Bitmap* bmp = Gdiplus::Bitmap::FromHICON(hIcon);
+        unsigned char* buf = get_raw_bytes(bmp, buf_size, &png_clsid);
+        delete bmp;
+        ::DestroyIcon(hIcon);
 
         return buf;
     }
