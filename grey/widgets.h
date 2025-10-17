@@ -31,9 +31,9 @@ namespace grey::widgets {
         float b;
         float o;
 
-        rgb_colour() : r{0}, g{0}, b{0}, o{0} {
+        rgb_colour() : r{0}, g{0}, b{0}, o{0} { }
 
-        }
+        rgb_colour(float r, float g, float b, float o = 1) : r{r}, g{g}, b{b}, o{o} { }
 
         rgb_colour(const ImColor& ic) {
             r = ic.Value.x;
@@ -349,6 +349,8 @@ namespace grey::widgets {
 
     void label(const std::string& text, size_t text_wrap_pos = 0, bool enabled = true);
 
+    void label(const std::string& text, rgb_colour colour);
+
     void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0, bool enabled = true);
 
     bool input(std::string& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
@@ -396,7 +398,7 @@ namespace grey::widgets {
 
     bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false);
 
-    bool icon_checkbox(const std::string& icon, bool& is_checked, bool reversed = false);
+    bool icon_checkbox(const std::string& icon, bool& is_checked, bool reversed = false, const std::string& tooltip = "");
 
     bool checkbox(const std::string& label, bool& is_checked);
 
