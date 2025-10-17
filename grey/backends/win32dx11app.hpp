@@ -168,6 +168,13 @@ namespace grey::backends {
     class win32dx11app : public grey::app {
     private:
         HWND hwnd{0};
+
+        const float ClearColorF4[4] = {
+            ClearColor[0] * ClearColor[3],
+            ClearColor[1] * ClearColor[3],
+            ClearColor[2] * ClearColor[3],
+            ClearColor[3]};
+
     public:
 
         string title;
@@ -217,7 +224,26 @@ namespace grey::backends {
                     uFlags |= SWP_NOMOVE;
                 }
 
+                // take into account window decorations (chrome etc.) because SetWindowPos expects the full window size
+                {
+                    RECT rc{0, 0, window_width, window_height};
+                    const DWORD style = static_cast<DWORD>(::GetWindowLongPtr(hwnd, GWL_STYLE));
+                    const DWORD exstyle = static_cast<DWORD>(::GetWindowLongPtr(hwnd, GWL_EXSTYLE));
+                    ::AdjustWindowRectEx(&rc, style, FALSE, exstyle);
+                    window_width = rc.right - rc.left;
+                    window_height = rc.bottom - rc.top;
+                }
+
                 ::SetWindowPos(hwnd, HWND_TOP, window_left, window_top, window_width, window_height, uFlags);
+            }
+        }
+
+        void move_main_viewport(int x, int y) {
+            window_left = (int)(x * scale);
+            window_top = (int)(y * scale);
+            if(hwnd) {
+                UINT uFlags = SWP_NOSIZE;
+                ::SetWindowPos(hwnd, HWND_TOP, window_left, window_top, 0, 0, uFlags);
             }
         }
 
@@ -242,7 +268,7 @@ namespace grey::backends {
 
             wstring w_title = grey::common::str::to_wstr(title);
 
-            DWORD dwStyle = WS_OVERLAPPEDWINDOW;// | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME;
+            DWORD dwStyle = WS_OVERLAPPEDWINDOW;
             //DWORD dwStyle = WS_POPUP;
             if(!win32_can_resize) {
                 // remove resize frame and maximize button
@@ -250,6 +276,9 @@ namespace grey::backends {
                 dwStyle &= ~WS_MAXIMIZEBOX;
             }
             //if(can_minimise) dwStyle |= WS_MINIMIZEBOX;
+            //dwStyle &= ~WS_CAPTION;
+            //dwStyle &= ~WS_SYSMENU; // remove system menu
+            //dwStyle &= ~WS_BORDER;
 
             if(win32_center_on_screen) {
                 get_screen_center(window_width, window_height, window_left, window_top);
@@ -265,6 +294,33 @@ namespace grey::backends {
                 wc.hInstance, nullptr);
 
             ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+
+            // Hide from taskbar if requested
+            if(win32_hide_from_taskbar) {
+                LONG_PTR ex = ::GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+                // Remove WS_EX_APPWINDOW if present, add WS_EX_TOOLWINDOW
+                ex &= ~WS_EX_APPWINDOW;
+                ex |= WS_EX_TOOLWINDOW;
+                ::SetWindowLongPtr(hwnd, GWL_EXSTYLE, ex);
+                // Ensure non-client metrics recalculated
+                ::SetWindowPos(hwnd, nullptr, 0, 0, 0, 0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+            }
+
+            if(win32_transparent) {
+                // remove all styles, so that window has no title, borders etc.
+                ::SetWindowLong(hwnd, GWL_STYLE, 0);
+
+                // Set the layered window extended style
+                LONG_PTR exStyle = ::GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+                if(!(exStyle & WS_EX_LAYERED)) {
+                    ::SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
+                }
+
+                // Set the transparency level
+                COLORREF crKey = RGB(ClearColor[0] * 255, ClearColor[1] * 255, ClearColor[2] * 255);
+                ::SetLayeredWindowAttributes(hwnd, crKey, 0, LWA_COLORKEY);
+            }
 
             // Initialize Direct3D
             if(!CreateDeviceD3D(hwnd)) {
@@ -334,7 +390,7 @@ namespace grey::backends {
             //IM_ASSERT(font != nullptr);
 
             // Our state
-            ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+            //ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
             //ImVec4 clear_color = ImVec4(0.1f, 0.1f, 0.1f, 1.00f);
 
             // Main loop
@@ -345,6 +401,7 @@ namespace grey::backends {
             on_after_initialised();
 
             while(!done) {
+
                 // Poll and handle messages (inputs, window resize, etc.)
                 // See the WndProc() function below for our to dispatch events to the Win32 backend.
                 MSG msg;
@@ -382,9 +439,8 @@ namespace grey::backends {
 
                 // Rendering
                 ImGui::Render();
-                const float clear_color_with_alpha[4] = {clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w};
                 g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, nullptr);
-                g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color_with_alpha);
+                g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, ClearColorF4);
                 ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
                 // Update and Render additional Platform Windows

@@ -76,12 +76,12 @@ namespace Grey {
             Native.spinner_hbo_dots(radius, thickness, speed, dotCount);
         }
 
-        public static void Slider(ref float value, float min, float max, string label) {
-            Native.slider_float(ref value, min, max, label);
+        public static bool Slider(ref float value, float min, float max, string label) {
+            return Native.slider_float(ref value, min, max, label);
         }
 
-        public static void Slider(ref int value, int min, int max, string label) {
-            Native.slider_int(ref value, min, max, label);
+        public static bool Slider(ref int value, int min, int max, string label) {
+            return Native.slider_int(ref value, min, max, label);
         }
 
         /// <summary>
@@ -90,6 +90,39 @@ namespace Grey {
         /// <param name="text"></param>
         public static void Tooltip(string text) {
             Native.tooltip(text);
+        }
+
+        /// <summary>
+        /// Combo selection widget
+        /// </summary>
+        /// <param name="label">Label to display</param>
+        /// <param name="items">List of selection items</param>
+        /// <param name="currentItem">Reference to currently selected item index</param>
+        /// <param name="width"></param>
+        /// <returns>True if selection has changed</returns>
+        public static bool Combo(string label, string[] items, ref uint currentItem, float width = 0) {
+            return Native.combo(label, items, items.Length, ref currentItem, width);
+        }
+
+        public static bool List(string label, string[] items, ref uint currentItem, float width = 0) {
+            return Native.list(label, items, items.Length, ref currentItem, width);
+        }
+
+        public static void Table(string id, string[] columns, int rowCount, Action<int, int> cellRender,
+            float outer_width = 0, float outerHeight = 0,
+            bool alternateRowBg = false) {
+            Native.table(id, columns, columns.Length, rowCount,
+                outer_width, outerHeight,
+                alternateRowBg,
+                (rowIndex, columnIndex) => {
+                    cellRender(rowIndex, columnIndex);
+                });
+        }
+
+        public static void StatusBar(Action render) {
+            Native.status_bar(() => {
+                render();
+            });
         }
 
         public static void PrintFps() {

@@ -2,11 +2,11 @@
 
 env:
   VERSION: 0.0.0
-  PACKAGE_SUFFIX: '-pre.19'
+  PACKAGE_SUFFIX: '-pre.24'
   # PACKAGE_SUFFIX: ''
   ASM_VERSION: 0.0.0
   BUILD_TYPE: Release
-  VCPKG_HASH: 0f88ecb8528605f91980b90a2c5bad88e3cb565f
+  VCPKG_HASH: 9824d05f8d9548720ba3331f4baba3e2d6c1693b
 
 on:
   push:
@@ -162,6 +162,139 @@ jobs:
           docs/release-notes.md
           docs/version-notes.md
           docs/version.txt
+
+  build-demo-apps:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            name: Windows x64
+            arch: x64
+            vcpkg_triplet: x64-windows-static
+            vcpkg_config: Release
+            dotnet_rid: win-x64
+          - os: ubuntu-latest
+            name: Linux x64
+            arch: x64
+            vcpkg_triplet: x64-linux
+            vcpkg_config: MinSizeRel
+            dotnet_rid: linux-x64
+
+      fail-fast: false
+    name: 'demo app: ${{ matrix.name }}'
+    needs:
+      - make-fat-native
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: native-fat
+          path: xbin/
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+
+      - name: Publish
+        run: dotnet publish dotnet/ConsoleDemo/ -r ${{ matrix.dotnet_rid }} --self-contained true -p:PublishSingleFile=true  -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true
+
+      - name: Setup screenshot tools (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb scrot mesa-utils libgl1-mesa-dri libegl1 libglu1-mesa xterm
+          
+          
+      - name: Run app and capture screenshot (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          # Start Xvfb with GLX extension
+          Xvfb :99 -screen 0 1920x1080x24 +extension GLX +render -noreset &
+          export DISPLAY=:99
+          
+          # Use software rendering
+          export LIBGL_ALWAYS_SOFTWARE=1
+          export MESA_GL_VERSION_OVERRIDE=3.3
+
+          # Wait for Xvfb to be ready
+          sleep 2
+          
+          # Verify display is working
+          glxinfo | head -20 || echo "GLX not available"
+
+          # Start xterm (optional, for debugging)
+          xterm &
+          
+          # Run the app in background
+          chmod +x dotnet/ConsoleDemo/bin/Release/net9.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo
+                    dotnet/ConsoleDemo/bin/Release/net9.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo 2>&1 | tee app.log &
+          APP_PID=$!
+          
+          # Wait for app to render
+          sleep 5
+          
+          # Capture screenshot
+          mkdir -p screenshots
+          scrot screenshots/demo-${{ matrix.dotnet_rid }}.png
+
+          # Show app logs
+          cat app.log || true
+          
+          # Kill the app
+          kill $APP_PID || true
+          
+      - name: Run app and capture screenshot (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # Start the app in background
+          $app = Start-Process -FilePath "dotnet\ConsoleDemo\bin\Release\net9.0\${{ matrix.dotnet_rid }}\publish\ConsoleDemo.exe" -PassThru
+          
+          # Wait for app to render
+          Start-Sleep -Seconds 5
+          
+          # Capture screenshot using PowerShell
+          New-Item -ItemType Directory -Force -Path screenshots
+          
+          Add-Type -AssemblyName System.Windows.Forms,System.Drawing
+          $screens = [System.Windows.Forms.Screen]::AllScreens
+          $bounds = $screens[0].Bounds
+          $bitmap = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
+          $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+          $graphics.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size)
+          $bitmap.Save("screenshots\demo-${{ matrix.dotnet_rid }}.png", [System.Drawing.Imaging.ImageFormat]::Png)
+          $graphics.Dispose()
+          $bitmap.Dispose()
+          
+          # Kill the app
+          Stop-Process -Id $app.Id -Force -ErrorAction SilentlyContinue
+
+
+      - name: Flatten files for artifact upload
+        shell: bash
+        run: |
+          mkdir -p flat-output
+          # Copy published binaries
+          find dotnet/ConsoleDemo/bin/Release/net9.0/${{ matrix.dotnet_rid }}/publish/ -type f -exec cp {} flat-output/ \;
+          # Copy screenshots if they exist
+          find screenshots/ -type f -exec cp {} flat-output/ \; 2>/dev/null || true
+          ls -la flat-output/
+
+      - uses: actions/upload-artifact@v4
+        name: Collect Artifacts
+        with:
+          name: dotnet-demo-${{ matrix.dotnet_rid }}
+          compression-level: 9
+          if-no-files-found: error
+          path: flat-output/
 
   release:
     name: '🕋 Release library'

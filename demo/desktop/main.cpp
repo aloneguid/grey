@@ -9,7 +9,7 @@ using namespace std;
 namespace w = grey::widgets;
 
 vector<string> items = { "item1", "item2", "item3" };
-size_t current_item = 0;
+unsigned int current_item = 0;
 bool app_open{true};
 bool show_demo{false};
 string window_title = "Demo app";
@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
     //auto wnd = backend->make_window<demo::main_wnd>();
     //backend->run();
 
-    auto app = grey::app::make(APP_LONG_NAME, 800, 600);
+    auto app = grey::app::make("demo", 800, 600);
     app->load_fixed_font = true;
     float scale = app->scale;
 
@@ -205,11 +205,13 @@ int main(int argc, char* argv[]) {
             {
                 auto tab = tabs.next_tab("Lists");
                 if(tab) {
-                    w::label(text);
-                    w::input(text, "text");
+                    w::combo("combo", items, current_item);
+                    w::list("list", items, current_item);
 
                     w::label("selected item: "); w::sl(); w::label(items[current_item]);
-                    w::combo("si", items, current_item);
+                    w::label("selected index: "); w::sl(); w::label(to_string(current_item));
+
+
 
                     if(w::button("center on screen")) {
                         wnd.center();
@@ -229,7 +231,7 @@ int main(int argc, char* argv[]) {
 
             // tables
             {
-                auto tab = tabs.next_tab("Tables");
+                auto tab = tabs.next_tab("Table");
                 if(tab) {
                     int row_count = 1000;
                     w::table t{"table1", 3, 0, -20 * c_app.scale};
@@ -254,6 +256,39 @@ int main(int argc, char* argv[]) {
                     }
                 }
             }
+            {
+                auto tab = tabs.next_tab("Big Table");
+                if(tab) {
+                    static int row_count = 1000;
+                    static int col_count = 3;
+
+                    w::slider(row_count, 0, 1000000000, "row count");
+                    w::slider(col_count, 1, 100, "col count");
+
+                    static vector<string> columns;
+                    if(col_count != columns.size()) {
+                        columns.clear();
+                        for(int i = 0; i < col_count; i++) {
+                            columns.push_back("col " + to_string(i));
+                        }
+                    }
+
+                    static bool row_bg = false;
+                    w::checkbox("alternate row bg", row_bg);
+
+                    w::big_table t{"table2", columns, (size_t)row_count, 0.0f, -20 * w::scale, row_bg};
+                    if(t) {
+                        t.render_data([](int row, int col) {
+                            if(col == 0) {
+                                w::label(to_string(row));
+                            } else {
+                                w::label(to_string(row) + "x" + to_string(col));
+                            }
+                        });
+                    }
+                }
+            }
+
 
             // Spinners
             {
@@ -317,6 +352,9 @@ int main(int argc, char* argv[]) {
 
             w::sl(); w::label("|", 0, false);
             w::sl(); w::label_debug_info();
+
+            w::sl(); w::label("|", 0, false);
+            w::sl(); w::label(ImGui::GetVersion());
         )
 
 

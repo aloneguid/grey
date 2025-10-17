@@ -86,6 +86,7 @@ namespace grey::widgets {
         window& no_resize();
         window& no_collapse();
         window& no_titlebar();
+        window& no_background();
         window& border(float width);
         window& no_scroll();
         window& center(void* monitor_handle = nullptr);
@@ -147,6 +148,15 @@ namespace grey::widgets {
             return *this;
         }
 
+        container& background(bool present) {
+            if(present) {
+                window_flags &= ~ImGuiWindowFlags_NoBackground;
+            } else {
+                window_flags |= ImGuiWindowFlags_NoBackground;
+            }
+            return *this;
+        }
+
         container& auto_size_y() {
             flags |= ImGuiChildFlags_AutoResizeY;
             return *this;
@@ -172,15 +182,24 @@ namespace grey::widgets {
             return *this;
         }
 
+        container& padding(float x, float y) {
+            window_flags |= ImGuiWindowFlags_AlwaysUseWindowPadding;
+            pad = ImVec2{x, y};
+            return *this;
+        }
+
         void enter() override;
         void leave() override;
 
     private:
         std::string id;
         ImVec2 size;
+        ImVec2 pad{0, 0};
         ImGuiChildFlags flags{0};
         ImGuiWindowFlags window_flags{0};
     };
+
+#define with_container(c, ...) { { grey::widgets::guard cg{c}; __VA_ARGS__ }}
 
     class group {
     public:
@@ -271,7 +290,7 @@ namespace grey::widgets {
 
     class tab_bar_item {
     public:
-        tab_bar_item(const std::string& id, bool unsaved);
+        tab_bar_item(const std::string& id, bool unsaved, bool selected);
         ~tab_bar_item();
 
         operator bool() const {
@@ -289,7 +308,7 @@ namespace grey::widgets {
         tab_bar(const std::string& id, bool tab_list_popup = false, bool scroll = false);
         ~tab_bar();
 
-        tab_bar_item next_tab(const std::string& title, bool unsaved = false);
+        tab_bar_item next_tab(const std::string& title, bool unsaved = false, bool selected = false);
 
         /**
          * @brief Increments tab index
@@ -332,20 +351,17 @@ namespace grey::widgets {
     };
 
     /**
-     * @brief Set absolute position. If value is less than zero, no positioning is done for that axis.
+     * @brief Get cursor position
      * @param x 
      * @param y 
      */
-    void set_pos(float x, float y);
+    void cur_get(float& x, float& y);
+    ImVec2 cur_get();
+    void cur_set(float x, float y);
+    void cur_set(const ImVec2& pos);
 
-    void get_pos(float& x, float& y);
-
-    /**
-     * @brief Move relatively. Supports positive and negative values.
-     * @param x 
-     * @param y 
-     */
-    void move_pos(float x, float y);
+    float avail_x();
+    float avail_y();
 
     void label(const std::string& text, size_t text_wrap_pos = 0, bool enabled = true);
 
@@ -380,8 +396,16 @@ namespace grey::widgets {
 
     bool slider(int& value, int min, int max, const std::string& label = "");
 
+    /**
+     * @brief Checks if the last rendered item is hovered, and if so, shows a tooltip with the given text.
+     * @param text 
+     */
     void tooltip(const std::string& text);
 
+    /**
+     * @brief Checks if the last rendered item is hovered, and if so, shows a tooltip with the given text.
+     * @param text 
+     */
     void tooltip(const char* text);
 
     void image(app& app, const std::string& key, size_t width, size_t height);
@@ -396,7 +420,7 @@ namespace grey::widgets {
     void sl(float offset = 0);
     void sep(const std::string& text = "");
 
-    bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false);
+    bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false, const std::string& tooltip_text = "");
 
     bool icon_checkbox(const std::string& icon, bool& is_checked, bool reversed = false, const std::string& tooltip = "");
 
@@ -418,16 +442,16 @@ namespace grey::widgets {
     bool accordion(const std::string& header, bool default_open = false);
 
     /**
-     * @brief 
-     * @param label 
-     * @param options 
-     * @param selected 
+     * @brief Combo box selection widget
+     * @param label Label to display
+     * @param options List of options
+     * @param selected Selected index 
      * @param width Unscaled width
-     * @return 
+     * @return True if selection has changed.
      */
-    bool combo(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width = 0);
+    bool combo(const std::string& label, const std::vector<std::string>& options, unsigned int& selected, float width = 0);
 
-    bool list(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width = 0);
+    bool list(const std::string& label, const std::vector<std::string>& options, unsigned int& selected, float width = 0);
 
     //bool list(const std::string& label, std::ranges::range auto&& options, size_t& selected, size_t& hovered, float width = 0);
 
@@ -455,6 +479,21 @@ namespace grey::widgets {
 
     bool is_hovered();
 
+    enum class mouse_cursor_type {
+        none = -1,
+        arrow = 0,
+        text_input,
+        resize_all,
+        resize_ns,
+        resize_ew,
+        resize_nesw,
+        resize_nwse,
+        hand,
+        not_allowed
+    };
+
+    void mouse_cursor(mouse_cursor_type mct);
+
     bool tree_node(const std::string& label, ImGuiTreeNodeFlags flags = 0, emphasis emp = emphasis::none);
 
     // colour helpers
@@ -463,19 +502,6 @@ namespace grey::widgets {
 
     // system debug info
     void label_debug_info();
-
-    // Node editor
-
-    class node_editor_node {
-    public:
-        ImVec2 size;
-
-        node_editor_node(int id);
-        ~node_editor_node();
-
-    private:
-        int id;
-    };
 
     // ImGuiColorTextEdit
     class text_editor {
@@ -535,22 +561,25 @@ namespace grey::widgets {
      */
     class big_table {
     public:
-        big_table(const std::string& id, int column_count, int row_count, ImVec2 outer_size);
+        big_table(const std::string& id, const std::vector<std::string>& columns, size_t row_count,
+            float outer_width = 0.0f, float outer_height = 0.0f,
+            bool alternate_row_bg = false);
         ~big_table();
 
         operator bool() const {
             return rendered;
         }
 
-        void col(const std::string& label, bool stretch = false);
-        void headers_row();
-
-        bool step(int& display_start, int& display_end);
-        void next_row();
-        void to_col(int i);
+        /**
+         * @brief Call to initialize table data rendering. Accepts lambda callback to be invoked for each cell.
+         * @param cell_render Callback that will be called for each cell in the table. Row and column indices are passed as parameters.
+         */
+        void render_data(std::function<void(int, int)> cell_render);
 
     private:
+        size_t columns_size;
         bool rendered{false};
+        ImVec2 outer_size;
         ImGuiTableFlags flags {
             ImGuiTableFlags_Borders |
             ImGuiTableFlags_NoBordersInBodyUntilResize |

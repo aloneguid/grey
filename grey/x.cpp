@@ -3,7 +3,6 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include <map>
 #include <stack>
 #include <iostream>
 
@@ -161,7 +160,7 @@ EXPORTED bool push_next_tab(const char* c_title) {
 
     w::tab_bar& bar = tab_bars.top();
     string id = string{c_title} + "##" + std::to_string(bar.increment_tab_index());
-    tab_items.emplace(id, false);
+    tab_items.emplace(id, false, false);
 
     auto& item = tab_items.top();
     return item;
@@ -191,52 +190,35 @@ EXPORTED void tooltip(const char* text) {
     w::tooltip(text);
 }
 
-// -- status bar
-
-vector<w::status_bar> status_bars;
-
-EXPORTED void push_status_bar() {
-    status_bars.emplace_back();
+EXPORTED bool combo(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width) {
+    return w::combo(c_label, vector<string>(options, options + options_size), *selected, width * scale);
 }
 
-EXPORTED void pop_status_bar() {
-    status_bars.pop_back();
+EXPORTED bool list(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width) {
+    return w::list(c_label, vector<string>(options, options + options_size), *selected, width * scale);
 }
 
-// -- tables
-
-stack<w::table> tables;
-
-EXPORTED bool push_table(const char* c_id, int32_t column_count, float outer_width, float outer_height) {
-    string id = c_id;
-    tables.emplace(id, column_count, outer_width, outer_height);
-    auto& t = tables.top();
-    return t;
+EXPORTED void status_bar(RenderCallback c_render_callback) {
+    w::status_bar sb;
+    c_render_callback();
 }
 
-EXPORTED void pop_table() {
-    tables.pop();
-}
+EXPORTED void table(const char* c_id,
+    const char** c_columns, int32_t c_columns_size, int32_t row_count,
+    float outer_width, float outer_height,
+    bool alternate_row_bg,
+    RenderTableCellCallback c_cell_callback)
+{
+    vector<string> cols;
+    // copy columns into cols vector
+    for (int i = 0; i < c_columns_size; i++) {
+        cols.push_back(c_columns[i]);
+    }
 
-EXPORTED void table_col(const char* c_label) {
-    string label = c_label;
-    auto& t = tables.top();
-    t.columns.push_back(label);
-}
-
-EXPORTED void table_begin_data() {
-    auto& t = tables.top();
-    t.begin_data();
-}
-
-EXPORTED void table_begin_row() {
-    auto& t = tables.top();
-    t.begin_row();
-}
-
-EXPORTED void table_begin_col() {
-    auto& t = tables.top();
-    t.begin_col();
+    w::big_table t{ c_id, cols, static_cast<size_t>(row_count), outer_width * scale, outer_height * scale, alternate_row_bg };
+    t.render_data([c_cell_callback](int row_idx, int column_idx) {
+            c_cell_callback(row_idx, column_idx);
+        });
 }
 
 // -- application menus

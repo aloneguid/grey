@@ -13,6 +13,9 @@ StringBuilder multilineText = new StringBuilder("initial text\nanother line", 10
 float mlHeight = 0;
 bool mlEnabled = true;
 bool mlUseFixedFont = false;
+bool alternateTableRowBg = false;
+string[] choices = ["one", "two", "three"];
+uint currentChoice = 0;
 
 
 Grey.App.Run("Grey# Demo", () => {
@@ -90,6 +93,18 @@ Grey.App.Run("Grey# Demo", () => {
             }
         }
 
+        using(var ti = new TabItem("Lists")) {
+            if(ti) {
+                if(Combo("combo", choices, ref currentChoice)) {
+                    Notify($"COMBO choice changed to {choices[currentChoice]}");
+                }
+                if(List("list", choices, ref currentChoice)) {
+                    Notify($"LIST choice changed to {choices[currentChoice]}");
+                }
+                Label($"current: {currentChoice}");
+            }
+        }
+
         using(var ti = new TabItem("Icons")) {
             if(ti) {
                 Label($"{Icon.Num10k} {Icon.Fireplace}");
@@ -122,33 +137,20 @@ Grey.App.Run("Grey# Demo", () => {
 
         using(var ti = new TabItem("Tables")) {
             if(ti) {
+                Checkbox("alg bg", ref alternateTableRowBg);
 
-                int totalRows = 100;
-                Label($"Simple table with {totalRows} rows");
-                using(var tbl = new Table("t0", ["id", "name", "description+"])) {
-                    if(tbl) {
-
-                        for(int i = 0; i < totalRows; i++) {
-                            tbl.BeginRow();
-
-                            tbl.BeginCol();
-                            Label(i.ToString());
-
-                            tbl.BeginCol();
-                            Label($"name {i}");
-                            tbl.BeginCol();
-                            Label($"description {i}");
-                        }
-                    }
-                }
+                Table("t0", new[] { "id", "name", "description+" }, 100000,
+                    (int row, int column) => {
+                        Label($"{row}x{column}");
+                    },
+                    alternateRowBg: alternateTableRowBg);
             }
         }
 
         // Status bar
-        using(new StatusBar()) {
+        StatusBar(() => {
             Label("status bar content");
-        }
-
+        });
     }
 
     return isRunning;

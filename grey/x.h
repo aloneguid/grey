@@ -9,6 +9,9 @@
 #endif
 
 typedef bool (*RenderFrameCallback)();
+typedef void (*RenderCallback)();
+typedef void (*RenderTableCellCallback)(int32_t row_index, int32_t col_index);
+
 
 extern "C"
 {
@@ -62,6 +65,10 @@ extern "C"
 
     EXPORTED void tooltip(const char* text);
 
+    EXPORTED bool combo(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width);
+
+    EXPORTED bool list(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width);
+
     // -- tab bars
 
     EXPORTED bool push_tab_bar(const char* c_id);
@@ -74,25 +81,16 @@ extern "C"
 
     EXPORTED void spinner_hbo_dots(float radius, float thickness, float speed, int32_t dot_count);
 
-    // -- status bar
+    EXPORTED void status_bar(RenderCallback c_render_callback);
 
-    EXPORTED void push_status_bar();
-
-    EXPORTED void pop_status_bar();
-
-    // -- tables
-
-    EXPORTED bool push_table(const char* c_id, int32_t column_count, float outer_width, float outer_height);
-
-    EXPORTED void pop_table();
-
-    EXPORTED void table_col(const char* c_label);
-
-    EXPORTED void table_begin_data();
-
-    EXPORTED void table_begin_row();
-
-    EXPORTED void table_begin_col();
+    /**
+     * @brief Table call in a single function call.
+     * @param c_cell_callback Callback function that is called for each cell in the table, and receives row and column indices.
+     */
+    EXPORTED void table(const char* c_id, const char** c_columns, int32_t c_columns_size, int32_t row_count,
+        float outer_width, float outer_height,
+        bool alternate_row_bg,
+        RenderTableCellCallback c_cell_callback);
 
     // -- application menus
 

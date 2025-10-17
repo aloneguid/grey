@@ -67,10 +67,30 @@ namespace grey {
         virtual void resize_main_viewport(int width, int height) = 0;
 
         /**
+         * @brief Moves the main viewport of the application to the specified position on the screen. This is monitor/platform dependent and may not work on all platforms.
+         * @param x 
+         * @param y 
+         */
+        virtual void move_main_viewport(int x, int y) = 0;
+
+        /**
          * @brief Limits maximum FPS for the application. This is useful when you want to limit the CPU usage of the application.
          * @param fps 
          */
         void set_target_fps(int fps);
+
+        /**
+         * @brief Returns the clear color of the application as RGBA array of floats (0-1).
+         * @return 
+         */
+        std::array<float, 4> get_clear_color() const;
+
+        /**
+         * @brief Find the monitor with the largest overlap with the given viewport.
+         * @param vp 
+         * @return Monitor index, or -1 if no monitors are found.
+         */
+        int find_monitor_for_main_viewport();
 
         // platform specific flags
 
@@ -81,6 +101,8 @@ namespace grey {
         bool win32_title_bar{true};
         bool win32_can_resize{true};
         bool win32_center_on_screen{false};
+        bool win32_transparent{false};
+        bool win32_hide_from_taskbar{false};
         std::string win32_window_class_name{"GreyDX11"};
 
         /**
@@ -95,6 +117,10 @@ namespace grey {
 #endif
 
     protected:
+
+        // clear color as RGBA array of floats (0-1)
+        const float ClearColor[4] = {0.1f, 0.1f, 0.1f, 1.00f};
+
         void on_after_initialised();
 
         virtual void* make_native_texture(grey::common::raw_img& img) = 0;

@@ -89,6 +89,11 @@ namespace grey::widgets {
         return *this;
     }
 
+    window& window::no_background() {
+        flags |= ImGuiWindowFlags_NoBackground;
+        return *this;
+    }
+
     window& window::border(float width) {
         border_size = width;
         return *this;
@@ -98,6 +103,7 @@ namespace grey::widgets {
         flags |= ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
         return *this;
     }
+
 
     window& window::center(void* monitor_handle) {
         init_center_monitor = monitor_handle;
@@ -209,20 +215,24 @@ namespace grey::widgets {
     }
 
     void container::enter() {
-
-        ImVec2 tsz = size;
-
         if (size.y < 0) {
+            ImVec2 tsz = size;
             // pad from the bottom
             ImVec2 wsz = ImGui::GetWindowSize();
             tsz = ImVec2(tsz.x, wsz.y + size.y);
         }
 
+        if(pad.x > 0 || pad.y > 0) {
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, pad);
+        }
         ImGui::BeginChild(id.c_str(), size, flags, window_flags);
     }
 
     void container::leave() {
         ImGui::EndChild();
+        if(pad.x > 0 || pad.y > 0) {
+            ImGui::PopStyleVar();
+        }
     }
 
     bool mi(const std::string& text, bool reserve_icon_space, const std::string& icon) {
@@ -495,29 +505,36 @@ namespace grey::widgets {
 
     // ---- position ----
 
-    void set_pos(float x, float y) {
-        if (x < 0 && y >= 0) {
-            ImGui::SetCursorPosY(y);
-        }
-        else if (x >= 0 && y < 0) {
-            ImGui::SetCursorPosX(x);
-        }
-        else {
-            ImGui::SetCursorPos(ImVec2{ x, y });
-        }
-    }
-
     void get_pos(float& x, float& y) {
         ImVec2 p = ImGui::GetCursorPos();
         x = p.x;
         y = p.y;
     }
 
-    void move_pos(float x, float y) {
-        ImVec2 mv = ImGui::GetCursorPos();
-        mv.x += x;
-        mv.y += y;
-        ImGui::SetCursorPos(mv);
+    void cur_get(float& x, float& y) {
+        ImVec2 p = ImGui::GetCursorScreenPos();
+        x = p.x;
+        y = p.y;
+    }
+
+    ImVec2 cur_get() {
+        return ImGui::GetCursorScreenPos();
+    }
+
+    void cur_set(float x, float y) {
+        ImGui::SetCursorScreenPos(ImVec2{x, y});
+    }
+
+    void cur_set(const ImVec2& pos) {
+        ImGui::SetCursorScreenPos(pos);
+    }
+
+    float avail_x() {
+        return ImGui::GetContentRegionAvail().x;
+    }
+
+    float avail_y() {
+        return ImGui::GetContentRegionAvail().y;
     }
 
     // ---- image ----
@@ -590,7 +607,7 @@ namespace grey::widgets {
 
     // ---- button ----
 
-    bool button(const std::string& text, emphasis emp, bool is_enabled, bool is_small) {
+    bool button(const std::string & text, emphasis emp, bool is_enabled, bool is_small, const string& tooltip_text) {
 
         if (!is_enabled) {
             ImGui::BeginDisabled(true);
@@ -619,6 +636,10 @@ namespace grey::widgets {
 
         if (!is_enabled) {
             ImGui::EndDisabled();
+        }
+
+        if(!tooltip_text.empty()) {
+            tooltip(tooltip_text);
         }
 
         return clicked;
@@ -706,7 +727,7 @@ namespace grey::widgets {
         return ImGui::CollapsingHeader(header.c_str(), flags);
     }
 
-    bool combo(const string& label, const std::vector<std::string>& options, size_t& selected, float width) {
+    bool combo(const string& label, const std::vector<std::string>& options, unsigned int& selected, float width) {
         bool ret{ false };
 
         if (width != 0) {
@@ -742,7 +763,7 @@ namespace grey::widgets {
         return ret;
     }
 
-    bool list(const std::string& label, const std::vector<std::string>& options, size_t& selected, float width) {
+    bool list(const std::string& label, const std::vector<std::string>& options, unsigned int& selected, float width) {
         bool ret{ false };
 
         if (width != 0) {
@@ -759,7 +780,7 @@ namespace grey::widgets {
         if (ImGui::BeginListBox(label.c_str())) {
             for (size_t i = 0; i < options.size(); i++) {
                 bool is_selected = selected == i;
-                if (ImGui::Selectable(options[i].c_str(), is_selected)) {
+                if (ImGui::Selectable(options[i].c_str(), is_selected, is_selected ? ImGuiSelectableFlags_Highlight : 0)) {
                     selected = i;
                     ret = true;
                 }
@@ -930,6 +951,10 @@ namespace grey::widgets {
         return ImGui::IsItemHovered();
     }
 
+    void mouse_cursor(mouse_cursor_type mct) {
+        ImGui::SetMouseCursor((ImGuiMouseCursor_)mct);
+    }
+
     bool tree_node(const std::string& label, ImGuiTreeNodeFlags flags, emphasis emp) {
         bool ok;
         if (emp == emphasis::none) {
@@ -989,14 +1014,17 @@ namespace grey::widgets {
         }
     }
 
-    tab_bar_item tab_bar::next_tab(const string& title, bool unsaved) {
-        return tab_bar_item{ title + "##" + std::to_string(tab_index++), unsaved };
+    tab_bar_item tab_bar::next_tab(const string& title, bool unsaved, bool selected) {
+        return tab_bar_item{ title + "##" + std::to_string(tab_index++), unsaved, selected };
     }
 
-    tab_bar_item::tab_bar_item(const std::string& id, bool unsaved) : id{ id } {
+    tab_bar_item::tab_bar_item(const std::string& id, bool unsaved, bool selected) : id{ id } {
         //cout << "tab_bar_item::tab_bar_item " << id << endl;
         if (unsaved) {
             flags |= ImGuiTabItemFlags_UnsavedDocument;
+        }
+        if(selected) {
+            flags |= ImGuiTabItemFlags_SetSelected;
         }
         rendered = ImGui::BeginTabItem(id.c_str(), nullptr, flags);
     }
@@ -1120,11 +1148,29 @@ namespace grey::widgets {
         header_rendered = true;
     }
 
-    big_table::big_table(const std::string& id, int column_count, int row_count, ImVec2 outer_size) {
-        rendered = ImGui::BeginTable(id.c_str(), column_count, flags, outer_size);
+    big_table::big_table(const std::string& id, const vector<string>& columns, size_t row_count,
+        float outer_width,
+        float outer_height,
+        bool alternate_row_bg) : columns_size{columns.size()}, outer_size{outer_width, outer_height} {
+        if(alternate_row_bg) {
+            flags |= ImGuiTableFlags_RowBg;
+        }
+        rendered = ImGui::BeginTable(id.c_str(), columns.size(), flags, outer_size);
         if (rendered) {
-            ImGui::TableSetupScrollFreeze(column_count, 1);
-            clipper.Begin(row_count, 10);
+            ImGui::TableSetupScrollFreeze(0, 1);
+            clipper.Begin(row_count);
+
+            // setup columns
+            for (const string& cn : columns) {
+                if (cn.empty() || !cn.ends_with("+")) {
+                    ImGui::TableSetupColumn(cn.c_str());
+                }
+                else {
+                    string n = cn.substr(0, cn.size() - 1);
+                    ImGui::TableSetupColumn(n.c_str(), ImGuiTableColumnFlags_WidthStretch);
+                }
+            }
+            ImGui::TableHeadersRow();
         }
     }
 
@@ -1134,30 +1180,24 @@ namespace grey::widgets {
         }
     }
 
-    void big_table::col(const std::string& label, bool stretch) {
-        ImGui::TableSetupColumn(label.c_str(),
-            stretch ? ImGuiTableColumnFlags_WidthStretch : ImGuiTableColumnFlags_WidthFixed);
-    }
+    void big_table::render_data(std::function<void(int, int)> cell_render) {
+        if(!rendered) return;
 
-    void big_table::headers_row() {
-        ImGui::TableHeadersRow();
-    }
+        while(clipper.Step()) {
+            for(int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
+                ImGui::TableNextRow();
+                for (int col = 0; col < columns_size; col++) {
+                    if(!ImGui::TableSetColumnIndex(col)) {
+                        // don't bother rendering invisible columns
+                        continue;
+                    }
 
-    bool big_table::step(int& display_start, int& display_end) {
-        if (clipper.Step()) {
-            display_start = clipper.DisplayStart;
-            display_end = clipper.DisplayEnd;
-            return true;
+                    if (cell_render) {
+                        cell_render(row, col);
+                    }
+                }
+            }
         }
-        return false;
-    }
-
-    void big_table::next_row() {
-        ImGui::TableNextRow();
-    }
-
-    void big_table::to_col(int i) {
-        ImGui::TableSetColumnIndex(i);
     }
 
     // -- plotting

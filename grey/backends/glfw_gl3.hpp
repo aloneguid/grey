@@ -228,6 +228,8 @@ namespace grey::backends {
 
         void resize_main_viewport(int width, int height) {}
 
+        void move_main_viewport(int x, int y) {}
+
         void* make_native_texture(grey::common::raw_img& img) {
             return nullptr;
         }

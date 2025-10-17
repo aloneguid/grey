@@ -11,6 +11,8 @@ namespace Grey {
 
         public delegate bool RenderFrameCallback();
 
+        public delegate void RenderCallback();
+
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void app_run(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string title,
@@ -79,15 +81,45 @@ namespace Grey {
         internal static extern void spinner_hbo_dots(float radius, float thickness, float speed, int dot_count);
 
         [DllImport(LibName)]
-        internal static extern void slider_float(ref float value, float min, float max,
+        internal static extern bool slider_float(ref float value, float min, float max,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label);
 
         [DllImport(LibName)]
-        internal static extern void slider_int(ref int value, int min, int max,
+        internal static extern bool slider_int(ref int value, int min, int max,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label);
 
         [DllImport(LibName)]
         internal static extern void tooltip([MarshalAs(UnmanagedType.LPUTF8Str)] string text);
+
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool combo(
+            [MarshalAs(UnmanagedType.LPUTF8Str)]  string label,
+            [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] options,
+            int options_size,
+            ref uint selected,
+            float width);
+
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool list(
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
+            [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] options,
+            int options_size,
+            ref uint selected,
+            float width);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void RenderTableCellCallback(int row, int col);
+
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void table(
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string id,
+            [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] columns,
+            int columns_size,
+            int row_count,
+            float outer_width,
+            float outer_height,
+            bool alternate_row_bg,
+            RenderTableCellCallback cell_callback);
 
 
         // -- tabs
@@ -104,37 +136,8 @@ namespace Grey {
         [DllImport(LibName)]
         internal static extern void pop_next_tab();
 
-        // -- status bar
-
         [DllImport(LibName)]
-        internal static extern void push_status_bar();
-
-        [DllImport(LibName)]
-        internal static extern void pop_status_bar();
-
-        // -- tables
-
-        [DllImport(LibName)]
-        internal static extern bool push_table([MarshalAs(UnmanagedType.LPUTF8Str)] string id,
-            int column_count,
-            float outer_width,
-            float outer_height);
-
-        [DllImport(LibName)]
-        internal static extern void pop_table();
-
-        [DllImport(LibName)]
-        internal static extern void table_col(
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string label);
-
-        [DllImport(LibName)]
-        internal static extern void table_begin_data();
-
-        [DllImport(LibName)]
-        internal static extern void table_begin_row();
-
-        [DllImport(LibName)]
-        internal static extern void table_begin_col();
+        internal static extern void status_bar(RenderCallback c_callback);
 
         // application menus
 
