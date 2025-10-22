@@ -69,7 +69,7 @@ extern "C"
 
     EXPORTED bool list(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width);
 
-    // -- tab bars
+    // -- tab bars (todo: refactor to single call)
 
     EXPORTED bool push_tab_bar(const char* c_id);
 
@@ -92,7 +92,7 @@ extern "C"
         bool alternate_row_bg,
         RenderTableCellCallback c_cell_callback);
 
-    // -- application menus
+    // -- application menus (todo: refactor to single call)
 
     EXPORTED bool push_menu_bar();
 

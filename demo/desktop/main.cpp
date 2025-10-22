@@ -43,6 +43,7 @@ int main(int argc, char* argv[]) {
     //backend->run();
 
     auto app = grey::app::make("demo", 800, 600);
+    //app->load_icon_font = false;
     app->load_fixed_font = true;
     float scale = app->scale;
 
@@ -82,6 +83,7 @@ int main(int argc, char* argv[]) {
                             w::notify_info("theme changed to " + id);
                             app->set_theme(id);
                         });
+                        w::small_checkbox("Show ImGui demo", show_demo);
                     }
                 }
 
