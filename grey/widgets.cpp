@@ -332,6 +332,12 @@ namespace grey::widgets {
             ImGui::PopTextWrapPos();
     }
 
+    void label(const std::string& text, rgb_colour colour) {
+        ImGui::PushStyleColor(ImGuiCol_Text, colour);
+        label(text);
+        ImGui::PopStyleColor();
+    }
+
     void label(const std::string& text, emphasis emp, size_t text_wrap_pos, bool enabled) {
 
         if (emp == emphasis::none || !enabled) {
@@ -499,18 +505,6 @@ namespace grey::widgets {
 
     // ---- position ----
 
-    void set_pos(float x, float y) {
-        if (x < 0 && y >= 0) {
-            ImGui::SetCursorPosY(y);
-        }
-        else if (x >= 0 && y < 0) {
-            ImGui::SetCursorPosX(x);
-        }
-        else {
-            ImGui::SetCursorPos(ImVec2{ x, y });
-        }
-    }
-
     void get_pos(float& x, float& y) {
         ImVec2 p = ImGui::GetCursorPos();
         x = p.x;
@@ -535,11 +529,12 @@ namespace grey::widgets {
         ImGui::SetCursorScreenPos(pos);
     }
 
-    void move_pos(float x, float y) {
-        ImVec2 mv = ImGui::GetCursorPos();
-        mv.x += x;
-        mv.y += y;
-        ImGui::SetCursorPos(mv);
+    float avail_x() {
+        return ImGui::GetContentRegionAvail().x;
+    }
+
+    float avail_y() {
+        return ImGui::GetContentRegionAvail().y;
     }
 
     // ---- image ----
@@ -650,7 +645,7 @@ namespace grey::widgets {
         return clicked;
     }
 
-    bool icon_checkbox(const std::string& icon, bool& is_checked, bool reversed) {
+    bool icon_checkbox(const std::string& icon, bool& is_checked, bool reversed, const string& tooltip) {
 
         if (reversed ? !is_checked : is_checked) {
             ImGui::Text(icon.c_str());
@@ -661,6 +656,10 @@ namespace grey::widgets {
 
         if (ImGui::IsItemHovered()) {
             ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+            if(!tooltip.empty()) {
+                ImGui::SetTooltip("%s", tooltip.c_str());
+            }
 
             if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
                 is_checked = !is_checked;
