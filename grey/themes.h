@@ -16,9 +16,27 @@ namespace grey::themes {
         GreyCol_EmphasisPrimary = 0,
         GreyCol_EmphasisPrimaryHovered,
         GreyCol_EmphasisPrimaryActive,
+
+        GreyCol_EmphasisSecondary,
+        GreyCol_EmphasisSecondaryHovered,
+        GreyCol_EmphasisSecondaryActive,
+
+        GreyCol_EmphasisSuccess,
+        GreyCol_EmphasisSuccessHovered,
+        GreyCol_EmphasisSuccessActive,
+
         GreyCol_EmphasisError,
         GreyCol_EmphasisErrorHovered,
         GreyCol_EmphasisErrorActive,
+
+        GreyCol_EmphasisWarning,
+        GreyCol_EmphasisWarningHovered,
+        GreyCol_EmphasisWarningActive,
+
+        GreyCol_EmphasisInfo,
+        GreyCol_EmphasisInfoHovered,
+        GreyCol_EmphasisInfoActive,
+
         GreyCol_Count
     };
 

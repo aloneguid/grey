@@ -31,6 +31,9 @@ namespace Grey {
             Emphasis emphasis, int text_wrap_pos, bool enabled);
 
         [DllImport(LibName)]
+        internal static extern bool selectable([MarshalAs(UnmanagedType.LPUTF8Str)] string text, bool span_columns);
+
+        [DllImport(LibName)]
         internal static extern bool checkbox([MarshalAs(UnmanagedType.LPUTF8Str)] string label, ref bool is_checked);
 
         [DllImport(LibName)]

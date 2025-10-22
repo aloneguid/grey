@@ -28,6 +28,9 @@ function foo()
 end
 )";
 
+w::container md_wnd;
+w::container md_wnd1;
+
 void plot_demo() {
 
 }
@@ -108,15 +111,23 @@ int main(int argc, char* argv[]) {
                     w::tooltip("simple tooltip");
                     w::sl(); w::label(ICON_MD_5G " icon1");
                     w::sl(); w::label("primary", w::emphasis::primary);
+                    w::sl(); w::label("secondary", w::emphasis::secondary);
+                    w::sl(); w::label("success", w::emphasis::success);
                     w::sl(); w::label("error", w::emphasis::error);
+                    w::sl(); w::label("warning", w::emphasis::warning);
+                    w::sl(); w::label("info", w::emphasis::info);
 
                     w::sep();
 
                     w::sep("buttons");
 
                     w::button("simple");
-                    w::sl(); w::button("primary", w::emphasis::primary);
-                    w::sl(); w::button("error", w::emphasis::error);
+                    w::sl(); w::button("Primary", w::emphasis::primary);
+                    w::sl(); w::button("Secondary", w::emphasis::secondary);
+                    w::sl(); w::button("Success", w::emphasis::success);
+                    w::sl(); w::button("Error", w::emphasis::error);
+                    w::sl(); w::button("Warning", w::emphasis::warning);
+                    w::sl(); w::button("Info", w::emphasis::info);
                     w::sl(); w::label(text);
                     if(w::button("add dot")) {
                         text += ".";
@@ -139,6 +150,8 @@ int main(int argc, char* argv[]) {
                     w::hyperlink("blog", "https://www.aloneguid.uk/posts/");
 
                     w::input(text, "##input1");
+
+                    w::selectable("default selectable");
                 }
             }
 
@@ -263,9 +276,16 @@ int main(int argc, char* argv[]) {
                 if(tab) {
                     static int row_count = 1000;
                     static int col_count = 3;
+                    static bool row_selectable = false;
+                    static bool row_selectable_span = false;
 
                     w::slider(row_count, 0, 1000000000, "row count");
                     w::slider(col_count, 1, 100, "col count");
+                    w::checkbox("row selectable", row_selectable);
+                    if(row_selectable) {
+                        w::sl();
+                        w::checkbox("span all columns", row_selectable_span);
+                    }
 
                     static vector<string> columns;
                     if(col_count != columns.size()) {
@@ -282,7 +302,13 @@ int main(int argc, char* argv[]) {
                     if(t) {
                         t.render_data([](int row, int col) {
                             if(col == 0) {
-                                w::label(to_string(row));
+                                if(row_selectable) {
+                                    if(w::selectable(to_string(row), row_selectable_span)) {
+                                        w::notify_info("row " + to_string(row) + " selected");
+                                    }
+                                } else {
+                                    w::label(to_string(row));
+                                }
                             } else {
                                 w::label(to_string(row) + "x" + to_string(col));
                             }
@@ -334,6 +360,31 @@ int main(int argc, char* argv[]) {
             with_tab(tabs, "Plots",
                 //w::plot_demo();
                 plot_demo();)
+
+            // markdown
+            {
+                auto tab = tabs.next_tab("Markdown");
+                if(tab) {
+                    float w = w::avail_x();
+                    static string md_text = R"(# Markdown Example
+This is a **bold** text and this is an *italic* text.
+## List
+- Item 1
+- Item 2
+- Item 3
+)";
+                    {
+                        md_wnd.resize(w / 2, .0f);
+                        w::guard g{md_wnd};
+                        w::input_ml("##md_input", md_text, 0.0f);
+                    }
+                    w::sl();
+                    {
+                        w::guard g{md_wnd1};
+                        w::markdown(md_text);
+                    }
+                }
+            }
         }
 
 

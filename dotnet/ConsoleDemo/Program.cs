@@ -14,6 +14,8 @@ float mlHeight = 0;
 bool mlEnabled = true;
 bool mlUseFixedFont = false;
 bool alternateTableRowBg = false;
+bool tableSelectables = false;
+bool tableSelectableRow = false;
 string[] choices = ["one", "two", "three"];
 uint currentChoice = 0;
 
@@ -43,7 +45,13 @@ Grey.App.Run("Grey# Demo", () => {
                 SL();
                 Label("primary", Emphasis.Primary);
                 SL();
+                Label("secondary", Emphasis.Secondary);
+                SL();
                 Label("error", Emphasis.Error);
+                SL();
+                Label("warning", Emphasis.Warning);
+                SL();
+                Label("info", Emphasis.Info);
                 SL();
                 Label("disabled label", isEnabled: false);
                 Sep();
@@ -107,7 +115,7 @@ Grey.App.Run("Grey# Demo", () => {
 
         using(var ti = new TabItem("Icons")) {
             if(ti) {
-                Label($"{Icon.Num10k} {Icon.Fireplace}");
+                Label($"{Icon.Num10k} {Icon.Fireplace} {Icon.Access_alarm}");
             }
         }
 
@@ -138,10 +146,26 @@ Grey.App.Run("Grey# Demo", () => {
         using(var ti = new TabItem("Tables")) {
             if(ti) {
                 Checkbox("alg bg", ref alternateTableRowBg);
+                Checkbox("selectable", ref tableSelectables);
+                if(tableSelectables) {
+                    SL();
+                    Checkbox("entire row", ref tableSelectableRow);
+                }
 
                 Table("t0", new[] { "id", "name", "description+" }, 100000,
                     (int row, int column) => {
-                        Label($"{row}x{column}");
+
+                        if(column == 0) {
+                            if(tableSelectables) {
+                                if(Selectable($"{row}", tableSelectableRow)) {
+                                    Notify($"clicked {row}x{column}");
+                                }
+                            } else {
+                                Label(row.ToString());
+                            }
+                        } else {
+                            Label($"{row}x{column}");
+                        }
                     },
                     alternateRowBg: alternateTableRowBg);
             }

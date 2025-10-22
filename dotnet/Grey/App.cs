@@ -19,6 +19,10 @@ namespace Grey {
             Native.label(text, emphasis, textWrapPos, isEnabled);
         }
 
+        public static bool Selectable(string text, bool spanColumns = false) {
+            return Native.selectable(text, spanColumns);
+        }
+
         public static bool Checkbox(string label, ref bool isChecked) {
             return Native.checkbox(label, ref isChecked);
         }

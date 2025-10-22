@@ -4,6 +4,7 @@
 #include "imgui_stdlib.h"
 #include "3rdparty/ImGuiNotify.hpp"
 #include "3rdparty/imspinner.h"
+#include "3rdparty/imgui_markdown/imgui_markdown.h"
 #include "fonts/font_loader.h"
 #include <iostream>
 // for Windows-specific hacks
@@ -42,10 +43,30 @@ namespace grey::widgets {
             hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisPrimaryHovered];
             active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisPrimaryActive];
             return true;
+        case emphasis::secondary:
+            normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisSecondary];
+            hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisSecondaryHovered];
+            active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisSecondaryActive];
+            return true;
+        case emphasis::success:
+            normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisSuccess];
+            hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisSuccessHovered];
+            active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisSuccessActive];
+            return true;
         case emphasis::error:
             normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisError];
             hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisErrorHovered];
             active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisErrorActive];
+            return true;
+        case emphasis::warning:
+            normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisWarning];
+            hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisWarningHovered];
+            active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisWarningActive];
+            return true;
+        case emphasis::info:
+            normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisInfo];
+            hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisInfoHovered];
+            active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisInfoActive];
             return true;
         }
 
@@ -355,6 +376,12 @@ namespace grey::widgets {
         }
     }
 
+    bool selectable(const std::string& text, bool span_columns) {
+        return ImGui::Selectable(text.c_str(),
+            false,
+            span_columns ? ImGuiSelectableFlags_SpanAllColumns : ImGuiSelectableFlags_None );
+    }
+
     template<typename T>
     bool input(T& value, int value_length, const std::string& label, bool enabled, float width, bool is_readonly) {
         bool fired;
@@ -487,6 +514,17 @@ namespace grey::widgets {
 
     bool input_ml(const std::string& id, char* value, int value_length, float height, bool autoscroll, bool enabled, bool use_fixed_font) {
         return input_ml<char*>(id, value, value_length, height, autoscroll, enabled, use_fixed_font);
+    }
+
+    static ImGui::MarkdownConfig mdConfig{
+        nullptr,
+        nullptr,
+        nullptr,
+        ICON_MD_LINK
+    };
+
+    void markdown(const std::string& text) {
+        ImGui::Markdown(text.c_str(), text.size(), mdConfig);
     }
 
     // ---- tooltip ----

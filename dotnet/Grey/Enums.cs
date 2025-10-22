@@ -8,6 +8,10 @@ namespace Grey {
     public enum Emphasis : int {
         None = 0,
         Primary = 1,
-        Error = 2
+        Secondary = 2,
+        Success = 3,
+        Error = 4,
+        Warning = 5,
+        Info = 6
     };
 }

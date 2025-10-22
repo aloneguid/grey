@@ -87,6 +87,11 @@ EXPORTED void label(const char* c_text, int32_t emphasis, int32_t text_wrap_pos,
     w::label(text, (w::emphasis)emphasis, text_wrap_pos, enabled);
 }
 
+EXPORTED bool selectable(const char* c_text, bool span_columns) {
+    string text{ c_text };
+    return w::selectable(text, span_columns);
+}
+
 EXPORTED bool checkbox(const char* c_label, bool* is_checked) {
     string label{ c_label };
     return w::checkbox(label, *is_checked);

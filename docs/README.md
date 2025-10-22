@@ -24,7 +24,7 @@ To get started in C#, reference [GreyMatter](https://www.nuget.org/packages/Grey
 
 ### Windows
 
-To build native part on Windows, you only need Visual Studio 2022 with C++ workload and CMake which you can install from Visual Studio installer.
+To build native part on Windows, you only need Visual Studio 2022 or 2026 with C++ workload and CMake which you can install from Visual Studio installer.
 
 ### Linux
 
@@ -36,4 +36,4 @@ To build native part on Linux or WSL2, you need:
 
 ### MacOSX
 
-I currently do not pay Apple tax, but instructions should be similar to Linux.
+I currently do not pay Apple tax, but instructions should be similar to Linux. If you want to help with MacOSX support, please open an issue. Supporting MacOSX should resort to testing Metal rendering backend and some native OS integrations around windowing.

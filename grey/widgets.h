@@ -21,7 +21,11 @@ namespace grey::widgets {
     enum class emphasis : int32_t {
         none = 0,
         primary = 1,
-        error = 2
+        secondary = 2,
+        success = 3,
+        error = 4,
+        warning = 5,
+        info = 6
     };
 
     class rgb_colour {
@@ -369,6 +373,14 @@ namespace grey::widgets {
 
     void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0, bool enabled = true);
 
+    /**
+     * @brief Selectable item
+     * @param text Text to display
+     * @param span_columns Whether to span all columns in a table (only applicable inside tables)
+     * @return True if selection changes
+     */
+    bool selectable(const std::string& text, bool span_columns = false);
+
     bool input(std::string& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
 
     bool input(int& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
@@ -391,6 +403,11 @@ namespace grey::widgets {
 
     bool input_ml(const std::string& id, char* value, int value_length, float height = 0, bool autoscroll = false, bool enabled = true, bool use_fixed_font = false);
 
+    /**
+     * @brief Renders markdown text using https://github.com/enkisoftware/imgui_markdown. This is not ready for public consumption yet.
+     * @param text 
+     */
+    void markdown(const std::string& text);
 
     bool slider(float& value, float min, float max, const std::string& label = "");
 

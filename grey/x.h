@@ -36,6 +36,8 @@ extern "C"
 
     EXPORTED void label(const char* c_text, int32_t emphasis, int32_t text_wrap_pos, bool enabled);
 
+    EXPORTED bool selectable(const char* c_text, bool span_columns = false);
+
     EXPORTED bool checkbox(const char* c_label, bool* is_checked);
 
     EXPORTED bool button(const char* c_text, int32_t emphasis, bool is_enabled, bool is_small);
