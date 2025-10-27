@@ -524,6 +524,7 @@ namespace grey::widgets {
     };
 
     void markdown(const std::string& text) {
+        // integration example: https://github.com/enkisoftware/imgui_markdown?tab=readme-ov-file#example-use-on-windows-with-links-opening-in-browser
         ImGui::Markdown(text.c_str(), text.size(), mdConfig);
     }
 
@@ -1144,49 +1145,7 @@ namespace grey::widgets {
         return editor.IsTextChanged();
     }
 
-    table::table(const std::string& id, int column_count, float outer_width, float outer_height) {
-        rendered = ImGui::BeginTable(id.c_str(), column_count, flags, ImVec2(outer_width, outer_height));
-    }
-
-    table::~table() {
-        if(rendered) {
-            render_headers();
-            ImGui::EndTable();
-        }
-    }
-
-    void table::begin_data() {
-        render_headers();
-    }
-
-    void table::begin_row() {
-        ImGui::TableNextRow();
-    }
-
-    void table::begin_col() {
-        ImGui::TableNextColumn();
-    }
-
-    void table::render_headers() {
-        if(header_rendered || !rendered) return;
-
-        ImGui::TableSetupScrollFreeze(0, 1);
-
-        for(const string& cn : columns) {
-            if(cn.empty() || !cn.ends_with("+")) {
-                ImGui::TableSetupColumn(cn.c_str());
-            } else {
-                string n = cn.substr(0, cn.size() - 1);
-                ImGui::TableSetupColumn(n.c_str(), ImGuiTableColumnFlags_WidthStretch);
-            }
-        }
-
-        ImGui::TableHeadersRow();
-
-        header_rendered = true;
-    }
-
-    big_table::big_table(const std::string& id, const vector<string>& columns, size_t row_count,
+    table::table(const std::string& id, const vector<string>& columns, size_t row_count,
         float outer_width,
         float outer_height,
         bool alternate_row_bg) : columns_size{columns.size()}, outer_size{outer_width, outer_height} {
@@ -1212,13 +1171,13 @@ namespace grey::widgets {
         }
     }
 
-    big_table::~big_table() {
+    table::~table() {
         if (rendered) {
             ImGui::EndTable();
         }
     }
 
-    void big_table::render_data(std::function<void(int, int)> cell_render) {
+    void table::render_data(std::function<void(int, int)> cell_render) {
         if(!rendered) return;
 
         while(clipper.Step()) {

@@ -20,6 +20,10 @@ To get started in C++, simply include this repository as a git submodule and fol
 
 To get started in C#, reference [GreyMatter](https://www.nuget.org/packages/GreyMatter/) package, which includes C# interface and pre-built binaries for Windows and Linux.
 
+# Roadmap
+- Markdown component support.
+- Tree table component.
+
 ## Building
 
 ### Windows

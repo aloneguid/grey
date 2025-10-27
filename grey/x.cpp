@@ -220,7 +220,7 @@ EXPORTED void table(const char* c_id,
         cols.push_back(c_columns[i]);
     }
 
-    w::big_table t{ c_id, cols, static_cast<size_t>(row_count), outer_width * scale, outer_height * scale, alternate_row_bg };
+    w::table t{ c_id, cols, static_cast<size_t>(row_count), outer_width * scale, outer_height * scale, alternate_row_bg };
     t.render_data([c_cell_callback](int row_idx, int column_idx) {
             c_cell_callback(row_idx, column_idx);
         });

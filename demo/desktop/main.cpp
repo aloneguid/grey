@@ -244,35 +244,9 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            // tables
+           
             {
                 auto tab = tabs.next_tab("Table");
-                if(tab) {
-                    int row_count = 1000;
-                    w::table t{"table1", 3, 0, -20 * c_app.scale};
-                    if(t) {
-                        t.columns.push_back("id");
-                        t.columns.push_back("name");
-                        t.columns.push_back("description+");
-                      
-                        t.begin_data();
-                        for(int i = 0; i < row_count; i++) {
-                            t.begin_row();
-
-                            t.begin_col();
-                            w::label(to_string(i));
-
-                            t.begin_col();
-                            w::label("name " + to_string(i));
-
-                            t.begin_col();
-                            w::label("description " + to_string(i));
-                        }
-                    }
-                }
-            }
-            {
-                auto tab = tabs.next_tab("Big Table");
                 if(tab) {
                     static int row_count = 1000;
                     static int col_count = 3;
@@ -298,7 +272,7 @@ int main(int argc, char* argv[]) {
                     static bool row_bg = false;
                     w::checkbox("alternate row bg", row_bg);
 
-                    w::big_table t{"table2", columns, (size_t)row_count, 0.0f, -20 * w::scale, row_bg};
+                    w::table t{"table2", columns, (size_t)row_count, 0.0f, -20 * w::scale, row_bg};
                     if(t) {
                         t.render_data([](int row, int col) {
                             if(col == 0) {
