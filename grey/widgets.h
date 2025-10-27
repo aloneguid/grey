@@ -511,7 +511,22 @@ namespace grey::widgets {
 
     void mouse_cursor(mouse_cursor_type mct);
 
-    bool tree_node(const std::string& label, ImGuiTreeNodeFlags flags = 0, emphasis emp = emphasis::none);
+    class tree_node {
+    public:
+        tree_node(const std::string& label, bool open_by_default = false, bool is_leaf = false);
+        ~tree_node();
+
+        operator bool() const {
+            return opened;
+        }
+    private:
+        const std::string label;
+        bool opened{false};
+    };
+
+#define with_window(w, ...) { { grey::widgets::guard wg{w}; __VA_ARGS__ }}
+
+    //bool tree_node(const std::string& label, ImGuiTreeNodeFlags flags = 0, emphasis emp = emphasis::none);
 
     // colour helpers
 

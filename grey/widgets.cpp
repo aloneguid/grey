@@ -994,7 +994,27 @@ namespace grey::widgets {
         ImGui::SetMouseCursor((ImGuiMouseCursor_)mct);
     }
 
-    bool tree_node(const std::string& label, ImGuiTreeNodeFlags flags, emphasis emp) {
+    tree_node::tree_node(const std::string& label, bool open_by_default, bool is_leaf) {
+        ImGuiTreeNodeFlags flags{0};
+        if (open_by_default) {
+            flags |= ImGuiTreeNodeFlags_DefaultOpen;
+        }
+        if (is_leaf) {
+            flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
+        }
+
+        // todo: since 1.92 trees can draw hierarchy lines
+
+        opened = ImGui::TreeNodeEx(label.c_str(), flags);
+    }
+
+    tree_node::~tree_node() {
+        if (opened) {
+            ImGui::TreePop();
+        }
+    }
+
+    /*bool tree_node(const std::string& label, ImGuiTreeNodeFlags flags, emphasis emp) {
         bool ok;
         if (emp == emphasis::none) {
             ok = ImGui::TreeNodeEx(label.c_str(), flags);
@@ -1012,7 +1032,7 @@ namespace grey::widgets {
         }
 
         return ok;
-    }
+    }*/
 
     // colour helpers
 
@@ -1216,5 +1236,6 @@ namespace grey::widgets {
 
     }
 #endif
+
 
 }

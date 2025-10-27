@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
 
         // top tabs
         {
-            w::tab_bar tabs{"topTabs"};
+            w::tab_bar tabs{"topTabs", true, true};
 
             // basics
             {
@@ -206,12 +206,20 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            // accordion
+            // collapsibles
             {
-                auto tab = tabs.next_tab("Accordion");
+                auto tab = tabs.next_tab("Collapsibles");
                 if(tab) {
-                    if(w::accordion("Content inside")) {
+                    if(w::accordion("Accordion")) {
                         w::label("accordion content");
+                    }
+
+                    if(w::tree_node p("Tree Node", true); p) {
+                        if(w::tree_node c1("Child 1"); c1) {
+                            if(w::tree_node l0("Leaf 0", false, true); l0) {
+                                w::label("leaf content");
+                            }
+                        }
                     }
                 }
             }
