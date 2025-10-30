@@ -560,12 +560,12 @@ namespace grey::widgets {
     /**
      * @brief Table that allows displaying enormous amounts of data.
      */
-    class table {
+    class big_table {
     public:
-        table(const std::string& id, const std::vector<std::string>& columns, size_t row_count,
+        big_table(const std::string& id, const std::vector<std::string>& columns, size_t row_count,
             float outer_width = 0.0f, float outer_height = 0.0f,
             bool alternate_row_bg = false);
-        ~table();
+        ~big_table();
 
         operator bool() const {
             return rendered;

@@ -1165,7 +1165,7 @@ namespace grey::widgets {
         return editor.IsTextChanged();
     }
 
-    table::table(const std::string& id, const vector<string>& columns, size_t row_count,
+    big_table::big_table(const std::string& id, const vector<string>& columns, size_t row_count,
         float outer_width,
         float outer_height,
         bool alternate_row_bg) : columns_size{columns.size()}, outer_size{outer_width, outer_height} {
@@ -1191,13 +1191,13 @@ namespace grey::widgets {
         }
     }
 
-    table::~table() {
+    big_table::~big_table() {
         if (rendered) {
             ImGui::EndTable();
         }
     }
 
-    void table::render_data(std::function<void(int, int)> cell_render) {
+    void big_table::render_data(std::function<void(int, int)> cell_render) {
         if(!rendered) return;
 
         while(clipper.Step()) {

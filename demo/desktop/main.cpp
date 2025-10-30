@@ -279,7 +279,7 @@ int main(int argc, char* argv[]) {
                     static bool row_bg = false;
                     w::checkbox("alternate row bg", row_bg);
 
-                    w::table t{"table2", columns, (size_t)row_count, 0.0f, -20 * w::scale, row_bg};
+                    w::big_table t{"table2", columns, (size_t)row_count, 0.0f, -20 * w::scale, row_bg};
                     if(t) {
                         t.render_data([](int row, int col) {
                             if(col == 0) {
