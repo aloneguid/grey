@@ -112,6 +112,22 @@ namespace Grey {
             return Native.list(label, items, items.Length, ref currentItem, width);
         }
 
+        public static void MenuBar(Action render) {
+            Native.menu_bar(() => {
+                render();
+            });
+        }
+
+        public static void Menu(string label, Action render) {
+            Native.menu(label, () => {
+                render();
+            });
+        }
+
+        public static bool MenuItem(string label, bool reserveIconSpace = false, string icon = "") {
+            return Native.menu_item(label, reserveIconSpace, icon);
+        }
+
         public static void BigTable(string id, string[] columns, int rowCount, Action<int, int> cellRender,
             float outer_width = 0, float outerHeight = 0,
             bool alternateRowBg = false) {

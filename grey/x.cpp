@@ -255,37 +255,24 @@ EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf,
     }
 }
 
-// -- application menus
-
-stack<w::menu_bar> menu_bars;
-
-EXPORTED bool push_menu_bar() {
-    menu_bars.emplace();
-    auto& t = menu_bars.top();
-    return t;
+EXPORTED void menu_bar(RenderCallback c_render_callback) {
+    if(w::menu_bar mb; mb) {
+        c_render_callback();
+    }
 }
 
-EXPORTED void pop_menu_bar() {
-    menu_bars.pop();
-}
-
-stack<w::menu> menus;
-
-EXPORTED bool push_menu(const char* c_title) {
+void menu(const char* c_title, RenderCallback c_render_callback) {
     string title = c_title;
-    menus.emplace(title);
-    auto& t = menus.top();
-    return t;
+    if(w::menu m{title}; m) {
+        c_render_callback();
+    }
 }
 
-EXPORTED void pop_menu() {
-    menus.pop();
-}
+// -- application menus
 
 EXPORTED bool menu_item(const char* c_text, bool reserve_icon_space, const char* c_icon) {
     string text{c_text};
     string icon{c_icon ? c_icon : ""};
-    auto& m = menus.top();
     return w::mi(text, reserve_icon_space, icon);
 }
 

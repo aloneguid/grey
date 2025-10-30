@@ -104,18 +104,11 @@ extern "C"
 
     EXPORTED bool table_next_column(void* table_ptr);
 
-
     EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, RenderCallback c_render_callback);
 
-    // -- application menus (todo: refactor to single call)
+    EXPORTED void menu_bar(RenderCallback c_render_callback);
 
-    EXPORTED bool push_menu_bar();
-
-    EXPORTED void pop_menu_bar();
-
-    EXPORTED bool push_menu(const char* c_title);
-
-    EXPORTED void pop_menu();
+    EXPORTED void menu(const char* c_title, RenderCallback c_render_callback);
 
     EXPORTED bool menu_item(const char* c_text, bool reserve_icon_space, const char* c_icon = "");
 

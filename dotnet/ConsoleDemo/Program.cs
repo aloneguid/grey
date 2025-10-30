@@ -23,17 +23,13 @@ uint currentChoice = 0;
 Grey.App.Run("Grey# Demo", () => {
 
     // top menu
-    using(var bar = new MenuBar()) {
-        if(bar) {
-            using(MenuBar.Menu mFile = bar.M("File")) {
-                if(mFile) {
-                    if(mFile.Item("Quit")) {
-                        isRunning = false;
-                    }
-                }
+    MenuBar(() => {
+        Menu("File", () => {
+            if(MenuItem("Quit", true, Icon.Exit_to_app)) {
+                isRunning = false;
             }
-        }
-    }
+        });
+    });
 
     Label("fps:"); SL(); PrintFps();
 

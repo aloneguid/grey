@@ -171,16 +171,10 @@ namespace Grey {
         // application menus
 
         [DllImport(LibName)]
-        internal static extern bool push_menu_bar();
+        internal static extern void menu_bar(RenderCallback c_callback);
 
         [DllImport(LibName)]
-        internal static extern void pop_menu_bar();
-
-        [DllImport(LibName)]
-        internal static extern bool push_menu([MarshalAs(UnmanagedType.LPUTF8Str)] string label);
-
-        [DllImport(LibName)]
-        internal static extern void pop_menu();
+        internal static extern void menu([MarshalAs(UnmanagedType.LPUTF8Str)] string label, RenderCallback c_callback);
 
         [DllImport(LibName)]
         internal static extern bool menu_item(
