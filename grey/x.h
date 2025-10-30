@@ -11,6 +11,7 @@
 typedef bool (*RenderFrameCallback)();
 typedef void (*RenderCallback)();
 typedef void (*RenderTableCellCallback)(int32_t row_index, int32_t col_index);
+typedef void (*RenderPtrCallback)(void* ptr);
 
 
 extern "C"
@@ -89,10 +90,20 @@ extern "C"
      * @brief Table call in a single function call.
      * @param c_cell_callback Callback function that is called for each cell in the table, and receives row and column indices.
      */
-    EXPORTED void table(const char* c_id, const char** c_columns, int32_t c_columns_size, int32_t row_count,
+    EXPORTED void big_table(const char* c_id, const char** c_columns, int32_t c_columns_size, int32_t row_count,
         float outer_width, float outer_height,
         bool alternate_row_bg,
         RenderTableCellCallback c_cell_callback);
+
+    EXPORTED void table(const char* c_id, const char** c_columns, int32_t c_columns_size,
+        float outer_width, float outer_height,
+        bool alternate_row_bg,
+        RenderPtrCallback c_ptr_callback);
+
+    EXPORTED bool table_begin_row(void* table_ptr);
+
+    EXPORTED bool table_next_column(void* table_ptr);
+
 
     EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, RenderCallback c_render_callback);
 

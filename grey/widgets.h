@@ -592,9 +592,32 @@ namespace grey::widgets {
         ImGuiListClipper clipper;
     };
 
-    class small_table {
+    class table {
     public:
-        
+        table(const std::string& id, const std::vector<std::string>& columns,
+            float outer_width = 0.0f, float outer_height = 0.0f);
+        ~table();
+
+        bool begin_row();
+        bool next_column();
+
+        operator bool() const {
+            return rendered;
+        }
+
+    private:
+        size_t columns_size;
+        bool rendered{false};
+        ImVec2 outer_size;
+        ImGuiTableFlags flags {
+            ImGuiTableFlags_Borders |
+            ImGuiTableFlags_NoBordersInBodyUntilResize |
+            ImGuiTableFlags_HighlightHoveredColumn |
+            ImGuiTableFlags_Hideable |
+            ImGuiTableFlags_Resizable |
+            ImGuiTableFlags_ScrollY |
+            ImGuiTableFlags_ScrollX
+        };
     };
 
     /*

@@ -113,8 +113,11 @@ namespace Grey {
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void RenderTableCellCallback(int row, int col);
 
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void RenderPtrCallback(IntPtr user_data);
+
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void table(
+        internal static extern void big_table(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string id,
             [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] columns,
             int columns_size,
@@ -123,6 +126,23 @@ namespace Grey {
             float outer_height,
             bool alternate_row_bg,
             RenderTableCellCallback cell_callback);
+
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void table(
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string id,
+            [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] columns,
+            int columns_size,
+            float outer_width,
+            float outer_height,
+            bool alternate_row_bg,
+            RenderPtrCallback cell_callback);
+
+        [DllImport(LibName)]
+        internal static extern bool table_begin_row(nint table_ptr);
+
+        [DllImport(LibName)]
+        internal static extern bool table_next_column(nint table_ptr);
+
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void tree_node(

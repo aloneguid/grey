@@ -1328,4 +1328,39 @@ namespace grey::widgets {
         ImGui::TreePop();
     }*/
 
+    table::table(const std::string& id, const std::vector<std::string>& columns,
+        float outer_width, float outer_height)
+        : columns_size{columns.size()}, outer_size{outer_width, outer_height} {
+        rendered = ImGui::BeginTable(id.c_str(), columns.size(), flags, outer_size);
+        if (rendered) {
+            ImGui::TableSetupScrollFreeze(0, 1);
+            // setup columns
+            for (const string& cn : columns) {
+                if (cn.empty() || !cn.ends_with("+")) {
+                    ImGui::TableSetupColumn(cn.c_str());
+                }
+                else {
+                    string n = cn.substr(0, cn.size() - 1);
+                    ImGui::TableSetupColumn(n.c_str(), ImGuiTableColumnFlags_WidthStretch);
+                }
+            }
+            ImGui::TableHeadersRow();
+        }
+    }
+
+    table::~table() {
+        if (rendered) {
+            ImGui::EndTable();
+        }
+    }
+
+    bool table::begin_row() {
+        ImGui::TableNextRow();
+        return ImGui::TableNextColumn();
+    }
+
+    bool table::next_column() {
+        return ImGui::TableNextColumn();
+    }
+
 }

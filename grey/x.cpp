@@ -208,7 +208,7 @@ EXPORTED void status_bar(RenderCallback c_render_callback) {
     c_render_callback();
 }
 
-EXPORTED void table(const char* c_id,
+EXPORTED void big_table(const char* c_id,
     const char** c_columns, int32_t c_columns_size, int32_t row_count,
     float outer_width, float outer_height,
     bool alternate_row_bg,
@@ -226,9 +226,31 @@ EXPORTED void table(const char* c_id,
         });
 }
 
+EXPORTED void table(const char* c_id, const char** c_columns, int32_t c_columns_size, float outer_width, float outer_height, bool alternate_row_bg, RenderPtrCallback c_ptr_callback) {
+    vector<string> cols;
+    // copy columns into cols vector
+    for(int i = 0; i < c_columns_size; i++) {
+        cols.push_back(c_columns[i]);
+    }
+
+    w::table t{c_id, cols, outer_width * scale, outer_height * scale};
+    if(t) {
+        c_ptr_callback(&t);
+    }
+}
+
+EXPORTED bool table_begin_row(void* table_ptr) {
+    w::table* t = static_cast<w::table*>(table_ptr);
+    return t->begin_row();
+}
+
+bool table_next_column(void* table_ptr) {
+    w::table* t = static_cast<w::table*>(table_ptr);
+    return t->next_column();
+}
+
 EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, RenderCallback c_render_callback) {
-    w::tree_node tn{c_label, open_by_default, is_leaf};
-    if(tn) {
+    if(w::tree_node tn{c_label, open_by_default, is_leaf}; tn) {
         c_render_callback();
     }
 }

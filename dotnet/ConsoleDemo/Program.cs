@@ -155,7 +155,20 @@ Grey.App.Run("Grey# Demo", () => {
             }
         }
 
-        using(var ti = new TabItem("Tables")) {
+        using(var ti = new TabItem("Table")) {
+            if(ti) {
+                Table("t0", ["id", "name", "description+"], ta => {
+                    ta.BeginRow();
+                    Label("1");
+                    ta.NextColumn();
+                    Label("Grey");
+                    ta.NextColumn();
+                    Label("A cross-platform immediate mode GUI library for .NET");
+                });
+            }
+        }
+
+        using(var ti = new TabItem("Big table")) {
             if(ti) {
                 Checkbox("alg bg", ref alternateTableRowBg);
                 Checkbox("selectable", ref tableSelectables);
@@ -164,7 +177,7 @@ Grey.App.Run("Grey# Demo", () => {
                     Checkbox("entire row", ref tableSelectableRow);
                 }
 
-                Table("t0", new[] { "id", "name", "description+" }, 100000,
+                BigTable("t0", new[] { "id", "name", "description+" }, 100000,
                     (int row, int column) => {
 
                         if(column == 0) {

@@ -112,14 +112,41 @@ namespace Grey {
             return Native.list(label, items, items.Length, ref currentItem, width);
         }
 
-        public static void Table(string id, string[] columns, int rowCount, Action<int, int> cellRender,
+        public static void BigTable(string id, string[] columns, int rowCount, Action<int, int> cellRender,
             float outer_width = 0, float outerHeight = 0,
             bool alternateRowBg = false) {
-            Native.table(id, columns, columns.Length, rowCount,
+            Native.big_table(id, columns, columns.Length, rowCount,
                 outer_width, outerHeight,
                 alternateRowBg,
                 (rowIndex, columnIndex) => {
                     cellRender(rowIndex, columnIndex);
+                });
+        }
+
+        public class TableActions {
+            private readonly nint _table_ptr;
+
+            public TableActions(IntPtr table_ptr) {
+                _table_ptr = table_ptr;
+            }
+
+            public bool BeginRow() {
+                return Native.table_begin_row(_table_ptr);
+            }
+
+            public bool NextColumn() {
+                return Native.table_next_column(_table_ptr);
+            }
+        }
+
+        public static void Table(string id, string[] columns, Action<TableActions> tableActions,
+            float outer_width = 0, float outerHeight = 0,
+            bool alternateRowBg = false) {
+            Native.table(id, columns, columns.Length,
+                outer_width, outerHeight,
+                alternateRowBg,
+                (IntPtr table_ptr) => {
+                    tableActions(new TableActions(table_ptr));
                 });
         }
 

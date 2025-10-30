@@ -250,10 +250,33 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-           
-            // tables
+            // table
             {
                 auto tab = tabs.next_tab("Table");
+                if(tab) {
+                    static int row_count = 100;
+                    w::slider(row_count, 0, 1000, "row count");
+                    int rows_rendered = 0;
+                    if(w::table tbl{"tbl", {"col 1", "col 2", "col 3"}, .0f, -40 * w::scale}; tbl) {
+                        for(int i = 0; i < row_count; i++) {
+                            if(tbl.begin_row()) {
+                                rows_rendered++;
+                                w::label("row " + to_string(i));
+                                for(int c = 1; c < 3; c++) {
+                                    if(tbl.next_column()) {
+                                        w::label(to_string(i) + " x " + to_string(c));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    w::label("rows rendered: "); w::sl(); w::label(to_string(rows_rendered));
+                }
+            }
+           
+            // big table
+            {
+                auto tab = tabs.next_tab("Big table");
                 if(tab) {
                     static int row_count = 1000;
                     static int col_count = 3;
