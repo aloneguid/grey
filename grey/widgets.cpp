@@ -1237,5 +1237,95 @@ namespace grey::widgets {
     }
 #endif
 
+    /*
+    tree_table::tree_table(const std::string& id, const std::vector<std::string>& columns, float outer_width, float outer_height)
+        : columns_size{columns.size()}, outer_size{outer_width, outer_height} {
+        rendered = ImGui::BeginTable(id.c_str(), columns.size(), flags, outer_size);
+        if(rendered) {
+            ImGui::TableSetupScrollFreeze(0, 1);
+
+            // setup columns
+            for(const string& cn : columns) {
+                if(cn.empty() || !cn.ends_with("+")) {
+                    ImGui::TableSetupColumn(cn.c_str());
+                } else {
+                    string n = cn.substr(0, cn.size() - 1);
+                    ImGui::TableSetupColumn(n.c_str(), ImGuiTableColumnFlags_WidthStretch);
+                }
+            }
+            ImGui::TableHeadersRow();
+        }
+    }
+
+    tree_table::~tree_table() {
+        if(rendered) {
+            ImGui::EndTable();
+        }
+    }
+
+    void tree_table::render(
+        function<bool(string&, int, int&, bool&)> row_render,
+        function<void(int, int)> column_render) {
+
+        int row_no{0};
+        string title;
+        int direction{0};
+        bool rendered;
+        static ImGuiTreeNodeFlags tree_node_flags_base = ImGuiTreeNodeFlags_SpanAllColumns;
+        while(row_render(title, row_no, direction)) {
+            ImGui::TableNextRow();
+
+            // tree node column
+            ImGui::TableNextColumn();
+            auto flags = tree_node_flags_base;
+            if(direction > 0) {
+                flags |= ImGuiTreeNodeFlags_DefaultOpen;
+            } else if(direction <= 0) {
+                flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+            }
+            bool is_open = ImGui::TreeNodeEx(title.c_str(), flags);
+
+            // rest of the columns
+            for(int col = 1; col < columns_size; col++) {
+                ImGui::TableNextColumn();
+                column_render(row_no, col);
+            }
+
+            if(direction < 0) {
+                ImGui::TreePop();
+            }
+
+            row_no++;
+            direction = 0;
+        }
+    }*/
+
+    /*bool tree_table::render_row(const std::string& title, bool add_nesting, bool default_open, std::function<void(int)> cell_render) {
+        ImGui::TableNextRow();
+
+        ImGui::TableNextColumn();
+        static ImGuiTreeNodeFlags tree_node_flags_base = ImGuiTreeNodeFlags_SpanAllColumns;
+        auto flags = tree_node_flags_base;
+        if(add_nesting) {
+            if(default_open) flags |= ImGuiTreeNodeFlags_DefaultOpen;
+        } else {
+            flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+        }
+        //| ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_DrawLinesFull;
+        bool is_open = ImGui::TreeNodeEx(title.c_str(), flags);
+
+        for(int col = 1; col < columns_size; col++) {
+            ImGui::TableNextColumn();
+            if(cell_render) {
+                cell_render(col);
+            }
+        }
+
+        return is_open;
+    }
+
+    void tree_table::close_nesting() {
+        ImGui::TreePop();
+    }*/
 
 }

@@ -123,6 +123,16 @@ namespace Grey {
                 });
         }
 
+        public static void TreeNode(string label, bool openByDefault, bool isLeaf, Action render) {
+            Native.tree_node(label, openByDefault, isLeaf, () => {
+                render();
+            });
+        }
+
+        public static void TreeNode(string label) {
+            Native.tree_node(label, true, true, () => { });
+        }
+
         public static void StatusBar(Action render) {
             Native.status_bar(() => {
                 render();

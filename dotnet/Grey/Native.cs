@@ -124,6 +124,12 @@ namespace Grey {
             bool alternate_row_bg,
             RenderTableCellCallback cell_callback);
 
+        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void tree_node(
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
+            bool open_by_default,
+            bool is_leaf,
+            RenderCallback content_callback);
 
         // -- tabs
 

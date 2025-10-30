@@ -143,6 +143,18 @@ Grey.App.Run("Grey# Demo", () => {
             }
         }
 
+        using(var ti = new TabItem("Collapsibles")) {
+            if(ti) {
+                TreeNode("parent", true, false, () => {
+                    TreeNode("child 1");
+                    TreeNode("child 2", false, false, () => {
+                        TreeNode("grand 1");
+                        TreeNode("grand 2");
+                    });
+                });
+            }
+        }
+
         using(var ti = new TabItem("Tables")) {
             if(ti) {
                 Checkbox("alg bg", ref alternateTableRowBg);

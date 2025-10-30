@@ -94,6 +94,8 @@ extern "C"
         bool alternate_row_bg,
         RenderTableCellCallback c_cell_callback);
 
+    EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, RenderCallback c_render_callback);
+
     // -- application menus (todo: refactor to single call)
 
     EXPORTED bool push_menu_bar();

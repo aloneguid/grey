@@ -558,7 +558,7 @@ namespace grey::widgets {
     // tables
 
     /**
-     * @brief Table that will allow displaying enormous amounts of data.
+     * @brief Table that allows displaying enormous amounts of data.
      */
     class table {
     public:
@@ -591,6 +591,40 @@ namespace grey::widgets {
             ImGuiTableFlags_ScrollX };
         ImGuiListClipper clipper;
     };
+
+    class small_table {
+    public:
+        
+    };
+
+    /*
+    class tree_table {
+        public:
+        tree_table(const std::string& id, const std::vector<std::string>& columns,
+            float outer_width = 0.0f, float outer_height = 0.0f);
+        ~tree_table();
+
+        void render(
+            std::function<bool(std::string&, int, int&, bool&)> row_render,
+            std::function<void(int, int)> column_render);
+
+        operator bool() const {
+            return rendered;
+        }
+
+    private:
+        size_t columns_size;
+        bool rendered{false};
+        ImVec2 outer_size;
+        ImGuiTableFlags flags{
+            ImGuiTableFlags_Borders |
+            ImGuiTableFlags_NoBordersInBodyUntilResize |
+            ImGuiTableFlags_HighlightHoveredColumn |
+            ImGuiTableFlags_Resizable |
+            ImGuiTableFlags_ScrollY |
+            ImGuiTableFlags_ScrollX };
+    };
+    */
 
     // plotting
 

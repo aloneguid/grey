@@ -226,6 +226,13 @@ EXPORTED void table(const char* c_id,
         });
 }
 
+EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, RenderCallback c_render_callback) {
+    w::tree_node tn{c_label, open_by_default, is_leaf};
+    if(tn) {
+        c_render_callback();
+    }
+}
+
 // -- application menus
 
 stack<w::menu_bar> menu_bars;
