@@ -156,16 +156,13 @@ namespace Grey {
         // -- tabs
 
         [DllImport(LibName)]
-        internal static extern bool push_tab_bar([MarshalAs(UnmanagedType.LPUTF8Str)] string id);
+        internal static extern void tab_bar([MarshalAs(UnmanagedType.LPUTF8Str)] string id, RenderPtrCallback render_callback);
 
         [DllImport(LibName)]
-        internal static extern void pop_tab_bar();
-
-        [DllImport(LibName)]
-        internal static extern bool push_next_tab([MarshalAs(UnmanagedType.LPUTF8Str)] string title);
-
-        [DllImport(LibName)]
-        internal static extern void pop_next_tab();
+        internal static extern void tab(nint tab_bar_ptr,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string title,
+            bool unsaved, bool selected,
+            RenderCallback c_render_callback);
 
         [DllImport(LibName)]
         internal static extern void status_bar(RenderCallback c_callback);

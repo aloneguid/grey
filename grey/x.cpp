@@ -139,44 +139,6 @@ EXPORTED bool input_multiline(const char* c_id, char* c_value, int32_t value_max
     return w::input_ml(id, c_value, value_max_length, height, autoscroll, enabled, use_fixed_font);
 }
 
-stack<w::tab_bar> tab_bars;
-stack<w::tab_bar_item> tab_items;
-
-EXPORTED bool push_tab_bar(const char* c_id) {
-
-    //cout << "push_tab_bar: " << c_id << endl;
-    tab_bars.emplace(c_id);
-    return true;
-}
-
-EXPORTED void pop_tab_bar() {
-    //cout << "pop_tab_bar " << tab_bars.size() << endl;
-    tab_bars.pop();
-}
-
-
-EXPORTED bool push_next_tab(const char* c_title) {
-
-    //cout << "push_next_tab: " << c_title << endl;
-
-    if(tab_bars.empty()) {
-        return false;
-    }
-
-    w::tab_bar& bar = tab_bars.top();
-    string id = string{c_title} + "##" + std::to_string(bar.increment_tab_index());
-    tab_items.emplace(id, false, false);
-
-    auto& item = tab_items.top();
-    return item;
-}
-
-EXPORTED void pop_next_tab() {
-    //cout << "pop_next_tab" << endl;
-
-    tab_items.pop();
-}
-
 EXPORTED void spinner_hbo_dots(float radius, float thickness, float speed, int32_t dot_count) {
     w::spinner_hbo_dots(radius, thickness, speed, dot_count);
 }
@@ -201,6 +163,19 @@ EXPORTED bool combo(const char* c_label, const char** options, int32_t options_s
 
 EXPORTED bool list(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width) {
     return w::list(c_label, vector<string>(options, options + options_size), *selected, width * scale);
+}
+
+EXPORTED void tab_bar(const char* c_id, RenderPtrCallback c_render_callback) {
+    w::tab_bar tb{ c_id };
+    c_render_callback(&tb); 
+}
+
+EXPORTED void tab(void* tab_bar_ptr, const char* c_title, bool unsaved, bool selected, RenderCallback c_render_callback) {
+    w::tab_bar* tb = static_cast<w::tab_bar*>(tab_bar_ptr);
+    w::tab_bar_item tbi = tb->next_tab(c_title, unsaved, selected);
+    if(tbi) {
+        c_render_callback();
+    }
 }
 
 EXPORTED void status_bar(RenderCallback c_render_callback) {

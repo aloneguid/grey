@@ -2,7 +2,7 @@
 
 env:
   VERSION: 0.0.0
-  PACKAGE_SUFFIX: '-pre.29'
+  PACKAGE_SUFFIX: '-pre.30'
   # PACKAGE_SUFFIX: ''
   ASM_VERSION: 0.0.0
   BUILD_TYPE: Release

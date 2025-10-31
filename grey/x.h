@@ -73,15 +73,9 @@ extern "C"
 
     EXPORTED bool list(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width);
 
-    // -- tab bars (todo: refactor to single call)
+    EXPORTED void tab_bar(const char* c_id, RenderPtrCallback c_render_callback);
 
-    EXPORTED bool push_tab_bar(const char* c_id);
-
-    EXPORTED void pop_tab_bar();
-
-    EXPORTED bool push_next_tab(const char* c_title);
-
-    EXPORTED void pop_next_tab();
+    EXPORTED void tab(void* tab_bar_ptr, const char* c_title, bool unsaved, bool selected, RenderCallback c_render_callback);
 
     EXPORTED void spinner_hbo_dots(float radius, float thickness, float speed, int32_t dot_count);
 

@@ -166,6 +166,24 @@ namespace Grey {
                 });
         }
 
+        public class TabBarActions {
+            private readonly nint _tabbar_ptr;
+            public TabBarActions(IntPtr tabbar_ptr) {
+                _tabbar_ptr = tabbar_ptr;
+            }
+            public void TabItem(string title, Action render, bool isUnsaved = false, bool isSelected = false) {
+                Native.tab(_tabbar_ptr, title, isUnsaved, isSelected, () => {
+                    render();
+                });
+            }
+        }
+
+        public static void TabBar(string id, Action<TabBarActions> render) {
+            Native.tab_bar(id, (nint tabbar_ptr) => {
+                render(new TabBarActions(tabbar_ptr));
+            });
+        }
+
         public static void TreeNode(string label, bool openByDefault, bool isLeaf, Action<bool> render) {
             Native.tree_node(label, openByDefault, isLeaf, (is_open) => {
                 render(is_open);
