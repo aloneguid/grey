@@ -13,6 +13,8 @@ namespace Grey {
 
         public delegate void RenderCallback();
 
+        public delegate void RenderTreeNodeCallback(bool is_open);
+
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void app_run(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string title,
@@ -149,7 +151,7 @@ namespace Grey {
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
             bool open_by_default,
             bool is_leaf,
-            RenderCallback content_callback);
+            RenderTreeNodeCallback content_callback);
 
         // -- tabs
 

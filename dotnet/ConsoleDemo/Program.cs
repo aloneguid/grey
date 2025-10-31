@@ -141,12 +141,16 @@ Grey.App.Run("Grey# Demo", () => {
 
         using(var ti = new TabItem("Collapsibles")) {
             if(ti) {
-                TreeNode("parent", true, false, () => {
-                    TreeNode("child 1");
-                    TreeNode("child 2", false, false, () => {
-                        TreeNode("grand 1");
-                        TreeNode("grand 2");
-                    });
+                TreeNode("parent", true, false, (isOpen) => {
+                    if(isOpen) {
+                        TreeNode("child 1");
+                        TreeNode("child 2", false, false, (isOpen) => {
+                            if(isOpen) {
+                                TreeNode("grand 1");
+                                TreeNode("grand 2");
+                            }
+                        });
+                    }
                 });
             }
         }
@@ -160,6 +164,24 @@ Grey.App.Run("Grey# Demo", () => {
                     Label("Grey");
                     ta.NextColumn();
                     Label("A cross-platform immediate mode GUI library for .NET");
+
+                    // try tree inside table
+                    ta.BeginRow();
+                    TreeNode("root", true, false, (isOpen) => {
+                        ta.NextColumn();
+                        Label("--");
+                        ta.NextColumn();
+                        Label("--");
+
+                        if(isOpen) {
+                            ta.BeginRow();
+                            Label("2");
+                            ta.NextColumn();
+                            Label("Two");
+                            ta.NextColumn();
+                            Label("Two is a good number");
+                        }
+                    });
                 });
             }
         }

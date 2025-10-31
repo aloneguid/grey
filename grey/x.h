@@ -10,6 +10,7 @@
 
 typedef bool (*RenderFrameCallback)();
 typedef void (*RenderCallback)();
+typedef void (*RenderTreeNodeCallback)(bool is_open);
 typedef void (*RenderTableCellCallback)(int32_t row_index, int32_t col_index);
 typedef void (*RenderPtrCallback)(void* ptr);
 
@@ -104,7 +105,7 @@ extern "C"
 
     EXPORTED bool table_next_column(void* table_ptr);
 
-    EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, RenderCallback c_render_callback);
+    EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, RenderTreeNodeCallback c_render_callback);
 
     EXPORTED void menu_bar(RenderCallback c_render_callback);
 

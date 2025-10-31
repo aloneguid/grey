@@ -249,10 +249,9 @@ bool table_next_column(void* table_ptr) {
     return t->next_column();
 }
 
-EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, RenderCallback c_render_callback) {
-    if(w::tree_node tn{c_label, open_by_default, is_leaf}; tn) {
-        c_render_callback();
-    }
+EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, RenderTreeNodeCallback c_render_callback) {
+    w::tree_node tn{c_label, open_by_default, is_leaf};
+    c_render_callback(tn);
 }
 
 EXPORTED void menu_bar(RenderCallback c_render_callback) {
