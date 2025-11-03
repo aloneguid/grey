@@ -151,6 +151,7 @@ namespace Grey {
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
             bool open_by_default,
             bool is_leaf,
+            bool span_all_cols,
             RenderTreeNodeCallback content_callback);
 
         // -- tabs

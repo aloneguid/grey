@@ -188,14 +188,14 @@ namespace Grey {
             });
         }
 
-        public static void TreeNode(string label, bool openByDefault, bool isLeaf, Action<bool> render) {
-            Native.tree_node(label, openByDefault, isLeaf, (is_open) => {
+        public static void TreeNode(string label, bool openByDefault, bool isLeaf, Action<bool> render, bool spanAllCols = false) {
+            Native.tree_node(label, openByDefault, isLeaf, spanAllCols, (is_open) => {
                 render(is_open);
             });
         }
 
-        public static void TreeNode(string label) {
-            Native.tree_node(label, true, true, (isOpen) => { });
+        public static void TreeNode(string label, bool spanAllCols = false) {
+            Native.tree_node(label, true, true, spanAllCols, (isOpen) => { });
         }
 
         public static void StatusBar(Action render) {
