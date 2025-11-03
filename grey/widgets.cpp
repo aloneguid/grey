@@ -1000,7 +1000,7 @@ namespace grey::widgets {
             flags |= ImGuiTreeNodeFlags_DefaultOpen;
         }
         if (is_leaf) {
-            flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
+            flags |= ImGuiTreeNodeFlags_Leaf;// | ImGuiTreeNodeFlags_Bullet;
         }
 
         if(span_all_cols) {
