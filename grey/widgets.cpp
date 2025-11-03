@@ -1004,7 +1004,7 @@ namespace grey::widgets {
         }
 
         if(span_all_cols) {
-            flags |= ImGuiTreeNodeFlags_SpanFullWidth;
+            flags |= ImGuiTreeNodeFlags_SpanAllColumns;
         }
 
         // todo: since 1.92 trees can draw hierarchy lines
