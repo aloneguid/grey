@@ -36,7 +36,7 @@ namespace Grey {
         internal static extern bool selectable([MarshalAs(UnmanagedType.LPUTF8Str)] string text, bool span_columns);
 
         [DllImport(LibName)]
-        internal static extern bool checkbox([MarshalAs(UnmanagedType.LPUTF8Str)] string label, ref bool is_checked);
+        internal static extern bool checkbox([MarshalAs(UnmanagedType.LPUTF8Str)] string label, ref bool is_checked, bool is_small);
 
         [DllImport(LibName)]
         internal static extern bool button(

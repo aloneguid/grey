@@ -513,7 +513,7 @@ namespace grey::widgets {
 
     class tree_node {
     public:
-        tree_node(const std::string& label, bool open_by_default = false, bool is_leaf = false);
+        tree_node(const std::string& label, bool open_by_default = false, bool is_leaf = false, bool span_all_cols = false);
         ~tree_node();
 
         operator bool() const {
@@ -595,7 +595,8 @@ namespace grey::widgets {
     class table {
     public:
         table(const std::string& id, const std::vector<std::string>& columns,
-            float outer_width = 0.0f, float outer_height = 0.0f);
+            float outer_width = 0.0f, float outer_height = 0.0f,
+            bool alternate_row_bg = false);
         ~table();
 
         bool begin_row();

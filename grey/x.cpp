@@ -92,9 +92,9 @@ EXPORTED bool selectable(const char* c_text, bool span_columns) {
     return w::selectable(text, span_columns);
 }
 
-EXPORTED bool checkbox(const char* c_label, bool* is_checked) {
+EXPORTED bool checkbox(const char* c_label, bool* is_checked, bool is_small) {
     string label{ c_label };
-    return w::checkbox(label, *is_checked);
+    return is_small ? w::small_checkbox(label, *is_checked) : w::checkbox(label, *is_checked);
 }
 
 EXPORTED bool button(const char* c_text, int32_t emphasis, bool is_enabled, bool is_small) {
@@ -208,7 +208,7 @@ EXPORTED void table(const char* c_id, const char** c_columns, int32_t c_columns_
         cols.push_back(c_columns[i]);
     }
 
-    w::table t{c_id, cols, outer_width * scale, outer_height * scale};
+    w::table t{c_id, cols, outer_width * scale, outer_height * scale, alternate_row_bg};
     if(t) {
         c_ptr_callback(&t);
     }
@@ -224,8 +224,8 @@ bool table_next_column(void* table_ptr) {
     return t->next_column();
 }
 
-EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, RenderTreeNodeCallback c_render_callback) {
-    w::tree_node tn{c_label, open_by_default, is_leaf};
+EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, bool span_all_cols, RenderTreeNodeCallback c_render_callback) {
+    w::tree_node tn{c_label, open_by_default, is_leaf, span_all_cols};
     c_render_callback(tn);
 }
 

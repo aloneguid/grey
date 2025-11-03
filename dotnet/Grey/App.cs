@@ -24,7 +24,11 @@ namespace Grey {
         }
 
         public static bool Checkbox(string label, ref bool isChecked) {
-            return Native.checkbox(label, ref isChecked);
+            return Native.checkbox(label, ref isChecked, false);
+        }
+
+        public static bool SmallCheckbox(string label, ref bool isChecked) {
+            return Native.checkbox(label, ref isChecked, true);
         }
 
         public static bool Button(string text, Emphasis emphasis = Emphasis.None,

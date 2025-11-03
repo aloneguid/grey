@@ -3,6 +3,7 @@ using Grey;
 using static Grey.App;
 
 bool isRunning = true;
+bool isChecked = true;
 string message = "1";
 int number = 42;
 float spinnerRadius = 16;
@@ -47,6 +48,10 @@ void Basics() {
 
     SL();
     Button("small button", isSmall: true);
+
+    Checkbox("checkbox", ref isChecked);
+    SL();
+    SmallCheckbox("small checkbox", ref isChecked);
 
     if(Accordion("Normal accordion")) {
         Label("accordion content");

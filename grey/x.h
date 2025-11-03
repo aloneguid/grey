@@ -40,7 +40,7 @@ extern "C"
 
     EXPORTED bool selectable(const char* c_text, bool span_columns = false);
 
-    EXPORTED bool checkbox(const char* c_label, bool* is_checked);
+    EXPORTED bool checkbox(const char* c_label, bool* is_checked, bool is_small);
 
     EXPORTED bool button(const char* c_text, int32_t emphasis, bool is_enabled, bool is_small);
 
@@ -99,7 +99,7 @@ extern "C"
 
     EXPORTED bool table_next_column(void* table_ptr);
 
-    EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, RenderTreeNodeCallback c_render_callback);
+    EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, bool span_all_cols, RenderTreeNodeCallback c_render_callback);
 
     EXPORTED void menu_bar(RenderCallback c_render_callback);
 
