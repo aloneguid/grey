@@ -1235,6 +1235,25 @@ namespace grey::widgets {
         }
 
     }
+
+    void plot_realtime(const string& name, scrolling_buffer& points, float x_min, float x_max, float y_min, float y_max) {
+        if(ImPlot::BeginPlot(name.c_str())) {
+            static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels;
+            ImPlot::SetupAxes(nullptr, nullptr, flags, flags);
+            
+            ImPlot::SetupAxisLimits(ImAxis_X1, x_min, x_max, ImGuiCond_Always);
+            ImPlot::SetupAxisLimits(ImAxis_Y1, y_min, y_max, ImGuiCond_Always);
+
+            //ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, 0.5f);
+            ImPlot::PlotLine("##realtime", &points.data[0].x, &points.data[0].y, points.data.size(),
+                0,
+                points.offset, 2 * sizeof(float));
+
+
+            ImPlot::EndPlot();
+        }
+    }
+
 #endif
 
     /*

@@ -19,7 +19,7 @@ BEGIN
             VALUE "InternalName", "JS"
             VALUE "LegalCopyright", "Copyright (C) 2024 by Ivan Gavryliuk"
             VALUE "OriginalFilename", "jsonic.exe"
-            VALUE "ProductName", "Jsonic"
+            VALUE "ProductName", "Redact"
             VALUE "ProductVersion", "1.0.0.0"
         END
     END

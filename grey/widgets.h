@@ -653,5 +653,36 @@ namespace grey::widgets {
 
 #if GREY_INCLUDE_IMPLOT
     void plot_demo();
+
+    struct scrolling_buffer {
+        int max_size;
+        int offset;
+        ImVector<ImVec2> data;
+
+        scrolling_buffer(int max_size = 2000) {
+            this->max_size = max_size;
+            this->offset = 0;
+            this->data.reserve(this->max_size);
+        }
+
+        void add(float x, float y) {
+            if (data.size() < max_size)
+                data.push_back(ImVec2(x, y));
+            else {
+                data[offset] = ImVec2(x, y);
+                offset = (offset + 1) % max_size;
+            }
+        }
+
+        void erase() {
+            if (data.size() > 0) {
+                data.shrink(0);
+                offset = 0;
+            }
+        }
+    };
+
+    void plot_realtime(const std::string& name, scrolling_buffer& points, float x_min, float x_max, float y_min, float y_max);
+
 #endif
 }
