@@ -40,7 +40,7 @@ extern "C"
 
     EXPORTED bool selectable(const char* c_text, bool span_columns = false);
 
-    EXPORTED bool checkbox(const char* c_label, bool* is_checked);
+    EXPORTED bool checkbox(const char* c_label, bool* is_checked, bool is_small);
 
     EXPORTED bool button(const char* c_text, int32_t emphasis, bool is_enabled, bool is_small);
 
@@ -73,15 +73,9 @@ extern "C"
 
     EXPORTED bool list(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width);
 
-    // -- tab bars (todo: refactor to single call)
+    EXPORTED void tab_bar(const char* c_id, RenderPtrCallback c_render_callback);
 
-    EXPORTED bool push_tab_bar(const char* c_id);
-
-    EXPORTED void pop_tab_bar();
-
-    EXPORTED bool push_next_tab(const char* c_title);
-
-    EXPORTED void pop_next_tab();
+    EXPORTED void tab(void* tab_bar_ptr, const char* c_title, bool unsaved, bool selected, RenderCallback c_render_callback);
 
     EXPORTED void spinner_hbo_dots(float radius, float thickness, float speed, int32_t dot_count);
 
@@ -105,7 +99,7 @@ extern "C"
 
     EXPORTED bool table_next_column(void* table_ptr);
 
-    EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, RenderTreeNodeCallback c_render_callback);
+    EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, bool span_all_cols, RenderTreeNodeCallback c_render_callback);
 
     EXPORTED void menu_bar(RenderCallback c_render_callback);
 

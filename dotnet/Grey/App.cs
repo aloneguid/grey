@@ -24,7 +24,11 @@ namespace Grey {
         }
 
         public static bool Checkbox(string label, ref bool isChecked) {
-            return Native.checkbox(label, ref isChecked);
+            return Native.checkbox(label, ref isChecked, false);
+        }
+
+        public static bool SmallCheckbox(string label, ref bool isChecked) {
+            return Native.checkbox(label, ref isChecked, true);
         }
 
         public static bool Button(string text, Emphasis emphasis = Emphasis.None,
@@ -166,14 +170,32 @@ namespace Grey {
                 });
         }
 
-        public static void TreeNode(string label, bool openByDefault, bool isLeaf, Action<bool> render) {
-            Native.tree_node(label, openByDefault, isLeaf, (is_open) => {
+        public class TabBarActions {
+            private readonly nint _tabbar_ptr;
+            public TabBarActions(IntPtr tabbar_ptr) {
+                _tabbar_ptr = tabbar_ptr;
+            }
+            public void TabItem(string title, Action render, bool isUnsaved = false, bool isSelected = false) {
+                Native.tab(_tabbar_ptr, title, isUnsaved, isSelected, () => {
+                    render();
+                });
+            }
+        }
+
+        public static void TabBar(string id, Action<TabBarActions> render) {
+            Native.tab_bar(id, (nint tabbar_ptr) => {
+                render(new TabBarActions(tabbar_ptr));
+            });
+        }
+
+        public static void TreeNode(string label, bool openByDefault, bool isLeaf, Action<bool> render, bool spanAllCols = false) {
+            Native.tree_node(label, openByDefault, isLeaf, spanAllCols, (is_open) => {
                 render(is_open);
             });
         }
 
-        public static void TreeNode(string label) {
-            Native.tree_node(label, true, true, (isOpen) => { });
+        public static void TreeNode(string label, bool spanAllCols = false) {
+            Native.tree_node(label, true, true, spanAllCols, (isOpen) => { });
         }
 
         public static void StatusBar(Action render) {
