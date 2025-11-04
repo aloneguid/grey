@@ -513,7 +513,8 @@ namespace grey::widgets {
 
     class tree_node {
     public:
-        tree_node(const std::string& label, bool open_by_default = false, bool is_leaf = false, bool span_all_cols = false);
+        tree_node(const std::string& label, bool open_by_default = false, bool is_leaf = false, bool span_all_cols = false,
+            emphasis emp = emphasis::none);
         ~tree_node();
 
         operator bool() const {
