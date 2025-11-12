@@ -28,6 +28,13 @@ namespace grey::widgets {
         info = 6
     };
 
+    enum class show_delay : int32_t {
+        immediate = 0,
+        quick,
+        normal,
+        slow
+    };
+
     class rgb_colour {
     public:
         float r;
@@ -292,6 +299,24 @@ namespace grey::widgets {
 
 #define with_status_bar(...) { grey::widgets::status_bar sb; __VA_ARGS__ }
 
+    /**
+     * @brief Rich tooltip container
+     */
+    class rich_tt {
+    public:
+        rich_tt(show_delay delay = show_delay::normal);
+        ~rich_tt();
+
+        operator bool() const {
+            return rendered;
+        }
+
+    private:
+        bool rendered;
+    };
+
+#define with_rich_tt(...) { grey::widgets::rich_tt rtt; if(rtt) { __VA_ARGS__ } }
+
     class tab_bar_item {
     public:
         tab_bar_item(const std::string& id, bool unsaved, bool selected);
@@ -417,13 +442,13 @@ namespace grey::widgets {
      * @brief Checks if the last rendered item is hovered, and if so, shows a tooltip with the given text.
      * @param text 
      */
-    void tooltip(const std::string& text);
+    void tt(const std::string& text, show_delay delay = show_delay::normal);
 
     /**
      * @brief Checks if the last rendered item is hovered, and if so, shows a tooltip with the given text.
      * @param text 
      */
-    void tooltip(const char* text);
+    void tt(const char* text, show_delay delay = show_delay::normal);
 
     void image(app& app, const std::string& key, size_t width, size_t height);
 

@@ -32,6 +32,28 @@ namespace grey::widgets {
         return prefix + std::to_string(incrementing_id++);
     }
 
+    ImGuiHoveredFlags to_hovered_flags(show_delay delay) {
+        ImGuiHoveredFlags flags = ImGuiHoveredFlags_None;
+        switch(delay) {
+            case grey::widgets::show_delay::immediate:
+                flags = ImGuiHoveredFlags_DelayNone;
+                break;
+            case grey::widgets::show_delay::quick:
+                flags = ImGuiHoveredFlags_DelayShort | ImGuiHoveredFlags_NoSharedDelay;
+                break;
+            case grey::widgets::show_delay::normal:
+                flags = ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay;
+                break;
+            case grey::widgets::show_delay::slow:
+                flags = ImGuiHoveredFlags_DelayNone | ImGuiHoveredFlags_NoSharedDelay;
+                break;
+            default:
+                break;
+        }
+        return flags;
+    }
+
+
     //inline std::string sys_label(const std::string& label) { return label + "##" + id; }
 
     bool set_emphasis_colours(emphasis em, ImVec4& normal, ImVec4& hovered, ImVec4& active) {
@@ -530,16 +552,20 @@ namespace grey::widgets {
 
     // ---- tooltip ----
 
-    void tooltip(const std::string& text) {
-        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
-            ImGui::SetTooltip("%s", text.c_str());
+    void tt(const std::string& text, show_delay delay) {
+        if(!ImGui::IsItemHovered(to_hovered_flags(delay))) {
+            return;
         }
+
+        ImGui::SetTooltip("%s", text.c_str());
     }
 
-    void tooltip(const char* text) {
-        if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
-            ImGui::SetTooltip("%s", text);
+    void tt(const char* text, show_delay delay) {
+        if(!ImGui::IsItemHovered(to_hovered_flags(delay))) {
+            return;
         }
+
+        ImGui::SetTooltip("%s", text);
     }
 
     // ---- position ----
@@ -678,7 +704,7 @@ namespace grey::widgets {
         }
 
         if(!tooltip_text.empty()) {
-            tooltip(tooltip_text);
+            tt(tooltip_text);
         }
 
         return clicked;
@@ -1310,6 +1336,22 @@ namespace grey::widgets {
 
     bool table::next_column() {
         return ImGui::TableNextColumn();
+    }
+
+    rich_tt::rich_tt(show_delay delay) {
+
+        if(!ImGui::IsItemHovered(to_hovered_flags(delay))) {
+            rendered = false;
+            return;
+        }
+
+        rendered = ImGui::BeginTooltip();
+    }
+
+    rich_tt::~rich_tt() {
+        if (rendered) {
+            ImGui::EndTooltip();
+        }
     }
 
 }

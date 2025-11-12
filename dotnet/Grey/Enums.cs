@@ -14,4 +14,11 @@ namespace Grey {
         Warning = 5,
         Info = 6
     };
+
+    public enum ShowDelay : int {
+        Immediate = 0,
+        Quick,
+        Normal,
+        Slow
+    };
 }

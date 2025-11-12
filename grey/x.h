@@ -67,7 +67,9 @@ extern "C"
 
     EXPORTED bool slider_int(int32_t* value, int32_t min, int32_t max, const char* c_label);
 
-    EXPORTED void tooltip(const char* text);
+    EXPORTED void tt(const char* text, int32_t delay);
+
+    EXPORTED void rich_tt(RenderCallback c_render_callback, int32_t delay);
 
     EXPORTED bool combo(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width);
 

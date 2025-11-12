@@ -108,7 +108,6 @@ int main(int argc, char* argv[]) {
                 auto tab = tabs.next_tab("Basics");
                 if(tab) {
                     w::label("simple text");
-                    w::tooltip("simple tooltip");
                     w::sl(); w::label(ICON_MD_5G " icon1");
                     w::sl(); w::label("primary", w::emphasis::primary);
                     w::sl(); w::label("secondary", w::emphasis::secondary);
@@ -116,6 +115,17 @@ int main(int argc, char* argv[]) {
                     w::sl(); w::label("error", w::emphasis::error);
                     w::sl(); w::label("warning", w::emphasis::warning);
                     w::sl(); w::label("info", w::emphasis::info);
+
+                    w::label("hover for simple tooltip");
+                    w::tt("simple tooltip");
+
+                    w::sl();
+                    w::label("hover for rich tooltip");
+                    if(w::rich_tt tt{w::show_delay::immediate}; tt) {
+                        w::label("rich tooltip content");
+                        w::sep();
+                        w::button("even button here");
+                    }
 
                     w::sep();
 

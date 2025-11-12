@@ -153,8 +153,15 @@ EXPORTED bool slider_int(int32_t* value, int32_t min, int32_t max, const char* c
     return w::slider(*value, min, max, label);
 }
 
-EXPORTED void tooltip(const char* text) {
-    w::tooltip(text);
+EXPORTED void tt(const char* text, int32_t delay) {
+    w::tt(text, static_cast<w::show_delay>(delay));
+}
+
+void rich_tt(RenderCallback c_render_callback, int32_t delay) {
+    w::rich_tt tt{static_cast<w::show_delay>(delay)};
+    if(tt) {
+        c_render_callback();
+    }
 }
 
 EXPORTED bool combo(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width) {

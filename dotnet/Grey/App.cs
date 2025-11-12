@@ -96,8 +96,20 @@ namespace Grey {
         /// A text-only tooltip appearing on curren item's hover
         /// </summary>
         /// <param name="text"></param>
-        public static void Tooltip(string text) {
-            Native.tooltip(text);
+        /// <param name="delay"></param>
+        public static void TT(string text, ShowDelay delay = ShowDelay.Normal) {
+            Native.tt(text, delay);
+        }
+
+        /// <summary>
+        /// Rich tooltip
+        /// </summary>
+        /// <param name="renderContent"></param>
+        /// <param name="delay"></param>
+        public static void TT(Action renderContent, ShowDelay delay = ShowDelay.Normal) {
+            Native.rich_tt(() => {
+                renderContent();
+            }, delay);
         }
 
         /// <summary>

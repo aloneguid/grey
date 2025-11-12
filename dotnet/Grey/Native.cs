@@ -94,7 +94,10 @@ namespace Grey {
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label);
 
         [DllImport(LibName)]
-        internal static extern void tooltip([MarshalAs(UnmanagedType.LPUTF8Str)] string text);
+        internal static extern void tt([MarshalAs(UnmanagedType.LPUTF8Str)] string text, ShowDelay delay);
+
+        [DllImport(LibName)]
+        internal static extern void rich_tt(RenderCallback c_callback, ShowDelay delay);
 
         [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern bool combo(

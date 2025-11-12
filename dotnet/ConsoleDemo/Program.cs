@@ -36,10 +36,18 @@ void Basics() {
 
     Label(message);
 
-    if(Button("get current date (has tooltip")) {
+    if(Button("get current date (has tooltip)")) {
         message = DateTime.Now.ToString();
     }
-    Tooltip("gets current date");
+
+    Label("Tooltips:");
+
+    SL(); Label("simple"); TT("simple tooltip");
+    SL(); Label("rich"); TT(() => {
+        Sep("rich");
+        Label("rich tooltip");
+        Button("close");
+    });
 
     SL();
     if(Button("Quit")) {
