@@ -22,7 +22,6 @@ To get started in C#, reference [GreyMatter](https://www.nuget.org/packages/Grey
 
 # Roadmap
 - Markdown component support.
-- Tree table component.
 
 ## Building
 

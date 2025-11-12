@@ -81,6 +81,12 @@ extern "C"
 
     EXPORTED void status_bar(RenderCallback c_render_callback);
 
+    EXPORTED bool is_hovered();
+
+    EXPORTED bool is_leftclicked();
+
+    EXPORTED bool is_rightclicked();
+
     /**
      * @brief Table call in a single function call.
      * @param c_cell_callback Callback function that is called for each cell in the table, and receives row and column indices.

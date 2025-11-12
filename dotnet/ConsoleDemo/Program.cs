@@ -74,6 +74,20 @@ void Basics() {
     Input(ref message, "readonly input", is_readonly: true);
     Input(ref message, "width explicitly set to 400", width: 400);
     Input(ref number, "number input");
+
+    Sep("Mouse helpers");
+
+    Label("hovered: ");
+    SL();
+    Label(IsHovered ? "yes" : "no");
+
+    Label("left clicked: ");
+    SL();
+    Label(IsLeftClicked ? "yes" : "no");
+
+    Label("right clicked: ");
+    SL();
+    Label(IsRightClicked ? "yes" : "no");
 }
 
 

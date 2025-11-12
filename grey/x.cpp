@@ -183,6 +183,18 @@ EXPORTED void status_bar(RenderCallback c_render_callback) {
     c_render_callback();
 }
 
+bool is_hovered() {
+    return w::is_hovered();
+}
+
+bool is_leftclicked() {
+    return w::is_leftclicked();
+}
+
+bool is_rightclicked() {
+    return w::is_rightclicked();
+}
+
 EXPORTED void big_table(const char* c_id,
     const char** c_columns, int32_t c_columns_size, int32_t row_count,
     float outer_width, float outer_height,

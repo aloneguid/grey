@@ -168,6 +168,15 @@ namespace Grey {
         [DllImport(LibName)]
         internal static extern void status_bar(RenderCallback c_callback);
 
+        [DllImport(LibName)]
+        internal static extern bool is_hovered();
+
+        [DllImport(LibName)]
+        internal static extern bool is_leftclicked();
+
+        [DllImport(LibName)]
+        internal static extern bool is_rightclicked();
+
         // application menus
 
         [DllImport(LibName)]

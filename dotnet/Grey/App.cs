@@ -204,6 +204,12 @@ namespace Grey {
             });
         }
 
+        public static bool IsHovered => Native.is_hovered();
+
+        public static bool IsLeftClicked => Native.is_leftclicked();
+
+        public static bool IsRightClicked => Native.is_rightclicked();
+
         public static void PrintFps() {
             Native.label_fps();
         }
