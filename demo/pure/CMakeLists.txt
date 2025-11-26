@@ -29,3 +29,15 @@ if (UNIX AND NOT APPLE)
         OpenGL::GL
         )
 endif()
+
+# Check if we are building on macOS
+if (APPLE)
+    find_package(glfw3 CONFIG REQUIRED)
+    find_library(METAL_FRAMEWORK Metal)
+    find_library(QUARTZCORE_FRAMEWORK QuartzCore)
+    find_library(COCOA_FRAMEWORK Cocoa)
+
+    # For now, we skip building the pure demo on macOS since it requires Objective-C++ 
+    # and we don't have a pure Metal demo. The main grey library handles Metal properly.
+    # add_executable(${APP_NAME} "main_glfw_metal.mm")
+endif()

@@ -21,8 +21,22 @@
             "platform": "linux"
         },
         {
+            "name": "imgui",
+            "features": [
+                "metal-binding",
+                "osx-binding",
+                "glfw-binding",
+                "docking-experimental"
+            ],
+            "platform": "osx"
+        },
+        {
             "name": "glfw3",
             "platform": "linux"
+        },
+        {
+            "name": "glfw3",
+            "platform": "osx"
         },
         "implot"
     ]
