@@ -7,10 +7,7 @@
 #include "backends/win32dx11app.hpp"
 #include "common/win32/os.h"
 #elif defined(__APPLE__)
-// Forward declaration for Metal backend
-namespace grey::backends {
-    class glfw_metal_app;
-}
+// Factory function for Metal backend (defined in glfw_metal.mm)
 std::unique_ptr<grey::app> create_glfw_metal_app(const std::string& title, int width, int height, float scale);
 #else
 #include "backends/glfw_gl3.hpp"

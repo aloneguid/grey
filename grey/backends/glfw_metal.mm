@@ -5,6 +5,7 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <QuartzCore/QuartzCore.h>
+#import <Cocoa/Cocoa.h>
 
 #define GLFW_INCLUDE_NONE
 #define GLFW_EXPOSE_NATIVE_COCOA
@@ -47,15 +48,15 @@ namespace grey::backends {
                 if (window == nullptr)
                     return;
 
-                id<MTLDevice> device = MTLCreateSystemDefaultDevice();
-                id<MTLCommandQueue> commandQueue = [device newCommandQueue];
+                device = MTLCreateSystemDefaultDevice();
+                commandQueue = [device newCommandQueue];
 
                 // Setup Platform/Renderer backends
                 ImGui_ImplGlfw_InitForOther(window, true);
                 ImGui_ImplMetal_Init(device);
 
                 NSWindow* nswin = glfwGetCocoaWindow(window);
-                CAMetalLayer* layer = [CAMetalLayer layer];
+                layer = [CAMetalLayer layer];
                 layer.device = device;
                 layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
                 nswin.contentView.layer = layer;
@@ -140,19 +141,52 @@ namespace grey::backends {
             }
         }
 
-        void resize_main_viewport(int width, int height) {}
+        void resize_main_viewport(int width, int height) {
+            if (window) {
+                glfwSetWindowSize(window, width, height);
+            }
+        }
 
-        void move_main_viewport(int x, int y) {}
+        void move_main_viewport(int x, int y) {
+            if (window) {
+                glfwSetWindowPos(window, x, y);
+            }
+        }
 
         void* make_native_texture(grey::common::raw_img& img) {
-            return nullptr;
+            if (!device || !img) return nullptr;
+
+            MTLTextureDescriptor* desc = [[MTLTextureDescriptor alloc] init];
+            desc.pixelFormat = MTLPixelFormatRGBA8Unorm;
+            desc.width = img.x;
+            desc.height = img.y;
+            desc.usage = MTLTextureUsageShaderRead;
+
+            id<MTLTexture> texture = [device newTextureWithDescriptor:desc];
+            if (!texture) return nullptr;
+
+            MTLRegion region = MTLRegionMake2D(0, 0, img.x, img.y);
+            [texture replaceRegion:region mipmapLevel:0 withBytes:img.get_data() bytesPerRow:img.x * 4];
+
+            return (__bridge_retained void*)texture;
         }
 
         void set_dark_mode(bool enabled) {
+            NSWindow* nswin = glfwGetCocoaWindow(window);
+            if (nswin) {
+                if (enabled) {
+                    nswin.appearance = [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua];
+                } else {
+                    nswin.appearance = [NSAppearance appearanceNamed:NSAppearanceNameAqua];
+                }
+            }
         }
 
     private:
         GLFWwindow* window{nullptr};
+        id<MTLDevice> device{nil};
+        id<MTLCommandQueue> commandQueue{nil};
+        CAMetalLayer* layer{nil};
         string title;
         int window_width{-1};
         int window_height{-1};
@@ -160,11 +194,9 @@ namespace grey::backends {
     };
 }
 
-// Factory function to create the Metal app
-extern "C" {
-    std::unique_ptr<grey::app> create_glfw_metal_app(const std::string& title, int width, int height, float scale) {
-        return std::make_unique<grey::backends::glfw_metal_app>(title, width, height, scale);
-    }
+// Factory function to create the Metal app (C++ linkage)
+std::unique_ptr<grey::app> create_glfw_metal_app(const std::string& title, int width, int height, float scale) {
+    return std::make_unique<grey::backends::glfw_metal_app>(title, width, height, scale);
 }
 
 #endif // __APPLE__
