@@ -6,6 +6,12 @@
 #if _WIN32
 #include "backends/win32dx11app.hpp"
 #include "common/win32/os.h"
+#elif defined(__APPLE__)
+// Forward declaration for Metal backend
+namespace grey::backends {
+    class glfw_metal_app;
+}
+std::unique_ptr<grey::app> create_glfw_metal_app(const std::string& title, int width, int height, float scale);
 #else
 #include "backends/glfw_gl3.hpp"
 #endif
@@ -17,6 +23,8 @@ namespace grey {
 
 #if _WIN32
         auto app = make_unique<grey::backends::win32dx11app>(title, width, height, scale);
+#elif defined(__APPLE__)
+        auto app = create_glfw_metal_app(title, width, height, scale);
 #else
         auto app = make_unique<grey::backends::glfw_gl3_app>(title, width, height, scale);
 #endif

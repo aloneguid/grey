@@ -6,26 +6,42 @@ set (DYNAMIC_NAME xgrey)
 find_package(imgui CONFIG REQUIRED)
 find_package(implot CONFIG REQUIRED)
 
-if(UNIX)
+if(UNIX AND NOT APPLE)
     find_package(OpenGL REQUIRED)
     find_package(glfw3 CONFIG REQUIRED)
+endif()
+
+if(APPLE)
+    find_package(glfw3 CONFIG REQUIRED)
+    enable_language(OBJCXX)
 endif()
 
 find_path(STB_INCLUDE_DIRS "stb.h")
 
 file(GLOB core_src CONFIGURE_DEPENDS "*.cpp"
-    "backends/*.cpp"
     "fonts/*.cpp"
     "common/*.cpp"
     "3rdparty/imgui-node-editor/*.cpp"
     "3rdparty/ImGuiColorTextEdit/*.cpp")
 
 if (WIN32)
+    file(GLOB backend_src CONFIGURE_DEPENDS "backends/*.cpp")
     file(GLOB core_src CONFIGURE_DEPENDS ${core_src} "common/win32/*.cpp")
+elseif(APPLE)
+    file(GLOB backend_src CONFIGURE_DEPENDS "backends/*.mm")
+else()
+    file(GLOB backend_src CONFIGURE_DEPENDS "backends/*.cpp" "backends/*.hpp")
 endif()
+
+set(core_src ${core_src} ${backend_src})
 
 if (WIN32)
     set(private_libs implot::implot D3D11.lib)
+elseif(APPLE)
+    find_library(METAL_FRAMEWORK Metal)
+    find_library(QUARTZCORE_FRAMEWORK QuartzCore)
+    find_library(COCOA_FRAMEWORK Cocoa)
+    set(private_libs implot::implot glfw ${METAL_FRAMEWORK} ${QUARTZCORE_FRAMEWORK} ${COCOA_FRAMEWORK})
 else()
     set(private_libs implot::implot glfw OpenGL::GL)
 endif()

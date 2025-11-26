@@ -23,7 +23,8 @@
         {
             "name": "imgui",
             "features": [
-                "opengl3-binding",
+                "metal-binding",
+                "osx-binding",
                 "glfw-binding",
                 "docking-experimental"
             ],

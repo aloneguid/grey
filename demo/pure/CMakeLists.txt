@@ -15,8 +15,8 @@ if (WIN32)
     target_link_libraries(${APP_NAME} PRIVATE D3D11.lib imgui::imgui)
 endif()
 
-# Check if we are building on Linux or macOS
-if (UNIX)
+# Check if we are building on Linux
+if (UNIX AND NOT APPLE)
     # sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
 
     find_package(OpenGL REQUIRED)
@@ -28,4 +28,16 @@ if (UNIX)
         glfw
         OpenGL::GL
         )
+endif()
+
+# Check if we are building on macOS
+if (APPLE)
+    find_package(glfw3 CONFIG REQUIRED)
+    find_library(METAL_FRAMEWORK Metal)
+    find_library(QUARTZCORE_FRAMEWORK QuartzCore)
+    find_library(COCOA_FRAMEWORK Cocoa)
+
+    # For now, we skip building the pure demo on macOS since it requires Objective-C++ 
+    # and we don't have a pure Metal demo. The main grey library handles Metal properly.
+    # add_executable(${APP_NAME} "main_glfw_metal.mm")
 endif()
