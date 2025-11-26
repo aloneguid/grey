@@ -39,11 +39,11 @@ jobs:
             vcpkg_config: MinSizeRel
             dotnet_rid: linux-x64
           - os: macos-latest
-            name: macOS x64
-            arch: x64
-            vcpkg_triplet: x64-osx
+            name: macOS ARM64
+            arch: arm64
+            vcpkg_triplet: arm64-osx
             vcpkg_config: MinSizeRel
-            dotnet_rid: osx-x64
+            dotnet_rid: osx-arm64
 
       fail-fast: false
     name: 'build: ${{ matrix.name }}'
@@ -187,11 +187,11 @@ jobs:
             vcpkg_config: MinSizeRel
             dotnet_rid: linux-x64
           - os: macos-latest
-            name: macOS x64
-            arch: x64
-            vcpkg_triplet: x64-osx
+            name: macOS ARM64
+            arch: arm64
+            vcpkg_triplet: arm64-osx
             vcpkg_config: MinSizeRel
-            dotnet_rid: osx-x64
+            dotnet_rid: osx-arm64
 
       fail-fast: false
     name: 'demo app: ${{ matrix.name }}'
