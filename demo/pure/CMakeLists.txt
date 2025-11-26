@@ -15,8 +15,8 @@ if (WIN32)
     target_link_libraries(${APP_NAME} PRIVATE D3D11.lib imgui::imgui)
 endif()
 
-# Check if we are building on Linux
-if (UNIX AND NOT APPLE)
+# Check if we are building on Linux or macOS
+if (UNIX)
     # sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
 
     find_package(OpenGL REQUIRED)

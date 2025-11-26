@@ -38,6 +38,12 @@ jobs:
             vcpkg_triplet: x64-linux
             vcpkg_config: MinSizeRel
             dotnet_rid: linux-x64
+          - os: macos-latest
+            name: macOS x64
+            arch: x64
+            vcpkg_triplet: x64-osx
+            vcpkg_config: MinSizeRel
+            dotnet_rid: osx-x64
 
       fail-fast: false
     name: 'build: ${{ matrix.name }}'
@@ -180,6 +186,12 @@ jobs:
             vcpkg_triplet: x64-linux
             vcpkg_config: MinSizeRel
             dotnet_rid: linux-x64
+          - os: macos-latest
+            name: macOS x64
+            arch: x64
+            vcpkg_triplet: x64-osx
+            vcpkg_config: MinSizeRel
+            dotnet_rid: osx-x64
 
       fail-fast: false
     name: 'demo app: ${{ matrix.name }}'
@@ -277,6 +289,27 @@ jobs:
           # Kill the app
           Stop-Process -Id $app.Id -Force -ErrorAction SilentlyContinue
 
+
+      - name: Run app and capture screenshot (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          # Run the app in background
+          chmod +x dotnet/ConsoleDemo/bin/Release/net9.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo
+          dotnet/ConsoleDemo/bin/Release/net9.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo 2>&1 | tee app.log &
+          APP_PID=$!
+          
+          # Wait for app to render
+          sleep 5
+          
+          # Capture screenshot using screencapture
+          mkdir -p screenshots
+          screencapture -x screenshots/demo-${{ matrix.dotnet_rid }}.png || echo "Screenshot capture failed"
+
+          # Show app logs
+          cat app.log || true
+          
+          # Kill the app
+          kill $APP_PID || true
 
       - name: Flatten files for artifact upload
         shell: bash
