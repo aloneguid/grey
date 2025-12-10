@@ -1295,6 +1295,43 @@ namespace grey::widgets {
         }
     }
 
+    void plot_realtime(const string& name,
+        float x_min, float x_max, float y_min, float y_max,
+        const std::string& name1, scrolling_buffer& points1,
+        const std::string& name2, scrolling_buffer& points2,
+        bool fill) {
+
+        if(ImPlot::BeginPlot(name.c_str())) {
+            static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels;
+            ImPlot::SetupAxes(nullptr, nullptr, flags, flags);
+
+            ImPlot::SetupAxisLimits(ImAxis_X1, x_min, x_max, ImGuiCond_Always);
+            ImPlot::SetupAxisLimits(ImAxis_Y1, y_min, y_max, ImGuiCond_Always);
+
+            if(fill) {
+                ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f);
+                ImPlot::PlotShaded(name1.c_str(), &points1.data[0].x, &points1.data[0].y, points1.data.size(),
+                    -INFINITY,
+                    0, points1.offset, 2 * sizeof(float));
+                ImPlot::PlotShaded(name2.c_str(), &points2.data[0].x, &points2.data[0].y, points2.data.size(),
+                    -INFINITY,
+                    0, points2.offset, 2 * sizeof(float));
+
+                ImPlot::PopStyleVar();
+            }
+
+            //ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, 0.5f);
+            ImPlot::PlotLine(name1.c_str(), &points1.data[0].x, &points1.data[0].y, points1.data.size(),
+                0,
+                points1.offset, 2 * sizeof(float));
+            ImPlot::PlotLine(name2.c_str(), &points2.data[0].x, &points2.data[0].y, points2.data.size(),
+                0,
+                points2.offset, 2 * sizeof(float));
+
+            ImPlot::EndPlot();
+        }
+    }
+
 #endif
 
     table::table(const std::string& id, const std::vector<std::string>& columns,

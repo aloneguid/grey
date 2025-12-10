@@ -711,5 +711,11 @@ namespace grey::widgets {
 
     void plot_realtime(const std::string& name, scrolling_buffer& points, float x_min, float x_max, float y_min, float y_max);
 
+    void plot_realtime(const std::string& name,
+        float x_min, float x_max, float y_min, float y_max,
+        const std::string& name1, scrolling_buffer& points1,
+        const std::string& name2, scrolling_buffer& points2,
+        bool fill = false);
+
 #endif
 }
