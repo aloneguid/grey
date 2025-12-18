@@ -21,7 +21,7 @@ namespace grey::x {
     public:
         void render();
 
-        void add_node(int id);
+        graph_node& add_node(int id);
         void add_edge(int from_node_id, int to_node_id);
 
         /**
@@ -44,5 +44,8 @@ namespace grey::x {
     private:
         std::vector<graph_node> nodes;
         std::vector<graph_edge> edges;
+        
+        int dragging_node_id{-1};
+        ImVec2 drag_offset{0.0f, 0.0f};
     };
 }
