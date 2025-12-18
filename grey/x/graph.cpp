@@ -34,9 +34,9 @@ namespace grey::x {
         // draw nodes
         for(const graph_node& node : nodes) {
             ImVec2 node_center = ImVec2(pos.x + node.pos.x + 50, pos.y + node.pos.y + 25);
-            const float node_radius = 25.0f;
             
-            dl->AddCircleFilled(node_center, node_radius, node.fill_colour);
+            dl->AddCircleFilled(node_center, node.radius, node.fill_colour);
+            dl->AddCircle(node_center, node.radius, node.border_colour, 0, 2.0f);
             
             ImVec2 text_size = ImGui::CalcTextSize(std::to_string(node.id).c_str());
             ImVec2 text_pos = ImVec2(node_center.x - text_size.x * 0.5f, node_center.y - text_size.y * 0.5f);

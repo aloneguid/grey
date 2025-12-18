@@ -7,6 +7,8 @@ namespace grey::x {
         ImVec2 pos;
         grey::widgets::rgb_colour fill_colour{0.2f, 0.6f, 0.9f, 1.0f};
         grey::widgets::rgb_colour text_colour{1.0f, 1.0f, 1.0f, 1.0f};
+        grey::widgets::rgb_colour border_colour{0.3f, 0.7f, 1.0f, 1.0f};
+        float radius{25.0f};
     };
 
     struct graph_edge {
