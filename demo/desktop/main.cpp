@@ -1,6 +1,7 @@
 ﻿//#include "main_wnd.h"
 #include "../grey/app.h"
 #include "../grey/widgets.h"
+#include "../grey/x/graph.h"
 #include <imgui_internal.h>
 #include <vector>
 #include <iostream>
@@ -30,6 +31,7 @@ end
 
 w::container md_wnd;
 w::container md_wnd1;
+grey::x::graph gr;
 
 void plot_demo() {
 
@@ -59,6 +61,14 @@ int main(int argc, char* argv[]) {
         .has_menubar();
 
     ted.set_text("-- add your Lua code here");
+
+    gr.add_node(1);
+    gr.add_node(2);
+    gr.add_node(3);
+    gr.add_node(4);
+    gr.add_edge(1, 2);
+    gr.add_edge(2, 3);
+    gr.add_edge(1, 4);
 
 
     app->run([&app](const grey::app& c_app) {
@@ -399,6 +409,40 @@ This is a **bold** text and this is an *italic* text.
                     }
                 }
             }
+
+            // graph
+            {
+                auto tab = tabs.next_tab("X");
+                if(tab) {
+                    static bool gr_auto_fr{false};
+                    static string gr_connect_to;
+
+                    if(w::button("add node")) {
+                        int id = gr.get_nodes().size() + 1;
+                        gr.add_node(id);
+                        if(!gr_connect_to.empty()) {
+                            gr.add_edge(id, std::stoi(gr_connect_to));
+                        }
+                    }
+                    w::sl();
+                    w::input(gr_connect_to, "connect to", true, 50 * w::scale);
+                    w::sl();
+                    w::label("|");
+                    w::sl();
+                    if(w::button("circle")) {
+                        gr.layout_circle();
+                    }
+                    w::sl();
+                    w::checkbox("auto FR", gr_auto_fr);
+                    if(gr_auto_fr) {
+                        gr.layout_fruchterman_reingold();
+                    }
+
+                    //gr.loop_fr_re();
+                    gr.render();
+                }
+            }
+
         }
 
 

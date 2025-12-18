@@ -17,6 +17,7 @@ file(GLOB core_src CONFIGURE_DEPENDS "*.cpp"
     "backends/*.cpp"
     "fonts/*.cpp"
     "common/*.cpp"
+    "x/*.cpp"
     "3rdparty/imgui-node-editor/*.cpp"
     "3rdparty/ImGuiColorTextEdit/*.cpp")
 
