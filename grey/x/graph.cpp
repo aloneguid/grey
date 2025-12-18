@@ -27,7 +27,7 @@ namespace grey::x {
             if(it_from != nodes.end() && it_to != nodes.end()) {
                 ImVec2 from_pos = ImVec2(pos.x + it_from->pos.x + 50, pos.y + it_from->pos.y + 25);
                 ImVec2 to_pos = ImVec2(pos.x + it_to->pos.x + 50, pos.y + it_to->pos.y + 25);
-                dl->AddLine(from_pos, to_pos, IM_COL32(200, 200, 200, 255), 2.0f);
+                dl->AddLine(from_pos, to_pos, edge.colour, 2.0f);
             }
         }
 
@@ -36,11 +36,11 @@ namespace grey::x {
             ImVec2 node_center = ImVec2(pos.x + node.pos.x + 50, pos.y + node.pos.y + 25);
             const float node_radius = 25.0f;
             
-            dl->AddCircleFilled(node_center, node_radius, IM_COL32(75, 75, 75, 255));
+            dl->AddCircleFilled(node_center, node_radius, node.fill_colour);
             
             ImVec2 text_size = ImGui::CalcTextSize(std::to_string(node.id).c_str());
             ImVec2 text_pos = ImVec2(node_center.x - text_size.x * 0.5f, node_center.y - text_size.y * 0.5f);
-            dl->AddText(text_pos, IM_COL32(255, 255, 255, 255), std::to_string(node.id).c_str());
+            dl->AddText(text_pos, node.text_colour, std::to_string(node.id).c_str());
         }
     }
 

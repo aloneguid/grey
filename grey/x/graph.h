@@ -5,11 +5,14 @@ namespace grey::x {
     struct graph_node {
         int id;
         ImVec2 pos;
+        grey::widgets::rgb_colour fill_colour{0.2f, 0.6f, 0.9f, 1.0f};
+        grey::widgets::rgb_colour text_colour{1.0f, 1.0f, 1.0f, 1.0f};
     };
 
     struct graph_edge {
         int from_node_id;
         int to_node_id;
+        grey::widgets::rgb_colour colour{0.8f, 0.8f, 0.8f, 1.0f};
     };
 
     class graph {

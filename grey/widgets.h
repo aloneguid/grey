@@ -60,11 +60,11 @@ namespace grey::widgets {
             o = vec.w;
         }
 
-        operator ImColor() {
+        operator ImColor() const {
             return ImColor(r, g, b, o);
         }
 
-        operator ImU32() {
+        operator ImU32() const {
             return (ImU32)ImColor(r, g, b, o);
         }
 
