@@ -937,36 +937,20 @@ namespace grey::widgets {
             ImDrawList* bdl = ImGui::GetBackgroundDrawList();
 
             if (bg_ci > 0) {
-                bdl->AddRectFilled(min, max,
-                    (ImU32)rgb_colour {
-                    style.Colors[bg_ci]
-                },
-                    style.FrameRounding);
+                bdl->AddRectFilled(min, max, (ImU32)rgb_colour { style.Colors[bg_ci] }, style.FrameRounding);
             }
 
             if (bdr_ci > 0) {
-                fdl->AddRect(min, max,
-                    (ImU32)rgb_colour {
-                    style.Colors[bdr_ci]
-                },
-                    style.FrameRounding);
+                fdl->AddRect(min, max, (ImU32)rgb_colour { style.Colors[bdr_ci] }, style.FrameRounding);
             }
 
             if (ImGui::IsItemHovered()) {
                 if (bg_hover_ci > 0) {
-                    bdl->AddRectFilled(min, max,
-                        (ImU32)rgb_colour {
-                        style.Colors[bg_hover_ci]
-                    },
-                        style.FrameRounding);
+                    bdl->AddRectFilled(min, max, (ImU32)rgb_colour { style.Colors[bg_hover_ci] }, style.FrameRounding);
                 }
 
                 if (bdr_hover_ci > 0) {
-                    fdl->AddRect(min, max,
-                        (ImU32)rgb_colour {
-                        style.Colors[bdr_hover_ci]
-                    },
-                        style.FrameRounding);
+                    fdl->AddRect(min, max, (ImU32)rgb_colour { style.Colors[bdr_hover_ci] }, style.FrameRounding);
                 }
             }
         }
