@@ -926,7 +926,8 @@ namespace grey::widgets {
             // add some content horizontally to force full width
             float max_width = ImGui::GetWindowWidth();
             ImGui::SetCursorPosX(0.0);
-            ImGui::InvisibleButton("ib", ImVec2(max_width, 0.1));
+            //ImGui::InvisibleButton("##ib", ImVec2(max_width, 0.1));
+            ImGui::Dummy(ImVec2(max_width, 0.1));
             ImGui::SameLine();
         }
 

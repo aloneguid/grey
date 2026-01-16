@@ -86,8 +86,17 @@ namespace grey::widgets {
         constexpr rect(const ImVec2& min, const ImVec2& max)
             : x_min{min.x}, y_min{min.y}, x_max{max.x}, y_max{max.y} {}
 
-        ImVec2 min() const { return ImVec2{x_min, y_min}; }
-        ImVec2 max() const { return ImVec2{x_max, y_max}; }
+        /**
+         * @brief Left-top corner
+         * @return 
+         */
+        ImVec2 lt() const { return ImVec2{x_min, y_min}; }
+
+        /**
+         * @brief Right-bottom corner
+         * @return 
+         */
+        ImVec2 rb() const { return ImVec2{x_max, y_max}; }
     };
 
     class guardable {

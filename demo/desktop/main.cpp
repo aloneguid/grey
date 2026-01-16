@@ -213,10 +213,10 @@ int main(int argc, char* argv[]) {
                     auto& style = ImGui::GetStyle();
 
                     if(grp_border || (grp_hover_border && is_hovered))
-                        fdl->AddRect(item_rect.min(), item_rect.max(), w::imcol32(ImGuiCol_Border), style.FrameRounding);
+                        fdl->AddRect(item_rect.lt(), item_rect.rb(), w::imcol32(ImGuiCol_Border), style.FrameRounding);
 
                     if(grp_bg || (grp_hover_bg && is_hovered))
-                        bdl->AddRectFilled(item_rect.min(), item_rect.max(), w::imcol32(ImGuiCol_Border), style.FrameRounding);
+                        bdl->AddRectFilled(item_rect.lt(), item_rect.rb(), w::imcol32(ImGuiCol_Border), style.FrameRounding);
 
 
                     w::sep("scroller");
