@@ -175,52 +175,58 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            // container
+            // containers
             {
-                auto tab = tabs.next_tab("Container");
+                auto tab = tabs.next_tab("Containers");
                 if(tab) {
-                    w::guard g{scroller};
 
-                    // add 100 buttons
-                    for(int i = 0; i < 100; i++) {
-                        w::button("button " + to_string(i));
-                    }
-                }
-            }
+                    static bool grp_bg{false};
+                    static bool grp_border{false};
+                    static bool grp_fw{false};
+                    static bool grp_hover_bg{false};
+                    static bool grp_hover_border{false};
 
-            // group
-            {
-                auto tab = tabs.next_tab("Group");
-                if(tab) {
-                    {
-                        w::group g;
-                        g.render();
-
-                        w::label("group");
-                    }
+                    w::checkbox("full width", grp_fw);
 
                     {
-                        w::group g;
-                        g.border(ImGuiCol_FrameBgActive).render();
-
-                        w::label("bordered group");
+                        w::group g{grp_fw};
+                        w::label("group content");
+                        w::label("a label");
+                        w::button("a button");
                     }
 
-                    {
-                        w::group g;
-                        g.border(ImGuiCol_FrameBgActive).spread_horizontally().render();
+                    auto item_rect = w::item_rect_get();
+                    bool is_hovered = w::is_hovered();
 
-                        w::label("full width");
+                    if(w::accordion("decoration")) {
+                        w::checkbox("has background", grp_bg);
+                        w::checkbox("has border", grp_border);
+                        w::checkbox("hover background", grp_hover_bg);
+                        w::checkbox("hover border", grp_hover_border);
                     }
 
-                    {
-                        w::group g;
-                        g
-                            .background_hover(ImGuiCol_Border)
-                            .border_hover(ImGuiCol_FrameBgHovered)
-                            .render();
+                    w::label("(" + to_string((int)item_rect.x_min) + "x" + to_string((int)item_rect.y_min) + ") - (" +
+                         to_string((int)item_rect.x_max) + "x" + to_string((int)item_rect.y_max) + ")");
 
-                        w::label("border on hover");
+                    ImDrawList* fdl = ImGui::GetWindowDrawList();
+                    ImDrawList* bdl = ImGui::GetForegroundDrawList();
+                    auto& style = ImGui::GetStyle();
+
+                    if(grp_border || (grp_hover_border && is_hovered))
+                        fdl->AddRect(item_rect.min(), item_rect.max(), w::imcol32(ImGuiCol_Border), style.FrameRounding);
+
+                    if(grp_bg || (grp_hover_bg && is_hovered))
+                        bdl->AddRectFilled(item_rect.min(), item_rect.max(), w::imcol32(ImGuiCol_Border), style.FrameRounding);
+
+
+                    w::sep("scroller");
+                    {
+                        w::guard g{scroller};
+
+                        // add 100 buttons
+                        for(int i = 0; i < 100; i++) {
+                            w::button("button " + to_string(i));
+                        }
                     }
 
                 }

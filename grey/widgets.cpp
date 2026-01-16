@@ -602,6 +602,12 @@ namespace grey::widgets {
         return ImGui::GetContentRegionAvail().y;
     }
 
+    // ----- basic drawing ----
+
+    rect item_rect_get() {
+        return rect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+    }
+
     // ---- image ----
 
     void image(app& app, const std::string& key, size_t width, size_t height) {
@@ -636,7 +642,7 @@ namespace grey::widgets {
 
     bool icon_selector(app& app, const std::string& path, size_t square_size) {
         group g;
-        g.border_hover(ImGuiCol_ButtonHovered).render();
+        //g.border_hover(ImGuiCol_ButtonHovered).render();
 
         if (path.empty()) {
             ImGui::Dummy(ImVec2(square_size, square_size));
@@ -909,17 +915,15 @@ namespace grey::widgets {
 
     // ---- group ----
 
-    group::group() {
-
-    }
-
-    void group::render() {
+    group::group(bool full_width) : full_width{full_width} {
         ImGui::BeginGroup();
+
     }
 
     group::~group() {
 
-        if (full_width) {
+        if(full_width) {
+            // add some content horizontally to force full width
             float max_width = ImGui::GetWindowWidth();
             ImGui::SetCursorPosX(0.0);
             ImGui::InvisibleButton("ib", ImVec2(max_width, 0.1));
@@ -927,34 +931,6 @@ namespace grey::widgets {
         }
 
         ImGui::EndGroup();
-
-        if (bdr_ci || bdr_hover_ci || bg_ci || bg_hover_ci) {
-            auto& style = ImGui::GetStyle();
-
-            auto min = ImGui::GetItemRectMin();
-            auto max = ImGui::GetItemRectMax();
-            ImDrawList* fdl = ImGui::GetWindowDrawList();
-            ImDrawList* bdl = ImGui::GetBackgroundDrawList();
-
-            if (bg_ci > 0) {
-                bdl->AddRectFilled(min, max, (ImU32)rgb_colour { style.Colors[bg_ci] }, style.FrameRounding);
-            }
-
-            if (bdr_ci > 0) {
-                fdl->AddRect(min, max, (ImU32)rgb_colour { style.Colors[bdr_ci] }, style.FrameRounding);
-            }
-
-            if (ImGui::IsItemHovered()) {
-                if (bg_hover_ci > 0) {
-                    bdl->AddRectFilled(min, max, (ImU32)rgb_colour { style.Colors[bg_hover_ci] }, style.FrameRounding);
-                }
-
-                if (bdr_hover_ci > 0) {
-                    fdl->AddRect(min, max, (ImU32)rgb_colour { style.Colors[bdr_hover_ci] }, style.FrameRounding);
-                }
-            }
-        }
-
     }
 
     // ---- status bar ----

@@ -74,6 +74,22 @@ namespace grey::widgets {
         operator bool() { return o > 0; }
     };
 
+    struct rect {
+        float x_min;
+        float y_min;
+        float x_max;
+        float y_max;
+
+        constexpr rect() : x_min{0}, y_min{0}, x_max{0}, y_max{0} {}
+        constexpr rect(float x_min, float y_min, float x_max, float y_max)
+            : x_min{x_min}, y_min{y_min}, x_max{x_max}, y_max{y_max} {}
+        constexpr rect(const ImVec2& min, const ImVec2& max)
+            : x_min{min.x}, y_min{min.y}, x_max{max.x}, y_max{max.y} {}
+
+        ImVec2 min() const { return ImVec2{x_min, y_min}; }
+        ImVec2 max() const { return ImVec2{x_max, y_max}; }
+    };
+
     class guardable {
     public:
         virtual void enter() = 0;
@@ -214,33 +230,12 @@ namespace grey::widgets {
 
     class group {
     public:
-        group();
-
-        group& background(size_t colour_index) {
-            this->bg_ci = colour_index; return *this; }
-
-        group& background_hover(size_t colour_index) {
-            this->bg_hover_ci = colour_index; return *this; }
-
-        group& border(size_t colour_index) {
-            this->bdr_ci = colour_index; return *this; }
-
-        group& border_hover(size_t colour_index) {
-            this->bdr_hover_ci = colour_index; return *this; }
-
-        group& spread_horizontally() {
-            this->full_width = true; return *this; }
-
-        void render();
+        group(bool full_width = false);
 
         ~group();
 
     private:
-        size_t bdr_ci{0};
-        size_t bdr_hover_ci{0};
-        size_t bg_ci{0};
-        size_t bg_hover_ci{0};
-        bool full_width{false};
+        bool full_width;
     };
 
     const std::string SetThemeMenuPrefix{"set_theme_"};
@@ -391,6 +386,10 @@ namespace grey::widgets {
 
     float avail_x();
     float avail_y();
+
+    // Basic drawing
+
+    rect item_rect_get();
 
     void label(const std::string& text, size_t text_wrap_pos = 0, bool enabled = true);
 
