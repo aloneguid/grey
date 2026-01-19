@@ -529,6 +529,8 @@ namespace grey::widgets {
 
     bool is_hovered();
 
+    bool is_focused();
+
     enum class mouse_cursor_type {
         none = -1,
         arrow = 0,

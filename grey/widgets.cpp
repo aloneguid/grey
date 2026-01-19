@@ -977,6 +977,10 @@ namespace grey::widgets {
         return ImGui::IsItemHovered();
     }
 
+    bool is_focused() {
+        return ImGui::IsItemFocused();
+    }
+
     void mouse_cursor(mouse_cursor_type mct) {
         ImGui::SetMouseCursor((ImGuiMouseCursor_)mct);
     }
