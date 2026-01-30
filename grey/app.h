@@ -103,6 +103,10 @@ namespace grey {
         bool win32_center_on_screen{false};
         bool win32_transparent{false};
         bool win32_hide_from_taskbar{false};
+        /**
+         * @brief sets WS_EX_NOACTIVATE on window (if you need to create a tool window that does not take focus, useful for notification windows)
+         */
+        bool win32_no_activate{false};
         std::string win32_window_class_name{"GreyDX11"};
 
         /**

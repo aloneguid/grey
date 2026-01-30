@@ -286,12 +286,22 @@ namespace grey::backends {
                 window_left = window_top = CW_USEDEFAULT;
             }
 
-            hwnd = ::CreateWindowW(wc.lpszClassName,
-                w_title.c_str(), dwStyle,
-                window_left, window_top,
-                window_width, window_height,
-                nullptr, nullptr,
-                wc.hInstance, nullptr);
+            DWORD dwExStyle = 0;
+
+            if(win32_no_activate) {
+                dwExStyle |= WS_EX_NOACTIVATE;
+            }
+
+            hwnd = ::CreateWindowExW(
+                dwExStyle,
+                wc.lpszClassName,
+                w_title.c_str(),
+                dwStyle,
+                window_left, window_top, window_width, window_height,
+                nullptr,
+                nullptr,
+                wc.hInstance,
+                nullptr);
 
             ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
