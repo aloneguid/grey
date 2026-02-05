@@ -467,6 +467,107 @@ namespace grey::widgets {
         return slider<int>(value, min, max, label);
     }
 
+    bool slider(float& value, float min, float max, float step, const std::string& label, bool ticks) {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        if(window->SkipItems)
+            return false;
+
+        ImGuiContext& g = *GImGui;
+        const ImGuiStyle& style = g.Style;
+        const ImGuiID id = window->GetID(label.c_str());
+        const float w = ImGui::CalcItemWidth();
+
+        // Calculate dimensions
+        const float knob_radius = style.FramePadding.y + 8.0f;
+        const float track_height = 4.0f;
+        const float height = knob_radius * 2.0f;
+
+        // Reserve space for the widget
+        ImVec2 pos = window->DC.CursorPos;
+        ImVec2 size(w, height);
+        ImRect bb(pos, ImVec2(pos.x + size.x, pos.y + size.y));
+        ImGui::ItemSize(size, style.FramePadding.y);
+        if (!ImGui::ItemAdd(bb, id))
+            return false;
+
+        // Handle input
+        bool hovered, held;
+        bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, 0);
+        bool value_changed = false;
+
+        if (held) {
+            float mouse_x = g.IO.MousePos.x;
+            float t = ImClamp((mouse_x - (bb.Min.x + knob_radius)) / (bb.GetWidth() - knob_radius * 2.0f), 0.0f, 1.0f);
+            float new_value = min + t * (max - min);
+
+            // Snap to step if specified
+            if (step > 0.0f) {
+                new_value = min + std::round((new_value - min) / step) * step;
+                new_value = ImClamp(new_value, min, max);
+            }
+
+            if (new_value != value) {
+                value = new_value;
+                value_changed = true;
+            }
+        }
+
+        // Calculate knob position based on current value
+        float t = (max > min) ? ImClamp((value - min) / (max - min), 0.0f, 1.0f) : 0.0f;
+        float knob_x = bb.Min.x + knob_radius + t * (bb.GetWidth() - knob_radius * 2.0f);
+        float knob_y = bb.Min.y + height / 2.0f;
+
+        // Draw track (line)
+        ImDrawList* draw_list = window->DrawList;
+        float track_y = knob_y;
+        ImU32 track_color = ImGui::GetColorU32(ImGuiCol_FrameBg);
+        ImU32 track_filled_color = ImGui::GetColorU32(ImGuiCol_SliderGrabActive);
+        
+        // Background track
+        draw_list->AddLine(
+            ImVec2(bb.Min.x + knob_radius, track_y),
+            ImVec2(bb.Max.x - knob_radius, track_y),
+            track_color, track_height);
+
+        // Filled portion of track (from start to knob)
+        draw_list->AddLine(
+            ImVec2(bb.Min.x + knob_radius, track_y),
+            ImVec2(knob_x, track_y),
+            track_filled_color, track_height);
+
+        // Draw ticks if enabled and step is set
+        if (ticks && step > 0.0f) {
+            const float tick_height = knob_radius * 0.6f;
+            ImU32 tick_color = ImGui::GetColorU32(ImGuiCol_TextDisabled);
+            float track_start = bb.Min.x + knob_radius;
+            float track_end = bb.Max.x - knob_radius;
+            float track_width = track_end - track_start;
+
+            for (float v = min; v <= max; v += step) {
+                float tick_t = (max > min) ? (v - min) / (max - min) : 0.0f;
+                float tick_x = track_start + tick_t * track_width;
+                draw_list->AddLine(
+                    ImVec2(tick_x, track_y - tick_height),
+                    ImVec2(tick_x, track_y + tick_height),
+                    tick_color, 1.0f);
+            }
+        }
+
+        // Draw knob (bubble)
+        ImU32 knob_color = ImGui::GetColorU32(held ? ImGuiCol_SliderGrabActive : (hovered ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab));
+        draw_list->AddCircleFilled(ImVec2(knob_x, knob_y), knob_radius, knob_color);
+
+        // Draw label vertically centered with the track
+        if (!label.empty() && label[0] != '#') {
+            float text_height = ImGui::GetTextLineHeight();
+            float label_y = bb.Min.y + (height - text_height) / 2.0f;
+            ImGui::SetCursorScreenPos(ImVec2(bb.Max.x + style.ItemInnerSpacing.x, label_y));
+            ImGui::TextUnformatted(label.c_str());
+        }
+
+        return value_changed;
+    }
+
     void autoscroll_input_ml(const string& id) {
         const char* child_window_name = NULL;
         ImGuiContext* g = ImGui::GetCurrentContext();

@@ -172,6 +172,12 @@ int main(int argc, char* argv[]) {
                     w::input(text, "##input1");
 
                     w::selectable("default selectable");
+
+                    static float slider_value = 0.5f;
+                    static bool slider_ticks = false;
+                    w::slider(slider_value, 0.0f, 1.0f, "slider");
+                    w::checkbox("ticks", slider_ticks);
+                    w::slider(slider_value, 0.0f, 1.0f, 0.1f, "slider2", slider_ticks);
                 }
             }
 
