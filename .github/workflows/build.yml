@@ -137,8 +137,7 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: |
-          8.0.x
-          9.0.x
+          10.0.x
 
     - name: Build
       run: dotnet build dotnet/Grey.sln -c release /p:Version=${{ env.VERSION }}${{ env.PACKAGE_SUFFIX }} /p:FileVersion=$VERSION /p:AssemblyVersion=$ASM_VERSION
@@ -200,8 +199,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
-            8.0.x
-            9.0.x
+            10.0.x
 
       - name: Publish
         run: dotnet publish dotnet/ConsoleDemo/ -r ${{ matrix.dotnet_rid }} --self-contained true -p:PublishSingleFile=true  -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true
@@ -256,7 +254,7 @@ jobs:
         shell: pwsh
         run: |
           # Start the app in background
-          $app = Start-Process -FilePath "dotnet\ConsoleDemo\bin\Release\net9.0\${{ matrix.dotnet_rid }}\publish\ConsoleDemo.exe" -PassThru
+          $app = Start-Process -FilePath "dotnet\ConsoleDemo\bin\Release\net10.0\${{ matrix.dotnet_rid }}\publish\ConsoleDemo.exe" -PassThru
           
           # Wait for app to render
           Start-Sleep -Seconds 5
@@ -283,7 +281,7 @@ jobs:
         run: |
           mkdir -p flat-output
           # Copy published binaries
-          find dotnet/ConsoleDemo/bin/Release/net9.0/${{ matrix.dotnet_rid }}/publish/ -type f -exec cp {} flat-output/ \;
+          find dotnet/ConsoleDemo/bin/Release/net10.0/${{ matrix.dotnet_rid }}/publish/ -type f -exec cp {} flat-output/ \;
           # Copy screenshots if they exist
           find screenshots/ -type f -exec cp {} flat-output/ \; 2>/dev/null || true
           ls -la flat-output/
