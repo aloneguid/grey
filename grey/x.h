@@ -63,7 +63,7 @@ extern "C"
         float height,
         bool autoscroll, bool enabled, bool use_fixed_font);
 
-    EXPORTED bool slider_float(float* value, float min, float max, const char* c_label);
+    EXPORTED bool slider_float(float* value, float min, float max, const char* c_label, float step, bool ticks, int32_t emphasis);
 
     EXPORTED bool slider_int(int32_t* value, int32_t min, int32_t max, const char* c_label);
 

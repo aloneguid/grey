@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
     //auto wnd = backend->make_window<demo::main_wnd>();
     //backend->run();
 
-    auto app = grey::app::make("demo", 800, 600);
+    auto app = grey::app::make("demo", 700, 800);
     //app->load_icon_font = false;
     app->load_fixed_font = true;
     float scale = app->scale;
@@ -175,9 +175,10 @@ int main(int argc, char* argv[]) {
 
                     static float slider_value = 0.5f;
                     static bool slider_ticks = false;
-                    w::slider(slider_value, 0.0f, 1.0f, "slider");
+                    w::slider_classic(slider_value, 0.0f, 1.0f, "slider");
                     w::checkbox("ticks", slider_ticks);
-                    w::slider(slider_value, 0.0f, 1.0f, 0.1f, "slider2", slider_ticks);
+                    w::slider(slider_value, 0.0f, 1.0f, "slider2", 0.1f, slider_ticks);
+                    w::slider(slider_value, 0.0f, 1.0f, "slider2_primary", 0.1f, slider_ticks, w::emphasis::secondary);
                 }
             }
 
@@ -287,7 +288,7 @@ int main(int argc, char* argv[]) {
                 auto tab = tabs.next_tab("Table");
                 if(tab) {
                     static int row_count = 100;
-                    w::slider(row_count, 0, 1000, "row count");
+                    w::slider_classic(row_count, 0, 1000, "row count");
                     int rows_rendered = 0;
                     if(w::table tbl{"tbl", {"col 1", "col 2", "col 3"}, .0f, -40 * w::scale}; tbl) {
                         for(int i = 0; i < row_count; i++) {
@@ -315,8 +316,8 @@ int main(int argc, char* argv[]) {
                     static bool row_selectable = false;
                     static bool row_selectable_span = false;
 
-                    w::slider(row_count, 0, 1000000000, "row count");
-                    w::slider(col_count, 1, 100, "col count");
+                    w::slider_classic(row_count, 0, 1000000000, "row count");
+                    w::slider_classic(col_count, 1, 100, "col count");
                     w::checkbox("row selectable", row_selectable);
                     if(row_selectable) {
                         w::sl();
@@ -365,7 +366,7 @@ int main(int argc, char* argv[]) {
                     w::slider(radius, 5, 500, "radius");
                     w::slider(thickness, 1, 50, "thickness");
                     w::slider(speed, 0.1, 10, "speed");
-                    w::slider(dot_count, 1, 100, "dot count");
+                    w::slider_classic(dot_count, 1, 100, "dot count");
                     w::spinner_hbo_dots(radius, thickness, speed, dot_count);
                 }
             }

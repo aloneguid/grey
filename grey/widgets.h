@@ -442,11 +442,11 @@ namespace grey::widgets {
      */
     void markdown(const std::string& text);
 
-    bool slider(float& value, float min, float max, const std::string& label = "");
+    // classic sliders will be deprecated in the future, use slider() instead
+    bool slider_classic(float& value, float min, float max, const std::string& label = "");
+    bool slider_classic(int& value, int min, int max, const std::string& label = "");
 
-    bool slider(int& value, int min, int max, const std::string& label = "");
-
-    bool slider(float& value, float min, float max, float step, const std::string& label = "", bool ticks = false);
+    bool slider(float& value, float min, float max, const std::string& label = "", float step = 0.0f, bool ticks = false, emphasis emp = emphasis::none);
 
     /**
      * @brief Checks if the last rendered item is hovered, and if so, shows a tooltip with the given text.

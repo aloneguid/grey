@@ -84,8 +84,8 @@ namespace Grey {
             Native.spinner_hbo_dots(radius, thickness, speed, dotCount);
         }
 
-        public static bool Slider(ref float value, float min, float max, string label) {
-            return Native.slider_float(ref value, min, max, label);
+        public static bool Slider(ref float value, float min, float max, string label, float step = 0, bool ticks = false, Emphasis emphasis = Emphasis.None) {
+            return Native.slider_float(ref value, min, max, label, step, ticks, emphasis);
         }
 
         public static bool Slider(ref int value, int min, int max, string label) {

@@ -459,15 +459,15 @@ namespace grey::widgets {
         return fired;
     }
 
-    bool slider(float& value, float min, float max, const std::string& label) {
+    bool slider_classic(float& value, float min, float max, const std::string& label) {
         return slider<float>(value, min, max, label);
     }
 
-    bool slider(int& value, int min, int max, const std::string& label) {
+    bool slider_classic(int& value, int min, int max, const std::string& label) {
         return slider<int>(value, min, max, label);
     }
 
-    bool slider(float& value, float min, float max, float step, const std::string& label, bool ticks) {
+    bool slider(float& value, float min, float max, const std::string& label, float step, bool ticks, emphasis emp) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         if(window->SkipItems)
             return false;
@@ -517,11 +517,17 @@ namespace grey::widgets {
         float knob_x = bb.Min.x + knob_radius + t * (bb.GetWidth() - knob_radius * 2.0f);
         float knob_y = bb.Min.y + height / 2.0f;
 
+        // Determine colors based on emphasis
+        ImVec4 emp_normal, emp_hovered, emp_active;
+        bool has_emphasis = set_emphasis_colours(emp, emp_normal, emp_hovered, emp_active);
+
         // Draw track (line)
         ImDrawList* draw_list = window->DrawList;
         float track_y = knob_y;
         ImU32 track_color = ImGui::GetColorU32(ImGuiCol_FrameBg);
-        ImU32 track_filled_color = ImGui::GetColorU32(ImGuiCol_SliderGrabActive);
+        ImU32 track_filled_color = has_emphasis 
+            ? ImGui::GetColorU32(emp_normal) 
+            : ImGui::GetColorU32(ImGuiCol_SliderGrabActive);
         
         // Background track
         draw_list->AddLine(
@@ -554,7 +560,12 @@ namespace grey::widgets {
         }
 
         // Draw knob (bubble)
-        ImU32 knob_color = ImGui::GetColorU32(held ? ImGuiCol_SliderGrabActive : (hovered ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab));
+        ImU32 knob_color;
+        if (has_emphasis) {
+            knob_color = ImGui::GetColorU32(held ? emp_active : (hovered ? emp_hovered : emp_normal));
+        } else {
+            knob_color = ImGui::GetColorU32(held ? ImGuiCol_SliderGrabActive : (hovered ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab));
+        }
         draw_list->AddCircleFilled(ImVec2(knob_x, knob_y), knob_radius, knob_color);
 
         // Draw label vertically centered with the track

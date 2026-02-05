@@ -87,7 +87,8 @@ namespace Grey {
 
         [DllImport(LibName)]
         internal static extern bool slider_float(ref float value, float min, float max,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string label);
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
+            float step, bool ticks, Emphasis emphasis);
 
         [DllImport(LibName)]
         internal static extern bool slider_int(ref int value, int min, int max,
