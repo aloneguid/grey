@@ -173,12 +173,17 @@ int main(int argc, char* argv[]) {
 
                     w::selectable("default selectable");
 
-                    static float slider_value = 0.5f;
+                    static float slider_value_float = 0.5f;
+                    static int slider_value_int = 1;
                     static bool slider_ticks = false;
-                    w::slider_classic(slider_value, 0.0f, 1.0f, "slider");
                     w::checkbox("ticks", slider_ticks);
-                    w::slider(slider_value, 0.0f, 1.0f, "slider2", 0.1f, slider_ticks);
-                    w::slider(slider_value, 0.0f, 1.0f, "slider2_primary", 0.1f, slider_ticks, w::emphasis::secondary);
+                    w::slider(slider_value_float, 0.0f, 1.0f, "slider float", 0.1f, slider_ticks);
+                    w::slider(slider_value_float, 0.0f, 1.0f, "slider float secondary", 0.1f, slider_ticks, w::emphasis::secondary);
+                    w::slider_classic(slider_value_float, 0.0f, 1.0f, "slider classic");
+
+                    w::slider(slider_value_int, 0, 10, "slider int", 2, slider_ticks);
+
+
                 }
             }
 

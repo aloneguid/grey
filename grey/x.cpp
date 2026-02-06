@@ -148,9 +148,9 @@ EXPORTED bool slider_float(float* value, float min, float max, const char* c_lab
     return w::slider(*value, min, max, label, step, ticks, (w::emphasis)emphasis);
 }
 
-EXPORTED bool slider_int(int32_t* value, int32_t min, int32_t max, const char* c_label) {
+EXPORTED bool slider_int(int32_t* value, int32_t min, int32_t max, const char* c_label, int step, bool ticks, int32_t emphasis) {
     string label{ c_label };
-    return w::slider_classic(*value, min, max, label);
+    return w::slider(*value, min, max, label, step, ticks, (w::emphasis)emphasis);
 }
 
 EXPORTED void tt(const char* text, int32_t delay) {

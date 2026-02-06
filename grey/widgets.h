@@ -447,6 +447,7 @@ namespace grey::widgets {
     bool slider_classic(int& value, int min, int max, const std::string& label = "");
 
     bool slider(float& value, float min, float max, const std::string& label = "", float step = 0.0f, bool ticks = false, emphasis emp = emphasis::none);
+    bool slider(int& value, int min, int max, const std::string& label = "", int step = 0, bool ticks = false, emphasis emp = emphasis::none);
 
     /**
      * @brief Checks if the last rendered item is hovered, and if so, shows a tooltip with the given text.

@@ -92,7 +92,8 @@ namespace Grey {
 
         [DllImport(LibName)]
         internal static extern bool slider_int(ref int value, int min, int max,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string label);
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
+            int step, bool ticks, Emphasis emphasis);
 
         [DllImport(LibName)]
         internal static extern void tt([MarshalAs(UnmanagedType.LPUTF8Str)] string text, ShowDelay delay);

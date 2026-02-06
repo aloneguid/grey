@@ -88,8 +88,8 @@ namespace Grey {
             return Native.slider_float(ref value, min, max, label, step, ticks, emphasis);
         }
 
-        public static bool Slider(ref int value, int min, int max, string label) {
-            return Native.slider_int(ref value, min, max, label);
+        public static bool Slider(ref int value, int min, int max, string label, int step = 0, bool ticks = false, Emphasis emphasis = Emphasis.None) {
+            return Native.slider_int(ref value, min, max, label, step, ticks, emphasis);
         }
 
         /// <summary>

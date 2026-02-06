@@ -467,7 +467,8 @@ namespace grey::widgets {
         return slider<int>(value, min, max, label);
     }
 
-    bool slider(float& value, float min, float max, const std::string& label, float step, bool ticks, emphasis emp) {
+    template<typename T>
+    bool slider_impl(T& value, T min, T max, const std::string& label, T step, bool ticks, emphasis emp) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         if(window->SkipItems)
             return false;
@@ -498,11 +499,21 @@ namespace grey::widgets {
         if (held) {
             float mouse_x = g.IO.MousePos.x;
             float t = ImClamp((mouse_x - (bb.Min.x + knob_radius)) / (bb.GetWidth() - knob_radius * 2.0f), 0.0f, 1.0f);
-            float new_value = min + t * (max - min);
+            T new_value;
+            
+            if constexpr (std::is_integral_v<T>) {
+                new_value = static_cast<T>(min + std::round(t * (max - min)));
+            } else {
+                new_value = min + t * (max - min);
+            }
 
             // Snap to step if specified
-            if (step > 0.0f) {
-                new_value = min + std::round((new_value - min) / step) * step;
+            if (step > 0) {
+                if constexpr (std::is_integral_v<T>) {
+                    new_value = min + static_cast<T>(std::round(static_cast<float>(new_value - min) / step) * step);
+                } else {
+                    new_value = min + std::round((new_value - min) / step) * step;
+                }
                 new_value = ImClamp(new_value, min, max);
             }
 
@@ -513,7 +524,7 @@ namespace grey::widgets {
         }
 
         // Calculate knob position based on current value
-        float t = (max > min) ? ImClamp((value - min) / (max - min), 0.0f, 1.0f) : 0.0f;
+        float t = (max > min) ? ImClamp(static_cast<float>(value - min) / static_cast<float>(max - min), 0.0f, 1.0f) : 0.0f;
         float knob_x = bb.Min.x + knob_radius + t * (bb.GetWidth() - knob_radius * 2.0f);
         float knob_y = bb.Min.y + height / 2.0f;
 
@@ -542,15 +553,15 @@ namespace grey::widgets {
             track_filled_color, track_height);
 
         // Draw ticks if enabled and step is set
-        if (ticks && step > 0.0f) {
+        if (ticks && step > 0) {
             const float tick_height = knob_radius * 0.6f;
             ImU32 tick_color = ImGui::GetColorU32(ImGuiCol_TextDisabled);
             float track_start = bb.Min.x + knob_radius;
             float track_end = bb.Max.x - knob_radius;
             float track_width = track_end - track_start;
 
-            for (float v = min; v <= max; v += step) {
-                float tick_t = (max > min) ? (v - min) / (max - min) : 0.0f;
+            for (T v = min; v <= max; v += step) {
+                float tick_t = (max > min) ? static_cast<float>(v - min) / static_cast<float>(max - min) : 0.0f;
                 float tick_x = track_start + tick_t * track_width;
                 draw_list->AddLine(
                     ImVec2(tick_x, track_y - tick_height),
@@ -577,6 +588,14 @@ namespace grey::widgets {
         }
 
         return value_changed;
+    }
+
+    bool slider(float& value, float min, float max, const std::string& label, float step, bool ticks, emphasis emp) {
+        return slider_impl<float>(value, min, max, label, step, ticks, emp);
+    }
+
+    bool slider(int& value, int min, int max, const std::string& label, int step, bool ticks, emphasis emp) {
+        return slider_impl<int>(value, min, max, label, step, ticks, emp);
     }
 
     void autoscroll_input_ml(const string& id) {
