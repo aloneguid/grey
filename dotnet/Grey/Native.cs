@@ -26,6 +26,9 @@ namespace Grey {
             RenderFrameCallback callback);
 
         [DllImport(LibName)]
+        internal static extern void id_frame(int scope_id, RenderCallback c_callback);
+
+        [DllImport(LibName)]
         internal static extern void sl(float offset);
 
         [DllImport(LibName)]

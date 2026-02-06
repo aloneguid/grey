@@ -95,6 +95,21 @@ namespace grey::widgets {
         return false;
     }
 
+    // ---- guard ----
+
+    id_frame::id_frame(ImGuiID id) {
+        ImGui::PushID(id);
+    }
+
+    id_frame::id_frame(int scope_id) : id_frame(ImGui::GetID(scope_id)) {}
+
+    id_frame::id_frame(const std::string& scope_id) : id_frame(ImGui::GetID(scope_id.c_str())) {}
+
+    id_frame::~id_frame() {
+        ImGui::PopID();
+    }
+
+
     // ---- window ----
 
     window::window(const std::string& title, bool* p_open) : title{ title } {
@@ -578,6 +593,21 @@ namespace grey::widgets {
             knob_color = ImGui::GetColorU32(held ? ImGuiCol_SliderGrabActive : (hovered ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab));
         }
         draw_list->AddCircleFilled(ImVec2(knob_x, knob_y), knob_radius, knob_color);
+
+        // Show tooltip only when the knob itself is hovered (not the whole widget)
+        ImVec2 mouse_pos = g.IO.MousePos;
+        float dx = mouse_pos.x - knob_x;
+        float dy = mouse_pos.y - knob_y;
+        if (dx*dx + dy*dy <= knob_radius * knob_radius) {
+            // If a label is provided show it, otherwise show the current value
+            if constexpr (std::is_integral_v<T>) {
+                ImGui::SetTooltip("%d", static_cast<int>(value));
+            } else {
+                char buf[64];
+                sprintf(buf, "%.3f", static_cast<double>(value));
+                ImGui::SetTooltip("%s", buf);
+            }
+        }
 
         // Draw label vertically centered with the track
         if (!label.empty() && label[0] != '#') {
@@ -1486,5 +1516,6 @@ namespace grey::widgets {
             ImGui::EndTooltip();
         }
     }
+
 
 }

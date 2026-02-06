@@ -78,6 +78,13 @@ EXPORTED void app_run(
     });
 }
 
+EXPORTED void id_frame(int32_t scope_id, RenderCallback c_ptr_callback) {
+    w::id_frame f{scope_id};
+    if(c_ptr_callback) {
+        c_ptr_callback();
+    }
+}
+
 EXPORTED void sl(float offset) {
     w::sl(offset);
 }

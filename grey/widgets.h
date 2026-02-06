@@ -74,6 +74,9 @@ namespace grey::widgets {
         operator bool() { return o > 0; }
     };
 
+    /**
+     * @brief Trivial rectangle struct for storing item bounds.
+     */
     struct rect {
         float x_min;
         float y_min;
@@ -103,6 +106,19 @@ namespace grey::widgets {
     public:
         virtual void enter() = 0;
         virtual void leave() = 0;
+    };
+
+    /**
+     * @brief ID collision avoidance frame. Creates a new ID scope.
+     */
+    class id_frame {
+    public:
+        id_frame(int scope_id);
+        id_frame(const std::string& scope_id);
+        ~id_frame();
+
+    private:
+        id_frame(ImGuiID id);
     };
 
     class window : public guardable {
@@ -442,12 +458,12 @@ namespace grey::widgets {
      */
     void markdown(const std::string& text);
 
+    bool slider(float& value, float min, float max, const std::string& label = "", float step = 0.0f, bool ticks = false, emphasis emp = emphasis::none);
+    bool slider(int& value, int min, int max, const std::string& label = "", int step = 0, bool ticks = false, emphasis emp = emphasis::none);
+
     // classic sliders will be deprecated in the future, use slider() instead
     bool slider_classic(float& value, float min, float max, const std::string& label = "");
     bool slider_classic(int& value, int min, int max, const std::string& label = "");
-
-    bool slider(float& value, float min, float max, const std::string& label = "", float step = 0.0f, bool ticks = false, emphasis emp = emphasis::none);
-    bool slider(int& value, int min, int max, const std::string& label = "", int step = 0, bool ticks = false, emphasis emp = emphasis::none);
 
     /**
      * @brief Checks if the last rendered item is hovered, and if so, shows a tooltip with the given text.

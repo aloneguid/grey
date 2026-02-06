@@ -183,7 +183,11 @@ int main(int argc, char* argv[]) {
 
                     w::slider(slider_value_int, 0, 10, "slider int", 2, slider_ticks);
 
-
+                    for(int i = 0; i < 10; i++) {
+                        w::id_frame f{i};   // demonstrates collision avoidance when using id_frame
+                        if(i > 0) w::sl();
+                        w::button("collide");
+                    }
                 }
             }
 
@@ -293,7 +297,7 @@ int main(int argc, char* argv[]) {
                 auto tab = tabs.next_tab("Table");
                 if(tab) {
                     static int row_count = 100;
-                    w::slider_classic(row_count, 0, 1000, "row count");
+                    w::slider(row_count, 0, 1000, "row count");
                     int rows_rendered = 0;
                     if(w::table tbl{"tbl", {"col 1", "col 2", "col 3"}, .0f, -40 * w::scale}; tbl) {
                         for(int i = 0; i < row_count; i++) {
@@ -321,8 +325,8 @@ int main(int argc, char* argv[]) {
                     static bool row_selectable = false;
                     static bool row_selectable_span = false;
 
-                    w::slider_classic(row_count, 0, 1000000000, "row count");
-                    w::slider_classic(col_count, 1, 100, "col count");
+                    w::slider(row_count, 0, 1000000000, "row count");
+                    w::slider(col_count, 1, 100, "col count");
                     w::checkbox("row selectable", row_selectable);
                     if(row_selectable) {
                         w::sl();
@@ -371,7 +375,7 @@ int main(int argc, char* argv[]) {
                     w::slider(radius, 5, 500, "radius");
                     w::slider(thickness, 1, 50, "thickness");
                     w::slider(speed, 0.1, 10, "speed");
-                    w::slider_classic(dot_count, 1, 100, "dot count");
+                    w::slider(dot_count, 1, 100, "dot count");
                     w::spinner_hbo_dots(radius, thickness, speed, dot_count);
                 }
             }

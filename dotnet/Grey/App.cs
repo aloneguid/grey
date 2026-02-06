@@ -12,6 +12,12 @@ namespace Grey {
             Native.app_run(title, width, height, hasMenuBar, isScrollable, centerOnScreen, callback);
         }
 
+        public static void IdFrame(int scopeId, Action render) {
+            Native.id_frame(scopeId, () => {
+                render();
+            });
+        }
+
         public static void SL(float offset = 0) {
             Native.sl(offset);
         }

@@ -34,6 +34,8 @@ extern "C"
         bool center_on_screen,
         RenderFrameCallback c_frame_callback);
 
+    EXPORTED void id_frame(int32_t scope_id, RenderCallback c_ptr_callback);
+
     EXPORTED void sl(float offset);
 
     EXPORTED void label(const char* c_text, int32_t emphasis, int32_t text_wrap_pos, bool enabled);

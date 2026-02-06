@@ -96,6 +96,15 @@ void Basics() {
     Label("right clicked: ");
     SL();
     Label(IsRightClicked ? "yes" : "no");
+
+    // collision demo
+    for(int i = 0; i < 5; i++) {
+        if(i > 0) SL();
+
+        IdFrame(i, () => {
+            Button("collide");
+        });
+    }
 }
 
 
