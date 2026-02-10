@@ -444,8 +444,10 @@ namespace grey::backends {
                 ImGui_ImplWin32_NewFrame();
                 ImGui::NewFrame();
 
-                bool has_more = render_frame(*this);
-                if(!has_more) done = true;
+                if(!render_frame(*this)) {
+                    // Post message to close the window, which should be handled in the next iteration of the message loop.
+                    ::PostMessage(hwnd, WM_CLOSE, 0, 0);
+                }
 
                 // Rendering
                 ImGui::Render();
