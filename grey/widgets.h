@@ -489,7 +489,7 @@ namespace grey::widgets {
     void sl(float offset = 0);
     void sep(const std::string& text = "");
 
-    bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false, const std::string& tooltip_text = "");
+    bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false, const std::string& tooltip_text = "", float width = 0);
 
     bool icon_checkbox(const std::string& icon, bool& is_checked, bool reversed = false, const std::string& tooltip = "");
 
@@ -506,6 +506,12 @@ namespace grey::widgets {
      */
     bool small_checkbox(const std::string& label, bool& is_checked);
 
+    /**
+     * @brief Selector in a form of horizontal list of icons. Only one can be selected at a time. Returns true if selection has changed.
+     * @param options List of pairs (icon, tooltip)
+     * @param selected 
+     * @return 
+     */
     bool icon_list(const std::vector<std::pair<std::string, std::string>>& options, size_t& selected);
 
     bool accordion(const std::string& header, bool default_open = false);

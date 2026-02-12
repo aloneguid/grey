@@ -269,6 +269,11 @@ namespace grey::backends {
             wstring w_title = grey::common::str::to_wstr(title);
 
             DWORD dwStyle = WS_OVERLAPPEDWINDOW;
+
+            if(!win32_title_bar) {
+                dwStyle = WS_POPUP;
+            }
+
             //DWORD dwStyle = WS_POPUP;
             if(!win32_can_resize) {
                 // remove resize frame and maximize button

@@ -839,7 +839,7 @@ namespace grey::widgets {
 
     // ---- button ----
 
-    bool button(const std::string & text, emphasis emp, bool is_enabled, bool is_small, const string& tooltip_text) {
+    bool button(const std::string & text, emphasis emp, bool is_enabled, bool is_small, const string& tooltip_text, float width) {
 
         if (!is_enabled) {
             ImGui::BeginDisabled(true);
@@ -859,7 +859,7 @@ namespace grey::widgets {
             clicked = ImGui::SmallButton(text.c_str());
         }
         else {
-            clicked = ImGui::Button(text.c_str());
+            clicked = ImGui::Button(text.c_str(), ImVec2(width, 0));
         }
 
         if (emp != emphasis::none) {
