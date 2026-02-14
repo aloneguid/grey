@@ -13,6 +13,14 @@ namespace grey {
         size_t height;
     };
 
+#if _WIN32
+    enum class win32_transparency_mode {
+        none,
+        colour_key,
+        window
+    };
+#endif
+
     class app {
     public:
         /**
@@ -101,8 +109,21 @@ namespace grey {
         bool win32_title_bar{true};
         bool win32_can_resize{true};
         bool win32_center_on_screen{false};
-        bool win32_transparent{false};
         bool win32_hide_from_taskbar{false};
+
+        // transparency
+
+        /**
+         * @brief If set to true, clear colour will be fully transparent
+         */
+        bool win32_use_transparency_colour_key_value{false};
+
+        /**
+         * @brief If less than 255, this value will be used as the alpha value for the entire window, making it semi-transparent.
+         */
+        int win32_transparency_window_alpha{255};
+
+
         /**
          * @brief sets WS_EX_NOACTIVATE on window (if you need to create a tool window that does not take focus, useful for notification windows)
          */
@@ -138,6 +159,7 @@ namespace grey {
         float max_frame_interval_ms;
 
     private:
+        // todo: textures are not properly disposed of, we need to track native texture handles and dispose of them when app is closed. For now we just leak them, which is not a big deal since app is expected to be short lived and textures are expected to be small, but we should fix this in the future.
         std::map<std::string, texture> textures;
     };
 }

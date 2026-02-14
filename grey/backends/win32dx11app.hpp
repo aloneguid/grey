@@ -322,19 +322,24 @@ namespace grey::backends {
                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
             }
 
-            if(win32_transparent) {
-                // remove all styles, so that window has no title, borders etc.
-                ::SetWindowLong(hwnd, GWL_STYLE, 0);
-
+            // transparency
+            if(win32_use_transparency_colour_key_value || win32_transparency_window_alpha < 255) {
                 // Set the layered window extended style
                 LONG_PTR exStyle = ::GetWindowLongPtr(hwnd, GWL_EXSTYLE);
                 if(!(exStyle & WS_EX_LAYERED)) {
                     ::SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
                 }
 
-                // Set the transparency level
+                DWORD dwFlags = 0;
+                if(win32_use_transparency_colour_key_value) {
+                    dwFlags |= LWA_COLORKEY;
+                }
+                if(win32_transparency_window_alpha < 255) {
+                    dwFlags |= LWA_ALPHA;
+                }
+
                 COLORREF crKey = RGB(ClearColor[0] * 255, ClearColor[1] * 255, ClearColor[2] * 255);
-                ::SetLayeredWindowAttributes(hwnd, crKey, 0, LWA_COLORKEY);
+                ::SetLayeredWindowAttributes(hwnd, crKey, win32_transparency_window_alpha, dwFlags);
             }
 
             // Initialize Direct3D
@@ -523,6 +528,7 @@ namespace grey::backends {
                 pTexture->Release();
             }
 
+            // todo: when we are finished with the texture (ID3D11ShaderResourceView) we need to call ->Release() on it, this is not done at the moment.
             return out_srv;
         }
     };
