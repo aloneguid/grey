@@ -168,6 +168,8 @@ namespace grey::backends {
     class win32dx11app : public grey::app {
     private:
         HWND hwnd{0};
+        bool last_use_transparency_colour_key_value{false};
+        int last_transparency_window_alpha{255};
 
         const float ClearColorF4[4] = {
             ClearColor[0] * ClearColor[3],
@@ -247,6 +249,43 @@ namespace grey::backends {
             }
         }
 
+        void apply_transparency() {
+            if(!hwnd) return;
+
+            bool use_color_key = win32_use_transparency_colour_key_value;
+            int alpha = win32_transparency_window_alpha;
+            if(use_color_key == last_use_transparency_colour_key_value &&
+               alpha == last_transparency_window_alpha) {
+                return;
+            }
+
+            last_use_transparency_colour_key_value = use_color_key;
+            last_transparency_window_alpha = alpha;
+
+            LONG_PTR exStyle = ::GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+            if(use_color_key || alpha < 255) {
+                if(!(exStyle & WS_EX_LAYERED)) {
+                    ::SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
+                }
+
+                DWORD dwFlags = 0;
+                if(use_color_key) {
+                    dwFlags |= LWA_COLORKEY;
+                }
+                if(alpha < 255) {
+                    dwFlags |= LWA_ALPHA;
+                }
+
+                if(alpha < 0) alpha = 0;
+                if(alpha > 255) alpha = 255;
+
+                COLORREF crKey = RGB(ClearColor[0] * 255, ClearColor[1] * 255, ClearColor[2] * 255);
+                ::SetLayeredWindowAttributes(hwnd, crKey, static_cast<BYTE>(alpha), dwFlags);
+            } else if(exStyle & WS_EX_LAYERED) {
+                ::SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_LAYERED);
+            }
+        }
+
         void run(std::function<bool(const app& app)> render_frame) {
             // Create application window
             //ImGui_ImplWin32_EnableDpiAwareness();
@@ -322,25 +361,7 @@ namespace grey::backends {
                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
             }
 
-            // transparency
-            if(win32_use_transparency_colour_key_value || win32_transparency_window_alpha < 255) {
-                // Set the layered window extended style
-                LONG_PTR exStyle = ::GetWindowLongPtr(hwnd, GWL_EXSTYLE);
-                if(!(exStyle & WS_EX_LAYERED)) {
-                    ::SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
-                }
-
-                DWORD dwFlags = 0;
-                if(win32_use_transparency_colour_key_value) {
-                    dwFlags |= LWA_COLORKEY;
-                }
-                if(win32_transparency_window_alpha < 255) {
-                    dwFlags |= LWA_ALPHA;
-                }
-
-                COLORREF crKey = RGB(ClearColor[0] * 255, ClearColor[1] * 255, ClearColor[2] * 255);
-                ::SetLayeredWindowAttributes(hwnd, crKey, win32_transparency_window_alpha, dwFlags);
-            }
+            apply_transparency();
 
             // Initialize Direct3D
             if(!CreateDeviceD3D(hwnd)) {
@@ -448,6 +469,8 @@ namespace grey::backends {
                     g_ResizeWidth = g_ResizeHeight = 0;
                     CreateRenderTarget();
                 }
+
+                apply_transparency();
 
                 // Start the Dear ImGui frame
                 ImGui_ImplDX11_NewFrame();
