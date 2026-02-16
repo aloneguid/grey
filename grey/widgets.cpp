@@ -773,7 +773,7 @@ namespace grey::widgets {
 
     void image(app& app, const std::string& key, size_t width, size_t height) {
         auto tex = app.get_texture(key);
-        if (tex->data) {
+        if (tex && tex->data) {
             ImGui::Image((ImTextureID)tex->data, ImVec2(width, height));
         }
         else {
