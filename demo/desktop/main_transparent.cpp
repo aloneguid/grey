@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
 
     auto app = grey::app::make("transparent", 800, 600);
     float scale = app->scale;
-    app->win32_transparent = true;
+    app->win32_use_transparency_colour_key_value = true;
 
     app->run([&app](const grey::app& c_app) {
         w::guard wg{wnd};
