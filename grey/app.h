@@ -11,6 +11,13 @@ namespace grey {
         void* data;
         size_t width;
         size_t height;
+
+        texture(void* data) : data{data}, width{0}, height{0} {}
+
+        /**
+         * @brief Disposing the texture is platform specific.
+         */
+        virtual ~texture() = default;
     };
 
 #if _WIN32
@@ -54,7 +61,7 @@ namespace grey {
 
         virtual void run(std::function<bool(const app&)> render_frame) = 0;
 
-        texture get_texture(const std::string& key);
+        std::shared_ptr<texture> get_texture(const std::string& key);
 
         bool preload_texture(const std::string& key, unsigned char* buffer, unsigned int len);
 
@@ -148,7 +155,7 @@ namespace grey {
 
         void on_after_initialised();
 
-        virtual void* make_native_texture(grey::common::raw_img& img) = 0;
+        virtual std::shared_ptr<texture> make_native_texture(grey::common::raw_img& img) = 0;
 
         /**
          * @brief Hints if dark mode should be enabled for this application on the OS level. For instance, on Windows 10/11 dark mode will paint window chrome in dark color.
@@ -159,7 +166,7 @@ namespace grey {
         float max_frame_interval_ms;
 
     private:
-        // todo: textures are not properly disposed of, we need to track native texture handles and dispose of them when app is closed. For now we just leak them, which is not a big deal since app is expected to be short lived and textures are expected to be small, but we should fix this in the future.
-        std::map<std::string, texture> textures;
+        // key is texture name, value is texture data. The app will take care of disposing the textures when the app is closed.
+        std::map<std::string, std::shared_ptr<texture>> textures;
     };
 }

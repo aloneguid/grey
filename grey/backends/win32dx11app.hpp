@@ -18,6 +18,20 @@ namespace grey::backends {
 
     using namespace std;
 
+
+    struct dx11texture : public grey::texture {
+        ID3D11ShaderResourceView* srv;
+
+        dx11texture(ID3D11ShaderResourceView* srv) : texture{srv}, srv{srv} {}
+
+        ~dx11texture() override {
+            if(srv) {
+                srv->Release();
+                srv = nullptr;
+            }
+        }
+    };
+
     // Helpers
     static LPCWSTR g_firstIconName{nullptr};
     BOOL CALLBACK EnumIconsProc(HMODULE hModule, LPCWSTR lpType, LPWSTR lpName, LONG_PTR lParam) {
@@ -519,7 +533,7 @@ namespace grey::backends {
             ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
         }
 
-        void* make_native_texture(grey::common::raw_img& img) {
+        std::shared_ptr<texture> make_native_texture(grey::common::raw_img& img) {
             D3D11_TEXTURE2D_DESC desc{0};
             desc.Width = img.x;
             desc.Height = img.y;
@@ -551,8 +565,7 @@ namespace grey::backends {
                 pTexture->Release();
             }
 
-            // todo: when we are finished with the texture (ID3D11ShaderResourceView) we need to call ->Release() on it, this is not done at the moment.
-            return out_srv;
+            return std::make_shared<dx11texture>(out_srv);
         }
     };
 }

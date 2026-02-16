@@ -111,10 +111,10 @@ namespace grey {
         return best;
     }
 
-    texture app::get_texture(const std::string& key) {
+    shared_ptr<texture> app::get_texture(const std::string& key) {
         auto entry = textures.find(key);
         if(entry == textures.end()) {
-            return {nullptr, 0, 0};
+            return nullptr;
         }
         return entry->second;
     }
@@ -127,9 +127,12 @@ namespace grey {
         grey::common::raw_img img_data = grey::common::load_image_from_memory(buffer, len);
         if(!img_data) return false;
 
-        void* native_texture = make_native_texture(img_data);
+        std::shared_ptr<texture> native_texture = make_native_texture(img_data);
         if(!native_texture) return false;
-        textures[key] = texture{native_texture, img_data.x, img_data.y};
+
+        native_texture->width = img_data.x;
+        native_texture->height = img_data.y;
+        textures[key] = native_texture;
 
         return true;
     }
@@ -143,10 +146,14 @@ namespace grey {
         grey::common::raw_img img_data = grey::common::load_image_from_file(path);
         if(!img_data) return false;
 
-        void* native_texture = make_native_texture(img_data);
+        std::shared_ptr<texture> native_texture = make_native_texture(img_data);
         if(!native_texture) return false;
-        textures[key] = texture{native_texture, img_data.x, img_data.y};
 
-        return false;
+        native_texture->width = img_data.x;
+        native_texture->height = img_data.y;
+        textures[key] = native_texture;
+
+
+        return true;
     }
 }

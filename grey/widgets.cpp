@@ -773,8 +773,8 @@ namespace grey::widgets {
 
     void image(app& app, const std::string& key, size_t width, size_t height) {
         auto tex = app.get_texture(key);
-        if (tex.data) {
-            ImGui::Image((ImTextureID)tex.data, ImVec2(width, height));
+        if (tex->data) {
+            ImGui::Image((ImTextureID)tex->data, ImVec2(width, height));
         }
         else {
             ImGui::Dummy(ImVec2(width, height));
@@ -788,13 +788,13 @@ namespace grey::widgets {
 
     void rounded_image(app& app, const std::string& key, size_t width, size_t height, float rounding) {
         auto tex = app.get_texture(key);
-        if (tex.data) {
+        if (tex->data) {
             //ImDrawList* dl = ImGui::GetForegroundDrawList();
             ImDrawList* dl = ImGui::GetWindowDrawList();
             ImVec2 p_min = ImGui::GetCursorScreenPos();
             ImVec2 p_max = ImVec2(p_min.x + width, p_min.y + height);
             ImGui::Dummy(ImVec2(width, height));
-            dl->AddImageRounded((ImTextureID)tex.data, p_min, p_max,
+            dl->AddImageRounded((ImTextureID)tex->data, p_min, p_max,
                 ImVec2(0, 0), ImVec2(1, 1), ImGui::GetColorU32(ImVec4(1, 1, 1, 1)),
                 rounding);
             //ImGui::SetCursorPos(p_max);
