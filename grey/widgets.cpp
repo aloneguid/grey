@@ -915,6 +915,19 @@ namespace grey::widgets {
         return ImGui::TextLink(text.c_str());
     }
 
+    bool colour(const std::string& label, unsigned int& colour) {
+        ImColor col{colour};
+        if(ImGui::ColorEdit4(label.c_str(), &col.Value.x,
+            ImGuiColorEditFlags_NoAlpha |
+            ImGuiColorEditFlags_NoSidePreview |
+            ImGuiColorEditFlags_NoInputs |
+            ImGuiColorEditFlags_NoTooltip)) {
+            colour = ImGui::ColorConvertFloat4ToU32(col);
+            return true;
+        }
+        return false;
+    }
+
     bool small_checkbox(const std::string& label, bool& is_checked) {
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
         bool r = checkbox(label, is_checked);
