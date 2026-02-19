@@ -477,11 +477,24 @@ namespace grey::widgets {
      */
     void tt(const char* text, show_delay delay = show_delay::normal);
 
-    void image(app& app, const std::string& key, size_t width, size_t height);
+    /**
+     * @brief Display image from texture loaded in app. The texture must be loaded with preload_texture() beforehand.
+     * @param app 
+     * @param key 
+     * @param width 
+     * @param height 
+     * @param uv0_x "UV" coordinates for the top-left corner of the image. Ranges from 0 to 1, where (0, 0) is the top-left of the texture and (1, 1) is the bottom-right.
+     * @param uv0_y 
+     * @param uv1_x 
+     * @param uv1_y 
+     */
+    void image(app& app, const std::string& key, size_t width, size_t height,
+        float uv0_x = .0f, float uv0_y = .0f, float uv1_x = 1.0f, float uv1_y = 1.0f);
+
+    void image_rounded(app& app, const std::string& key, size_t width, size_t height, float rounding,
+        float uv0_x = .0f, float uv0_y = .0f, float uv1_x = 1.0f, float uv1_y = 1.0f);
 
     void icon_image(app& app, const std::string& key);
-
-    void rounded_image(app& app, const std::string& key, size_t width, size_t height, float rounding);
 
     bool icon_selector(app& app, const std::string& path, size_t square_size);
 

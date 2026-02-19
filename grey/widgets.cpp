@@ -771,34 +771,35 @@ namespace grey::widgets {
 
     // ---- image ----
 
-    void image(app& app, const std::string& key, size_t width, size_t height) {
+    void image(app& app, const std::string& key, size_t width, size_t height,
+        float uv0_x, float uv0_y, float uv1_x, float uv1_y) {
         auto tex = app.get_texture(key);
         if (tex && tex->data) {
-            ImGui::Image((ImTextureID)tex->data, ImVec2(width, height));
+            ImGui::Image((ImTextureID)tex->data, ImVec2(width, height),
+                ImVec2(uv0_x, uv0_y), ImVec2(uv1_x, uv1_y));
         }
         else {
             ImGui::Dummy(ImVec2(width, height));
         }
     }
 
-    void icon_image(app& app, const std::string& key) {
-        float size = 16 * app.scale;
-        image(app, key, size, size);
-    }
-
-    void rounded_image(app& app, const std::string& key, size_t width, size_t height, float rounding) {
+    void image_rounded(app& app, const std::string& key, size_t width, size_t height, float rounding,
+        float uv0_x, float uv0_y, float uv1_x, float uv1_y) {
         auto tex = app.get_texture(key);
         if (tex->data) {
-            //ImDrawList* dl = ImGui::GetForegroundDrawList();
             ImDrawList* dl = ImGui::GetWindowDrawList();
             ImVec2 p_min = ImGui::GetCursorScreenPos();
             ImVec2 p_max = ImVec2(p_min.x + width, p_min.y + height);
             ImGui::Dummy(ImVec2(width, height));
             dl->AddImageRounded((ImTextureID)tex->data, p_min, p_max,
-                ImVec2(0, 0), ImVec2(1, 1), ImGui::GetColorU32(ImVec4(1, 1, 1, 1)),
+                ImVec2(uv0_x, uv0_y), ImVec2(uv1_x, uv1_y), ImGui::GetColorU32(ImVec4(1, 1, 1, 1)),
                 rounding);
-            //ImGui::SetCursorPos(p_max);
         }
+    }
+
+    void icon_image(app& app, const std::string& key) {
+        float size = 16 * app.scale;
+        image(app, key, size, size);
     }
 
     bool icon_selector(app& app, const std::string& path, size_t square_size) {
@@ -810,7 +811,7 @@ namespace grey::widgets {
         }
         else {
             app.preload_texture(path, path);
-            rounded_image(app, path, square_size, square_size, square_size / 2);
+            image_rounded(app, path, square_size, square_size, square_size / 2);
         }
         return is_leftclicked();
     }
