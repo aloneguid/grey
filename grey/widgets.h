@@ -558,7 +558,12 @@ namespace grey::widgets {
      */
     void spinner_hbo_dots(float radius = 16, float thickness = 4, float speed = 1.0f, size_t dot_count = 6);
 
+    /**
+     * @brief Shows notification toast in the bottom-right corner. Requires notify_render_frame() to be called every frame.
+     * @param message 
+     */
     void notify_info(const std::string& message);
+
     void notify_render_frame();
 
     // mouse helpers
