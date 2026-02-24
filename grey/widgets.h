@@ -135,7 +135,8 @@ namespace grey::widgets {
         window& resize(float width = 0, float height = 0);
         window& has_menubar();
         window& fullscreen();
-        window& no_resize();
+        window& no_resize();    // no manual resize
+        window& auto_resize();
         window& no_collapse();
         window& no_titlebar();
         window& no_background();

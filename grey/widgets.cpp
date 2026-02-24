@@ -137,6 +137,11 @@ namespace grey::widgets {
         return *this;
     }
 
+    window& window::auto_resize() {
+        flags |= ImGuiWindowFlags_AlwaysAutoResize;
+        return *this;
+    }
+
     window& window::no_collapse() {
         flags |= ImGuiWindowFlags_NoCollapse;
         return *this;
