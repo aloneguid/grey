@@ -459,8 +459,8 @@ namespace grey::widgets {
      */
     void markdown(const std::string& text);
 
-    bool slider(float& value, float min, float max, const std::string& label = "", float step = 0.0f, bool ticks = false, emphasis emp = emphasis::none);
-    bool slider(int& value, int min, int max, const std::string& label = "", int step = 0, bool ticks = false, emphasis emp = emphasis::none);
+    bool slider(float& value, float min, float max, const std::string& label = "", float step = 0.0f, bool ticks = false, emphasis emp = emphasis::none, bool is_small = false);
+    bool slider(int& value, int min, int max, const std::string& label = "", int step = 0, bool ticks = false, emphasis emp = emphasis::none, bool is_small = false);
 
     // classic sliders will be deprecated in the future, use slider() instead
     bool slider_classic(float& value, float min, float max, const std::string& label = "");

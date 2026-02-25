@@ -488,7 +488,7 @@ namespace grey::widgets {
     }
 
     template<typename T>
-    bool slider_impl(T& value, T min, T max, const std::string& label, T step, bool ticks, emphasis emp) {
+    bool slider_impl(T& value, T min, T max, const std::string& label, T step, bool ticks, emphasis emp, bool is_small) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         if(window->SkipItems)
             return false;
@@ -499,9 +499,9 @@ namespace grey::widgets {
         const float w = ImGui::CalcItemWidth();
 
         // Calculate dimensions
-        const float knob_radius = style.FramePadding.y + 8.0f;
-        const float track_height = 4.0f;
-        const float height = knob_radius * 2.0f;
+        const float knob_radius = style.FramePadding.y + (is_small ? 4.0f : 8.0f);
+        const float track_height = (is_small ? 1.0f : 2.0f) * scale;
+        const float height = knob_radius * scale;
 
         // Reserve space for the widget
         ImVec2 pos = window->DC.CursorPos;
@@ -625,12 +625,12 @@ namespace grey::widgets {
         return value_changed;
     }
 
-    bool slider(float& value, float min, float max, const std::string& label, float step, bool ticks, emphasis emp) {
-        return slider_impl<float>(value, min, max, label, step, ticks, emp);
+    bool slider(float& value, float min, float max, const std::string& label, float step, bool ticks, emphasis emp, bool is_small) {
+        return slider_impl<float>(value, min, max, label, step, ticks, emp, is_small);
     }
 
-    bool slider(int& value, int min, int max, const std::string& label, int step, bool ticks, emphasis emp) {
-        return slider_impl<int>(value, min, max, label, step, ticks, emp);
+    bool slider(int& value, int min, int max, const std::string& label, int step, bool ticks, emphasis emp, bool is_small) {
+        return slider_impl<int>(value, min, max, label, step, ticks, emp, is_small);
     }
 
     void autoscroll_input_ml(const string& id) {

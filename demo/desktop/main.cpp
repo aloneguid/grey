@@ -178,6 +178,7 @@ int main(int argc, char* argv[]) {
                     static bool slider_ticks = false;
                     w::checkbox("ticks", slider_ticks);
                     w::slider(slider_value_float, 0.0f, 1.0f, "slider float", 0.1f, slider_ticks);
+                    w::slider(slider_value_float, 0.0f, 1.0f, "slider float (small)", 0.1f, slider_ticks, w::emphasis::none, true);
                     w::slider(slider_value_float, 0.0f, 1.0f, "slider float secondary", 0.1f, slider_ticks, w::emphasis::secondary);
                     w::slider_classic(slider_value_float, 0.0f, 1.0f, "slider classic");
 
