@@ -40,8 +40,8 @@ namespace grey::themes {
         style.Colors[ImGuiCol_FrameBg] = ImVec4(0.2000000029802322f, 0.2000000029802322f, 0.2156862765550613f, 1.0f);
         style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.28f, 0.44f, 0.55f, 1.00f);
         style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.0f, 0.4666666686534882f, 0.7843137383460999f, 1.0f);
-        style.Colors[ImGuiCol_TitleBg] = ImVec4(0.28f, 0.44f, 0.55f, 1.00f);
-        style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.0f, 0.4666666686534882f, 0.7843137383460999f, 1.0f);
+        style.Colors[ImGuiCol_TitleBg] = ImVec4(0.28f, 0.44f, 0.55f, 0.9f);
+        style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.28f, 0.44f, 0.55f, 1.00f);
         style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.1450980454683304f, 0.1450980454683304f, 0.1490196138620377f, 1.0f);
         style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.2000000029802322f, 0.2000000029802322f, 0.2156862765550613f, 1.0f);
         style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.2000000029802322f, 0.2000000029802322f, 0.2156862765550613f, 1.0f);

@@ -254,7 +254,7 @@ public:
             case ImGuiToastType::Error:
                 return {255, 0, 0, 255}; // Error
             case ImGuiToastType::Info: {
-                ImVec4 textColor = ImGui::GetStyle().Colors[ImGuiCol_Text];
+                ImVec4 textColor = ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered];
                 return {textColor.x, textColor.y, textColor.z, 255};
             }
                 //return {0, 157, 255, 255}; // Blue
