@@ -230,7 +230,7 @@ namespace grey::backends {
 
         void move_main_viewport(int x, int y) {}
 
-        void* make_native_texture(grey::common::raw_img& img) {
+        std::shared_ptr<texture> make_native_texture(grey::common::raw_img& img) {
             return nullptr;
         }
 
