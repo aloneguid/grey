@@ -232,8 +232,8 @@ jobs:
           xterm &
           
           # Run the app in background
-          chmod +x dotnet/ConsoleDemo/bin/Release/net9.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo
-                    dotnet/ConsoleDemo/bin/Release/net9.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo 2>&1 | tee app.log &
+          chmod +x dotnet/ConsoleDemo/bin/Release/net10.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo
+                    dotnet/ConsoleDemo/bin/Release/net10.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo 2>&1 | tee app.log &
           APP_PID=$!
           
           # Wait for app to render
