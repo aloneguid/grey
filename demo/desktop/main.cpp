@@ -397,8 +397,13 @@ int main(int argc, char* argv[]) {
                 }
             }
 
+            static vector<string> lang_names = {"None", "C++", "C", "C#", "Python", "Lua", "JSON", "SQL", "AngelScript", "GLSL", "HLSL"};
+
             // ImGuiColorTextEdit
-            with_tab(tabs, "Lua Editor",
+            with_tab(tabs, "Code Editor",
+
+                w::combo("Language", lang_names, (unsigned int&)ted.lng);
+
                 if(ted.render()) {
                     w::label("code changed");
                 })

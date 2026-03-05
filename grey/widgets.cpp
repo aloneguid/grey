@@ -13,7 +13,7 @@
 #endif
 
 // 3rdparty
-#include "3rdparty/ImGuiColorTextEdit/langdefs.h"
+//#include "3rdparty/ImGuiColorTextEdit/langdefs.h"
 
 using namespace std;
 
@@ -1318,14 +1318,13 @@ namespace grey::widgets {
 
     // ImGuiColorTextEdit
 
-    text_editor::text_editor(bool border) :
-        id{ generate_id("TextEditor") },
+    text_editor::text_editor(text_editor::lang l, bool border) :
+        id{generate_id("TextEditor")},
         border{ border },
-        lang{ grey::thirdparty::langdefs::lua() } {
-        editor.SetLanguageDefinition(lang);
+        lng{l}, current_lng{-1} {
         //editor.SetShowWhitespaces(true);
         editor.SetTabSize(2);
-        editor.SetShowKeywordTooltips(false);
+        //editor.SetShowKeywordTooltips(false);
     }
 
     void text_editor::set_text(const std::string& text) {
@@ -1342,13 +1341,19 @@ namespace grey::widgets {
             ImGui::PushFont(f);
         }
 
-        editor.Render(id.c_str(), ImVec2(width, height), border);
+        if(current_lng != lng) {
+            editor.SetLanguageDefinition((TextEditor::LanguageDefinitionId)lng);
+            current_lng = lng;
+        }
+
+        editor.Render(id.c_str(), true, ImVec2(width, height), border);
 
         if (f) {
             ImGui::PopFont();
         }
 
-        return editor.IsTextChanged();
+        return false;
+        //return editor.IsTextChanged();
     }
 
     big_table::big_table(const std::string& id, const vector<string>& columns, size_t row_count,

@@ -13,7 +13,7 @@ namespace w = grey::widgets;
 #include "common/win32/os.h"
 #endif
 
-float scale = 1.0f;
+float scale = 1.0f; // default scale
 
 void platform_init() {
 #if _WIN32
