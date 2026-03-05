@@ -2,6 +2,14 @@
 using System.Text;
 
 namespace Grey {
+
+    public class DebugInfo {
+        /// <summary>
+        /// Rendering FPS (frames per second)
+        /// </summary>
+        public float FPS { get; set; }
+    }
+
     public static class App {
         public static void Run(string title, Func<bool> renderFrame,
             int width = 800, int height = 600,
@@ -228,8 +236,14 @@ namespace Grey {
 
         public static bool IsRightClicked => Native.is_rightclicked();
 
-        public static void PrintFps() {
-            Native.label_fps();
+        public static DebugInfo GetDebugInfo() {
+            var r = new DebugInfo();
+
+            float fps = 0;
+            Native.get_debug_info(ref fps);
+            r.FPS = fps;
+
+            return r;
         }
     }
 }

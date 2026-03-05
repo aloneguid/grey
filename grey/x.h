@@ -118,5 +118,6 @@ extern "C" {
 
     // -- system debug
 
-    EXPORTED void label_fps();
+    EXPORTED void get_debug_info(float* fps);
+
 }

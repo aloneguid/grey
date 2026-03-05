@@ -19,7 +19,7 @@ string text;
 w::container scroller{400, 100};
 w::popup status_pop {"status_pop"};
 bool ned_initialised{false};
-w::text_editor ted;
+w::code_editor ted;
 bool selected{false};
 // multiline string with sample for text editor
 string text_editor_text = R"(
