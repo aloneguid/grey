@@ -15,8 +15,7 @@ typedef void (*RenderTableCellCallback)(int32_t row_index, int32_t col_index);
 typedef void (*RenderPtrCallback)(void* ptr);
 
 
-extern "C"
-{
+extern "C" {
     /**
      * @brief The main entry that creates platform window with the specified title, width and height.
      * @param c_title 
@@ -119,5 +118,6 @@ extern "C"
 
     // -- system debug
 
-    EXPORTED void label_fps();
+    EXPORTED void get_debug_info(float* fps);
+
 }

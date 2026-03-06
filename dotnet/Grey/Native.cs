@@ -202,7 +202,7 @@ namespace Grey {
         // system debug
 
         [DllImport(LibName)]
-        internal static extern void label_fps();
+        internal static extern void get_debug_info(ref float fps);
 
     }
 }

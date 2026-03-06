@@ -13,7 +13,7 @@ namespace w = grey::widgets;
 #include "common/win32/os.h"
 #endif
 
-float scale = 1.0f;
+float scale = 1.0f; // default scale
 
 void platform_init() {
 #if _WIN32
@@ -276,10 +276,8 @@ EXPORTED bool menu_item(const char* c_text, bool reserve_icon_space, const char*
     return w::mi(text, reserve_icon_space, icon);
 }
 
-EXPORTED void label_fps() {
-    float fps = ImGui::GetIO().Framerate;
-    // format fps to string with 2 floating points
-    char buf[32];
-    sprintf(buf, "%.2f", fps);
-    w::label(buf);
+void get_debug_info(float* fps) {
+    if(fps) {
+        *fps = ImGui::GetIO().Framerate;
+    }
 }

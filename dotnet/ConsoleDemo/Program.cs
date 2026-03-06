@@ -227,7 +227,8 @@ Grey.App.Run("Grey# Demo", () => {
 
     // Status bar
     StatusBar(() => {
-        PrintFps();
+        DebugInfo dbg = GetDebugInfo();
+        Label($"FPS: {dbg.FPS}");
     });
 
     return isRunning;

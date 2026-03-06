@@ -19,7 +19,7 @@ string text;
 w::container scroller{400, 100};
 w::popup status_pop {"status_pop"};
 bool ned_initialised{false};
-w::text_editor ted;
+w::code_editor ted;
 bool selected{false};
 // multiline string with sample for text editor
 string text_editor_text = R"(
@@ -397,8 +397,13 @@ int main(int argc, char* argv[]) {
                 }
             }
 
+            static vector<string> lang_names = {"None", "C++", "C", "C#", "Python", "Lua", "JSON", "SQL", "AngelScript", "GLSL", "HLSL"};
+
             // ImGuiColorTextEdit
-            with_tab(tabs, "Lua Editor",
+            with_tab(tabs, "Code Editor",
+
+                w::combo("Language", lang_names, (unsigned int&)ted.lng);
+
                 if(ted.render()) {
                     w::label("code changed");
                 })

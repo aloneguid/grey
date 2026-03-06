@@ -12,9 +12,6 @@
 #include <Windows.h>
 #endif
 
-// 3rdparty
-#include "3rdparty/ImGuiColorTextEdit/langdefs.h"
-
 using namespace std;
 
 namespace grey::widgets {
@@ -1318,37 +1315,42 @@ namespace grey::widgets {
 
     // ImGuiColorTextEdit
 
-    text_editor::text_editor(bool border) :
-        id{ generate_id("TextEditor") },
+    code_editor::code_editor(code_editor::language l, bool border) :
+        id{generate_id("TextEditor")},
         border{ border },
-        lang{ grey::thirdparty::langdefs::lua() } {
-        editor.SetLanguageDefinition(lang);
+        lng{l}, current_lng{-1} {
         //editor.SetShowWhitespaces(true);
         editor.SetTabSize(2);
-        editor.SetShowKeywordTooltips(false);
+        //editor.SetShowKeywordTooltips(false);
     }
 
-    void text_editor::set_text(const std::string& text) {
+    void code_editor::set_text(const std::string& text) {
         editor.SetText(text);
     }
 
-    std::string text_editor::get_text() {
+    std::string code_editor::get_text() {
         return editor.GetText();
     }
 
-    bool text_editor::render(float width, float height) {
+    bool code_editor::render(float width, float height) {
         ImFont* f = fonts::font_loader::get_fixed_size_font(scale);
         if (f) {
             ImGui::PushFont(f);
         }
 
-        editor.Render(id.c_str(), ImVec2(width, height), border);
+        if(current_lng != lng) {
+            editor.SetLanguageDefinition((TextEditor::LanguageDefinitionId)lng);
+            current_lng = lng;
+        }
+
+        editor.Render(id.c_str(), true, ImVec2(width, height), border);
 
         if (f) {
             ImGui::PopFont();
         }
 
-        return editor.IsTextChanged();
+        return false;
+        //return editor.IsTextChanged();
     }
 
     big_table::big_table(const std::string& id, const vector<string>& columns, size_t row_count,

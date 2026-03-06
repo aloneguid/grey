@@ -3,15 +3,13 @@
 #include <vector>
 #include <map>
 
-namespace grey::common::win32::reg
-{
+namespace grey::common::win32::reg {
     enum class hive {
         classes_root = 0,
 
         local_machine,
 
         current_user,
-
     };
 
     std::vector<std::string> enum_subkeys(hive h, std::string path);

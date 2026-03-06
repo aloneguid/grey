@@ -618,9 +618,30 @@ namespace grey::widgets {
     void label_debug_info();
 
     // ImGuiColorTextEdit
-    class text_editor {
+    class code_editor {
     public:
-        text_editor(bool border = false);
+
+        /**
+         * @brief Programming language for syntax highlighting.
+         * Do not change the order, as it's mapped directly to TextEditor::LanguageDefinitionId enum.
+         */
+        enum class language {
+            none,
+            cpp,
+            c,
+            cs,
+            python,
+            lua,
+            json,
+            sql,
+            angelscript,
+            glsl,
+            hlsl
+        };
+
+        language lng;
+
+        code_editor(language l = language::none, bool border = false);
 
         void set_text(const std::string& text);
         std::string get_text();
@@ -634,7 +655,7 @@ namespace grey::widgets {
         std::string id;
         bool border;
         TextEditor editor;
-        const TextEditor::LanguageDefinition& lang;
+        language current_lng{language::none};
     };
 
     // tables
