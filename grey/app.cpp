@@ -156,4 +156,8 @@ namespace grey {
 
         return true;
     }
+
+    bool app::release_texture(const std::string& key) {
+        return textures.erase(key) > 0;
+    }
 }
