@@ -32,7 +32,7 @@ namespace grey {
         }
 #else
         if (scale == 0.0f)
-            scale = 1.0f;
+            scale = 1.5f;
 #endif
         this->scale = scale;
 

@@ -3,5 +3,6 @@ out/
 bin/
 obj/
 xbin/
+.idea/
 PublishProfiles/
 *.user

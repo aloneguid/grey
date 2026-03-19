@@ -16,6 +16,9 @@
 
 #if WIN32
 #include "../common/win32/os.h"
+#elif defined(__linux__)
+#include "../common/lin/os.h"
+#include "roboto.inl"
 #else
 #include "roboto.inl"
 #endif
@@ -32,6 +35,18 @@ namespace grey::fonts {
         // Segoe UI is the default UI font for Windows 10 and 11.
         path += "\\segoeui.ttf";
         ImFont* f = io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f * scale);
+#elif defined(__linux__)
+        string path = grey::common::lin::os::get_system_font_path("sans-serif");
+        ImFont* f = nullptr;
+        if (!path.empty()) {
+            f = io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f * scale);
+        }
+        if (!f) {
+            // fallback if system font not found or failed to load
+            f = io.Fonts->AddFontFromMemoryCompressedTTF(
+                Roboto_compressed_data, Roboto_compressed_size,
+                16.0f * scale);
+        }
 #else
         ImFont* f = io.Fonts->AddFontFromMemoryCompressedTTF(
             Roboto_compressed_data, Roboto_compressed_size,
@@ -47,6 +62,12 @@ namespace grey::fonts {
         // Segoe UI is the default UI font for Windows 10 and 11.
         path += "\\consola.ttf";
         return io.Fonts->AddFontFromFileTTF(path.c_str(), 16.0f * scale);
+#elif defined(__linux__)
+        string path = grey::common::lin::os::get_system_font_path("monospace");
+        if (!path.empty()) {
+            return io.Fonts->AddFontFromFileTTF(path.c_str(), 16.0f * scale);
+        }
+        return nullptr;
 #else
         return nullptr;
 #endif
