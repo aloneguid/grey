@@ -235,19 +235,25 @@ namespace grey::widgets {
     }
 
     void window::leave() {
-        if (border_size >= 0)
-            ImGui::PopStyleVar();
-        ImGui::End();
 
 #ifdef _WIN32
-        if (!win32_brought_forward) {
-            ImGuiViewport* vp = ImGui::GetWindowViewport();
-            if (vp) {
-                ::SetForegroundWindow((HWND)vp->PlatformHandleRaw);
+        ImGuiViewport* vp = ImGui::GetWindowViewport();
+        if(vp && vp->PlatformWindowCreated) {
+            HWND hWnd = (HWND)vp->PlatformHandleRaw;
+            if(!win32_brought_forward) {
+                ::SetForegroundWindow(hWnd);
                 win32_brought_forward = true;
+            }
+            if(win32_exclude_from_capture_current != win32_exclude_from_capture) {
+                ::SetWindowDisplayAffinity(hWnd, win32_exclude_from_capture ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
+                win32_exclude_from_capture_current = win32_exclude_from_capture;
             }
         }
 #endif
+
+        if (border_size >= 0)
+            ImGui::PopStyleVar();
+        ImGui::End();
 
         if (fill_viewport_enabled) {
             ImGui::PopStyleVar();

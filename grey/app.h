@@ -68,6 +68,13 @@ namespace grey {
         bool preload_texture(const std::string& key, const std::string& path);
 
         /**
+         * @brief Releases texture from memory
+         * @param key 
+         * @return True, if texture was found and released, false if texture with this key was not found.
+         */
+        bool release_texture(const std::string& key);
+
+        /**
          * @brief Use this to set theme for the application. This will also apply scaling factor to the theme and OS specific customisations if needed.
          * @param theme_id 
          */

@@ -11,8 +11,8 @@ It's based on the awesome [ImGui](https://github.com/ocornut/imgui) framework an
 ## Features
 
 - Cross-platform - currently supports **Windows x64** and **Linux x64**.
-- Completely stateless i.e. no widgets, state synchronisation and so on.
-- Looks beautiful by default i.e. renders in high DPI, using system fonts and colours, supports themes and material icons.
+- Completely stateless i.e., no widgets, state synchronization and so on.
+- Looks beautiful by default i.e., renders in high DPI, using system fonts and colours, supports themes and material icons.
 
 ## Getting started
 

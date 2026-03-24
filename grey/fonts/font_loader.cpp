@@ -16,6 +16,9 @@
 
 #if WIN32
 #include "../common/win32/os.h"
+#elif defined(__linux__)
+#include "../common/lin/os.h"
+#include "roboto.inl"
 #else
 #include "roboto.inl"
 #endif

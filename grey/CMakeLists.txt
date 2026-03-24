@@ -23,6 +23,8 @@ file(GLOB core_src CONFIGURE_DEPENDS "*.cpp"
 
 if (WIN32)
     file(GLOB core_src CONFIGURE_DEPENDS ${core_src} "common/win32/*.cpp")
+elseif (UNIX AND NOT APPLE)
+    file(GLOB core_src CONFIGURE_DEPENDS ${core_src} "common/lin/*.cpp")
 endif()
 
 if (WIN32)
