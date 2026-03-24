@@ -81,27 +81,28 @@ namespace grey::backends {
     class glfw_gl3_app : public grey::app {
 
     public:
-        glfw_gl3_app(const std::string& title, int width, int height, float scale)
-            : grey::app{scale}, title{title}, window_width{width}, window_height{height} {
+        glfw_gl3_app(const std::string& title, int width, int height)
+            : title{title}, window_width{width}, window_height{height} {
             last_frame_time = std::chrono::high_resolution_clock::now();
             gl_init();
         }
 
         void run(std::function<bool(const app& app)> render_frame) {
             // Create window with graphics context
-            window = glfwCreateWindow(window_width, window_height, title.c_str(), nullptr, nullptr);
+            float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
+            window = glfwCreateWindow((int)(window_width * main_scale), (int)(window_height * main_scale), title.c_str(), nullptr, nullptr);
             if(window == nullptr)
                 return;
             glfwMakeContextCurrent(window);
-            glfwSwapInterval(6); // Enable vsync
+            glfwSwapInterval(1); // Enable vsync
 
             // Setup Dear ImGui context
             IMGUI_CHECKVERSION();
             ImGui::CreateContext();
             ImGuiIO& io = ImGui::GetIO(); (void)io;
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-            //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-            //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+            io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+            io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
             io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
             //io.ConfigViewportsNoAutoMerge = true;
             //io.ConfigViewportsNoTaskBarIcon = true;
@@ -110,8 +111,16 @@ namespace grey::backends {
             ImGui::StyleColorsDark();
             //ImGui::StyleColorsLight();
 
-             // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+            // Setup scaling
             ImGuiStyle& style = ImGui::GetStyle();
+            style.ScaleAllSizes(main_scale);
+            style.FontScaleDpi = main_scale;
+#if GLFW_VERSION_MAJOR >= 3 && GLFW_VERSION_MINOR >= 3
+            io.ConfigDpiScaleFonts = true;
+            io.ConfigDpiScaleViewports = true;
+#endif
+
+             // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
             if(io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
                 style.WindowRounding = 0.0f;
                 style.Colors[ImGuiCol_WindowBg].w = 1.0f;
