@@ -1116,7 +1116,7 @@ namespace grey::widgets {
     status_bar::status_bar() : style{ ImGui::GetStyle() }, cursor_before{ ImGui::GetCursorPos() } {
         auto io = ImGui::GetIO();
 
-        float height = io.Fonts->Fonts[0]->FontSize + style.FramePadding.y * 2.0f;
+        float height = ImGui::GetFontBaked()->Size + style.FramePadding.y * 2.0f;
 
         ImVec2 ws = ImGui::GetWindowSize();
 

@@ -36,7 +36,7 @@ namespace grey {
          * @param title 
          * @return 
          */
-        static std::unique_ptr<app> make(const std::string& title, int width, int height, float scale = 0.0f);
+        static std::unique_ptr<app> make(const std::string& title, int width, int height);
 
         /**
          * @brief When set, application will set this theme on startup.
@@ -57,7 +57,7 @@ namespace grey {
 
         std::function<void(int, const std::string&)> on_user_message;
 
-        app(float scale = 0.0f);
+        app();
 
         virtual void run(std::function<bool(const app&)> render_frame) = 0;
 

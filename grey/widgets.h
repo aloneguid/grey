@@ -197,7 +197,7 @@ namespace grey::widgets {
         container(const std::string& id, float width = 0.0F, float height = 0.0F);
 
         container& border() {
-            flags |= ImGuiChildFlags_Border;
+            flags |= ImGuiChildFlags_Borders;
             return *this;
         }
 
@@ -236,7 +236,7 @@ namespace grey::widgets {
         }
 
         container& padding(float x, float y) {
-            window_flags |= ImGuiWindowFlags_AlwaysUseWindowPadding;
+            flags |= ImGuiChildFlags_AlwaysUseWindowPadding;
             pad = ImVec2{x, y};
             return *this;
         }

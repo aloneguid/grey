@@ -89,6 +89,15 @@ namespace grey::backends {
         if(res != S_OK)
             return false;
 
+        // Disable DXGI's default Alt+Enter fullscreen behavior.
+        // - You are free to leave this enabled, but it will not work properly with multiple viewports.
+        // - This must be done for all windows associated to the device. Our DX11 backend does this automatically for secondary viewports that it creates.
+        IDXGIFactory* pSwapChainFactory;
+        if(SUCCEEDED(g_pSwapChain->GetParent(IID_PPV_ARGS(&pSwapChainFactory)))) {
+            pSwapChainFactory->MakeWindowAssociation(hWnd, DXGI_MWA_NO_ALT_ENTER);
+            pSwapChainFactory->Release();
+        }
+
         CreateRenderTarget();
         return true;
     }
@@ -199,8 +208,12 @@ namespace grey::backends {
         int window_width{-1};
         int window_height{-1};
 
-        win32dx11app(const std::string& title, int width, int height, float scale) :
-            grey::app{scale}, title{title}, window_width{width}, window_height{height} {
+        win32dx11app(const std::string& title, int width, int height) :
+            title{title}, window_width{width}, window_height{height} {
+
+            // Make process DPI aware and obtain main monitor scale
+            ImGui_ImplWin32_EnableDpiAwareness();
+            this->scale = ImGui_ImplWin32_GetDpiScaleForMonitor(::MonitorFromPoint(POINT{0, 0}, MONITOR_DEFAULTTOPRIMARY));
 
             if(window_width == -1 || window_height == -1) {
                 window_width = window_height = CW_USEDEFAULT;
@@ -302,7 +315,6 @@ namespace grey::backends {
 
         void run(std::function<bool(const app& app)> render_frame) {
             // Create application window
-            //ImGui_ImplWin32_EnableDpiAwareness();
 
             // apply win32 customisations
             g_win32_close_on_focus_lost = win32_close_on_focus_lost;
@@ -417,8 +429,15 @@ namespace grey::backends {
             ImGui::StyleColorsDark();
             //ImGui::StyleColorsLight();
 
-            // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
             ImGuiStyle& style = ImGui::GetStyle();
+
+            // Setup scaling
+            style.ScaleAllSizes(scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
+            style.FontScaleDpi = scale;        // Set initial font scale. (in docking branch: using io.ConfigDpiScaleFonts=true automatically overrides this for every window depending on the current monitor)
+            io.ConfigDpiScaleFonts = true;          // [Experimental] Automatically overwrite style.FontScaleDpi in Begin() when Monitor DPI changes. This will scale fonts but _NOT_ scale sizes/padding for now.
+            io.ConfigDpiScaleViewports = true;      // [Experimental] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
+
+            // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
             if(io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
                 style.WindowRounding = 0.0f;
                 style.Colors[ImGuiCol_WindowBg].w = 1.0f;

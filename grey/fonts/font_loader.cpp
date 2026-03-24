@@ -26,36 +26,36 @@ namespace grey::fonts {
 
     ImFont* font_loader::fixed_size_font{nullptr};
 
-    ImFont* font_loader::load_system_font(ImGuiIO& io, float scale) {
+    ImFont* font_loader::load_system_font(ImGuiIO& io) {
 #if WIN32
         string path = grey::common::win32::os::get_system_fonts_path();
         // Segoe UI is the default UI font for Windows 10 and 11.
         path += "\\segoeui.ttf";
-        ImFont* f = io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f * scale);
+        ImFont* f = io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f);
 #else
         ImFont* f = io.Fonts->AddFontFromMemoryCompressedTTF(
             Roboto_compressed_data, Roboto_compressed_size,
-            16.0f * scale);
+            16.0f);
 #endif
         return f;
 
     }
 
-    ImFont* font_loader::load_fixed_font(ImGuiIO& io, float scale) {
+    ImFont* font_loader::load_fixed_font(ImGuiIO& io) {
 #if WIN32
         string path = grey::common::win32::os::get_system_fonts_path();
         // Segoe UI is the default UI font for Windows 10 and 11.
         path += "\\consola.ttf";
-        return io.Fonts->AddFontFromFileTTF(path.c_str(), 16.0f * scale);
+        return io.Fonts->AddFontFromFileTTF(path.c_str(), 16.0f);
 #else
         return nullptr;
 #endif
     }
 
-    void font_loader::load_font(float scale, bool load_fa, bool load_fixed) {
+    void font_loader::load_font(bool load_fa, bool load_fixed) {
         ImGuiIO& io = ImGui::GetIO();
 
-        ImFont* f = load_system_font(io, scale);
+        ImFont* f = load_system_font(io);
 
         if(f && load_fa) {
 
@@ -79,12 +79,12 @@ namespace grey::fonts {
 
             // Google Material Icons
             {
-                float icon_font_size = 16.0f * scale;
+                float icon_font_size = 16.0f;
                 ImFontConfig config;
                 config.OversampleH = 1;
                 config.MergeMode = true;
                 config.PixelSnapH = true;
-                config.GlyphOffset.y = 3.0f * scale;
+                config.GlyphOffset.y = 3.0f;
                 config.GlyphMinAdvanceX = icon_font_size; // Use if you want to make the icon monospaced
                 static const ImWchar icon_ranges[] = {ICON_MIN_MD, ICON_MAX_16_MD, 0};
                 io.Fonts->AddFontFromMemoryCompressedTTF(
@@ -124,7 +124,7 @@ namespace grey::fonts {
         }
 
         if(load_fixed) {
-            fixed_size_font = load_fixed_font(io, scale);
+            fixed_size_font = load_fixed_font(io);
         }
     }
 
