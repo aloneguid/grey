@@ -248,6 +248,11 @@ namespace grey::widgets {
                 ::SetWindowDisplayAffinity(hWnd, win32_exclude_from_capture ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
                 win32_exclude_from_capture_current = win32_exclude_from_capture;
             }
+            if(win32_always_on_top_current != win32_always_on_top) {
+                ::SetWindowPos(hWnd, win32_always_on_top ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0,
+                    SWP_NOMOVE | SWP_NOSIZE);
+                win32_always_on_top_current = win32_always_on_top;
+            }
         }
 #endif
 

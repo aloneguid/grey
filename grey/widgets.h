@@ -127,6 +127,7 @@ namespace grey::widgets {
 
 #ifdef _WIN32
         bool win32_exclude_from_capture{false};
+        bool win32_always_on_top{false};
 #endif
 
         /**
@@ -174,6 +175,7 @@ namespace grey::widgets {
 #ifdef _WIN32
         bool win32_brought_forward{false};
         bool win32_exclude_from_capture_current{false};
+        bool win32_always_on_top_current{false};
 #endif
     };
 
