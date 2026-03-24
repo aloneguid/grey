@@ -5,7 +5,8 @@ namespace grey::common::lin::os {
     /**
      * @brief Gets location of the system fonts folder.
      * On Linux, this is a bit more complex, so we might return a common path or use fc-match.
-     * @return 
+     * @return Path to the system fonts folder.
+
      */
     std::string get_system_fonts_path();
 

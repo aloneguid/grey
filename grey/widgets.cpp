@@ -238,7 +238,7 @@ namespace grey::widgets {
 
 #ifdef _WIN32
         ImGuiViewport* vp = ImGui::GetWindowViewport();
-        if(vp && vp->PlatformWindowCreated) {
+        if(vp && vp->PlatformWindowCreated && vp->PlatformHandleRaw) {
             HWND hWnd = (HWND)vp->PlatformHandleRaw;
             if(!win32_brought_forward) {
                 ::SetForegroundWindow(hWnd);

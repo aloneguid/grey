@@ -125,7 +125,7 @@ namespace grey::widgets {
     public:
         window(const std::string& title, bool* p_open = nullptr);
 
-#if _WIN32
+#ifdef _WIN32
         bool win32_exclude_from_capture{false};
 #endif
 
@@ -171,7 +171,7 @@ namespace grey::widgets {
         float border_size{-1};
         bool fill_viewport_enabled{false};
 
-#if _WIN32
+#ifdef _WIN32
         bool win32_brought_forward{false};
         bool win32_exclude_from_capture_current{false};
 #endif
