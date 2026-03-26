@@ -215,6 +215,7 @@ namespace grey::backends {
             // Make process DPI aware and obtain main monitor scale
             ImGui_ImplWin32_EnableDpiAwareness();
             this->scale = ImGui_ImplWin32_GetDpiScaleForMonitor(::MonitorFromPoint(POINT{0, 0}, MONITOR_DEFAULTTOPRIMARY));
+            grey::widgets::scale = this->scale;
 
             if(window_width == -1 || window_height == -1) {
                 window_width = window_height = CW_USEDEFAULT;
