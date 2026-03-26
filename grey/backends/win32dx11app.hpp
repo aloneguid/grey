@@ -7,6 +7,7 @@
 #include <d3d11.h>
 #include <dwmapi.h>
 #include "../common/str.h"
+
 #if GREY_INCLUDE_IMPLOT
 #include "implot.h"
 #endif
@@ -313,6 +314,17 @@ namespace grey::backends {
             }
         }
 
+        void apply_window_corner_preference() {
+            if(!hwnd) return;
+
+            const int preference = win32_title_bar ? DWMWCP_DEFAULT : DWMWCP_ROUND;
+            ::DwmSetWindowAttribute(
+                hwnd,
+                static_cast<DWMWINDOWATTRIBUTE>(DWMWA_WINDOW_CORNER_PREFERENCE),
+                &preference,
+                sizeof(preference));
+        }
+
         void run(std::function<bool(const app& app)> render_frame) {
             // Create application window
 
@@ -388,6 +400,7 @@ namespace grey::backends {
             }
 
             apply_transparency();
+            apply_window_corner_preference();
 
             // Initialize Direct3D
             if(!CreateDeviceD3D(hwnd)) {
