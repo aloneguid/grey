@@ -2,7 +2,11 @@
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable (demo WIN32 "main.cpp" main.rc)
+if(WIN32)
+    add_executable (demo WIN32 "main.cpp" main.rc)
+else()
+    add_executable (demo "main.cpp")
+endif()
 
 if(WIN32)
     # "Transparent" demo for Windows
@@ -22,4 +26,6 @@ target_compile_definitions(demo PRIVATE GREY_INCLUDE_IMNODES)
 target_link_libraries(demo libgrey)
 target_include_directories(demo PRIVATE "../../grey")
 
-target_sources(demo PRIVATE dpi-aware.manifest)
+if(WIN32)
+    target_sources(demo PRIVATE dpi-aware.manifest)
+endif()

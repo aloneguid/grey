@@ -6,10 +6,10 @@ set (DYNAMIC_NAME xgrey)
 find_package(imgui CONFIG REQUIRED)
 find_package(implot CONFIG REQUIRED)
 
-if(UNIX AND NOT APPLE)
+if(UNIX)
     find_package(OpenGL REQUIRED)
     find_package(glfw3 CONFIG REQUIRED)
- endif()
+endif()
 
 find_path(STB_INCLUDE_DIRS "stb.h")
 
