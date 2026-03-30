@@ -264,27 +264,33 @@ jobs:
       - name: Run app and capture screenshot (macOS)
         if: runner.os == 'macOS'
         run: |
-          # Run the app in background
+          # Run the app in background.
+          # With the CGL software-rendering fallback the Grey window is now
+          # visible even on CI runners that lack hardware-accelerated OpenGL.
           chmod +x dotnet/ConsoleDemo/bin/Release/net10.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo
           dotnet/ConsoleDemo/bin/Release/net10.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo 2>&1 | tee app.log &
-          APP_PID=$!
 
-          # Wait for app to render
-          sleep 8
+          # Wait for the window to appear
+          sleep 10
 
-          # Bring the window to the front before capturing
-          osascript -e "tell application \"System Events\" to set frontmost of (first application process whose unix id is $APP_PID) to true" 2>/dev/null || true
+          # Bring the Grey window to the front and capture it
+          mkdir -p screenshots
+          osascript -e 'tell application "System Events"
+            set procs to every process whose name is "ConsoleDemo"
+            if procs is not {} then
+              set frontmost of item 1 of procs to true
+            end if
+          end tell' 2>/dev/null || true
           sleep 1
 
-          # Capture screenshot using macOS built-in screencapture
-          mkdir -p screenshots
+          # Capture the screen; -x suppresses the screenshot sound
           screencapture -x screenshots/demo-${{ matrix.dotnet_rid }}.png
 
           # Show app logs
           cat app.log || true
 
           # Kill the app
-          kill $APP_PID || true
+          pkill -f ConsoleDemo 2>/dev/null || true
 
       - name: Run app and capture screenshot (Windows)
         if: runner.os == 'Windows'

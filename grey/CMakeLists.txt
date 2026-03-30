@@ -23,12 +23,17 @@ file(GLOB core_src CONFIGURE_DEPENDS "*.cpp"
 
 if (WIN32)
     file(GLOB core_src CONFIGURE_DEPENDS ${core_src} "common/win32/*.cpp")
+elseif (APPLE)
+    file(GLOB core_src CONFIGURE_DEPENDS ${core_src} "common/lin/*.cpp" "backends/*.mm")
 elseif (UNIX AND NOT APPLE)
     file(GLOB core_src CONFIGURE_DEPENDS ${core_src} "common/lin/*.cpp")
 endif()
 
 if (WIN32)
     set(private_libs implot::implot D3D11.lib)
+elseif (APPLE)
+    set(private_libs implot::implot glfw OpenGL::GL
+        "-framework AppKit" "-framework OpenGL")
 else()
     set(private_libs implot::implot glfw OpenGL::GL)
 endif()
