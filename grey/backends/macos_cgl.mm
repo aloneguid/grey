@@ -62,6 +62,14 @@ bool grey_macos_create_software_gl_context(void* ns_window_ptr) {
     [s_ctx setView:view];
     [s_ctx makeCurrentContext];
 
+    // Bring the window to front so screencapture can see it
+    [window makeKeyAndOrderFront:nil];
+    // Process pending AppKit events so the window is fully displayed
+    [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
+
+    // Call update to sync the context with the view's current bounds
+    [s_ctx update];
+
     fprintf(stderr, "macOS GL fallback: software GL context created successfully\n");
     return true;
 }

@@ -10,6 +10,8 @@
 #include "imgui_impl_opengl3.h"
 #include <chrono>
 #include <thread>
+#include <vector>
+#include <cstdlib>
 #include <stdio.h>
 #define GL_SILENCE_DEPRECATION
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -267,6 +269,39 @@ namespace grey::backends {
                 glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
                 glClear(GL_COLOR_BUFFER_BIT);
                 ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+                // In-app screenshot: if GREY_SCREENSHOT_PPM env var is set,
+                // capture the framebuffer to a PPM file after the first N rendered frames.
+                // sips (macOS) can convert PPM→PNG: sips -s format png file.ppm --out file.png
+                {
+                    static const int kScreenshotFrame = 200; // ~5 s at 40 FPS
+                    static int s_frame_count = 0;
+                    ++s_frame_count;
+                    const char* ppm_path = std::getenv("GREY_SCREENSHOT_PPM");
+                    if(ppm_path && s_frame_count == kScreenshotFrame && display_w > 0 && display_h > 0) {
+                        std::vector<unsigned char> px(display_w * display_h * 3);
+                        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+                        glReadPixels(0, 0, display_w, display_h, GL_RGB, GL_UNSIGNED_BYTE, px.data());
+                        // OpenGL reads bottom-to-top; flip vertically for PPM (top-to-bottom)
+                        for(int row = 0; row < display_h / 2; row++) {
+                            int opp = display_h - 1 - row;
+                            std::swap_ranges(
+                                px.begin() + row * display_w * 3,
+                                px.begin() + (row + 1) * display_w * 3,
+                                px.begin() + opp * display_w * 3);
+                        }
+                        FILE* f = fopen(ppm_path, "wb");
+                        if(f) {
+                            fprintf(f, "P6\n%d %d\n255\n", display_w, display_h);
+                            fwrite(px.data(), 1, px.size(), f);
+                            fclose(f);
+                            fprintf(stderr, "Grey: framebuffer screenshot saved to %s (%dx%d)\n",
+                                ppm_path, display_w, display_h);
+                        } else {
+                            fprintf(stderr, "Grey: failed to open screenshot file: %s\n", ppm_path);
+                        }
+                    }
+                }
 
                 // Update and Render additional Platform Windows
                 // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.

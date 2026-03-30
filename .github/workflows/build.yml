@@ -264,27 +264,36 @@ jobs:
       - name: Run app and capture screenshot (macOS)
         if: runner.os == 'macOS'
         run: |
-          # Run the app in background.
-          # With the CGL software-rendering fallback the Grey window is now
-          # visible even on CI runners that lack hardware-accelerated OpenGL.
+          # Set GREY_SCREENSHOT_PPM so the app saves its own framebuffer at frame 200.
+          # This is the primary screenshot mechanism — it works even if the window is
+          # not composited by the macOS window server (e.g. in CI with no GPU).
+          export GREY_SCREENSHOT_PPM=/tmp/grey-frame.ppm
+
           chmod +x dotnet/ConsoleDemo/bin/Release/net10.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo
           dotnet/ConsoleDemo/bin/Release/net10.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo 2>&1 | tee app.log &
 
-          # Wait for the window to appear
+          # Wait for 200 frames to render (app runs at 40 FPS → ~5 s) plus extra margin
           sleep 10
 
-          # Bring the Grey window to the front and capture it
           mkdir -p screenshots
-          osascript -e 'tell application "System Events"
-            set procs to every process whose name is "ConsoleDemo"
-            if procs is not {} then
-              set frontmost of item 1 of procs to true
-            end if
-          end tell' 2>/dev/null || true
-          sleep 1
 
-          # Capture the screen; -x suppresses the screenshot sound
-          screencapture -x screenshots/demo-${{ matrix.dotnet_rid }}.png
+          # Use the in-app framebuffer screenshot if available (primary)
+          if [ -f /tmp/grey-frame.ppm ]; then
+            echo "In-app framebuffer screenshot captured; converting to PNG"
+            sips -s format png /tmp/grey-frame.ppm --out screenshots/demo-${{ matrix.dotnet_rid }}.png \
+              || cp /tmp/grey-frame.ppm screenshots/demo-${{ matrix.dotnet_rid }}.ppm
+          else
+            echo "WARNING: In-app screenshot not found; falling back to screencapture"
+            # Try to bring the window to front before capturing the full screen
+            osascript -e 'tell application "System Events"
+              set procs to every process whose name is "ConsoleDemo"
+              if procs is not {} then
+                set frontmost of item 1 of procs to true
+              end if
+            end tell' 2>/dev/null || true
+            sleep 1
+            screencapture -x screenshots/demo-${{ matrix.dotnet_rid }}.png
+          fi
 
           # Show app logs
           cat app.log || true
