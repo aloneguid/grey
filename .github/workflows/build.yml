@@ -38,6 +38,12 @@ jobs:
             vcpkg_triplet: x64-linux
             vcpkg_config: MinSizeRel
             dotnet_rid: linux-x64
+          - os: macos-latest
+            name: macOS arm64
+            arch: arm64
+            vcpkg_triplet: arm64-osx
+            vcpkg_config: MinSizeRel
+            dotnet_rid: osx-arm64
 
       fail-fast: false
     name: 'build: ${{ matrix.name }}'
@@ -179,6 +185,12 @@ jobs:
             vcpkg_triplet: x64-linux
             vcpkg_config: MinSizeRel
             dotnet_rid: linux-x64
+          - os: macos-latest
+            name: macOS arm64
+            arch: arm64
+            vcpkg_triplet: arm64-osx
+            vcpkg_config: MinSizeRel
+            dotnet_rid: osx-arm64
 
       fail-fast: false
     name: 'demo app: ${{ matrix.name }}'
@@ -249,10 +261,54 @@ jobs:
           # Kill the app
           kill $APP_PID || true
           
+      - name: Run app and capture screenshot (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          # Set GREY_SCREENSHOT_PPM so the app saves its own framebuffer at frame 200.
+          # This is the primary screenshot mechanism — it works even if the window is
+          # not composited by the macOS window server (e.g. in CI with no GPU).
+          export GREY_SCREENSHOT_PPM=/tmp/grey-frame.ppm
+
+          chmod +x dotnet/ConsoleDemo/bin/Release/net10.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo
+          dotnet/ConsoleDemo/bin/Release/net10.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo 2>&1 | tee app.log &
+
+          # Wait for 200 frames to render (app runs at 40 FPS → ~5 s) plus extra margin
+          sleep 10
+
+          mkdir -p screenshots
+
+          # Use the in-app framebuffer screenshot if available (primary)
+          if [ -f /tmp/grey-frame.ppm ]; then
+            echo "In-app framebuffer screenshot captured; converting to PNG"
+            sips -s format png /tmp/grey-frame.ppm --out screenshots/demo-${{ matrix.dotnet_rid }}.png \
+              || cp /tmp/grey-frame.ppm screenshots/demo-${{ matrix.dotnet_rid }}.ppm
+          else
+            echo "WARNING: In-app screenshot not found; falling back to screencapture"
+            # Try to bring the window to front before capturing the full screen
+            osascript -e 'tell application "System Events"
+              set procs to every process whose name is "ConsoleDemo"
+              if procs is not {} then
+                set frontmost of item 1 of procs to true
+              end if
+            end tell' 2>/dev/null || true
+            sleep 1
+            screencapture -x screenshots/demo-${{ matrix.dotnet_rid }}.png
+          fi
+
+          # Show app logs
+          cat app.log || true
+
+          # Kill the app
+          pkill -f ConsoleDemo 2>/dev/null || true
+
       - name: Run app and capture screenshot (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          # Set a higher screen resolution for better screenshots
+          Set-DisplayResolution -Width 1920 -Height 1080 -Force -ErrorAction SilentlyContinue
+          Start-Sleep -Seconds 2
+
           # Start the app in background
           $app = Start-Process -FilePath "dotnet\ConsoleDemo\bin\Release\net10.0\${{ matrix.dotnet_rid }}\publish\ConsoleDemo.exe" -PassThru
           

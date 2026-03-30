@@ -10,12 +10,19 @@
 #include "imgui_impl_opengl3.h"
 #include <chrono>
 #include <thread>
+#include <vector>
+#include <cstdlib>
 #include <stdio.h>
 #define GL_SILENCE_DEPRECATION
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <GLES2/gl2.h>
 #endif
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
+#if defined(__APPLE__)
+#define GLFW_EXPOSE_NATIVE_COCOA
+#include <GLFW/glfw3native.h>
+#include "macos_cgl.h"
+#endif
 
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
@@ -88,13 +95,66 @@ namespace grey::backends {
         }
 
         void run(std::function<bool(const app& app)> render_frame) {
-            // Create window with graphics context
-            float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
-            window = glfwCreateWindow((int)(window_width * main_scale), (int)(window_height * main_scale), title.c_str(), nullptr, nullptr);
+            // Compute scale from primary monitor (works regardless of client API)
+            GLFWmonitor* primary_monitor = glfwGetPrimaryMonitor();
+            float main_scale = primary_monitor
+                ? ImGui_ImplGlfw_GetContentScaleForMonitor(primary_monitor)
+                : 1.0f;
+            int eff_w = (int)(window_width * main_scale);
+            int eff_h = (int)(window_height * main_scale);
+
+            // Attempt 1: GL 3.2 Core (normal macOS / Linux path)
+            window = glfwCreateWindow(eff_w, eff_h, title.c_str(), nullptr, nullptr);
+
+#if defined(__APPLE__)
+            bool using_cgl_fallback = false;
+
+            if(window == nullptr) {
+                // Attempt 2: GL 2.1 legacy via NSGL — still uses NSOpenGLPFAAccelerated
+                // internally, so may fail on CI, but worth a try.
+                glfwDefaultWindowHints();
+                glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+                glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+                glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
+                g_glsl_version = "#version 120";
+                window = glfwCreateWindow(eff_w, eff_h, title.c_str(), nullptr, nullptr);
+            }
+
+            if(window == nullptr) {
+                // Attempt 3: CGL software-rendering fallback.
+                // Create a bare GLFW window (no GL context) and attach a
+                // manually-created NSOpenGLContext that does NOT request
+                // NSOpenGLPFAAccelerated — the CI display session always has a
+                // software renderer available.
+                glfwDefaultWindowHints();
+                glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+                g_glsl_version = "#version 120";
+                window = glfwCreateWindow(eff_w, eff_h, title.c_str(), nullptr, nullptr);
+                if(window != nullptr) {
+                    void* ns_win = (void*)glfwGetCocoaWindow(window);
+                    if(grey_macos_create_software_gl_context(ns_win)) {
+                        using_cgl_fallback = true;
+                    } else {
+                        glfwDestroyWindow(window);
+                        window = nullptr;
+                    }
+                }
+            }
+#endif
             if(window == nullptr)
                 return;
+
+            // For the normal path GLFW manages the GL context; for the CGL
+            // fallback the context is already current via macos_cgl.mm.
+#if defined(__APPLE__)
+            if(!using_cgl_fallback) {
+                glfwMakeContextCurrent(window);
+                glfwSwapInterval(1);
+            }
+#else
             glfwMakeContextCurrent(window);
             glfwSwapInterval(1); // Enable vsync
+#endif
 
             // Setup Dear ImGui context
             IMGUI_CHECKVERSION();
@@ -127,7 +187,18 @@ namespace grey::backends {
             }
 
             // Setup Platform/Renderer backends
+#if defined(__APPLE__)
+            if(using_cgl_fallback) {
+                ImGui_ImplGlfw_InitForOther(window, true);
+                // Disable multi-viewport: extra platform windows need their own
+                // GL contexts, which is complex in the CGL fallback path.
+                io.ConfigFlags &= ~ImGuiConfigFlags_ViewportsEnable;
+            } else {
+                ImGui_ImplGlfw_InitForOpenGL(window, true);
+            }
+#else
             ImGui_ImplGlfw_InitForOpenGL(window, true);
+#endif
 #ifdef __EMSCRIPTEN__
             ImGui_ImplGlfw_InstallEmscriptenCallbacks(window, "#canvas");
 #endif
@@ -199,6 +270,39 @@ namespace grey::backends {
                 glClear(GL_COLOR_BUFFER_BIT);
                 ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+                // In-app screenshot: if GREY_SCREENSHOT_PPM env var is set,
+                // capture the framebuffer to a PPM file after the first N rendered frames.
+                // sips (macOS) can convert PPM→PNG: sips -s format png file.ppm --out file.png
+                {
+                    static const int kScreenshotFrame = 200; // ~5 s at 40 FPS
+                    static int s_frame_count = 0;
+                    ++s_frame_count;
+                    const char* ppm_path = std::getenv("GREY_SCREENSHOT_PPM");
+                    if(ppm_path && s_frame_count == kScreenshotFrame && display_w > 0 && display_h > 0) {
+                        std::vector<unsigned char> px(display_w * display_h * 3);
+                        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+                        glReadPixels(0, 0, display_w, display_h, GL_RGB, GL_UNSIGNED_BYTE, px.data());
+                        // OpenGL reads bottom-to-top; flip vertically for PPM (top-to-bottom)
+                        for(int row = 0; row < display_h / 2; row++) {
+                            int opp = display_h - 1 - row;
+                            std::swap_ranges(
+                                px.begin() + row * display_w * 3,
+                                px.begin() + (row + 1) * display_w * 3,
+                                px.begin() + opp * display_w * 3);
+                        }
+                        FILE* f = fopen(ppm_path, "wb");
+                        if(f) {
+                            fprintf(f, "P6\n%d %d\n255\n", display_w, display_h);
+                            fwrite(px.data(), 1, px.size(), f);
+                            fclose(f);
+                            fprintf(stderr, "Grey: framebuffer screenshot saved to %s (%dx%d)\n",
+                                ppm_path, display_w, display_h);
+                        } else {
+                            fprintf(stderr, "Grey: failed to open screenshot file: %s\n", ppm_path);
+                        }
+                    }
+                }
+
                 // Update and Render additional Platform Windows
                 // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
                 //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
@@ -218,7 +322,15 @@ namespace grey::backends {
                     std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(sleep_time)));
                 }
 
+#if defined(__APPLE__)
+                if(using_cgl_fallback) {
+                    grey_macos_gl_flush();
+                } else {
+                    glfwSwapBuffers(window);
+                }
+#else
                 glfwSwapBuffers(window);
+#endif
 
                 last_frame_time = b_now;
             }
@@ -231,6 +343,11 @@ namespace grey::backends {
             ImGui_ImplGlfw_Shutdown();
             ImGui::DestroyContext();
 
+#if defined(__APPLE__)
+            if(using_cgl_fallback) {
+                grey_macos_destroy_gl_context();
+            }
+#endif
             glfwDestroyWindow(window);
             glfwTerminate();
         }

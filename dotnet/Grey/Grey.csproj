@@ -46,6 +46,11 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
 
+        <!-- macOS arm64 -->
+        <Content Include="..\..\xbin\runtimes\osx-arm64\native\libxgrey.dylib" Link="libxgrey.dylib" PackagePath="runtimes/osx-arm64/native">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+
     </ItemGroup>
 
     <ItemGroup>

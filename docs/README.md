@@ -10,7 +10,7 @@ It's based on the awesome [ImGui](https://github.com/ocornut/imgui) framework an
 
 ## Features
 
-- Cross-platform - currently supports **Windows x64** and **Linux x64**.
+- Cross-platform - currently supports **Windows x64**, **Linux x64**, and **macOS arm64**.
 - Completely stateless i.e., no widgets, state synchronization and so on.
 - Looks beautiful by default i.e., renders in high DPI, using system fonts and colours, supports themes and material icons.
 
@@ -18,7 +18,7 @@ It's based on the awesome [ImGui](https://github.com/ocornut/imgui) framework an
 
 To get started in C++, simply include this repository as a git submodule and follow the examples. For a real-life, production sample, check out [bt](https://github.com/aloneguid/bt).
 
-To get started in C#, reference [GreyMatter](https://www.nuget.org/packages/GreyMatter/) package, which includes C# interface and pre-built binaries for Windows and Linux.
+To get started in C#, reference [GreyMatter](https://www.nuget.org/packages/GreyMatter/) package, which includes C# interface and pre-built binaries for Windows, Linux, and macOS.
 
 # Roadmap
 - Markdown component support.
@@ -40,4 +40,21 @@ To build native part on Linux or WSL2, you need:
 
 ### MacOSX
 
-I currently do not pay Apple tax, but instructions should be similar to Linux. If you want to help with MacOSX support, please open an issue. Supporting MacOSX should resort to testing Metal rendering backend and some native OS integrations around windowing.
+To build native part on macOS, you need:
+- [vcpkg](https://learn.microsoft.com/en-gb/vcpkg/get_started/get-started?pivots=shell-bash).
+- CMake. `brew install cmake`.
+- Build tools (Xcode Command Line Tools). `xcode-select --install`.
+- Ninja build system. `brew install ninja`.
+
+Once the prerequisites are installed, clone the repository and build:
+
+```bash
+git clone --recursive https://github.com/aloneguid/grey
+cd grey
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_TOOLCHAIN_FILE=$HOME/vcpkg/scripts/buildsystems/vcpkg.cmake \
+  -DVCPKG_TARGET_TRIPLET=arm64-osx
+cmake --build build --config Release
+```
+
+The library uses the **GLFW + OpenGL3** backend on macOS (the same as Linux), which is fully supported and requires no extra runtime dependencies. All required libraries are statically linked via vcpkg.
