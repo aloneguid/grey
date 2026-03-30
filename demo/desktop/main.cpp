@@ -50,8 +50,10 @@ int main(int argc, char* argv[]) {
     auto app = grey::app::make("demo", 700, 800);
     //app->load_icon_font = false;
     app->load_fixed_font = true;
+#if defined(_WIN32)
     app->win32_title_bar = false;
     app->win32_center_on_screen = true;
+#endif
     float scale = app->scale;
 
     wnd
