@@ -270,7 +270,11 @@ jobs:
           APP_PID=$!
 
           # Wait for app to render
-          sleep 5
+          sleep 8
+
+          # Bring the window to the front before capturing
+          osascript -e "tell application \"System Events\" to set frontmost of (first application process whose unix id is $APP_PID) to true" 2>/dev/null || true
+          sleep 1
 
           # Capture screenshot using macOS built-in screencapture
           mkdir -p screenshots
@@ -286,6 +290,10 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          # Set a higher screen resolution for better screenshots
+          Set-DisplayResolution -Width 1920 -Height 1080 -Force -ErrorAction SilentlyContinue
+          Start-Sleep -Seconds 2
+
           # Start the app in background
           $app = Start-Process -FilePath "dotnet\ConsoleDemo\bin\Release\net10.0\${{ matrix.dotnet_rid }}\publish\ConsoleDemo.exe" -PassThru
           

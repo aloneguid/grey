@@ -91,6 +91,15 @@ namespace grey::backends {
             // Create window with graphics context
             float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
             window = glfwCreateWindow((int)(window_width * main_scale), (int)(window_height * main_scale), title.c_str(), nullptr, nullptr);
+#if defined(__APPLE__)
+            if(window == nullptr) {
+                // Fallback for CI / headless environments where GL 3.2 Core is unavailable:
+                // retry with legacy GL 2.1 which uses the macOS software renderer.
+                glfwDefaultWindowHints();
+                g_glsl_version = "#version 120";
+                window = glfwCreateWindow((int)(window_width * main_scale), (int)(window_height * main_scale), title.c_str(), nullptr, nullptr);
+            }
+#endif
             if(window == nullptr)
                 return;
             glfwMakeContextCurrent(window);
