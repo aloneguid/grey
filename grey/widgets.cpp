@@ -10,6 +10,7 @@
 // for Windows-specific hacks
 #ifdef _WIN32
 #include <Windows.h>
+#include "common/win32/window.h"
 #endif
 
 using namespace std;
@@ -240,6 +241,13 @@ namespace grey::widgets {
         ImGuiViewport* vp = ImGui::GetWindowViewport();
         if(vp && vp->PlatformWindowCreated && vp->PlatformHandleRaw) {
             HWND hWnd = (HWND)vp->PlatformHandleRaw;
+            grey::common::win32::window wnd{hWnd};
+
+            if(!win32_x_style_applied) {
+                wnd.set_rounded_corners(true);
+                win32_x_style_applied = true;
+            }
+
             if(!win32_brought_forward) {
                 ::SetForegroundWindow(hWnd);
                 win32_brought_forward = true;

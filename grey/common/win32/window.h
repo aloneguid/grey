@@ -53,6 +53,8 @@ namespace grey::common::win32 {
         /// </summary>
         static void set_pos(HWND hwnd, int x, int y, int width, int height);
 
+        void set_rounded_corners(bool smaller_rounding = false);
+
     private:
         HWND hwnd;
     };

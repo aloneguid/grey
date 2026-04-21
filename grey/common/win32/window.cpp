@@ -1,5 +1,6 @@
 #include "window.h"
 #include "../str.h"
+#include <dwmapi.h>
 
 #define MAX_LOADSTRING 1024
 
@@ -96,5 +97,15 @@ namespace grey::common::win32 {
         if(width == -1 || height == -1) flags |= SWP_NOSIZE;
 
         ::SetWindowPos(hwnd, NULL, x, y, width, height, flags);
+    }
+
+    void window::set_rounded_corners(bool smaller_rounding) {
+        const int preference = smaller_rounding ? DWMWCP_ROUNDSMALL : DWMWCP_ROUND;
+        ::DwmSetWindowAttribute(
+            hwnd,
+            static_cast<DWMWINDOWATTRIBUTE>(DWMWA_WINDOW_CORNER_PREFERENCE),
+            &preference,
+            sizeof(preference));
+
     }
 }

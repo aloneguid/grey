@@ -7,6 +7,7 @@
 #include <d3d11.h>
 #include <dwmapi.h>
 #include "../common/str.h"
+#include "../common/win32/window.h"
 
 #if GREY_INCLUDE_IMPLOT
 #include "implot.h"
@@ -317,13 +318,10 @@ namespace grey::backends {
 
         void apply_window_corner_preference() {
             if(!hwnd) return;
-
-            const int preference = win32_title_bar ? DWMWCP_DEFAULT : DWMWCP_ROUND;
-            ::DwmSetWindowAttribute(
-                hwnd,
-                static_cast<DWMWINDOWATTRIBUTE>(DWMWA_WINDOW_CORNER_PREFERENCE),
-                &preference,
-                sizeof(preference));
+            if(!win32_title_bar) {
+                grey::common::win32::window wnd{hwnd};
+                wnd.set_rounded_corners();
+            }
         }
 
         void run(std::function<bool(const app& app)> render_frame) {
