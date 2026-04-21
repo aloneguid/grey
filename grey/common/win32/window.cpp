@@ -29,6 +29,10 @@ namespace grey::common::win32 {
         return window{ ::GetForegroundWindow() };
     }
 
+    void window::set_foreground() {
+        ::SetForegroundWindow(hwnd);
+    }
+
     bool window::is_valid() {
         return ::IsWindow(hwnd);
     }

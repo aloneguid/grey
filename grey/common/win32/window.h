@@ -19,6 +19,8 @@ namespace grey::common::win32 {
 
         static window get_foreground();
 
+        void set_foreground();
+
         std::string get_text();
 
         bool is_visible();

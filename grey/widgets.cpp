@@ -244,12 +244,12 @@ namespace grey::widgets {
             grey::common::win32::window wnd{hWnd};
 
             if(!win32_x_style_applied) {
-                wnd.set_rounded_corners(true);
+                wnd.set_rounded_corners(false);
                 win32_x_style_applied = true;
             }
 
             if(!win32_brought_forward) {
-                ::SetForegroundWindow(hWnd);
+                wnd.set_foreground();
                 win32_brought_forward = true;
             }
             if(win32_exclude_from_capture_current != win32_exclude_from_capture) {
@@ -266,6 +266,7 @@ namespace grey::widgets {
 
         if (border_size >= 0)
             ImGui::PopStyleVar();
+
         ImGui::End();
 
         if (fill_viewport_enabled) {
