@@ -643,9 +643,7 @@ namespace grey::widgets {
             lua,
             json,
             sql,
-            angelscript,
-            glsl,
-            hlsl
+            markdown
         };
 
         language lng;
@@ -665,6 +663,8 @@ namespace grey::widgets {
         bool border;
         TextEditor editor;
         language current_lng{language::none};
+
+        void set_language(language l);
     };
 
     // tables

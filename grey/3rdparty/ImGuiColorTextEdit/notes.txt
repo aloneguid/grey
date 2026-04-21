@@ -1,3 +1,5 @@
 The original repository for ImGuiColorTextEdit is not maintained anymore, so just like imgui_bundle, I'm using the most maintained fork/branch: https://github.com/pthom/ImGuiColorTextEdit/tree/imgui_bundle.
 
 Source: https://github.com/pthom/imgui_bundle/blob/main/external/ImGuiColorTextEdit/Readme_Forks.md
+
+Now switching to https://github.com/goossens/ImGuiColorTextEdit (most maintained)

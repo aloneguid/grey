@@ -49,7 +49,7 @@ namespace grey::fonts {
         string path = grey::common::win32::os::get_system_fonts_path();
         // Segoe UI is the default UI font for Windows 10 and 11.
         path += "\\consola.ttf";
-        return io.Fonts->AddFontFromFileTTF(path.c_str(), 16.0f);
+        return io.Fonts->AddFontFromFileTTF(path.c_str(), 15.0f);
 #else
         return nullptr;
 #endif

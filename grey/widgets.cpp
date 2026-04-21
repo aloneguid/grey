@@ -1332,6 +1332,7 @@ namespace grey::widgets {
         lng{l}, current_lng{-1} {
         //editor.SetShowWhitespaces(true);
         editor.SetTabSize(2);
+        editor.SetShowLineNumbersEnabled(false);
         //editor.SetShowKeywordTooltips(false);
     }
 
@@ -1350,11 +1351,16 @@ namespace grey::widgets {
         }
 
         if(current_lng != lng) {
-            editor.SetLanguageDefinition((TextEditor::LanguageDefinitionId)lng);
+            //editor.SetLanguageDefinition((TextEditor::LanguageDefinitionId)lng);
+            set_language(lng);
             current_lng = lng;
         }
 
-        editor.Render(id.c_str(), true, ImVec2(width, height), border);
+        //editor.SetAutoIndentEnabled(true);
+        //editor.SetShowLineNumbersEnabled(false);
+        editor.Render(id.c_str(), ImVec2(width, height), border);
+        //editor.Render(id.c_str(), false, ImVec2(width, height), border);
+
 
         if (f) {
             ImGui::PopFont();
@@ -1362,6 +1368,35 @@ namespace grey::widgets {
 
         return false;
         //return editor.IsTextChanged();
+    }
+
+    void code_editor::set_language(language l) {
+        switch(l) {
+            case language::none:
+                editor.SetLanguage(nullptr);
+                break;
+            case language::cpp:
+                editor.SetLanguage(TextEditor::Language::Cpp());
+                break;
+            case language::c:
+                editor.SetLanguage(TextEditor::Language::C());
+                break;
+            case language::cs:
+                editor.SetLanguage(TextEditor::Language::Cs());
+                break;
+            case language::lua:
+                editor.SetLanguage(TextEditor::Language::Lua());
+                break;
+            case language::python:
+                editor.SetLanguage(TextEditor::Language::Python());
+                break;
+            case language::json:
+                editor.SetLanguage(TextEditor::Language::Json());
+                break;
+            case language::markdown:
+                editor.SetLanguage(TextEditor::Language::Markdown());
+                break;
+        }
     }
 
     big_table::big_table(const std::string& id, const vector<string>& columns, size_t row_count,
