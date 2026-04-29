@@ -276,9 +276,35 @@ EXPORTED bool menu_item(const char* c_text, bool reserve_icon_space, const char*
     return w::mi(text, reserve_icon_space, icon);
 }
 
+
 // -- windowing
 
 map<int, unique_ptr<w::window>> window_map;
+
+EXPORTED int32_t window(int32_t id, bool unregister,
+    const char* title,
+    bool* p_open,
+    RenderCallback c_render_callback) {
+
+    auto it = window_map.find(id);
+    if(it == window_map.end()) {
+        if(unregister) return -1;
+
+        // create new window
+        id = w::generate_int_id();
+        string t{title};
+        window_map[id] = make_unique<w::window>(t, p_open);
+    } else if(unregister) {
+        // delete window from map
+        window_map.erase(it);
+        return -1;
+    }
+
+    w::window& w{*window_map[id]};
+    w::guard wg{w};
+    if(c_render_callback) c_render_callback();
+    return id;
+}
 
 EXPORTED int32_t window_register(const char* title, bool* is_open) {
 
@@ -316,37 +342,29 @@ EXPORTED void window_render(int32_t id, RenderCallback c_render_callback) {
 
 map<int, unique_ptr<w::code_editor>> code_editor_map;
 
-EXPORTED int32_t code_editor_register(int32_t language) {
-    int id = w::generate_int_id();
-    w::code_editor::language lng = static_cast<w::code_editor::language>(language);
-    code_editor_map[id] = make_unique<w::code_editor>(lng);
+EXPORTED int32_t code_editor(int32_t id, bool unregister, int32_t language, const char* c_text) {
+    auto it = code_editor_map.find(id);
+    if(it == code_editor_map.end()) {
+        if(unregister) return -1;
+
+        // create new code editor
+        id = w::generate_int_id();
+        code_editor_map[id] = make_unique<w::code_editor>();
+    } else if(unregister) {
+        // delete code editor from map
+        code_editor_map.erase(it);
+        return -1;
+    }
+
+    w::code_editor& ce{*code_editor_map[id]};
+    if(c_text) {
+        ce.set_text(c_text);
+    }
+    ce.lng = static_cast<w::code_editor::language>(language);
+    ce.render();
     return id;
 }
 
-EXPORTED bool code_editor_unregister(int32_t id) {
-    // delete window from map
-    auto it = code_editor_map.find(id);
-    if(it == code_editor_map.end()) return false;
-
-    code_editor_map.erase(it);
-    return true;
-}
-
-EXPORTED void code_editor_set_text(int32_t id, const char* text) {
-    auto it = code_editor_map.find(id);
-    if(it == code_editor_map.end()) return;
-
-    w::code_editor& ce{*it->second};
-    ce.set_text(text);
-}
-
-EXPORTED void code_editor_render(int32_t id) {
-    auto it = code_editor_map.find(id);
-    if(it == code_editor_map.end()) return;
-
-    w::code_editor& ce{*it->second};
-    ce.render();
-}
 
 void get_debug_info(float* fps) {
     if(fps) {

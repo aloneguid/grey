@@ -116,19 +116,18 @@ extern "C" {
 
     EXPORTED bool menu_item(const char* c_text, bool reserve_icon_space, const char* c_icon = "");
 
-    EXPORTED int32_t window_register(const char* title, bool* is_open);
+    EXPORTED int32_t window(int32_t id,
+        bool unregister,
+        const char* title,
+        bool* p_open,
+        RenderCallback c_render_callback);
 
-    EXPORTED bool window_unregister(int32_t id);
 
-    EXPORTED void window_render(int32_t id, RenderCallback c_render_callback);
+    EXPORTED int32_t code_editor(int32_t id,
+        bool unregister,
+        int32_t language,
+        const char* c_text);
 
-    EXPORTED int32_t code_editor_register(int32_t language);
-
-    EXPORTED bool code_editor_unregister(int32_t id);
-
-    EXPORTED void code_editor_set_text(int32_t id, const char* text);
-
-    EXPORTED void code_editor_render(int32_t id);
     // -- system debug
 
     EXPORTED void get_debug_info(float* fps);

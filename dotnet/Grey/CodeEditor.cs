@@ -4,26 +4,28 @@ using System.Text;
 
 namespace Grey {
     public class CodeEditor : IDisposable {
-        private readonly int _id;
+        private int _id = -1;
+        private string? _setText;
 
         public CodeEditor(ProgrammingLanguage language) {
-            _id = Native.code_editor_register((int)language);
+            Language = language;
         }
 
+        public ProgrammingLanguage Language;
+
         public void Render() {
-            Native.code_editor_render(_id);
+            _id = Native.code_editor(_id, false, (int)Language, _setText);
+            _setText = null;
         }
 
         public string Text {
             set {
-                Native.code_editor_set_text(_id, value);
+                _setText = value;
             }
         }
 
         public void Dispose() {
-            if(!Native.code_editor_unregister(_id)) {
-                throw new InvalidOperationException($"Failed to deregister code editor#{_id}");
-            }
+            Native.code_editor(_id, true, 0, null);
         }
     }
 }

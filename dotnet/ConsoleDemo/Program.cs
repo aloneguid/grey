@@ -117,7 +117,7 @@ void Basics() {
     }
 
     if(xwnd1 != null) {
-        xwnd1.Frame(() => {
+        xwnd1.Run(() => {
             Label("hello from external window");
 
             InputMultiline("xml", multilineText, 200, false, true, true);

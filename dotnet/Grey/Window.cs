@@ -5,12 +5,14 @@ using System.Text;
 
 namespace Grey {
     public class Window : IDisposable {
-        private readonly int _id;
+        private int _id = -1;
         private bool _isOpen = true;
+        private GCHandle _isOpenHandle;
+        private readonly string _title;
 
         public Window(string title, bool canClose = true) {
-
-            _id = Native.window_register(title, ref _isOpen);
+            _isOpenHandle = GCHandle.Alloc(_isOpen, GCHandleType.Pinned);
+            _title = title;
         }
 
         public bool IsOpen {
@@ -18,15 +20,16 @@ namespace Grey {
             set => _isOpen = value;
         }
 
-        public void Frame(Action renderContent) {
-            Native.window_render(_id, () => {
+        public void Run(Action renderContent) {
+            _id = Native.window(_id, false, _title, ref _isOpen, () => {
                 renderContent();
             });
         }
 
         public void Dispose() {
-            if(!Native.window_unregister(_id)) {
-                throw new InvalidOperationException($"Failed to deregister window#{_id}");
+            Native.window(_id, true, "", ref _isOpen, () => { });
+            if(_isOpenHandle.IsAllocated) {
+                _isOpenHandle.Free();
             }
         }
     }
