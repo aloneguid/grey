@@ -283,6 +283,7 @@ map<int, unique_ptr<w::window>> window_map;
 
 EXPORTED int32_t window(int32_t id, bool unregister,
     const char* title,
+    int32_t width, int32_t height,
     bool* p_open,
     RenderCallback c_render_callback) {
 
@@ -293,7 +294,9 @@ EXPORTED int32_t window(int32_t id, bool unregister,
         // create new window
         id = w::generate_int_id();
         string t{title};
-        window_map[id] = make_unique<w::window>(t, p_open);
+        auto wnd = make_unique<w::window>(t, p_open);
+        wnd->size(width, height);
+        window_map[id] = std::move(wnd);
     } else if(unregister) {
         // delete window from map
         window_map.erase(it);

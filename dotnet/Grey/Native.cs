@@ -206,6 +206,7 @@ namespace Grey {
             int id,
             bool unregister,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string title,
+            int width, int height,
             ref bool is_open,
             RenderCallback c_callback
             );

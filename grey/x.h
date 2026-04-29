@@ -119,6 +119,7 @@ extern "C" {
     EXPORTED int32_t window(int32_t id,
         bool unregister,
         const char* title,
+        int32_t width, int32_t height,
         bool* p_open,
         RenderCallback c_render_callback);
 
