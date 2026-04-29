@@ -102,6 +102,8 @@ namespace grey::widgets {
         ImVec2 rb() const { return ImVec2{x_max, y_max}; }
     };
 
+    int generate_int_id();
+
     class guardable {
     public:
         virtual void enter() = 0;
@@ -635,7 +637,7 @@ namespace grey::widgets {
          * @brief Programming language for syntax highlighting.
          * Do not change the order, as it's mapped directly to TextEditor::LanguageDefinitionId enum.
          */
-        enum class language {
+        enum class language : int32_t {
             none,
             cpp,
             c,

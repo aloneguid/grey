@@ -199,6 +199,30 @@ namespace Grey {
             bool reserve_icon_space,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string c_icon);
 
+        // windowing
+
+        [DllImport(LibName)]
+        internal static extern int window_register([MarshalAs(UnmanagedType.LPUTF8Str)] string title, ref bool is_open);
+
+        [DllImport(LibName)]
+        internal static extern bool window_unregister(int id);
+
+        [DllImport(LibName)]
+        internal static extern void window_render(int id, RenderCallback c_callback);
+
+        // code editor
+        [DllImport(LibName)]
+        internal static extern int code_editor_register(int language);
+
+        [DllImport(LibName)]
+        internal static extern bool code_editor_unregister(int id);
+
+        [DllImport(LibName)]
+        internal static extern void code_editor_render(int id);
+
+        [DllImport(LibName)]
+        internal static extern void code_editor_set_text(int id, [MarshalAs(UnmanagedType.LPUTF8Str)] string text);
+
         // system debug
 
         [DllImport(LibName)]

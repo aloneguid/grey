@@ -19,7 +19,6 @@ string text;
 w::container scroller{400, 100};
 w::popup status_pop {"status_pop"};
 bool ned_initialised{false};
-w::code_editor ted;
 bool selected{false};
 // multiline string with sample for text editor
 string text_editor_text = R"(
@@ -51,7 +50,7 @@ int main(int argc, char* argv[]) {
     //app->load_icon_font = false;
     app->load_fixed_font = true;
 #if defined(_WIN32)
-    app->win32_title_bar = false;
+    //app->win32_title_bar = false;
     app->win32_center_on_screen = true;
 #endif
     float scale = app->scale;
@@ -64,8 +63,7 @@ int main(int argc, char* argv[]) {
         .border(0)
         .has_menubar();
 
-    ted.set_text("-- add your Lua code here");
-
+   
     gr.add_node(1);
     gr.add_node(2);
     gr.add_node(3);
@@ -393,24 +391,29 @@ int main(int argc, char* argv[]) {
                     static bool autoscroll = false;
                     static bool enabled = true;
                     static bool use_fixed_font = false;
+                    static bool use_rich_editor = false;
+                    static bool ted_initialised = false;
                     w::slider(height, -500, 500, "height");
                     w::checkbox("autoscroll", autoscroll);
                     w::checkbox("enabled", enabled);
                     w::checkbox("fixed font", use_fixed_font);
-                    w::input_ml("##ml", text_editor_text, height == 0 ? -FLT_MIN : height, autoscroll, enabled, use_fixed_font);
+                    w::checkbox("use rich editor", use_rich_editor);
+
+                    if(use_rich_editor) {
+                        //ted.render(height == 0 ? -FLT_MIN : height);
+                        static w::code_editor ted;
+                        if(!ted_initialised) {
+                            ted.lng = w::code_editor::language::lua;
+                            ted.set_text(text_editor_text);
+                            ted_initialised = true;
+                        }
+
+                        ted.render();
+                    } else {
+                        w::input_ml("##ml", text_editor_text, height == 0 ? -FLT_MIN : height, autoscroll, enabled, use_fixed_font);
+                    }
                 }
             }
-
-            static vector<string> lang_names = {"None", "C++", "C", "C#", "Python", "Lua", "JSON", "SQL", "AngelScript", "GLSL", "HLSL"};
-
-            // ImGuiColorTextEdit
-            with_tab(tabs, "Code Editor",
-
-                w::combo("Language", lang_names, (unsigned int&)ted.lng);
-
-                if(ted.render()) {
-                    w::label("code changed");
-                })
 
             // ImPlot
             with_tab(tabs, "Plots",

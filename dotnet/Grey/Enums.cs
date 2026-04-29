@@ -21,4 +21,16 @@ namespace Grey {
         Normal,
         Slow
     };
+
+    public enum  ProgrammingLanguage : int {
+        None = 0,
+        Cpp,
+        C,
+        Cs,
+        Python,
+        Lua,
+        Json,
+        Sql,
+        Markdown
+    }
 }

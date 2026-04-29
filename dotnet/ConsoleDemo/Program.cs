@@ -13,12 +13,16 @@ int spinnerDotCount = 8;
 StringBuilder multilineText = new StringBuilder("initial text\nanother line", 1000);
 float mlHeight = 0;
 bool mlEnabled = true;
+bool editorRich = false;
+CodeEditor? ce = null;
 bool mlUseFixedFont = false;
 bool alternateTableRowBg = false;
 bool tableSelectables = false;
 bool tableSelectableRow = false;
 string[] choices = ["one", "two", "three"];
 uint currentChoice = 0;
+Window? xwnd1 = null;
+bool xwnd2Show = true;
 
 void Basics() {
 
@@ -105,6 +109,26 @@ void Basics() {
             Button("collide");
         });
     }
+
+    if(Button("create external window")) {
+        if(xwnd1 == null) {
+            xwnd1 = new Window("external window");
+        }
+    }
+
+    if(xwnd1 != null) {
+        xwnd1.Frame(() => {
+            Label("hello from external window");
+
+            InputMultiline("xml", multilineText, 200, false, true, true);
+        });
+
+        if(!xwnd1.IsOpen) {
+            xwnd1.Dispose();
+            xwnd1 = null;
+        }
+    }
+
 }
 
 
@@ -149,9 +173,18 @@ Grey.App.Run("Grey# Demo", () => {
             Slider(ref mlHeight, -1000, 1000, "height");
             Checkbox("enabled", ref mlEnabled);
             Checkbox("use fixed font", ref mlUseFixedFont);
+            Checkbox("rich editor", ref editorRich);
 
-            if(InputMultiline("multiline", multilineText, mlHeight, false, mlEnabled, mlUseFixedFont)) {
-                Notify("multiline changed");
+            if(editorRich) {
+                if(ce == null) {
+                    ce = new CodeEditor(ProgrammingLanguage.Json);
+                    ce.Text = multilineText.ToString();
+                }
+                ce.Render();
+            } else {
+                if(InputMultiline("multiline", multilineText, mlHeight, false, mlEnabled, mlUseFixedFont)) {
+                    Notify("multiline changed");
+                }
             }
         });
 
