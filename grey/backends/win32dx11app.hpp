@@ -135,6 +135,12 @@ namespace grey::backends {
         if(ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
             return true;
 
+        grey::app* me = reinterpret_cast<grey::app*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        if(me && me->on_app_window_message) {
+            LRESULT res = me->on_app_window_message(msg, wParam, lParam);
+            if(res) return res;
+        }
+
         switch(msg) {
             case WM_SIZE:
                 if(wParam == SIZE_MINIMIZED)
@@ -178,7 +184,6 @@ namespace grey::backends {
             case WM_COPYDATA:
             {
                 // get "this" pointer
-                grey::app* me = reinterpret_cast<grey::app*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
                 if(me && me->on_user_message) {
                     COPYDATASTRUCT* pcds = (COPYDATASTRUCT*)lParam;
                     string message{(char*)pcds->lpData};

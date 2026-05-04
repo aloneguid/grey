@@ -5,6 +5,11 @@
 #include <map>
 #include "common/img.h"
 
+#if _WIN32
+#define NOMINMAX
+#include <Windows.h>
+#endif
+
 namespace grey {
 
     struct texture {
@@ -153,6 +158,12 @@ namespace grey {
          * @brief When set to true, window will be always on top.
          */
         bool win32_always_on_top{false};
+
+        /**
+         * @brief Called when a Windows message arrives to the application main window's message loop. Returning zero will indicate the usual message handling should occur. Non-zero result skips the further message handling and returns from windowproc with this code.
+         */
+        std::function<LRESULT(UINT, WPARAM, LPARAM)> on_app_window_message;
+
 #endif
 
     protected:
