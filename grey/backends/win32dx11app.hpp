@@ -240,11 +240,23 @@ namespace grey::backends {
         }
 
         void get_screen_center(int width, int height, int& x, int& y) {
-            int sw = ::GetSystemMetrics(SM_CXFULLSCREEN);
-            int sh = ::GetSystemMetrics(SM_CYFULLSCREEN);
+            // get center of the screen where mouse cursor is, not just the primary monitor
 
-            x = sw / 2 - width / 2;
-            y = sh / 2 - height / 2;
+            // mouse cursor position
+            POINT cursor;
+            ::GetCursorPos(&cursor);
+
+            // get monitor and it's info
+            HMONITOR hMonitor = ::MonitorFromPoint(cursor, MONITOR_DEFAULTTONEAREST);
+            MONITORINFO mi = {sizeof(mi)};
+            ::GetMonitorInfo(hMonitor, &mi);
+            RECT& wa = mi.rcWork;
+
+            // calculate it
+            int sw = wa.right - wa.left;
+            int sh = wa.bottom - wa.top;
+            x = wa.left + (sw - width) / 2;
+            y = wa.top + (sh - height) / 2;
         }
 
         void resize_main_viewport(int width, int height) {

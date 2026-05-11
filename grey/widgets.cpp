@@ -808,7 +808,7 @@ namespace grey::widgets {
     void image_rounded(app& app, const std::string& key, size_t width, size_t height, float rounding,
         float uv0_x, float uv0_y, float uv1_x, float uv1_y) {
         auto tex = app.get_texture(key);
-        if (tex->data) {
+        if (tex && tex->data) {
             ImDrawList* dl = ImGui::GetWindowDrawList();
             ImVec2 p_min = ImGui::GetCursorScreenPos();
             ImVec2 p_max = ImVec2(p_min.x + width, p_min.y + height);
