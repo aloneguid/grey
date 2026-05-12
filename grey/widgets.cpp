@@ -885,6 +885,9 @@ namespace grey::widgets {
             clicked = ImGui::Button(text.c_str(), ImVec2(width, 0));
         }
 
+        if(is_hovered())
+            mouse_cursor(mouse_cursor_type::hand);
+
         if (emp != emphasis::none) {
             ImGui::PopStyleColor(3);
         }
@@ -1176,6 +1179,10 @@ namespace grey::widgets {
 
     bool is_focused() {
         return ImGui::IsItemFocused();
+    }
+
+    float frame_delta() {
+        return ImGui::GetIO().DeltaTime;
     }
 
     void mouse_cursor(mouse_cursor_type mct) {

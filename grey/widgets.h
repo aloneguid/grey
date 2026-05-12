@@ -523,6 +523,12 @@ namespace grey::widgets {
 
     bool hyperlink(const std::string& text, const std::string& url_to_open = "");
 
+    /**
+     * @brief Colour picker
+     * @param label 
+     * @param colour 
+     * @return 
+     */
     bool colour(const std::string& label, unsigned int& colour);
 
     /**
@@ -588,6 +594,11 @@ namespace grey::widgets {
     bool is_hovered();
 
     bool is_focused();
+
+    /**
+     * @brief Time passed since last frame in seconds, most likely fractional.
+     */
+    float frame_delta();
 
     enum class mouse_cursor_type {
         none = -1,
