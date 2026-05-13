@@ -243,9 +243,9 @@ namespace grey::widgets {
             HWND hWnd = (HWND)vp->PlatformHandleRaw;
             grey::common::win32::window wnd{hWnd};
 
-            if(!win32_x_style_applied) {
+            if(win32_x_style_applied_to_handle != vp->PlatformHandleRaw) {
                 wnd.set_rounded_corners(false);
-                win32_x_style_applied = true;
+                win32_x_style_applied_to_handle = vp->PlatformHandleRaw;
             }
 
             if(!win32_brought_forward) {

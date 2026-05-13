@@ -53,7 +53,6 @@ namespace grey::backends {
     static bool                     g_SwapChainOccluded = false;
     static UINT                     g_ResizeWidth = 0, g_ResizeHeight = 0;
     static ID3D11RenderTargetView* g_mainRenderTargetView = nullptr;
-    static bool g_win32_close_on_focus_lost{false};
 
     // Forward declarations of helper functions
     bool CreateDeviceD3D(HWND hWnd);
@@ -177,7 +176,7 @@ namespace grey::backends {
                 }
                 break;
             case WM_KILLFOCUS:
-                if(g_win32_close_on_focus_lost) {
+                if(me && me->win32_close_on_focus_lost) {
                     ::PostQuitMessage(0);
                 }
                 break;
@@ -343,9 +342,6 @@ namespace grey::backends {
 
         void run(std::function<bool(const app& app)> render_frame) {
             // Create application window
-
-            // apply win32 customisations
-            g_win32_close_on_focus_lost = win32_close_on_focus_lost;
 
             wstring class_name = grey::common::str::to_wstr(win32_window_class_name);
             WNDCLASSEXW wc = {

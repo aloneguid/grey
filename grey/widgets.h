@@ -178,7 +178,7 @@ namespace grey::widgets {
         bool win32_brought_forward{false};
         bool win32_exclude_from_capture_current{false};
         bool win32_always_on_top_current{false};
-        bool win32_x_style_applied{false};
+        void* win32_x_style_applied_to_handle{nullptr};
 #endif
     };
 
