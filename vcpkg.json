@@ -24,6 +24,7 @@
             "name": "glfw3",
             "platform": "linux"
         },
-        "implot"
+        "implot",
+        "simpleini"
     ]
 }
