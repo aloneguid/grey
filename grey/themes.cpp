@@ -92,9 +92,9 @@ namespace grey::themes {
         GreyColors[GreyCol_EmphasisSecondaryHovered] = ImVec4(0.43f, 0.43f, 0.47f, 1.0f);
         GreyColors[GreyCol_EmphasisSecondaryActive] = ImVec4(0.43f, 0.43f, 0.47f, 0.95f);
 
-        GreyColors[GreyCol_EmphasisSuccess] = ImColor::HSV(2 / 7.0f, 0.6f, 0.9f);
-        GreyColors[GreyCol_EmphasisSuccessHovered] = ImColor::HSV(2 / 7.0f, 0.6f, 1.0f);
-        GreyColors[GreyCol_EmphasisSuccessActive] = ImColor::HSV(2 / 7.0f, 0.6f, 0.95f);
+        GreyColors[GreyCol_EmphasisSuccess] = ImVec4(50.0 / 255, 190.0 / 255, 15.0 / 255, 1.0f);
+        GreyColors[GreyCol_EmphasisSuccessHovered] = ImVec4(60.0 / 255, 200.0 / 255, 20.0 / 255, 1.0f);
+        GreyColors[GreyCol_EmphasisSuccessActive] = ImVec4(60.0 / 255, 200.0 / 255, 20.0 / 255, 1.0f);
 
         GreyColors[GreyCol_EmphasisError] = ImVec4(1.00f, 0.20f, 0.00f, 0.9f);
         GreyColors[GreyCol_EmphasisErrorHovered] = ImVec4(1.00f, 0.20f, 0.00f, 1.0f);
