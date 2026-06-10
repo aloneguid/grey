@@ -2,10 +2,10 @@
 #include "fonts/font_loader.h"
 #include "themes.h"
 #include "widgets.h"
+#include "common/os.h"
 
 #if _WIN32
 #include "backends/win32dx11app.hpp"
-#include "common/win32/os.h"
 #else
 #include "backends/glfw_gl3.hpp"
 #endif

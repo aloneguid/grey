@@ -15,7 +15,7 @@
 #include "imgui.h"
 
 #if WIN32
-#include "../common/win32/os.h"
+#include "../common/os.h"
 #elif defined(__linux__)
 #include "../common/lin/os.h"
 #include "roboto.inl"
@@ -31,7 +31,7 @@ namespace grey::fonts {
 
     ImFont* font_loader::load_system_font(ImGuiIO& io) {
 #if WIN32
-        string path = grey::common::win32::os::get_system_fonts_path();
+        string path = grey::common::os::get_system_fonts_path();
         // Segoe UI is the default UI font for Windows 10 and 11.
         path += "\\segoeui.ttf";
         ImFont* f = io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f);
@@ -46,7 +46,7 @@ namespace grey::fonts {
 
     ImFont* font_loader::load_fixed_font(ImGuiIO& io) {
 #if WIN32
-        string path = grey::common::win32::os::get_system_fonts_path();
+        string path = grey::common::os::get_system_fonts_path();
         // Segoe UI is the default UI font for Windows 10 and 11.
         path += "\\consola.ttf";
         return io.Fonts->AddFontFromFileTTF(path.c_str(), 15.0f);

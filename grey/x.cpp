@@ -4,20 +4,17 @@
 #include <memory>
 #include <vector>
 #include <stack>
-#include <iostream>
 
 using namespace std;
 namespace w = grey::widgets;
 
-#ifdef _WIN32
-#include "common/win32/os.h"
-#endif
+#include "common/os.h"
 
 float scale = 1.0f; // default scale
 
 void platform_init() {
 #if _WIN32
-    grey::common::win32::os::set_dpi_awareness();
+    grey::common::os::set_dpi_awareness();
 #endif
 }
 

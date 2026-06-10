@@ -3,6 +3,8 @@
 set (STATIC_NAME libgrey)
 set (DYNAMIC_NAME xgrey)
 
+find_path(SIMPLEINI_INCLUDE_DIRS "ConvertUTF.c")
+
 find_package(imgui CONFIG REQUIRED)
 find_package(implot CONFIG REQUIRED)
 
@@ -59,6 +61,7 @@ target_link_libraries(${STATIC_NAME}
 #endif()
 
 # target_include_directories(${APP_NAME} PRIVATE "../common")
+target_include_directories(${STATIC_NAME} PRIVATE ${SIMPLEINI_INCLUDE_DIRS})
 
 # dynamic library should be copied for the consumption to external bindings
 # https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html#generator-expression-reference
