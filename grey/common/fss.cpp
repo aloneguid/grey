@@ -73,9 +73,9 @@ namespace grey::common::fss {
         return config_path.string();
     }
 
-    std::string get_config_file_path(const std::string &filename) {
+    std::string get_config_file_path(const std::string& application_name, const std::string &filename) {
         fs::path config_path = get_config_dir();
-        return (config_path / filename).string();
+        return (config_path / application_name / filename).string();
     }
 
     std::string get_current_exec_path() {

@@ -19,7 +19,7 @@ namespace grey::common::fss {
     /**
      * Get a path to a configuration file in the configuration directory
      */
-    std::string get_config_file_path(const std::string& filename);
+    std::string get_config_file_path(const std::string& application_name, const std::string& filename);
 
     std::string get_current_exec_path();
 
