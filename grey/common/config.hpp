@@ -10,9 +10,12 @@ namespace grey::common {
     /**
      * Specifically designed for immediate mode. To use, define lines of
      *
-     * X(type, name, default_val)
+     * opt(type, name, default_val)
+     * or for sections
+     * opt_sect(type, name, default_val, sect_name, sect_val_name)
      *
-     * in config.def in the same folder you are including config.hpp.
+     * in config.def in the same folder you are including config.hpp. Types supported:
+     * int, float, string, bool, colour (saved as unsigned int).
      */
     class config {
     public:

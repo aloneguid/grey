@@ -73,6 +73,11 @@ namespace grey::common::fss {
         return config_path.string();
     }
 
+    std::string get_config_file_path(const std::string &filename) {
+        fs::path config_path = get_config_dir();
+        return (config_path / filename).string();
+    }
+
     std::string get_current_exec_path() {
 #if WIN32
         TCHAR szFileName[MAX_PATH];
