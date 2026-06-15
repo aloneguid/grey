@@ -56,7 +56,18 @@ namespace grey::common::os {
 #endif
     }
 
+
 #if WIN32
+    std::string get_win32_last_error_text() {
+        wchar_t err[256];
+        memset(err, 0, 256);
+        ::FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
+           nullptr,
+           GetLastError(),
+           MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), err, 255,  nullptr);
+        return str::to_str(wstring(err));
+    }
+
 #else
     struct pclose_deleter {
         void operator()(FILE* f) const { pclose(f); }

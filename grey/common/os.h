@@ -17,6 +17,11 @@ namespace grey::common::os {
     std::string get_system_fonts_path();
 
 #if WIN32
+    /**
+     * @brief Calls ::GetLastError() and returns the error text.
+     * @return
+     */
+    std::string get_win32_last_error_text();
 #else
     /**
      * @brief Gets the path to a specific system font using fontconfig (fc-match).
