@@ -17,14 +17,14 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace grey::backends {
-
     using namespace std;
 
 
     struct dx11texture : public grey::texture {
-        ID3D11ShaderResourceView* srv;
+        ID3D11ShaderResourceView *srv;
 
-        dx11texture(ID3D11ShaderResourceView* srv) : texture{srv}, srv{srv} {}
+        dx11texture(ID3D11ShaderResourceView *srv) : texture{srv}, srv{srv} {
+        }
 
         ~dx11texture() override {
             if(srv) {
@@ -36,6 +36,7 @@ namespace grey::backends {
 
     // Helpers
     static LPCWSTR g_firstIconName{nullptr};
+
     BOOL CALLBACK EnumIconsProc(HMODULE hModule, LPCWSTR lpType, LPWSTR lpName, LONG_PTR lParam) {
         g_firstIconName = lpName;
         return FALSE;
@@ -47,18 +48,22 @@ namespace grey::backends {
     }
 
     // Data
-    static ID3D11Device* g_pd3dDevice = nullptr;
-    static ID3D11DeviceContext* g_pd3dDeviceContext = nullptr;
-    static IDXGISwapChain* g_pSwapChain = nullptr;
-    static bool                     g_SwapChainOccluded = false;
-    static UINT                     g_ResizeWidth = 0, g_ResizeHeight = 0;
-    static ID3D11RenderTargetView* g_mainRenderTargetView = nullptr;
+    static ID3D11Device *g_pd3dDevice = nullptr;
+    static ID3D11DeviceContext *g_pd3dDeviceContext = nullptr;
+    static IDXGISwapChain *g_pSwapChain = nullptr;
+    static bool g_SwapChainOccluded = false;
+    static UINT g_ResizeWidth = 0, g_ResizeHeight = 0;
+    static ID3D11RenderTargetView *g_mainRenderTargetView = nullptr;
 
     // Forward declarations of helper functions
     bool CreateDeviceD3D(HWND hWnd);
+
     void CleanupDeviceD3D();
+
     void CreateRenderTarget();
+
     void CleanupRenderTarget();
+
     LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
     // Helper functions
@@ -84,16 +89,20 @@ namespace grey::backends {
         //createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
         D3D_FEATURE_LEVEL featureLevel;
         const D3D_FEATURE_LEVEL featureLevelArray[2] = {D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_0,};
-        HRESULT res = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &g_pSwapChain, &g_pd3dDevice, &featureLevel, &g_pd3dDeviceContext);
+        HRESULT res = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags,
+                                                    featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &g_pSwapChain,
+                                                    &g_pd3dDevice, &featureLevel, &g_pd3dDeviceContext);
         if(res == DXGI_ERROR_UNSUPPORTED) // Try high-performance WARP software driver if hardware is not available.
-            res = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_WARP, nullptr, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &g_pSwapChain, &g_pd3dDevice, &featureLevel, &g_pd3dDeviceContext);
+            res = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_WARP, nullptr, createDeviceFlags,
+                                                featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &g_pSwapChain,
+                                                &g_pd3dDevice, &featureLevel, &g_pd3dDeviceContext);
         if(res != S_OK)
             return false;
 
         // Disable DXGI's default Alt+Enter fullscreen behavior.
         // - You are free to leave this enabled, but it will not work properly with multiple viewports.
         // - This must be done for all windows associated to the device. Our DX11 backend does this automatically for secondary viewports that it creates.
-        IDXGIFactory* pSwapChainFactory;
+        IDXGIFactory *pSwapChainFactory;
         if(SUCCEEDED(g_pSwapChain->GetParent(IID_PPV_ARGS(&pSwapChainFactory)))) {
             pSwapChainFactory->MakeWindowAssociation(hWnd, DXGI_MWA_NO_ALT_ENTER);
             pSwapChainFactory->Release();
@@ -105,47 +114,58 @@ namespace grey::backends {
 
     void CleanupDeviceD3D() {
         CleanupRenderTarget();
-        if(g_pSwapChain) { g_pSwapChain->Release(); g_pSwapChain = nullptr; }
-        if(g_pd3dDeviceContext) { g_pd3dDeviceContext->Release(); g_pd3dDeviceContext = nullptr; }
-        if(g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = nullptr; }
+        if(g_pSwapChain) {
+            g_pSwapChain->Release();
+            g_pSwapChain = nullptr;
+        }
+        if(g_pd3dDeviceContext) {
+            g_pd3dDeviceContext->Release();
+            g_pd3dDeviceContext = nullptr;
+        }
+        if(g_pd3dDevice) {
+            g_pd3dDevice->Release();
+            g_pd3dDevice = nullptr;
+        }
     }
 
     void CreateRenderTarget() {
-        ID3D11Texture2D* pBackBuffer;
+        ID3D11Texture2D *pBackBuffer;
         g_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
         g_pd3dDevice->CreateRenderTargetView(pBackBuffer, nullptr, &g_mainRenderTargetView);
         pBackBuffer->Release();
     }
 
     void CleanupRenderTarget() {
-        if(g_mainRenderTargetView) { g_mainRenderTargetView->Release(); g_mainRenderTargetView = nullptr; }
+        if(g_mainRenderTargetView) {
+            g_mainRenderTargetView->Release();
+            g_mainRenderTargetView = nullptr;
+        }
     }
 
 #ifndef WM_DPICHANGED
 #define WM_DPICHANGED 0x02E0 // From Windows SDK 8.1+ headers
 #endif
 
-    // Win32 message handler
-    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-    // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+    // Win32 message handler.
+    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if ImGui wants to use your inputs.
+    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application or clear/overwrite your copy of the mouse data.
+    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application or clear/overwrite your copy of the keyboard data.
+    // Generally, you may always pass all inputs to ImGui and hide them from your application based on those two flags.
     LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         if(ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
             return true;
 
-        grey::app* me = reinterpret_cast<grey::app*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        const app *me = reinterpret_cast<app*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
         if(me && me->on_app_window_message) {
-            LRESULT res = me->on_app_window_message(msg, wParam, lParam);
-            if(res) return res;
+            if(LRESULT res = me->on_app_window_message(msg, wParam, lParam)) return res;
         }
 
         switch(msg) {
             case WM_SIZE:
                 if(wParam == SIZE_MINIMIZED)
                     return 0;
-                g_ResizeWidth = (UINT)LOWORD(lParam); // Queue resize
-                g_ResizeHeight = (UINT)HIWORD(lParam);
+                g_ResizeWidth = static_cast<UINT>(LOWORD(lParam)); // Queue resize
+                g_ResizeHeight = static_cast<UINT>(HIWORD(lParam));
                 return 0;
             case WM_SYSCOMMAND:
                 if((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
@@ -153,16 +173,15 @@ namespace grey::backends {
                 break;
             case WM_CREATE:
                 // load main icon and set as window icon
-                {
-                    FindFirstIcon();
-                    if(g_firstIconName) {
-                        HINSTANCE hInstance = ((LPCREATESTRUCT)lParam)->hInstance;
-                        HICON hMainIcon = ::LoadIcon(hInstance, g_firstIconName);
-                        if(hMainIcon) {
-                            ::SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hMainIcon);
-                        }
+            {
+                FindFirstIcon();
+                if(g_firstIconName) {
+                    HINSTANCE hInstance = reinterpret_cast<LPCREATESTRUCT>(lParam)->hInstance;
+                    if(HICON hMainIcon = ::LoadIcon(hInstance, g_firstIconName)) {
+                        ::SendMessage(hWnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(hMainIcon));
                     }
                 }
+            }
                 return 0;
             case WM_DESTROY:
                 ::PostQuitMessage(0);
@@ -171,8 +190,10 @@ namespace grey::backends {
                 if(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DpiEnableScaleViewports) {
                     //const int dpi = HIWORD(wParam);
                     //printf("WM_DPICHANGED to %d (%.0f%%)\n", dpi, (float)dpi / 96.0f * 100.0f);
-                    const RECT* suggested_rect = (RECT*)lParam;
-                    ::SetWindowPos(hWnd, nullptr, suggested_rect->left, suggested_rect->top, suggested_rect->right - suggested_rect->left, suggested_rect->bottom - suggested_rect->top, SWP_NOZORDER | SWP_NOACTIVATE);
+                    const RECT *suggested_rect = (RECT *) lParam;
+                    ::SetWindowPos(hWnd, nullptr, suggested_rect->left, suggested_rect->top,
+                                   suggested_rect->right - suggested_rect->left,
+                                   suggested_rect->bottom - suggested_rect->top, SWP_NOZORDER | SWP_NOACTIVATE);
                 }
                 break;
             case WM_KILLFOCUS:
@@ -180,23 +201,32 @@ namespace grey::backends {
                     ::PostQuitMessage(0);
                 }
                 break;
-            case WM_COPYDATA:
-            {
+            case WM_COPYDATA: {
                 // get "this" pointer
                 if(me && me->on_user_message) {
-                    COPYDATASTRUCT* pcds = (COPYDATASTRUCT*)lParam;
-                    string message{(char*)pcds->lpData};
-                    me->on_user_message((int)pcds->dwData, message);
+                    auto *pcds = reinterpret_cast<COPYDATASTRUCT*>(lParam);
+                    string message{static_cast<char *>(pcds->lpData)};
+                    me->on_user_message(static_cast<int>(pcds->dwData), message);
                 }
             }
             break;
+            /*
+            case WM_NCHITTEST: {
+                if(me && me->win32_grab_and_move) {
+                    if(::GetAsyncKeyState(VK_LBUTTON) & 0x8000) {
+                        return HTCAPTION;
+                    }
+                }
+            }
+            break;
+        */
         }
         return ::DefWindowProcW(hWnd, msg, wParam, lParam);
     }
 
     class win32dx11app : public grey::app {
     private:
-        HWND hwnd{0};
+        HWND hWnd{0};
         bool last_use_transparency_colour_key_value{false};
         int last_transparency_window_alpha{255};
 
@@ -204,41 +234,41 @@ namespace grey::backends {
             ClearColor[0] * ClearColor[3],
             ClearColor[1] * ClearColor[3],
             ClearColor[2] * ClearColor[3],
-            ClearColor[3]};
+            ClearColor[3]
+        };
 
     public:
-
         string title;
         int window_left{-1};
         int window_top{-1};
         int window_width{-1};
         int window_height{-1};
 
-        win32dx11app(const std::string& title, int width, int height) :
-            title{title}, window_width{width}, window_height{height} {
-
+        win32dx11app(const std::string &title, int width, int height) : title{title}, window_width{width},
+                                                                        window_height{height} {
             // Make process DPI aware and obtain main monitor scale
             ImGui_ImplWin32_EnableDpiAwareness();
-            this->scale = ImGui_ImplWin32_GetDpiScaleForMonitor(::MonitorFromPoint(POINT{0, 0}, MONITOR_DEFAULTTOPRIMARY));
+            this->scale = ImGui_ImplWin32_GetDpiScaleForMonitor(
+                ::MonitorFromPoint(POINT{0, 0}, MONITOR_DEFAULTTOPRIMARY));
             grey::widgets::scale = this->scale;
 
             if(window_width == -1 || window_height == -1) {
                 window_width = window_height = CW_USEDEFAULT;
             } else {
                 // apply scaling factor
-                window_width = (int)(window_width * this->scale);
-                window_height = (int)(window_height * this->scale);
+                window_width = static_cast<int>(window_width * this->scale);
+                window_height = static_cast<int>(window_height * this->scale);
             }
         }
 
-        void set_dark_mode(bool enabled) {
+        void set_dark_mode(bool enabled) override {
             BOOL win32_immersive_dark_mode = enabled;
             ::DwmSetWindowAttribute(
-                hwnd, DWMWINDOWATTRIBUTE::DWMWA_USE_IMMERSIVE_DARK_MODE,
+                hWnd, DWMWINDOWATTRIBUTE::DWMWA_USE_IMMERSIVE_DARK_MODE,
                 &win32_immersive_dark_mode, sizeof(win32_immersive_dark_mode));
         }
 
-        void get_screen_center(int width, int height, int& x, int& y) {
+        void get_screen_center(int width, int height, int &x, int &y) {
             // get center of the screen where mouse cursor is, not just the primary monitor
 
             // mouse cursor position
@@ -249,7 +279,7 @@ namespace grey::backends {
             HMONITOR hMonitor = ::MonitorFromPoint(cursor, MONITOR_DEFAULTTONEAREST);
             MONITORINFO mi = {sizeof(mi)};
             ::GetMonitorInfo(hMonitor, &mi);
-            RECT& wa = mi.rcWork;
+            RECT &wa = mi.rcWork;
 
             // calculate it
             int sw = wa.right - wa.left;
@@ -260,10 +290,10 @@ namespace grey::backends {
 
         void resize_main_viewport(int width, int height) {
             // apply scaling factor
-            window_width = (int)(width * scale);
-            window_height = (int)(height * scale);
+            window_width = static_cast<int>(width * scale);
+            window_height = static_cast<int>(height * scale);
 
-            if(hwnd) {
+            if(hWnd) {
                 UINT uFlags{0};
 
                 if(win32_center_on_screen) {
@@ -275,28 +305,28 @@ namespace grey::backends {
                 // take into account window decorations (chrome etc.) because SetWindowPos expects the full window size
                 {
                     RECT rc{0, 0, window_width, window_height};
-                    const DWORD style = static_cast<DWORD>(::GetWindowLongPtr(hwnd, GWL_STYLE));
-                    const DWORD exstyle = static_cast<DWORD>(::GetWindowLongPtr(hwnd, GWL_EXSTYLE));
+                    const DWORD style = static_cast<DWORD>(::GetWindowLongPtr(hWnd, GWL_STYLE));
+                    const DWORD exstyle = static_cast<DWORD>(::GetWindowLongPtr(hWnd, GWL_EXSTYLE));
                     ::AdjustWindowRectEx(&rc, style, FALSE, exstyle);
                     window_width = rc.right - rc.left;
                     window_height = rc.bottom - rc.top;
                 }
 
-                ::SetWindowPos(hwnd, HWND_TOP, window_left, window_top, window_width, window_height, uFlags);
+                ::SetWindowPos(hWnd, HWND_TOP, window_left, window_top, window_width, window_height, uFlags);
             }
         }
 
         void move_main_viewport(int x, int y) {
-            window_left = (int)(x * scale);
-            window_top = (int)(y * scale);
-            if(hwnd) {
+            window_left = (int) (x * scale);
+            window_top = (int) (y * scale);
+            if(hWnd) {
                 UINT uFlags = SWP_NOSIZE;
-                ::SetWindowPos(hwnd, HWND_TOP, window_left, window_top, 0, 0, uFlags);
+                ::SetWindowPos(hWnd, HWND_TOP, window_left, window_top, 0, 0, uFlags);
             }
         }
 
         void apply_transparency() {
-            if(!hwnd) return;
+            if(!hWnd) return;
 
             bool use_color_key = win32_use_transparency_colour_key_value;
             int alpha = win32_transparency_window_alpha;
@@ -308,10 +338,10 @@ namespace grey::backends {
             last_use_transparency_colour_key_value = use_color_key;
             last_transparency_window_alpha = alpha;
 
-            LONG_PTR exStyle = ::GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+            LONG_PTR exStyle = ::GetWindowLongPtr(hWnd, GWL_EXSTYLE);
             if(use_color_key || alpha < 255) {
                 if(!(exStyle & WS_EX_LAYERED)) {
-                    ::SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
+                    ::SetWindowLongPtr(hWnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
                 }
 
                 DWORD dwFlags = 0;
@@ -326,21 +356,21 @@ namespace grey::backends {
                 if(alpha > 255) alpha = 255;
 
                 COLORREF crKey = RGB(ClearColor[0] * 255, ClearColor[1] * 255, ClearColor[2] * 255);
-                ::SetLayeredWindowAttributes(hwnd, crKey, static_cast<BYTE>(alpha), dwFlags);
+                ::SetLayeredWindowAttributes(hWnd, crKey, static_cast<BYTE>(alpha), dwFlags);
             } else if(exStyle & WS_EX_LAYERED) {
-                ::SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_LAYERED);
+                ::SetWindowLongPtr(hWnd, GWL_EXSTYLE, exStyle & ~WS_EX_LAYERED);
             }
         }
 
         void apply_window_corner_preference() {
-            if(!hwnd) return;
+            if(!hWnd) return;
             if(!win32_title_bar) {
-                grey::common::win32::window wnd{hwnd};
+                grey::common::win32::window wnd{hWnd};
                 wnd.set_rounded_corners();
             }
         }
 
-        void run(std::function<bool(const app& app)> render_frame) {
+        void run(std::function<bool(const app &app)> render_frame) {
             // Create application window
 
             wstring class_name = grey::common::str::to_wstr(win32_window_class_name);
@@ -351,7 +381,8 @@ namespace grey::backends {
                 GetModuleHandle(nullptr),
                 nullptr, nullptr, nullptr, nullptr,
                 class_name.c_str(),
-                nullptr};
+                nullptr
+            };
 
             ::RegisterClassExW(&wc);
 
@@ -386,7 +417,7 @@ namespace grey::backends {
                 dwExStyle |= WS_EX_NOACTIVATE;
             }
 
-            hwnd = ::CreateWindowExW(
+            hWnd = ::CreateWindowExW(
                 dwExStyle,
                 wc.lpszClassName,
                 w_title.c_str(),
@@ -397,25 +428,25 @@ namespace grey::backends {
                 wc.hInstance,
                 nullptr);
 
-            ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+            ::SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
             // Hide from taskbar if requested
             if(win32_hide_from_taskbar) {
-                LONG_PTR ex = ::GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+                LONG_PTR ex = ::GetWindowLongPtr(hWnd, GWL_EXSTYLE);
                 // Remove WS_EX_APPWINDOW if present, add WS_EX_TOOLWINDOW
                 ex &= ~WS_EX_APPWINDOW;
                 ex |= WS_EX_TOOLWINDOW;
-                ::SetWindowLongPtr(hwnd, GWL_EXSTYLE, ex);
+                ::SetWindowLongPtr(hWnd, GWL_EXSTYLE, ex);
                 // Ensure non-client metrics recalculated
-                ::SetWindowPos(hwnd, nullptr, 0, 0, 0, 0,
-                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+                ::SetWindowPos(hWnd, nullptr, 0, 0, 0, 0,
+                               SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
             }
 
             apply_transparency();
             apply_window_corner_preference();
 
             // Initialize Direct3D
-            if(!CreateDeviceD3D(hwnd)) {
+            if(!CreateDeviceD3D(hWnd)) {
                 CleanupDeviceD3D();
                 ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
                 return;
@@ -428,7 +459,7 @@ namespace grey::backends {
             //::SetForegroundWindow(hwnd);    // just as an extra precaution
 
             if(win32_always_on_top) {
-                ::SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+                ::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
             }
 
             // Setup Dear ImGui context
@@ -437,11 +468,12 @@ namespace grey::backends {
 #if GREY_INCLUDE_IMPLOT
             ImPlot::CreateContext();
 #endif
-            ImGuiIO& io = ImGui::GetIO(); (void)io;
-            io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+            ImGuiIO &io = ImGui::GetIO();
+            (void) io;
+            io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
             //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;    // Enable Gamepad Controls
             //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
-            io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+            io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
             io.ConfigViewportsNoAutoMerge = true;
             io.ConfigViewportsNoTaskBarIcon = true;
             io.ConfigViewportsNoDefaultParent = false;
@@ -454,13 +486,17 @@ namespace grey::backends {
             ImGui::StyleColorsDark();
             //ImGui::StyleColorsLight();
 
-            ImGuiStyle& style = ImGui::GetStyle();
+            ImGuiStyle &style = ImGui::GetStyle();
 
             // Setup scaling
-            style.ScaleAllSizes(scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
-            style.FontScaleDpi = scale;        // Set initial font scale. (in docking branch: using io.ConfigDpiScaleFonts=true automatically overrides this for every window depending on the current monitor)
-            io.ConfigDpiScaleFonts = true;          // [Experimental] Automatically overwrite style.FontScaleDpi in Begin() when Monitor DPI changes. This will scale fonts but _NOT_ scale sizes/padding for now.
-            io.ConfigDpiScaleViewports = true;      // [Experimental] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
+            style.ScaleAllSizes(scale);
+            // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
+            style.FontScaleDpi = scale;
+            // Set initial font scale. (in docking branch: using io.ConfigDpiScaleFonts=true automatically overrides this for every window depending on the current monitor)
+            io.ConfigDpiScaleFonts = true;
+            // [Experimental] Automatically overwrite style.FontScaleDpi in Begin() when Monitor DPI changes. This will scale fonts but _NOT_ scale sizes/padding for now.
+            io.ConfigDpiScaleViewports = true;
+            // [Experimental] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
 
             // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
             if(io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
@@ -469,7 +505,7 @@ namespace grey::backends {
             }
 
             // Setup Platform/Renderer backends
-            ImGui_ImplWin32_Init(hwnd);
+            ImGui_ImplWin32_Init(hWnd);
             ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
             // Load Fonts
@@ -496,11 +532,10 @@ namespace grey::backends {
             bool done{false};
             bool shown{false};
 
-            // one time initialisation
+            // one time initialization
             on_after_initialised();
 
             while(!done) {
-
                 // Poll and handle messages (inputs, window resize, etc.)
                 // See the WndProc() function below for our to dispatch events to the Win32 backend.
                 MSG msg;
@@ -537,7 +572,7 @@ namespace grey::backends {
 
                 if(!render_frame(*this)) {
                     // Post message to close the window, which should be handled in the next iteration of the message loop.
-                    ::PostMessage(hwnd, WM_CLOSE, 0, 0);
+                    ::PostMessage(hWnd, WM_CLOSE, 0, 0);
                 }
 
                 // Rendering
@@ -553,13 +588,13 @@ namespace grey::backends {
                 }
 
                 // Present
-                HRESULT hr = g_pSwapChain->Present(1, 0);   // Present with vsync
+                HRESULT hr = g_pSwapChain->Present(1, 0); // Present with vsync
                 //HRESULT hr = g_pSwapChain->Present(0, 0); // Present without vsync
                 g_SwapChainOccluded = (hr == DXGI_STATUS_OCCLUDED);
 
                 // show after first frame is rendered
                 if(!shown) {
-                    ::ShowWindow(hwnd, SW_SHOWNORMAL);
+                    ::ShowWindow(hWnd, SW_SHOWNORMAL);
                     shown = true;
                 }
             }
@@ -573,11 +608,11 @@ namespace grey::backends {
             ImGui::DestroyContext();
 
             CleanupDeviceD3D();
-            ::DestroyWindow(hwnd);
+            ::DestroyWindow(hWnd);
             ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
         }
 
-        std::shared_ptr<texture> make_native_texture(grey::common::raw_img& img) {
+        std::shared_ptr<texture> make_native_texture(grey::common::raw_img &img) {
             D3D11_TEXTURE2D_DESC desc{0};
             desc.Width = img.x;
             desc.Height = img.y;
@@ -589,13 +624,13 @@ namespace grey::backends {
             desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
             desc.CPUAccessFlags = 0;
 
-            ID3D11Texture2D* pTexture = nullptr;
+            ID3D11Texture2D *pTexture = nullptr;
             D3D11_SUBRESOURCE_DATA subResource;
             subResource.pSysMem = img.get_data();
             subResource.SysMemPitch = desc.Width * 4;
             subResource.SysMemSlicePitch = 0;
             g_pd3dDevice->CreateTexture2D(&desc, &subResource, &pTexture);
-            ID3D11ShaderResourceView* out_srv{nullptr};
+            ID3D11ShaderResourceView *out_srv{nullptr};
 
             // Create texture view
             if(pTexture) {

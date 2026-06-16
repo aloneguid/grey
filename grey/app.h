@@ -35,6 +35,8 @@ namespace grey {
 
     class app {
     public:
+        virtual ~app() = default;
+
         /**
          * @brief Creates app instance, which will be different implementation depending on platform we run on.
          *        Only one instance of the app should be created per process lifetime.
@@ -110,7 +112,7 @@ namespace grey {
          * @brief Returns the clear color of the application as RGBA array of floats (0-1).
          * @return 
          */
-        std::array<float, 4> get_clear_color() const;
+        [[nodiscard]] std::array<float, 4> get_clear_color() const;
 
         /**
          * @brief Find the monitor with the largest overlap with the given viewport.
@@ -119,7 +121,7 @@ namespace grey {
          */
         int find_monitor_for_main_viewport();
 
-        // platform specific flags
+        // platform-specific flags
 
 #if _WIN32
         /**
@@ -158,6 +160,12 @@ namespace grey {
          * @brief When set to true, window will be always on top.
          */
         bool win32_always_on_top{false};
+
+        /**
+         * @brief When set to true, a window can be grabbed and moved by dragging inside any area of the window.
+         * Can't make this work reliably yet.
+         */
+        //bool win32_grab_and_move{false};
 
         /**
          * @brief Called when a Windows message arrives to the application main window's message loop. Returning zero will indicate the usual message handling should occur. Non-zero result skips the further message handling and returns from windowproc with this code.
