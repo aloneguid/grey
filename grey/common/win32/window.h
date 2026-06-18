@@ -57,6 +57,15 @@ namespace grey::common::win32 {
 
         void set_rounded_corners(bool smaller_rounding = false);
 
+        /**
+         * @brief Mark the window as ecluded from video capture. This is useful to display in-app control that should not be recorded by screen recording software.
+         * @param exclude set/unset.
+         * @return True if operation was successful.
+         */
+        void excluded_from_capture(bool exclude);
+
+        bool excluded_from_capture();
+
     private:
         HWND hwnd;
     };

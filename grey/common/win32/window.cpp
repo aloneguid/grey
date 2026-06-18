@@ -112,4 +112,15 @@ namespace grey::common::win32 {
             sizeof(preference));
 
     }
+
+    void window::excluded_from_capture(bool exclude) {
+        // WDA_MONITOR makes window black, but it's still visible (difference from WDA_EXCLUDEFROMCAPTURE)
+        ::SetWindowDisplayAffinity(hwnd, exclude ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
+    }
+
+    bool window::excluded_from_capture() {
+        DWORD dwAffinity{0};
+        if(!::GetWindowDisplayAffinity(hwnd, &dwAffinity)) return false;
+        return dwAffinity == WDA_EXCLUDEFROMCAPTURE;
+    }
 }
