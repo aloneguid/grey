@@ -10,5 +10,7 @@ namespace grey {
     class anim {
     public:
         static float ease_out_cubic(float x);
+
+        static float ease_in_cubic(float x);
     };
 }
