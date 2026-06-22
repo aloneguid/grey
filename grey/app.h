@@ -96,11 +96,16 @@ namespace grey {
         virtual void resize_main_viewport(int width, int height) = 0;
 
         /**
-         * @brief Moves the main viewport of the application to the specified position on the screen. This is monitor/platform dependent and may not work on all platforms.
+         * @brief Moves the main viewport of the application to the specified position on the screen. This is monitor/platform-dependent and may not work on all platforms.
          * @param x 
          * @param y 
          */
         virtual void move_main_viewport(int x, int y) = 0;
+
+        /**
+         * @brief Brings the main viewport of the application to the foreground.
+         */
+        virtual void foreground_main_viewport() = 0;
 
         /**
          * @brief Limits maximum FPS for the application. This is useful when you want to limit the CPU usage of the application.
@@ -109,14 +114,13 @@ namespace grey {
         void set_target_fps(int fps);
 
         /**
-         * @brief Returns the clear color of the application as RGBA array of floats (0-1).
+         * @brief Returns the clear color of the application as the RGBA array of floats (0-1).
          * @return 
          */
         [[nodiscard]] std::array<float, 4> get_clear_color() const;
 
         /**
          * @brief Find the monitor with the largest overlap with the given viewport.
-         * @param vp 
          * @return Monitor index, or -1 if no monitors are found.
          */
         int find_monitor_for_main_viewport();
@@ -146,18 +150,18 @@ namespace grey {
 
 
         /**
-         * @brief sets WS_EX_NOACTIVATE on window (if you need to create a tool window that does not take focus, useful for notification windows)
+         * @brief sets WS_EX_NOACTIVATE on the window (if you need to create a tool window that does not take focus, useful for notification windows)
          */
         bool win32_no_activate{false};
         std::string win32_window_class_name{"GreyDX11"};
 
         /**
-         * @brief When window loses focus, it will be closed. This is useful for modal windows. Needs to be set before application starts up to take effect.
+         * @brief When the window loses focus, it will be closed. This is useful for modal windows. Needs to be set before application starts up to take effect.
          */
         bool win32_close_on_focus_lost{false};
 
         /**
-         * @brief When set to true, window will be always on top.
+         * @brief When set to true, the window will always be on top.
          */
         bool win32_always_on_top{false};
 
@@ -192,7 +196,7 @@ namespace grey {
         float max_frame_interval_ms;
 
     private:
-        // key is texture name, value is texture data. The app will take care of disposing the textures when the app is closed.
+        // key is texture name, value is texture data. The app will take care of disposing of the textures when the app is closed.
         std::map<std::string, std::shared_ptr<texture>> textures;
     };
 }

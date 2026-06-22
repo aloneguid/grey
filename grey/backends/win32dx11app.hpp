@@ -226,7 +226,7 @@ namespace grey::backends {
 
     class win32dx11app : public grey::app {
     private:
-        HWND hWnd{0};
+        HWND hWnd{nullptr};
         bool last_use_transparency_colour_key_value{false};
         int last_transparency_window_alpha{255};
 
@@ -288,7 +288,7 @@ namespace grey::backends {
             y = wa.top + (sh - height) / 2;
         }
 
-        void resize_main_viewport(int width, int height) {
+        void resize_main_viewport(const int width, const int height) override {
             // apply scaling factor
             window_width = static_cast<int>(width * scale);
             window_height = static_cast<int>(height * scale);
@@ -316,12 +316,48 @@ namespace grey::backends {
             }
         }
 
-        void move_main_viewport(int x, int y) {
-            window_left = (int) (x * scale);
-            window_top = (int) (y * scale);
+        void move_main_viewport(const int x, const int y) override {
+            window_left = static_cast<int>(x * scale);
+            window_top = static_cast<int>(y * scale);
             if(hWnd) {
-                UINT uFlags = SWP_NOSIZE;
+                constexpr UINT uFlags = SWP_NOSIZE;
                 ::SetWindowPos(hWnd, HWND_TOP, window_left, window_top, 0, 0, uFlags);
+            }
+        }
+
+        void foreground_main_viewport() override {
+            if(!hWnd) return;
+
+            // non-forced
+            /*
+            * Windows actively fights you on this — it's by design, not a bug. Since Win2k, SetForegroundWindow() only succeeds unconditionally if:
+
+                - your process is the foreground process already,
+                - your process was launched by the foreground process,
+                - your process most recently received user input (keyboard/mouse),
+                - no menu is open and nothing's being debugged, and
+                - the foreground lock timeout (SPI_GETFOREGROUNDLOCKTIMEOUT) has elapsed since the last input.
+
+            ::SetForegroundWindow(hWnd);
+            ::SetFocus(hWnd);
+            */
+
+            // forced
+            const HWND hCurForeground = ::GetForegroundWindow();
+            const DWORD dwCurThread   = ::GetCurrentThreadId();
+            const DWORD dwForeThread  = ::GetWindowThreadProcessId(hCurForeground, nullptr);
+
+            bool attached = false;
+            if (dwForeThread != dwCurThread) {
+                attached = ::AttachThreadInput(dwForeThread, dwCurThread, TRUE);
+            }
+
+            if (IsIconic(hWnd)) ShowWindow(hWnd, SW_RESTORE);
+
+            BOOL result = ::SetForegroundWindow(hWnd);
+
+            if (attached) {
+                AttachThreadInput(dwForeThread, dwCurThread, FALSE);
             }
         }
 
