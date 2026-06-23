@@ -133,7 +133,12 @@ namespace grey {
          */
         bool win32_title_bar{true};
         bool win32_can_resize{true};
+
+        /**
+         * @brief When set to true, will center the window on the screen where mouse is currently located.
+         */
         bool win32_center_on_screen{false};
+
         bool win32_hide_from_taskbar{false};
 
         // transparency

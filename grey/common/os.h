@@ -32,4 +32,9 @@ namespace grey::common::os {
 #endif
 
     void set_dpi_awareness();
+
+    /**
+     * Get current monitor bounds in virtual screen coordinates. The current monitor is the one closes to mouse cursor.
+     */
+    bool get_current_monitor(int& left, int& top, int& right, int& bottom);
 }

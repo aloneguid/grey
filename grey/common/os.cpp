@@ -93,4 +93,23 @@ namespace grey::common::os {
     void set_dpi_awareness() {
         ::SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
     }
+
+    bool get_current_monitor(int &left, int &top, int &right, int &bottom) {
+
+#if WIN32
+        POINT pt;
+        if(!::GetCursorPos(&pt)) return false;
+        HMONITOR hMon = ::MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST);
+        MONITORINFOEX mi{};
+        mi.cbSize = sizeof(mi);
+        if (!::GetMonitorInfo(hMon, &mi)) return false;
+        left = mi.rcMonitor.left;
+        top = mi.rcMonitor.top;
+        right = mi.rcMonitor.right;
+        bottom = mi.rcMonitor.bottom;
+        return true;
+#endif
+
+        return false;
+    }
 }
