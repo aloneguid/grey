@@ -4,10 +4,16 @@
 #include "widgets.h"
 #include "common/os.h"
 
-#if _WIN32
+#if defined(_WIN32)
 #include "backends/win32dx11app.hpp"
-#else
+#endif
+
+#if defined(__linux__)
 #include "backends/glfw_gl3.hpp"
+#endif
+
+#if defined(__APPLE__)
+#include "backends/glfw_metal.hpp"
 #endif
 
 using namespace std;
@@ -15,10 +21,12 @@ using namespace std;
 namespace grey {
     std::unique_ptr<grey::app> app::make(const string& title, int width, int height) {
 
-#if _WIN32
+#if defined(_WIN32)
         auto app = make_unique<grey::backends::win32dx11app>(title, width, height);
-#else
+#elif defined(__linux__)
         auto app = make_unique<grey::backends::glfw_gl3_app>(title, width, height);
+#elif defined(__APPLE__)
+        auto app = make_unique<grey::backends::glfw_metal_app>(title, width, height);
 #endif
 
         return app;

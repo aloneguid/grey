@@ -24,6 +24,15 @@
             "name": "glfw3",
             "platform": "linux"
         },
+        {
+            "name": "imgui",
+            "features": [
+                "metal-binding",
+                "glfw-binding",
+                "docking-experimental"
+            ],
+            "platform": "osx"
+        },
         "implot",
         "simpleini"
     ]

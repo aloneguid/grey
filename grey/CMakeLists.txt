@@ -31,8 +31,10 @@ endif()
 
 if (WIN32)
     set(private_libs implot::implot D3D11.lib)
-else()
+elseif(UNIX AND NOT APPLE)
     set(private_libs implot::implot glfw OpenGL::GL)
+elseif(APPLE)
+    set(private_libs implot::implot glfw)
 endif()
 
 set(interface_libs imgui::imgui)
