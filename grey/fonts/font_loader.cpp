@@ -13,13 +13,9 @@
 #include "MaterialIcons.h"
 
 #include "imgui.h"
-
-#if WIN32
 #include "../common/os.h"
-#elif defined(__linux__)
-#include "../common/lin/os.h"
-#include "roboto.inl"
-#else
+
+#ifndef WIN32
 #include "roboto.inl"
 #endif
 

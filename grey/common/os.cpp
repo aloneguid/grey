@@ -1,5 +1,8 @@
 #include "os.h"
 #include <string>
+#include <memory>
+#include <array>
+#include <algorithm>
 #include "str.h"
 
 #if WIN32
@@ -19,6 +22,7 @@ using namespace std;
 namespace grey::common::os {
     bool is_app_light_theme(bool& value) {
 
+#if WIN32
         string s = win32::reg::get_value(win32::reg::hive::current_user,
             "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
             "AppsUseLightTheme");
@@ -26,9 +30,13 @@ namespace grey::common::os {
         value = s == "1";
 
         return !s.empty();
+#else
+        return false;
+#endif
     }
 
     bool is_system_light_theme(bool& value) {
+#if WIN32
         string s = win32::reg::get_value(win32::reg::hive::current_user,
         "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
         "SystemUsesLightTheme");
@@ -36,10 +44,16 @@ namespace grey::common::os {
         value = s == "1";
 
         return !s.empty();
+#else
+#endif
     }
 
     unsigned int get_dpi() {
+#if WIN32
         return ::GetDpiForSystem();
+#else
+        return 96;
+#endif
     }
 
     std::string get_system_fonts_path() {
@@ -91,7 +105,9 @@ namespace grey::common::os {
 #endif
 
     void set_dpi_awareness() {
+#if WIN32
         ::SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+#endif
     }
 
     bool get_current_monitor(int &left, int &top, int &right, int &bottom) {

@@ -1,5 +1,6 @@
-#ifndef _WIN32
 #pragma once
+
+#ifndef _WIN32
 
 // OpenGL3 + GLFW backend, which is cross-platform theoretically, but we will only use it for non-Windows platforms,
 // because we will use DirectX 11 + Win32 for much better OS integration on Windows.
@@ -238,6 +239,8 @@ namespace grey::backends {
         void resize_main_viewport(int width, int height) {}
 
         void move_main_viewport(int x, int y) {}
+
+        void foreground_main_viewport() override {}
 
         std::shared_ptr<texture> make_native_texture(grey::common::raw_img& img) {
             return nullptr;

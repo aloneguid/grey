@@ -178,6 +178,7 @@ namespace grey::common::fss {
     }
 
     std::string get_temp_file_path(const string& prefix) {
+#if WIN32
         WCHAR temp_path[MAX_PATH];
         WCHAR temp_file[MAX_PATH];
 
@@ -194,6 +195,9 @@ namespace grey::common::fss {
         }
 
         return str::to_str(wstring(temp_file));
+#else
+        return "";
+#endif
     }
 
     bool delete_file(const std::string& path) {
