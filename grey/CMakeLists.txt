@@ -8,7 +8,8 @@ find_path(SIMPLEINI_INCLUDE_DIRS "ConvertUTF.c")
 find_package(imgui CONFIG REQUIRED)
 find_package(implot CONFIG REQUIRED)
 
-if(UNIX AND NOT APPLE)
+# all non-Windows build use OpenGL+GLFW3
+if(UNIX)
     find_package(OpenGL REQUIRED)
     find_package(glfw3 CONFIG REQUIRED)
  endif()
@@ -16,7 +17,6 @@ if(UNIX AND NOT APPLE)
 find_path(STB_INCLUDE_DIRS "stb.h")
 
 file(GLOB core_src CONFIGURE_DEPENDS "*.cpp"
-    "backends/*.cpp"
     "fonts/*.cpp"
     "common/*.cpp"
     "x/*.cpp"
@@ -25,16 +25,14 @@ file(GLOB core_src CONFIGURE_DEPENDS "*.cpp"
 
 if (WIN32)
     file(GLOB core_src CONFIGURE_DEPENDS ${core_src} "common/win32/*.cpp")
-elseif (UNIX AND NOT APPLE)
+elseif (UNIX)
     file(GLOB core_src CONFIGURE_DEPENDS ${core_src} "common/lin/*.cpp")
 endif()
 
 if (WIN32)
     set(private_libs implot::implot D3D11.lib)
-elseif(UNIX AND NOT APPLE)
+elseif(UNIX)
     set(private_libs implot::implot glfw OpenGL::GL)
-elseif(APPLE)
-    set(private_libs implot::implot glfw)
 endif()
 
 set(interface_libs imgui::imgui)

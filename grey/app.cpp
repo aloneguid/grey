@@ -13,7 +13,8 @@
 #endif
 
 #if defined(__APPLE__)
-#include "backends/glfw_metal.hpp"
+//#include "backends/glfw_metal.hpp"
+#include "backends/glfw_gl3.hpp"
 #endif
 
 using namespace std;
@@ -26,7 +27,8 @@ namespace grey {
 #elif defined(__linux__)
         auto app = make_unique<grey::backends::glfw_gl3_app>(title, width, height);
 #elif defined(__APPLE__)
-        auto app = make_unique<grey::backends::glfw_metal_app>(title, width, height);
+        //auto app = make_unique<grey::backends::glfw_metal_app>(title, width, height);
+        auto app = make_unique<grey::backends::glfw_gl3_app>(title, width, height);
 #endif
 
         return app;
