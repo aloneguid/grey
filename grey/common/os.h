@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "platform.h"
 
 namespace grey::common::os {
     // returns true if app theme is set to Light

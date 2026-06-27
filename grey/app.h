@@ -4,8 +4,9 @@
 #include <functional>
 #include <map>
 #include "common/img.h"
+#include "common/platform.h"
 
-#if _WIN32
+#if PLATFORM_WINDOWS
 #define NOMINMAX
 #include <Windows.h>
 #endif
@@ -25,7 +26,7 @@ namespace grey {
         virtual ~texture() = default;
     };
 
-#if _WIN32
+#if PLATFORM_WINDOWS
     enum class win32_transparency_mode {
         none,
         colour_key,
@@ -127,7 +128,7 @@ namespace grey {
 
         // platform-specific flags
 
-#if _WIN32
+#if PLATFORM_WINDOWS
         /**
          * @brief When set to true, will enable dark mode for the application on Windows 10/11.
          */

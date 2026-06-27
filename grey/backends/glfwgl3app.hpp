@@ -6,6 +6,7 @@
 // because we will use DirectX 11 + Win32 for much better OS integration on Windows.
 
 #include "../app.h"
+#include "../common/platform.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"

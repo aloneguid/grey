@@ -26,7 +26,7 @@ namespace grey::fonts {
     ImFont* font_loader::fixed_size_font{nullptr};
 
     ImFont* font_loader::load_system_font(ImGuiIO& io) {
-#if WIN32
+#if PLATFORM_WINDOWS
         string path = grey::common::os::get_system_fonts_path();
         // Segoe UI is the default UI font for Windows 10 and 11.
         path += "\\segoeui.ttf";
@@ -41,7 +41,7 @@ namespace grey::fonts {
     }
 
     ImFont* font_loader::load_fixed_font(ImGuiIO& io) {
-#if WIN32
+#if PLATFORM_WINDOWS
         string path = grey::common::os::get_system_fonts_path();
         // Segoe UI is the default UI font for Windows 10 and 11.
         path += "\\consola.ttf";
