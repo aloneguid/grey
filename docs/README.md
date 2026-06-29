@@ -26,9 +26,11 @@ To get started in C#, reference [GreyMatter](https://www.nuget.org/packages/Grey
 
 ## Building
 
+In general, have a look at GHA definitions, because those are kept up to date.
+
 ### Windows
 
-To build native part on Windows, you only need Visual Studio 2022 or 2026 with C++ workload and CMake which you can install from Visual Studio installer.
+You only need **cmake** and **vcpkg**.
 
 ### Linux
 
@@ -38,6 +40,8 @@ To build native part on Linux or WSL2, you need:
 - Build tools. `sudo apt install g++ gdb make ninja-build rsync zip`.
 - GLFW3 dependencies. `sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config`.
 
+todo: sudo apt install autoconf autoconf-archive automake libtool
+
 ### MacOSX
 
-I currently do not pay Apple tax, but instructions should be similar to Linux. If you want to help with MacOSX support, please open an issue. Supporting MacOSX should resort to testing Metal rendering backend and some native OS integrations around windowing.
+Coming soon.

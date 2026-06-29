@@ -15,8 +15,33 @@
 #include "imgui.h"
 #include "../common/os.h"
 
-#ifndef WIN32
-#include "roboto.inl"
+#if PLATFORM_WINDOWS
+// use built-in system fonts
+#else
+// on *nix use fontconfig to discover fonts, rather than embedding them inline
+#include <fontconfig/fontconfig.h>
+
+std::string GetDefaultFontPath(const char* family = "sans-serif") {
+    FcConfig* config = FcInitLoadConfigAndFonts();
+    FcPattern* pattern = FcNameParse(reinterpret_cast<const FcChar8*>(family));
+    FcConfigSubstitute(config, pattern, FcMatchPattern);
+    FcDefaultSubstitute(pattern);
+
+    FcResult result;
+    FcPattern* match = FcFontMatch(config, pattern, &result);
+
+    std::string path;
+    if(match) {
+        FcChar8* file = nullptr;
+        if(FcPatternGetString(match, FC_FILE, 0, &file) == FcResultMatch)
+            path = reinterpret_cast<const char*>(file);
+        FcPatternDestroy(match);
+    }
+    FcPatternDestroy(pattern);
+    FcConfigDestroy(config);
+    return path;
+}
+
 #endif
 
 using namespace std;
@@ -26,29 +51,32 @@ namespace grey::fonts {
     ImFont* font_loader::fixed_size_font{nullptr};
 
     ImFont* font_loader::load_system_font(ImGuiIO& io) {
+        ImFont* f{nullptr};
 #if PLATFORM_WINDOWS
         string path = grey::common::os::get_system_fonts_path();
         // Segoe UI is the default UI font for Windows 10 and 11.
         path += "\\segoeui.ttf";
-        ImFont* f = io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f);
+        f = io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f);
 #else
-        ImFont* f = io.Fonts->AddFontFromMemoryCompressedTTF(
-            Roboto_compressed_data, Roboto_compressed_size,
-            16.0f);
+        string path = GetDefaultFontPath();
+        f = io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f);
 #endif
         return f;
 
     }
 
     ImFont* font_loader::load_fixed_font(ImGuiIO& io) {
+        ImFont* f{nullptr};
 #if PLATFORM_WINDOWS
         string path = grey::common::os::get_system_fonts_path();
         // Segoe UI is the default UI font for Windows 10 and 11.
         path += "\\consola.ttf";
-        return io.Fonts->AddFontFromFileTTF(path.c_str(), 15.0f);
+        f = io.Fonts->AddFontFromFileTTF(path.c_str(), 15.0f);
 #else
-        return nullptr;
+        string path = GetDefaultFontPath("nonospace");
+        f = io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f);
 #endif
+        return f;
     }
 
     void font_loader::load_font(bool load_fa, bool load_fixed) {

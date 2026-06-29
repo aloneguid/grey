@@ -24,6 +24,10 @@
             "name": "glfw3",
             "platform": "linux | osx"
         },
+        {
+            "name": "fontconfig",
+            "platform": "linux"
+        },
         "implot",
         "simpleini"
     ]

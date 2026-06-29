@@ -10,6 +10,7 @@ find_package(implot CONFIG REQUIRED)
 if(UNIX)
     find_package(OpenGL REQUIRED)
     find_package(glfw3 CONFIG REQUIRED)
+    find_package(Fontconfig REQUIRED) # since CMake 3.14
  endif()
 
 find_path(STB_INCLUDE_DIRS "stb.h")
@@ -23,14 +24,16 @@ file(GLOB core_src CONFIGURE_DEPENDS "*.cpp"
 
 if (WIN32)
     file(GLOB core_src CONFIGURE_DEPENDS ${core_src} "common/win32/*.cpp")
+    set(private_libs
+        implot::implot
+        D3D11.lib)
 elseif (UNIX)
     file(GLOB core_src CONFIGURE_DEPENDS ${core_src} "common/lin/*.cpp")
-endif()
-
-if (WIN32)
-    set(private_libs implot::implot D3D11.lib)
-elseif(UNIX)
-    set(private_libs implot::implot glfw OpenGL::GL)
+    set(private_libs
+        implot::implot
+        glfw
+        OpenGL::GL
+        Fontconfig::Fontconfig)
 endif()
 
 set(interface_libs imgui::imgui)
