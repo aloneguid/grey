@@ -17,7 +17,10 @@ namespace grey {
 
 #if PLATFORM_WINDOWS
         auto app = make_unique<grey::backends::win32dx11app>(title, width, height);
-#else
+#elif defined(__linux__)
+        auto app = make_unique<grey::backends::glfw_gl3_app>(title, width, height);
+#elif defined(__APPLE__)
+        //auto app = make_unique<grey::backends::glfw_metal_app>(title, width, height);
         auto app = make_unique<grey::backends::glfw_gl3_app>(title, width, height);
 #endif
 

@@ -18,11 +18,11 @@
                 "glfw-binding",
                 "docking-experimental"
             ],
-            "platform": "linux"
+            "platform": "linux | osx"
         },
         {
             "name": "glfw3",
-            "platform": "linux"
+            "platform": "linux | osx"
         },
         "implot",
         "simpleini"

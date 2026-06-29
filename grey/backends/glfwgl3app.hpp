@@ -1,9 +1,8 @@
 #pragma once
 
-#ifndef _WIN32
-
 // OpenGL3 + GLFW backend, which is cross-platform theoretically, but we will only use it for non-Windows platforms,
 // because we will use DirectX 11 + Win32 for much better OS integration on Windows.
+// ported from: https://github.com/ocornut/imgui/blob/docking/examples/example_glfw_opengl3/main.cpp
 
 #include "../app.h"
 #include "../common/platform.h"
@@ -60,11 +59,17 @@ namespace grey::backends {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 #elif defined(__APPLE__)
     // GL 3.2 + GLSL 150
-        g_glsl_version = "#version 150";
+        /*g_glsl_version = "#version 150";
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac*/
+
+        // Fallback to OpenGL 2.1 Legacy profile for unaccelerated VMs
+        g_glsl_version = "#version 120";
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+        // Remove CORE_PROFILE and FORWARD_COMPAT, as they are for 3.2+ only
 #else
     // GL 3.0 + GLSL 130
         g_glsl_version = "#version 130";
@@ -237,17 +242,22 @@ namespace grey::backends {
             glfwTerminate();
         }
 
-        void resize_main_viewport(int width, int height) {}
+        void resize_main_viewport(int width, int height) override
+        {
 
-        void move_main_viewport(int x, int y) {}
+        }
+
+        void move_main_viewport(int x, int y) override {
+
+        }
 
         void foreground_main_viewport() override {}
 
-        std::shared_ptr<texture> make_native_texture(grey::common::raw_img& img) {
+        std::shared_ptr<texture> make_native_texture(grey::common::raw_img& img) override {
             return nullptr;
         }
 
-        void set_dark_mode(bool enabled) {
+        void set_dark_mode(bool enabled) override {
         }
 
     private:
@@ -260,4 +270,3 @@ namespace grey::backends {
         std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_time;
     };
 }
-#endif

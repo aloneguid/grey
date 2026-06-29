@@ -22,7 +22,7 @@ using namespace std;
 namespace grey::common::os {
     bool is_app_light_theme(bool& value) {
 
-#if WIN32
+#if defined(_WIN32)
         string s = win32::reg::get_value(win32::reg::hive::current_user,
             "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
             "AppsUseLightTheme");
@@ -36,7 +36,7 @@ namespace grey::common::os {
     }
 
     bool is_system_light_theme(bool& value) {
-#if WIN32
+#if defined(_WIN32)
         string s = win32::reg::get_value(win32::reg::hive::current_user,
         "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
         "SystemUsesLightTheme");
@@ -45,6 +45,7 @@ namespace grey::common::os {
 
         return !s.empty();
 #else
+        return false;
 #endif
     }
 
