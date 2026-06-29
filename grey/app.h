@@ -7,7 +7,6 @@
 #include "common/platform.h"
 
 #if PLATFORM_WINDOWS
-#define NOMINMAX
 #include <Windows.h>
 #endif
 
