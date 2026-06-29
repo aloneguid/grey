@@ -5,8 +5,7 @@
 #include <algorithm>
 #include "str.h"
 
-#if WIN32
-
+#if PLATFORM_WINDOWS
 #include <Windows.h>
 #include <ShlObj_core.h>
 #include <shellapi.h>
@@ -14,43 +13,59 @@
 #include "win32/reg.h"
 
 #pragma comment(lib, "Shcore.lib")
-
 #endif
 
 using namespace std;
 
 namespace grey::common::os {
-    bool is_app_light_theme(bool& value) {
+    bool is_app_light_theme() {
 
-#if defined(_WIN32)
+#if PLATFORM_WINDOWS
         string s = win32::reg::get_value(win32::reg::hive::current_user,
             "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
             "AppsUseLightTheme");
 
-        value = s == "1";
+        return s.empty() ? true : s == "1";
+#elif PLATFORM_LINUX
+        auto run = [](const char* cmd) {
+            std::string out;
+            if(FILE* p = popen(cmd, "r")) {
+                char buf[256];
+                while(fgets(buf, sizeof(buf), p)) out += buf;
+                pclose(p);
+            }
+            return out;
+        };
 
-        return !s.empty();
+        // 1 - prefer dark, 2 - prefer light
+        std::string r = run("dbus-send --session --print-reply --dest=org.freedesktop.portal.Desktop "
+            "/org/freedesktop/portal/desktop org.freedesktop.portal.Settings.Read "
+            "string:'org.freedesktop.appearance' string:'color-scheme' 2>/dev/null");
+        if(r.find("uint32 1") != std::string::npos) return false;
+        if(r.find("uint32 2") != std::string::npos) return true;
+
+        // "default", "prefer-dark", "prefer-light"
+        r = run("gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null");
+        return r.find("dark") == std::string::npos;
 #else
         return false;
 #endif
     }
 
-    bool is_system_light_theme(bool& value) {
-#if defined(_WIN32)
+    bool is_system_light_theme() {
+#if PLATFORM_WINDOWS
         string s = win32::reg::get_value(win32::reg::hive::current_user,
-        "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-        "SystemUsesLightTheme");
+            "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+            "SystemUsesLightTheme");
 
-        value = s == "1";
-
-        return !s.empty();
+        return s.empty() ? true : s == "1";
 #else
-        return false;
+        return is_app_light_theme();
 #endif
     }
 
     unsigned int get_dpi() {
-#if WIN32
+#if PLATFORM_WINDOWS
         return ::GetDpiForSystem();
 #else
         return 96;
@@ -58,7 +73,7 @@ namespace grey::common::os {
     }
 
     std::string get_system_fonts_path() {
-#if WIN32
+#if PLATFORM_WINDOWS
         wchar_t path[MAX_PATH];
         if (SUCCEEDED(::SHGetFolderPath(NULL, CSIDL_FONTS, NULL, 0, path))) {
             return grey::common::str::to_str(path);
@@ -72,7 +87,7 @@ namespace grey::common::os {
     }
 
 
-#if WIN32
+#if PLATFORM_WINDOWS
     std::string get_win32_last_error_text() {
         wchar_t err[256];
         memset(err, 0, 256);
@@ -106,14 +121,14 @@ namespace grey::common::os {
 #endif
 
     void set_dpi_awareness() {
-#if WIN32
+#if PLATFORM_WINDOWS
         ::SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
 #endif
     }
 
     bool get_current_monitor(int &left, int &top, int &right, int &bottom) {
 
-#if WIN32
+#if PLATFORM_WINDOWS
         POINT pt;
         if(!::GetCursorPos(&pt)) return false;
         HMONITOR hMon = ::MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST);

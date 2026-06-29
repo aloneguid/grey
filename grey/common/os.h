@@ -3,11 +3,15 @@
 #include "platform.h"
 
 namespace grey::common::os {
-    // returns true if app theme is set to Light
-    bool is_app_light_theme(bool& value);
+    /**
+     * @brief Determines application theme. Prefer this to make decisions about colours.
+     */
+    bool is_app_light_theme();
 
-    // return true if system theme is set to Light
-    bool is_system_light_theme(bool& value);
+    /**
+     * @brief Determines system theme (can different from application theme). Rarely used.
+     */
+    bool is_system_light_theme();
 
     unsigned int get_dpi();
 
@@ -17,7 +21,7 @@ namespace grey::common::os {
      */
     std::string get_system_fonts_path();
 
-#if WIN32
+#if PLATFORM_WINDOWS
     /**
      * @brief Calls ::GetLastError() and returns the error text.
      * @return

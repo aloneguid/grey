@@ -148,9 +148,7 @@ namespace grey::themes {
     }
 
     void set_theme_follow_os() {
-        bool is_light{false};
-        grey::common::os::is_app_light_theme(is_light);
-        if(is_light) {
+        if(grey::common::os::is_app_light_theme()) {
             set_theme_light();
         } else {
             set_theme_dark();
@@ -591,8 +589,7 @@ namespace grey::themes {
         }
 
         if(r.id == FollowOsThemeId) {
-            bool is_light;
-            grey::common::os::is_app_light_theme(is_light);
+            bool is_light = grey::common::os::is_app_light_theme();
             r.is_dark = !is_light;
         }
 
