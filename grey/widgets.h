@@ -507,6 +507,9 @@ namespace grey::widgets {
     void image_rounded(app& app, const std::string& key, size_t width, size_t height, float rounding,
         float uv0_x = .0f, float uv0_y = .0f, float uv1_x = 1.0f, float uv1_y = 1.0f);
 
+    /**
+     * @brief Same as image, but width/height is pre-configured
+     */
     void icon_image(app& app, const std::string& key);
 
     bool icon_selector(app& app, const std::string& path, size_t square_size);

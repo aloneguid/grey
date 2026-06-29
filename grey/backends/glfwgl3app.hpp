@@ -33,6 +33,21 @@
 namespace grey::backends {
     using namespace std;
 
+    struct gl_texture : public grey::texture {
+        GLuint texture_id;
+
+        gl_texture(GLuint texture_id) : texture{reinterpret_cast<void*>(texture_id)}, texture_id{texture_id} {}
+
+        ~gl_texture() override {
+
+            if(texture_id) {
+                glDeleteTextures(1, &texture_id);
+                texture_id = 0;
+            }
+        }
+    };
+
+
     static void glfw_error_callback(int error, const char* description) {
         fprintf(stderr, "GLFW Error %d: %s\n", error, description);
     }
@@ -254,7 +269,20 @@ namespace grey::backends {
         void foreground_main_viewport() override {}
 
         std::shared_ptr<texture> make_native_texture(grey::common::raw_img& img) override {
-            return nullptr;
+            // Create a OpenGL texture identifier
+            GLuint image_texture;
+            glGenTextures(1, &image_texture);
+            glBindTexture(GL_TEXTURE_2D, image_texture);
+
+            // Setup filtering parameters for display
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            // Upload pixels into texture
+            glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.x, img.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, img.get_data());
+
+            return std::make_shared<gl_texture>(image_texture);
         }
 
         void set_dark_mode(bool enabled) override {

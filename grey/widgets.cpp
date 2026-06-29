@@ -1137,7 +1137,7 @@ namespace grey::widgets {
     // ---- status bar ----
 
     status_bar::status_bar() : style{ ImGui::GetStyle() }, cursor_before{ ImGui::GetCursorPos() } {
-        auto io = ImGui::GetIO();
+        //auto io = ImGui::GetIO();
 
         float height = ImGui::GetFontBaked()->Size + style.FramePadding.y * 2.0f;
 
@@ -1159,8 +1159,6 @@ namespace grey::widgets {
             (ImU32)rgb_colour {
             style.Colors[ImGuiCol_MenuBarBg]
         }, style.FrameRounding);
-
-        ImGui::SetCursorPos(cursor_before);
     }
 
     // mouse helpers

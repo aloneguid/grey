@@ -2,6 +2,7 @@
 #include "../grey/app.h"
 #include "../grey/widgets.h"
 #include "../grey/x/graph.h"
+#include "res.inl"
 #include <imgui_internal.h>
 #include <vector>
 #include <iostream>
@@ -47,6 +48,12 @@ int main(int argc, char* argv[]) {
     //backend->run();
 
     auto app = grey::app::make("demo", 700, 800);
+
+    app->on_initialised = [&app]() {
+        app->preload_texture("luna", luna_jpg, luna_jpg_len);
+    };
+
+
     //app->load_icon_font = false;
     app->load_fixed_font = true;
 #if defined(_WIN32)
@@ -191,6 +198,30 @@ int main(int argc, char* argv[]) {
                         if(i > 0) w::sl();
                         w::button("collide");
                     }
+
+                }
+            }
+
+            // simple image
+            {
+                auto tab = tabs.next_tab("Image");
+                if(tab) {
+                    static bool img_rounded{false};
+                    static float img_rounding{5.0f};
+                    static float img_scale{0.5f};
+
+                    auto texture = app->get_texture("luna");
+                    if(texture) {
+                        w::checkbox("rounded", img_rounded);
+                        w::slider(img_scale, 0.1f, 3.0f, "scale");
+                        if(img_rounded) {
+                            w::slider(img_rounding, 1, 50, "rounding");
+                            w::image_rounded(*app, "luna", texture->width * img_scale, texture->height * img_scale, img_rounding);
+                        } else {
+                            w::image(*app, "luna", texture->width * img_scale, texture->height * img_scale);
+                        }
+                    }
+
                 }
             }
 
