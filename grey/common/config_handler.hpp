@@ -8,6 +8,7 @@
 namespace grey::common {
     class config_handler {
     public:
+        using uint = unsigned int;
         using string = std::string;
         using strings = std::vector<std::string>;
         using colour = unsigned int;
@@ -39,28 +40,43 @@ namespace grey::common {
             ini.SaveFile(file_path.c_str());
         }
 
+        std::vector<std::string> list_sections() const {
+            std::vector<string> r;
+            std::list<CSimpleIni::Entry> ir;
+            ini.GetAllSections(ir);
+            for (auto& s : ir) {
+                r.push_back(s.pItem);
+            }
+            return r;
+        }
+
+        void delete_section(const std::string& section) {
+            ini.Delete(section.c_str(), nullptr, true);
+        }
+
+
         // save/ load functions
-        void set_string_value(const std::string &key, const std::string &value, const std::string &section = "") {
+        void save_string_value(const std::string &key, const std::string &value, const std::string &section = "") {
             ini.Delete(section.c_str(), key.c_str());
             if(!value.empty()) {
                 ini.SetValue(section.c_str(), key.c_str(), value.c_str());
             }
         }
 
-        string get_string_value(const std::string &key, const std::string &default_value,
+        string load_string_value(const std::string &key, const std::string &default_value,
                                 const std::string &section = "") {
             const char *v = ini.GetValue(section.c_str(), key.c_str());
             return v ? v : default_value;
         }
 
-        void set_strings_value(const std::string &key, const strings &value, const std::string &section = "") {
+        void save_strings_value(const std::string &key, const strings &value, const std::string &section = "") {
             ini.Delete(section.c_str(), key.c_str());
             for(const auto &s: value) {
                 ini.SetValue(section.c_str(), key.c_str(), s.c_str());
             }
         }
 
-        strings get_strings_value(const std::string &key, const strings &default_value,
+        strings load_strings_value(const std::string &key, const strings &default_value,
                                   const std::string &section = "") {
             strings r;
             std::list<CSimpleIni::Entry> ir;
@@ -71,41 +87,49 @@ namespace grey::common {
             return r;
         }
 
-        void set_int_value(const std::string &key, int value, const std::string &section = "") {
+        void save_int_value(const std::string &key, int value, const std::string &section = "") {
             ini.SetLongValue(section.c_str(), key.c_str(), value, nullptr, false, true);
         }
 
-        int get_int_value(const std::string &key, int default_value, const std::string &section = "") {
+        void save_uint_value(const std::string &key, uint value, const std::string &section = "") {
+            ini.SetLongValue(section.c_str(), key.c_str(), value, nullptr, false, true);
+        }
+
+        int load_int_value(const std::string &key, int default_value, const std::string &section = "") {
             return ini.GetLongValue(section.c_str(), key.c_str(), default_value);
         }
 
-        void set_float_value(const std::string &key, float value, const std::string &section = "") {
+        uint load_uint_value(const std::string &key, uint default_value, const std::string &section = "") {
+            return static_cast<uint>(ini.GetLongValue(section.c_str(), key.c_str(), default_value));
+        }
+
+        void save_float_value(const std::string &key, float value, const std::string &section = "") {
             ini.SetDoubleValue(section.c_str(), key.c_str(), value, nullptr, true);
         }
 
-        float get_float_value(const std::string &key, float default_value, const std::string &section = "") {
+        float load_float_value(const std::string &key, float default_value, const std::string &section = "") {
             return ini.GetDoubleValue(section.c_str(), key.c_str(), default_value);
         }
 
-        void set_bool_value(const std::string &key, bool value, const std::string &section = "") {
+        void save_bool_value(const std::string &key, bool value, const std::string &section = "") {
             ini.SetBoolValue(section.c_str(), key.c_str(), value, nullptr, true);
         }
 
-        bool get_bool_value(const std::string &key, bool default_value, const std::string &section = "") {
-            string value = get_string_value(key, "", section);
+        bool load_bool_value(const std::string &key, bool default_value, const std::string &section = "") {
+            string value = load_string_value(key, "", section);
             if(value.empty()) return default_value;
             return value == "true" || value == "y" || value == "1";
         }
 
-        unsigned int get_colour_value(const std::string &key, unsigned int default_value,
+        unsigned int load_colour_value(const std::string &key, unsigned int default_value,
                                       const std::string &section = "") {
-            string value = get_string_value(key, "", section);
+            string value = load_string_value(key, "", section);
             if(value.empty()) return default_value;
             return hex_to_imcol(value);
         }
 
-        void set_colour_value(const std::string &key, unsigned int value, const std::string &section = "") {
-            set_string_value(key, imcol_to_hex(value), section);
+        void save_colour_value(const std::string &key, unsigned int value, const std::string &section = "") {
+            save_string_value(key, imcol_to_hex(value), section);
         }
 
     private:

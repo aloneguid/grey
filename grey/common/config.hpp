@@ -4,6 +4,10 @@
 #include <filesystem>
 #include "config_handler.hpp"
 
+#if __has_include("model.h")
+#include "model.h"
+#endif
+
 #if __has_include("config_custom.h")
 #include "config_custom.h"
 #endif
@@ -22,6 +26,7 @@ namespace grey::common {
      */
     class config {
     public:
+        using uint = unsigned int;
         using string = std::string;
         using strings = std::vector<std::string>;
         using colour = unsigned int;
@@ -34,7 +39,9 @@ namespace grey::common {
 #define opt(type, name, default_val) type name{default_val};
 #define opt_sect(type, name, default_val, sect_name, sect_val_name) type name{default_val};
 #define opt_custom(type, name) type name;
+#define opt_enum(type, name, default_val, base_type) type name{default_val};
     #include "config.def"
+#undef opt_enum
 #undef opt_custom
 #undef opt_sect
 #undef opt
@@ -49,10 +56,12 @@ namespace grey::common {
             ini.reload();
 
             // loading logic
-#define opt(type, name, default_val) name = ini.get_##type##_value(#name, default_val);
-#define opt_sect(type, name, default_val, sect_name, sect_val_name) name = ini.get_##type##_value(#sect_val_name, default_val, #sect_name);
-#define opt_custom(type, name);
+#define opt(type, name, default_val) name = ini.load_##type##_value(#name, default_val);
+#define opt_sect(type, name, default_val, sect_name, sect_val_name) name = ini.load_##type##_value(#sect_val_name, default_val, #sect_name);
+#define opt_custom(type, name) load_custom(ini, browsers);
+#define opt_enum(type, name, default_val, base_type) base_type base_##name = ini.load_##base_type##_value(#name, default_val); name = static_cast<##type##>(base_##name);
     #include "config.def"
+#undef opt_enum
 #undef opt_custom
 #undef opt_sect
 #undef opt
@@ -60,10 +69,12 @@ namespace grey::common {
 
         void commit() {
             // saving logic
-#define opt(type, name, default_val) ini.set_##type##_value(#name, name);
-#define opt_sect(type, name, default_val, sect_name, sect_val_name) ini.set_##type##_value(#sect_val_name, name, #sect_name);
-#define opt_custom(type, name) set_custom(ini, browsers);
+#define opt(type, name, default_val) ini.save_##type##_value(#name, name);
+#define opt_sect(type, name, default_val, sect_name, sect_val_name) ini.save_##type##_value(#sect_val_name, name, #sect_name);
+#define opt_custom(type, name) save_custom(ini, browsers);
+#define opt_enum(type, name, default_val, base_type) ini.save_##base_type##_value(#name, static_cast<base_type>(name));
     #include "config.def"
+#undef opt_enum
 #undef opt_custom
 #undef opt_sect
 #undef opt

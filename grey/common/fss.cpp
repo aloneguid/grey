@@ -34,7 +34,7 @@ namespace grey::common::fss {
         return std::getenv("HOME");
     }
 
-    std::string get_config_dir() {
+    std::string get_config_dir(const std::string& application_name) {
         fs::path config_path;
 
 #if defined(_WIN32)
@@ -70,12 +70,14 @@ namespace grey::common::fss {
         }
 #endif
 
-        return config_path.string();
+        auto result = config_path;
+        if(!application_name.empty()) result /= application_name;
+        return result.string();
     }
 
     std::string get_config_file_path(const std::string& application_name, const std::string &filename) {
-        fs::path config_path = get_config_dir();
-        return (config_path / application_name / filename).string();
+        fs::path config_path = get_config_dir(application_name);
+        return (config_path / filename).string();
     }
 
     std::string get_current_exec_path() {

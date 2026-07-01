@@ -14,7 +14,7 @@ namespace grey::common::fss {
      *
      * @return Get a configuration directory that can be used to store user settings
      */
-    std::string get_config_dir();
+    std::string get_config_dir(const std::string& application_name = "");
 
     /**
      * Get a path to a configuration file in the configuration directory
