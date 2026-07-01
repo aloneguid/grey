@@ -15,7 +15,8 @@ if(UNIX)
 
 find_path(STB_INCLUDE_DIRS "stb.h")
 
-file(GLOB core_src CONFIGURE_DEPENDS "*.cpp"
+file(GLOB core_src
+    "*.cpp"
     "fonts/*.cpp"
     "common/*.cpp"
     "x/*.cpp"
@@ -23,12 +24,12 @@ file(GLOB core_src CONFIGURE_DEPENDS "*.cpp"
     "3rdparty/ImGuiColorTextEdit/*.cpp")
 
 if (WIN32)
-    file(GLOB core_src CONFIGURE_DEPENDS ${core_src} "common/win32/*.cpp")
+    file(GLOB core_src ${core_src} "common/win32/*.cpp")
     set(private_libs
         implot::implot
         D3D11.lib)
 elseif (UNIX)
-    file(GLOB core_src CONFIGURE_DEPENDS ${core_src} "common/lin/*.cpp")
+    file(GLOB core_src ${core_src} "common/lin/*.cpp")
     set(private_libs
         implot::implot
         glfw

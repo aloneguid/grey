@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+#include <list>
 #include <string>
 #include <filesystem>
 #include <SimpleIni.h> // https://github.com/brofield/simpleini
@@ -12,7 +14,7 @@ namespace grey::common {
      *
      * opt(type, name, default_val)
      * or for sections
-     * opt_sect(type, name, default_val, sect_name, sect_val_name)
+     * opt_sect(type, name, default_val, sect_name, sect_val_name). sect_val_name is value name inside the section
      *
      * in config.def in the same folder you are including config.hpp. Types supported:
      * int, float, string, bool, colour (saved as unsigned int).
@@ -20,6 +22,7 @@ namespace grey::common {
     class config {
     public:
         using string = std::string;
+        using strings = std::vector<std::string>;
         using colour = unsigned int;
 
         config(const std::string& application_name, const std::string& file_name = "config.ini") {
@@ -89,6 +92,23 @@ namespace grey::common {
         string get_string_value(const std::string& key, const std::string& default_value, const std::string& section = "") {
             const char* v = ini.GetValue(section.c_str(), key.c_str());
             return v ? v : default_value;
+        }
+
+        void set_strings_value(const std::string& key, const strings& value, const std::string& section = "") {
+            ini.Delete(section.c_str(), key.c_str());
+            for(const auto& s : value) {
+                ini.SetValue(section.c_str(), key.c_str(), s.c_str());
+            }
+        }
+
+        strings get_strings_value(const std::string& key, const strings& default_value, const std::string& section = "") {
+            strings r;
+            std::list<CSimpleIni::Entry> ir;
+            ini.GetAllValues(section.c_str(), key.c_str(), ir);
+            for (auto& e : ir) {
+                r.push_back(e.pItem);
+            }
+            return r;
         }
 
         void set_int_value(const std::string& key, int value, const std::string& section = "") {
