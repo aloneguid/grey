@@ -59,7 +59,7 @@ namespace grey::common {
 #define opt(type, name, default_val) name = ini.load_##type##_value(#name, default_val);
 #define opt_sect(type, name, default_val, sect_name, sect_val_name) name = ini.load_##type##_value(#sect_val_name, default_val, #sect_name);
 #define opt_custom(type, name) load_custom(ini, browsers);
-#define opt_enum(type, name, default_val, base_type) base_type base_##name = ini.load_##base_type##_value(#name, default_val); name = static_cast<##type##>(base_##name);
+#define opt_enum(type, name, default_val, base_type) base_type base_##name = ini.load_##base_type##_value(#name, default_val); name = static_cast<type>(base_##name);
     #include "config.def"
 #undef opt_enum
 #undef opt_custom

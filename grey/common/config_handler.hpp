@@ -4,6 +4,7 @@
 #include "imgui.h"
 #include "fss.h"
 #include <filesystem>
+#include <format>
 
 namespace grey::common {
     class config_handler {
