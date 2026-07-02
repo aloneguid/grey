@@ -122,7 +122,7 @@ namespace grey::common::str {
         return found_substring;
     }
 
-    std::vector<std::string> split(const std::string& str, const std::string& delimiter, bool trim_lines) {
+    std::vector<std::string> split(const std::string& str, const std::string& delimiter, bool trim_lines, bool remove_empty_entries) {
         std::vector<std::string> strings;
 
         std::string::size_type pos = 0;
@@ -130,7 +130,8 @@ namespace grey::common::str {
         while ((pos = str.find(delimiter, prev)) != std::string::npos) {
             string el = str.substr(prev, pos - prev);
             if (trim_lines) trim(el);
-            strings.push_back(el);
+            if(!remove_empty_entries || !el.empty())
+                strings.push_back(el);
             prev = pos + 1;
         }
 
@@ -258,6 +259,10 @@ namespace grey::common::str {
 
         return ret;
 
+    }
+
+    std::string base64_encode(const std::string& input) {
+        return base64_encode(reinterpret_cast<const unsigned char*>(input.c_str()), input.length());
     }
 
     std::string base64_decode(const std::string& encoded_string) {
@@ -433,6 +438,14 @@ namespace grey::common::str {
             [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); }
         );
         return (it != haystack.end());
+    }
+
+    bool equal_ic(const std::string& s1, const std::string& s2) {
+        // Utility function to compare two strings ignoring case
+        return std::equal(s1.begin(), s1.end(), s2.begin(), s2.end(),
+            [](char a, char b) {
+                return std::tolower(a) == std::tolower(b);
+            });
     }
 
     std::string escape_pipe(const std::string& input) {

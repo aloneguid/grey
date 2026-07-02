@@ -30,7 +30,7 @@ namespace grey::common::str {
 
     void replace_all(std::string& s, const std::string& search, const std::string& replacement);
 
-    std::vector<std::string> split(const std::string& str, const std::string& delimiter, bool trim_lines = false);
+    std::vector<std::string> split(const std::string& str, const std::string& delimiter, bool trim_lines = false, bool remove_empty_entries = false);
 
     template<class ForwardIterator>
     std::string join(ForwardIterator begin, ForwardIterator end, const std::string& separator) {
@@ -57,6 +57,8 @@ namespace grey::common::str {
     inline bool is_base64(unsigned char c);
 
     std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len);
+
+    std::string base64_encode(const std::string& input);
 
     std::string base64_decode(std::string const& encoded_string);
 
@@ -85,6 +87,8 @@ namespace grey::common::str {
      * @return 
     */
     bool contains_ic(const std::string& haystack, const std::string& needle);
+
+    bool equal_ic(const std::string& s1, const std::string& s2);
 
     /**
      * @brief Escapes pipe character in the string with backslash and pipe.
