@@ -1,41 +1,47 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <map>
+#include <windows.h>
 
-namespace grey::common::win32::reg {
-    enum class hive {
-        classes_root = 0,
+namespace grey::common::win32 {
+    namespace reg {
+        enum class hive {
+            classes_root = 0,
 
-        local_machine,
+            local_machine,
 
-        current_user,
-    };
+            current_user
+        };
 
-    std::vector<std::string> enum_subkeys(hive h, std::string path);
+        std::vector<std::string> enum_subkeys(hive h, std::string path);
 
-    std::vector<std::string> get_value_names(hive h, std::string path);
+        std::vector<std::string> get_value_names(hive h, std::string path);
 
-    std::string get_value(hive h, const std::string& path, const std::string& value_name = "");
+        std::string get_value(HKEY &hKey, const std::string &value_name = "");
 
-    std::vector<std::string> get_multi_value(hive h, const std::string& path, const std::string& value_name = "");
+        std::string get_value(hive h, const std::string &path, const std::string &value_name = "");
 
-    void delete_key(hive h, const std::string& path);
+        std::vector<std::string> get_multi_value(hive h, const std::string &path, const std::string &value_name = "");
 
-    void delete_value(hive h, const std::string& path, const std::string& value_name = "");
+        void delete_key(hive h, const std::string &path);
 
-    void set_value(hive h,
-       const std::string& path,
-       const std::string& value,
-       const std::string& value_name = "");
+        void delete_value(hive h, const std::string &path, const std::string &value_name = "");
 
-    void set_value(hive h,
-       const std::string& path,
-       int32_t value,
-       const std::string& value_name = "");
+        void set_value(hive h,
+                       const std::string &path,
+                       const std::string &value,
+                       const std::string &value_name = "");
 
-    void set_value(hive h,
-       const std::string& path,
-       const std::vector<std::string>& value,
-       const std::string& value_name = "");
+        void set_value(hive h,
+                       const std::string &path,
+                       int32_t value,
+                       const std::string &value_name = "");
+
+        void set_value(hive h,
+                       const std::string &path,
+                       const std::vector<std::string> &value,
+                       const std::string &value_name = "");
+
+        bool path_exists(hive h, const std::string &path);
+    }
 }
