@@ -73,7 +73,7 @@ namespace grey::common {
 
             ::CloseHandle(pi.hProcess);
             ::CloseHandle(pi.hThread);
-        }
+                           }
 
         return pid;
     }
@@ -142,10 +142,10 @@ namespace grey::common {
             // Close handles
             ::CloseHandle(pi.hProcess);
             ::CloseHandle(pi.hThread);
-        } else {
-            // Failed to create process
-            ::CloseHandle(hStdOutWrite);
-        }
+            } else {
+                // Failed to create process
+                ::CloseHandle(hStdOutWrite);
+            }
 
         ::CloseHandle(hStdOutRead);
         return static_cast<int>(exit_code);
@@ -271,7 +271,7 @@ namespace grey::common {
             }) {
             auto desc = queryDescription(lang, cp);
             if(!desc.empty()) return str::to_str(desc);
-        }
+            }
 
         return "";
     }
@@ -365,7 +365,7 @@ namespace grey::common {
                 auto uptime = file_clock::now() - creation_time;
                 auto uptime_sec = duration_cast<seconds>(uptime);
                 r = uptime_sec.count();
-            }
+                }
             ::CloseHandle(hProcess);
         }
         return r;
@@ -427,6 +427,7 @@ namespace grey::common {
 
         return perc;
     }
+}
 
 #else
 
@@ -447,6 +448,7 @@ namespace grey::common {
 #include <cctype>
 #include <cstdlib>
 
+namespace grey::common {
     process::process() : pid{getpid()} {
     }
 
@@ -661,7 +663,7 @@ namespace grey::common {
             if(ss >> state >> ppid >> pgrp >> session >> tty_nr >> tpgid >> flags >> minflt >> cminflt >> majflt >>
                cmajflt >> utime >> stime) {
                 return true;
-            }
+               }
             return false;
         };
 
@@ -692,6 +694,5 @@ namespace grey::common {
 
         return perc;
     }
-
-#endif
 }
+#endif
