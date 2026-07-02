@@ -17,5 +17,10 @@ namespace grey::common {
         std::vector<std::pair<std::string, std::string>> parameters;
 
         std::string to_string();
+
+        /**
+         * Opens the given URL in the default web browser.
+         */
+        static void open_in_browser(const std::string& url);
     };
 }

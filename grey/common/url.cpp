@@ -1,6 +1,15 @@
 #include "url.h"
 #include "str.h"
 #include <format>
+#include "platform.h"
+
+#if PLATFORM_WINDOWS
+#include <windows.h>
+#include <shellapi.h>
+#else
+#include <unistd.h>
+#include <sys/wait.h>
+#endif
 
 namespace grey::common {
     using namespace std;
@@ -70,5 +79,19 @@ namespace grey::common {
         }
 
         return r;
+    }
+
+    void url::open_in_browser(const std::string &url) {
+#if PLATFORM_WINDOWS
+        ::ShellExecuteA(nullptr, "open", url.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+#else
+        pid_t pid = fork();
+        if (pid == 0) {
+            // Child process
+            execlp("xdg-open", "xdg-open", url.c_str(), (char*)nullptr);
+            _exit(127); // exec failed
+        }
+        // Parent: don't wait, let it run detached (or waitpid if you want to check success)
+#endif
     }
 }
