@@ -4,7 +4,6 @@
 #include <array>
 #include <algorithm>
 #include <iostream>
-#include <unistd.h>
 
 #include "str.h"
 
@@ -16,6 +15,7 @@
 #include "win32/reg.h"
 #pragma comment(lib, "Shcore.lib")
 #elif PLATFORM_LINUX
+#include <unistd.h>
 #include <fcntl.h>
 #include <sys/wait.h>
 #endif
