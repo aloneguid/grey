@@ -17,8 +17,6 @@ namespace grey::common::win32::os {
 
     std::string get_user_name();
 
-    std::string create_guid();
-
     /**
      * @brief Get current CPU usage in percentage
      * @return value 0-100, or -1 in case of failure

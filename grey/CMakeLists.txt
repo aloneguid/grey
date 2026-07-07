@@ -16,20 +16,25 @@ if(UNIX)
 find_path(STB_INCLUDE_DIRS "stb.h")
 
 file(GLOB core_src
-    "*.cpp"
+    "anim.cpp"
+    "app.cpp"
+    "themes.cpp"
+    "widgets.cpp"
+    "guid.cpp"
+    "3rdparty/imgui-node-editor/*.cpp"
+    "3rdparty/ImGuiColorTextEdit/*.cpp"
     "fonts/*.cpp"
     "common/*.cpp"
-    "x/*.cpp"
-    "3rdparty/imgui-node-editor/*.cpp"
-    "3rdparty/ImGuiColorTextEdit/*.cpp")
+    "x/*.cpp")
 
 if (WIN32)
-    file(GLOB core_src ${core_src} "common/win32/*.cpp")
+    file(GLOB core_src ${core_src}
+            "common/win32/gdi.cpp")
     set(private_libs
         implot::implot
         D3D11.lib)
 elseif (UNIX)
-    file(GLOB core_src ${core_src} "common/lin/*.cpp")
+    # file(GLOB core_src ${core_src} "common/lin/*.cpp")
     set(private_libs
         implot::implot
         glfw
