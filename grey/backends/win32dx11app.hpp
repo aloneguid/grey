@@ -296,7 +296,7 @@ namespace grey::backends {
             if(hWnd) {
                 UINT uFlags{0};
 
-                if(win32_center_on_screen) {
+                if(center_on_screen) {
                     get_screen_center(window_width, window_height, window_left, window_top);
                 } else {
                     uFlags |= SWP_NOMOVE;
@@ -431,7 +431,7 @@ namespace grey::backends {
             }
 
             //DWORD dwStyle = WS_POPUP;
-            if(!win32_can_resize) {
+            if(!can_resize) {
                 // remove resize frame and maximize button
                 dwStyle &= ~WS_THICKFRAME;
                 dwStyle &= ~WS_MAXIMIZEBOX;
@@ -441,7 +441,7 @@ namespace grey::backends {
             //dwStyle &= ~WS_SYSMENU; // remove system menu
             //dwStyle &= ~WS_BORDER;
 
-            if(win32_center_on_screen) {
+            if(center_on_screen) {
                 get_screen_center(window_width, window_height, window_left, window_top);
             } else {
                 window_left = window_top = CW_USEDEFAULT;

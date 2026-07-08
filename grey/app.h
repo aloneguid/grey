@@ -38,7 +38,7 @@ namespace grey {
         virtual ~app() = default;
 
         /**
-         * @brief Creates app instance, which will be different implementation depending on platform we run on.
+         * @brief Creates app instance, which will be different implementation depending on the platform we run on.
          *        Only one instance of the app should be created per process lifetime.
          * @param title 
          * @return 
@@ -125,6 +125,16 @@ namespace grey {
          */
         int find_monitor_for_main_viewport();
 
+        /**
+         * @brief When set to true, will allow the window to be resized.
+         */
+        bool can_resize{true};
+
+        /**
+         * @brief When set to true, will center the window on the screen where mouse is currently located.
+         */
+        bool center_on_screen{false};
+
         // platform-specific flags
 
 #if PLATFORM_WINDOWS
@@ -132,12 +142,6 @@ namespace grey {
          * @brief When set to true, will enable dark mode for the application on Windows 10/11.
          */
         bool win32_title_bar{true};
-        bool win32_can_resize{true};
-
-        /**
-         * @brief When set to true, will center the window on the screen where mouse is currently located.
-         */
-        bool win32_center_on_screen{false};
 
         bool win32_hide_from_taskbar{false};
 
