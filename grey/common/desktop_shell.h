@@ -16,6 +16,8 @@ namespace grey::common {
          */
         static std::string file_open_dialog(const std::string &file_type_name, const std::string &extension);
 
+        static bool file_open_dialog_supported();
+
 
     private:
         desktop_shell() = delete;

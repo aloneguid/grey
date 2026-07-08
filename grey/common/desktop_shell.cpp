@@ -118,6 +118,15 @@ namespace grey::common {
 
         return path;
     }
+
+    bool desktop_shell::file_open_dialog_supported() {
+#if PLATFORM_WINDOWS
+        return true;
+#else
+        return false;
+#endif
+    }
+
 #else
     std::string desktop_shell::file_open_dialog(const std::string &file_type_name, const std::string &extension) {
         return "";

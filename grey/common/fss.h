@@ -11,8 +11,10 @@ namespace grey::common::fss {
     std::string get_home_dir();
 
     /**
-     *
-     * @return Get a configuration directory that can be used to store user settings
+     * Get a configuration directory that can be used to store user settings:
+     * - Roaming app data on Windows
+     * - XDG_CONFIG_HOME on Linux
+     * - HOME/Library/Application Support on macOS
      */
     std::string get_config_dir(const std::string& application_name = "");
 

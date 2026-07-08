@@ -1,5 +1,6 @@
 #include "fss.h"
-#if WIN32
+#include "platform.h"
+#if PLATFORM_WINDOWS
 #include <Windows.h>
 #include <ShlObj_core.h>
 #include <shellapi.h>
@@ -17,7 +18,7 @@ namespace fs = std::filesystem;
 namespace grey::common::fss {
     std::string get_current_dir() {
 
-#if WIN32
+#if PLATFORM_WINDOWS
         TCHAR buffer[MAX_PATH] = {0};
         ::GetModuleFileName(nullptr, buffer, MAX_PATH);
         std::wstring::size_type pos = std::wstring(buffer).find_last_of(L"\\/");
@@ -37,10 +38,10 @@ namespace grey::common::fss {
     std::string get_config_dir(const std::string& application_name) {
         fs::path config_path;
 
-#if defined(_WIN32)
+#if PLATFORM_WINDOWS
         // Windows: Use the Win32 API to fetch the Roaming AppData folder reliably
         wchar_t path[MAX_PATH];
-        if (SUCCEEDED(::SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path))) {
+        if (SUCCEEDED(::SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path))) {
             config_path = fs::path(path);
         } else {
             // Fallback to environment variable if API fails
@@ -50,14 +51,14 @@ namespace grey::common::fss {
             }
         }
 
-#elif defined(__APPLE__)
+#elif PLATFORM_MACOS
         // macOS: Use the standard Application Support directory
         const char* home = std::getenv("HOME");
         if (home) {
             config_path = fs::path(home) / "Library" / "Application Support";
         }
 
-#elif defined(__linux__) || defined(__unix__)
+#elif PLATFORM_LINUX
         // Linux/Unix: Adhere to XDG Base Directory Specification
         const char* xdg_config = std::getenv("XDG_CONFIG_HOME");
         if (xdg_config && *xdg_config != '\0') {
@@ -81,7 +82,7 @@ namespace grey::common::fss {
     }
 
     std::string get_current_exec_path() {
-#if WIN32
+#if PLATFORM_WINDOWS
         TCHAR szFileName[MAX_PATH];
         ::GetModuleFileName(nullptr, szFileName, MAX_PATH);
         return str::to_str(szFileName);
@@ -146,7 +147,7 @@ namespace grey::common::fss {
 
     unsigned int get_age_in_seconds(const std::string& filename) {
 
-#if WIN32
+#if PLATFORM_WINDOWS
         WIN32_FILE_ATTRIBUTE_DATA fileInfo;
 
         // Retrieve file attributes
@@ -180,7 +181,7 @@ namespace grey::common::fss {
     }
 
     std::string get_temp_file_path(const string& prefix) {
-#if WIN32
+#if PLATFORM_WINDOWS
         WCHAR temp_path[MAX_PATH];
         WCHAR temp_file[MAX_PATH];
 

@@ -29,6 +29,7 @@
             "platform": "linux"
         },
         "implot",
-        "simpleini"
+        "simpleini",
+        "fkyaml"
     ]
 }
