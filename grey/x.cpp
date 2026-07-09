@@ -53,9 +53,7 @@ EXPORTED void app_run(
     }
 
     auto app = grey::app::make(title, width, height);
-#ifdef _WIN32
-    app->win32_can_resize = true;
-#endif
+    app->can_resize = true;
     app->load_fixed_font = true;
     app->run([c_frame_callback, &is_running, &wnd](const grey::app& app) {
 
