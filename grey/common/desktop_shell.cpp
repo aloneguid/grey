@@ -121,6 +121,13 @@ namespace grey::common {
         return path;
     }
 
+#else
+    std::string desktop_shell::file_open_dialog(const std::string &file_type_name, const std::string &extension) {
+        return "";
+    }
+
+#endif
+
     bool desktop_shell::file_open_dialog_supported() {
 #if PLATFORM_WINDOWS
         return true;
@@ -129,10 +136,4 @@ namespace grey::common {
 #endif
     }
 
-#else
-    std::string desktop_shell::file_open_dialog(const std::string &file_type_name, const std::string &extension) {
-        return "";
-    }
-
-#endif
 }
