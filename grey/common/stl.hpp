@@ -24,4 +24,14 @@ namespace grey::common::stl {
                 return *x == *y;               // requires T::operator==
             });
     }
+
+    template<typename T>
+    std::vector<std::shared_ptr<T>> vec_deep_copy(const std::vector<std::shared_ptr<T>>& src) {
+        std::vector<std::shared_ptr<T>> result;
+        result.reserve(src.size());
+        for (const auto& p : src) {
+            result.push_back(p ? std::make_shared<T>(*p) : nullptr);
+        }
+        return result;
+    }
 }

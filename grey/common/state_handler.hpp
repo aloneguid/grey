@@ -73,6 +73,7 @@ namespace grey::common {
     public:
         state_ticker(T& state, float flush_interval = 1.0f) : prev_state{state}, state{state}, flush_interval{flush_interval} {
             last_write_time = state.get_last_write_time();
+            prev_state.on_copied();
         }
 
         bool tick(float delta_time) {
@@ -93,6 +94,7 @@ namespace grey::common {
                     if(!are_same) {
                         state.serialize();
                         prev_state = state;
+                        prev_state.on_copied();
                         last_write_time = state.get_last_write_time();
                         changed = true;
                     }
