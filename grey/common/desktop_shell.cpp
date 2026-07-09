@@ -20,6 +20,7 @@ namespace grey::common {
         return 96;
     }
 
+#if PLATFORM_WINDOWS
     void open_mssettings(const std::string name) {
         string url("ms-settings:");
         url += name;
@@ -32,6 +33,7 @@ namespace grey::common {
             nullptr,
             SW_SHOWDEFAULT);
     }
+#endif
 
     void desktop_shell::open_default_apps_configuration() {
 #if PLATFORM_WINDOWS
