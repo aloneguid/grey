@@ -202,7 +202,6 @@ namespace grey::common::os {
         return true;
 
 #else
-    (void)path; (void)args;
     return false;
 #endif
 }
