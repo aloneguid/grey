@@ -1,6 +1,9 @@
 #include "guid.h"
 #include "platform.h"
+
+#if PLATFORM_WINDOWS
 #include <combaseapi.h>
+#endif
 
 namespace grey::common {
     std::string guid::create_guid() {
@@ -16,6 +19,6 @@ namespace grey::common {
 
         return guid_cstr;
 #endif
-        return "todo";;
+        return "todo";
     }
 }
