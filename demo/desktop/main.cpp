@@ -56,11 +56,7 @@ int main(int argc, char* argv[]) {
 
     //app->load_icon_font = false;
     app->load_fixed_font = true;
-#if defined(_WIN32)
-    //app->win32_title_bar = false;
-    app->win32_center_on_screen = true;
-#endif
-    float scale = app->scale;
+    app->center_on_screen = true;
 
     wnd
         .no_titlebar()
