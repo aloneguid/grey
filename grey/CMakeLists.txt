@@ -30,7 +30,8 @@ file(GLOB core_src
 if (WIN32)
     file(GLOB core_src ${core_src}
             "common/win32/gdi.cpp"
-            "common/win32/window.cpp")
+            "common/win32/window.cpp"
+            "common/win32/reg.cpp")
     set(private_libs
         implot::implot
         D3D11.lib)
