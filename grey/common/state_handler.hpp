@@ -6,6 +6,9 @@
 #include "fss.h"
 
 namespace grey::common {
+
+#define fky(node, type, name, default_value) node.contains(name) ? node[name].get_value<type>() : default_value;
+
     class state_handler {
     public:
         using ynode = fkyaml::node;
@@ -20,7 +23,7 @@ namespace grey::common {
         }
 
         template<typename T>
-        static void read(ynode &n, const std::string &key, T &value, const T default_value) {
+        void read(ynode &n, const std::string &key, T &value, const T default_value) {
             const ynode &value_node = n[key];
             value = default_value;
 
@@ -34,8 +37,18 @@ namespace grey::common {
         }
 
         template<typename T>
-        static void write(ynode &n, const std::string &key, const T &value) {
+        void read(const std::string &key, T &value, const T default_value) {
+            read(root, key, value, default_value);
+        }
+
+        template<typename T>
+        void write(ynode &n, const std::string &key, const T &value) {
             n[key] = value;
+        }
+
+        template<typename T>
+        void write(const std::string &key, const T &value) {
+            write(root, key, value);
         }
 
         ynode root;
@@ -60,20 +73,24 @@ namespace grey::common {
         std::string file_path;
     };
 
-    class app_state {
+    template<typename TState>
+    class app_state_container {
     public:
+        virtual ~app_state_container() = default;
+
         virtual void serialize() = 0;
         virtual void deserialize() = 0;
         virtual std::filesystem::file_time_type get_last_write_time() const = 0;
-        virtual ~app_state() = default;
+        virtual TState& get_state() = 0;
     };
 
-    template<typename T>
+    template<typename TState>
     class state_ticker {
     public:
-        state_ticker(T& state, float flush_interval = 1.0f) : prev_state{state}, state{state}, flush_interval{flush_interval} {
-            last_write_time = state.get_last_write_time();
-            prev_state.on_copied();
+        state_ticker(app_state_container<TState>& state_container, float flush_interval = 1.0f)
+        : state_container{state_container}, flush_interval{flush_interval} {
+            last_write_time = state_container.get_last_write_time();
+            prev_state = state_container.get_state();
         }
 
         bool tick(float delta_time) {
@@ -82,20 +99,19 @@ namespace grey::common {
 
             if(last_flushed_ago > flush_interval) {
                 // check if our version is old
-                auto new_last_write_time = state.get_last_write_time();
+                auto new_last_write_time = state_container.get_last_write_time();
                 if(new_last_write_time > last_write_time) {
-                    state.deserialize();
+                    state_container.deserialize();
                     last_write_time = new_last_write_time;
-                    prev_state = state;
+                    prev_state = state_container.get_state();
                     changed = true;
                 } else {
                     // otherwise check if we need to dump the state
-                    bool are_same = state == prev_state;
+                    bool are_same = state_container.get_state() == prev_state;
                     if(!are_same) {
-                        state.serialize();
-                        prev_state = state;
-                        prev_state.on_copied();
-                        last_write_time = state.get_last_write_time();
+                        state_container.serialize();
+                        prev_state = state_container.get_state();
+                        last_write_time = state_container.get_last_write_time();
                         changed = true;
                     }
                 }
@@ -106,8 +122,8 @@ namespace grey::common {
         }
     private:
         const float flush_interval;
-        T prev_state;   // copy of the state (state needs to support copy constructor
-        T& state;
+        app_state_container<TState>& state_container;
+        TState prev_state;   // copy of the state (state needs to support copy constructor
         float last_flushed_ago{0.f};
         std::filesystem::file_time_type last_write_time;
     };
