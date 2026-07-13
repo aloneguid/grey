@@ -123,8 +123,15 @@ namespace grey::common::win32 {
                 SW_SHOWDEFAULT);
         }
 
-        void open_default_apps() {
-            open_mssettings("defaultapps");
+        void open_default_apps(const std::string app_registered_name, bool user_scoped) {
+            string url = "defaultapps";
+
+            if(!app_registered_name.empty()) {
+                url += (user_scoped ? "?registeredAppUser=" : "registeredAppMachine=");
+                url += app_registered_name;
+            }
+
+            open_mssettings(url);
         }
 
         shell_link read_link(const std::string &path) {

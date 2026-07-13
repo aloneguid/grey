@@ -27,7 +27,12 @@ namespace grey::common::win32::shell {
 
     void open_mssettings(const std::string name);
 
-    void open_default_apps();
+    /**
+     * @brief Opens system "default apps" page, optinally at application's page
+     * @param app_registered_name Application name under HKEY_CURRENT_USER\Software\Clients\StartMenuInternet\the_app\Capabilities\ApplicationName
+     * @param user_scoped if app is scoped to user or machine
+     */
+    void open_default_apps(const std::string app_registered_name = "", bool user_scoped = true);
 
     shell_link read_link(const std::string &path);
 
