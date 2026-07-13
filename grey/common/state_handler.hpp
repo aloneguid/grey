@@ -4,10 +4,73 @@
 #include <fstream>
 #include <fkYAML/node.hpp>
 #include "fss.h"
+#include "imgui.h"
 
 namespace grey::common {
 
-#define fky(node, type, name, default_value) node.contains(name) ? node[name].get_value<type>() : default_value;
+    template<typename T>
+    static T read(const fkyaml::node &n, const std::string &key, const T& default_value) {
+        const fkyaml::node &value_node = n[key];
+        T value = default_value;
+
+        if constexpr(std::is_same_v<T, std::string>) {
+            if(value_node.is_string())
+                value = value_node.get_value<std::string>();
+        } else if constexpr(std::is_same_v<T, bool>) {
+            if(value_node.is_boolean())
+                value = value_node.get_value<bool>();
+        } else if constexpr(std::is_same_v<T, float>) {
+            if(value_node.is_float_number())
+                value = value_node.get_value<float>();
+        } else if constexpr(std::is_same_v<T, int>) {
+            if(value_node.is_integer())
+                value = value_node.get_value<int>();
+        } else if constexpr(std::is_same_v<T, unsigned int>) {
+            if(value_node.is_integer())
+                value = value_node.get_value<unsigned int>();
+        }
+
+        return value;
+    }
+
+    template<typename T>
+    static void write(fkyaml::node &n, const std::string &key, const T &value) {
+        n[key] = value;
+    }
+
+    static unsigned int shex_to_imcol(const std::string& hex) {
+        std::string h = hex;
+
+        // Remove # prefix if present
+        if(!h.empty() && h[0] == '#') {
+            h = h.substr(1);
+        }
+
+        // Parse hex string (expects RRGGBB or RRGGBBAA format)
+        if(h.length() == 6) {
+            try {
+                unsigned long value = std::stoul(h, nullptr, 16);
+                // RGB format - add full alpha
+                float r = ((value >> 16) & 0xFF) / 255.0f;
+                float g = ((value >> 8) & 0xFF) / 255.0f;
+                float b = (value & 0xFF) / 255.0f;
+
+                ImColor ic{r, g, b};
+                return ic;
+            } catch(...) {
+                return 0;
+            }
+        }
+
+        return 0;
+    }
+
+    static std::string imcol_to_shex(unsigned int color) {
+        ImColor ic{color};
+        std::string hex = std::format("#{:02X}{:02X}{:02X}", (int) (ic.Value.x * 255), (int) (ic.Value.y * 255),
+                           (int) (ic.Value.z * 255));
+        return hex;
+    }
 
     class state_handler {
     public:
@@ -23,27 +86,8 @@ namespace grey::common {
         }
 
         template<typename T>
-        void read(ynode &n, const std::string &key, T &value, const T default_value) {
-            const ynode &value_node = n[key];
-            value = default_value;
-
-            if constexpr(std::is_same_v<T, std::string>) {
-                if(value_node.is_string())
-                    value = value_node.get_value<std::string>();
-            } else if constexpr(std::is_same_v<T, bool>) {
-                if(value_node.is_boolean())
-                    value = value_node.get_value<bool>();
-            }
-        }
-
-        template<typename T>
         void read(const std::string &key, T &value, const T default_value) {
             read(root, key, value, default_value);
-        }
-
-        template<typename T>
-        void write(ynode &n, const std::string &key, const T &value) {
-            n[key] = value;
         }
 
         template<typename T>
@@ -78,21 +122,33 @@ namespace grey::common {
     template<typename TState>
     class app_state_container {
     public:
-        virtual ~app_state_container() = default;
+        app_state_container(TState& state, const std::string &application_name, float flush_interval = 1.0f) : state{state}, h{application_name},
+            flush_interval{flush_interval} {
+            deserialize();
+            prev_state = state;
+            last_write_time = h.get_last_write_time();
+        }
 
-        virtual void serialize() = 0;
-        virtual void deserialize() = 0;
-        virtual std::filesystem::file_time_type get_last_write_time() const = 0;
-        virtual TState& get_state() = 0;
-    };
+        ~app_state_container() {
+            serialize();
+        }
 
-    template<typename TState>
-    class state_ticker {
-    public:
-        state_ticker(app_state_container<TState>& state_container, float flush_interval = 1.0f)
-        : state_container{state_container}, flush_interval{flush_interval} {
-            last_write_time = state_container.get_last_write_time();
-            prev_state = state_container.get_state();
+        void serialize() {
+            state.serialize(h.root);
+            h.serialize();
+        }
+
+        void deserialize() {
+            h.deserialize();
+            state.deserialize(h.root);
+        }
+
+        std::filesystem::file_time_type get_last_write_time() const {
+            return h.get_last_write_time();
+        }
+
+        TState& get_state() {
+            return state;
         }
 
         bool tick(float delta_time) {
@@ -101,19 +157,19 @@ namespace grey::common {
 
             if(last_flushed_ago > flush_interval) {
                 // check if our version is old
-                auto new_last_write_time = state_container.get_last_write_time();
+                auto new_last_write_time = get_last_write_time();
                 if(new_last_write_time > last_write_time) {
-                    state_container.deserialize();
+                    state.deserialize();
                     last_write_time = new_last_write_time;
-                    prev_state = state_container.get_state();
+                    prev_state = state;
                     changed = true;
                 } else {
                     // otherwise check if we need to dump the state
-                    bool are_same = state_container.get_state() == prev_state;
+                    bool are_same = state == prev_state;
                     if(!are_same) {
-                        state_container.serialize();
-                        prev_state = state_container.get_state();
-                        last_write_time = state_container.get_last_write_time();
+                        state.serialize();
+                        prev_state = state;
+                        last_write_time = get_last_write_time();
                         changed = true;
                     }
                 }
@@ -122,11 +178,13 @@ namespace grey::common {
 
             return changed;
         }
+
     private:
-        const float flush_interval;
-        app_state_container<TState>& state_container;
-        TState prev_state;   // copy of the state (state needs to support copy constructor
-        float last_flushed_ago{0.f};
+        TState& state;
+        TState prev_state;
+        state_handler h;
+        float flush_interval;
         std::filesystem::file_time_type last_write_time;
+        float last_flushed_ago{0.f};
     };
 }
