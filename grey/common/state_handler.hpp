@@ -55,7 +55,7 @@ namespace grey::common {
 
         void deserialize() {
             std::ifstream ifs{file_path, std::ios::in};
-            root = fkyaml::node::deserialize(ifs);
+            root = ifs ? fkyaml::node::deserialize(ifs) : fkyaml::node::mapping();
             if(root.get_type() != fkyaml::node_type::MAPPING)
                 root = fkyaml::node::mapping();
         }
@@ -66,7 +66,9 @@ namespace grey::common {
         }
 
         std::filesystem::file_time_type get_last_write_time() const {
-            return std::filesystem::last_write_time(file_path);
+            return std::filesystem::exists(file_path)
+                ? std::filesystem::last_write_time(file_path)
+                : std::filesystem::file_time_type{};
         }
 
     private:
