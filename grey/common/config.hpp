@@ -103,7 +103,7 @@ namespace grey::common {
         }
 
         void serialize() {
-            state.serialize(root);
+            to_node(root, state);
             std::ofstream ofs{file_path, std::ios::out};
             ofs << root;
         }
@@ -114,7 +114,7 @@ namespace grey::common {
             root = is_valid ? fkyaml::node::deserialize(ifs) : fkyaml::node::mapping();
             if(root.get_type() != fkyaml::node_type::MAPPING)
                 root = fkyaml::node::mapping();
-            state.deserialize(root);
+            from_node(root, state);
         }
 
         TState &get_state() {
@@ -129,14 +129,14 @@ namespace grey::common {
                 // check if our version is old
                 auto new_last_write_time = get_last_write_time();
                 if(new_last_write_time > last_write_time) {
-                    state.deserialize();
+                    from_node(root, state);
                     last_write_time = new_last_write_time;
                     prev_state = state;
                     changed = true;
                 } else {
                     // otherwise check if we need to dump the state
                     if(state != prev_state) {
-                        state.serialize();
+                        to_node(root, state);
                         prev_state = state;
                         last_write_time = get_last_write_time();
                         changed = true;
