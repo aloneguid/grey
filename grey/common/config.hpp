@@ -2,12 +2,14 @@
 #include <string>
 #include <filesystem>
 #include <fstream>
+#include <type_traits>
 #include <fkYAML/node.hpp>
 #include "fss.h"
 #include "imgui.h"
 #include <iostream>
 
 namespace grey::common {
+
     /**
      *
      * @tparam T Value type
@@ -18,20 +20,29 @@ namespace grey::common {
      */
     template<typename T>
     T read(const fkyaml::node &node, const std::string &key, const T& default_value) {
-
-        //uncomment for debugging only
-        //auto node_type = node.type();
-        //std::string serialized = fkyaml::node::serialize(node);
-
         if(!node.contains(key)) {
             return default_value;
         }
         const fkyaml::node &value = node[key];
+
         try {
             return value.get_value<T>();
         } catch(const fkyaml::exception &ex) {
             return default_value; // wrong type, or conversion failed
         }
+    }
+
+    template<typename T>
+    T read(const fkyaml::node &node, const std::string &key) {
+        T result{};
+        try {
+            const fkyaml::node &value = node.contains(key) ? node[key] : fkyaml::node::mapping();
+            from_node(value, result);
+            return result;
+        } catch(...) {
+
+        }
+        return result;
     }
 
     template<typename T>
