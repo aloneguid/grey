@@ -16,6 +16,9 @@ if(UNIX)
 find_path(STB_INCLUDE_DIRS "stb.h")
 
 file(GLOB core_src
+    "common/os.cpp"
+    "common/str.cpp"
+    "common/img.cpp"
     "anim.cpp"
     "app.cpp"
     "themes.cpp"
@@ -24,7 +27,6 @@ file(GLOB core_src
     "3rdparty/imgui-node-editor/*.cpp"
     "3rdparty/ImGuiColorTextEdit/*.cpp"
     "fonts/*.cpp"
-    "common/*.cpp"
     "x/*.cpp")
 
 if (WIN32)
