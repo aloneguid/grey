@@ -48,12 +48,6 @@ namespace grey::common::win32::os {
 
     bool get_mouse_pos(long& x, long& y);
 
-    // clipboard
-
-    void set_clipboard_text(const std::string& text);
-
-    std::string get_clipboard_text();
-
     // imaging
 
     bool capture_screen(int& width, int& height, std::vector<unsigned char>& out_pixels);

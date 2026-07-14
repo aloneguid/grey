@@ -42,14 +42,4 @@ namespace grey::common::os {
      * Get current monitor bounds in virtual screen coordinates. The current monitor is the one closes to the mouse cursor.
      */
     bool get_current_monitor(int& left, int& top, int& right, int& bottom);
-
-    /**
-     * Opens URL or path with the default UI shell.
-     * Uses:
-     * - Linux: xdg-open path
-     * - Windows: ShellExecute::open path
-     * @param path Program name, URL or path, whatever the shell can handle.
-     * @return
-     */
-    bool shell_open(const std::string& path);
 }

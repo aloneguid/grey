@@ -18,6 +18,15 @@ namespace grey::common {
 
         static bool file_open_dialog_supported();
 
+        /**
+         * Opens URL or path with the default UI shell.
+         * Uses:
+         * - Linux: xdg-open path
+         * - Windows: ShellExecute::open path
+         * @param path Program name, URL or path, whatever the shell can handle.
+         * @return
+         */
+        static bool open(const std::string& path, const std::string& args = "");
 
     private:
         desktop_shell() = delete;

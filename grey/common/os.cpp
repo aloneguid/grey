@@ -150,59 +150,5 @@ namespace grey::common::os {
         return false;
     }
 
-   bool shell_open(const std::string& path) {
-#if PLATFORM_WINDOWS
-    // ShellExecuteW explicitly — avoids ShellExecute macro's ANSI/Wide ambiguity.
-    // nullptr for args when empty; some handlers mishandle L"".
-    HINSTANCE hi = ::ShellExecuteW(
-        nullptr,
-        L"open",
-        str::to_wstr(path).c_str(),
-        nullptr,
-        nullptr,
-        SW_SHOWDEFAULT);
-    // HINSTANCE is a pointer type; cast to INT_PTR before comparing to integer.
-    return (INT_PTR)hi > 32;
 
-#elif PLATFORM_LINUX
-        pid_t pid = fork();
-
-        if (pid < 0) {
-            // Fork failed
-            std::cerr << "Failed to fork process." << std::endl;
-            return false;
-        }
-
-        if (pid == 0) {
-            // Inside Child Process
-
-            // Fork a second time to orphan the execution process.
-            // This prevents "zombie" processes without making the parent call waitpid().
-            pid_t grandchild_pid = fork();
-
-            if (grandchild_pid == 0) {
-                // Inside Grandchild Process
-                // execlp replaces the current process image with xdg-open
-                execlp("xdg-open", "xdg-open", path.c_str(), nullptr);
-
-                // If execlp returns, it means it failed to execute
-                std::cerr << "Failed to execute xdg-open" << std::endl;
-                _exit(1);
-            }
-
-            // Child exits immediately, orphaning the grandchild.
-            // init/systemd will automatically reap the grandchild.
-            _exit(0);
-        }
-
-        // Inside Parent Process
-        // Wait for the immediate child to exit (which happens instantly).
-        int status;
-        waitpid(pid, &status, 0);
-        return true;
-
-#else
-    return false;
-#endif
-}
 }
