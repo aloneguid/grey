@@ -1,12 +1,17 @@
 #include "desktop_shell.h"
 #include "platform.h"
 #include "str.h"
+#include <iostream>
 
 #if PLATFORM_WINDOWS
 #include <windows.h>
 #include <ShlObj_core.h>
 #include <shellapi.h>
 #include "win32/CDialogEventHandler.hpp"
+#elif PLATFORM_LINUX
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/wait.h>
 #endif
 
 using namespace std;

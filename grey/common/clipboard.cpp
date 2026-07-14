@@ -4,6 +4,8 @@
 
 #if PLATFORM_WINDOWS
 #include <windows.h>
+#elif PLATFORM_LINUX
+#include <cstdio>
 #endif
 
 using namespace std;
@@ -50,6 +52,29 @@ namespace grey::common::clipboard {
         ::CloseClipboard();
 
         return str::to_str(r);
+    }
+
+#elif PLATFORM_LINUX
+
+    void set_text(const std::string& text) {
+        FILE* pipe = popen("xclip -selection clipboard", "w");
+        if (pipe) {
+            fwrite(text.c_str(), 1, text.size(), pipe);
+            pclose(pipe);
+        }
+    }
+
+    std::string get_text() {
+        std::string out;
+        FILE* pipe = popen("xclip -selection clipboard -o", "r");
+        if (pipe) {
+            char buffer[4096];
+            while (fgets(buffer, sizeof(buffer), pipe)) {
+                out += buffer;
+            }
+            pclose(pipe);
+        }
+        return out;
     }
 
 #endif

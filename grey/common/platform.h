@@ -17,5 +17,21 @@
     #define PLATFORM_WINDOWS 0
 #endif
 
+#ifndef PLATFORM_LINUX
+    #define PLATFORM_LINUX 0
+#endif
+
+#ifndef PLATFORM_MACOS
+    #define PLATFORM_MACOS 0
+#endif
+
+#ifndef PLATFORM_ANDROID
+    #define PLATFORM_ANDROID 0
+#endif
+
+#ifndef PLATFORM_IOS
+    #define PLATFORM_IOS 0
+#endif
+
 // ...zero-fill the rest similarly, so you can write
 // `if constexpr (PLATFORM_WINDOWS)` instead of #ifdef chains where possible
