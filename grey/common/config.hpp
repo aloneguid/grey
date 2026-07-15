@@ -10,39 +10,19 @@
 
 namespace grey::common {
 
-    /**
-     *
-     * @tparam T Value type
-     * @param node YAML node
-     * @param key key to read
-     * @param default_value default value to return if key is not found.
-     * @return The value of the key in the yaml node.
-     */
     template<typename T>
-    T read(const fkyaml::node &node, const std::string &key, const T& default_value) {
-        if(!node.contains(key)) {
-            return default_value;
-        }
+    bool read(const fkyaml::node& node, const std::string& key, T& value_ref) {
+        if(!node.contains(key)) return false;
+
         const fkyaml::node &value = node[key];
 
         try {
-            return value.get_value<T>();
-        } catch(const fkyaml::exception &ex) {
-            return default_value; // wrong type, or conversion failed
+            value_ref = value.get_value<T>();
+            return true;
+        } catch(const fkyaml::exception&) {
+            // wrong type, or conversion failed
         }
-    }
-
-    template<typename T>
-    T read(const fkyaml::node &node, const std::string &key) {
-        T result{};
-        try {
-            const fkyaml::node &value = node.contains(key) ? node[key] : fkyaml::node::mapping();
-            from_node(value, result);
-            return result;
-        } catch(...) {
-
-        }
-        return result;
+        return false;
     }
 
     template<typename T>
