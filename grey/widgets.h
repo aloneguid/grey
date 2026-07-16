@@ -6,6 +6,7 @@
 #include <vector>
 #include <functional>
 #include "app.h"
+#include "magic_enum/magic_enum.hpp"
 
 // 3rdparty
 #include "3rdparty/ImGuiColorTextEdit/TextEditor.h"
@@ -562,6 +563,21 @@ namespace grey::widgets {
      * @return True if selection has changed.
      */
     bool combo(const std::string& label, const std::vector<std::string>& options, unsigned int& selected, float width = 0);
+
+    template<typename TEnum>
+    bool enum_combo(const std::string& label, TEnum& selected, float width = 0) {
+        static std::vector<std::string> names = [] {
+            std::vector<std::string> v;
+            for(auto sv : magic_enum::enum_names<TEnum>())
+                v.emplace_back(sv);
+            return v;
+        }();
+
+        unsigned int selected_uint = static_cast<unsigned int>(selected);
+        bool changed = combo(label, names, selected_uint, width);
+        if(changed) selected = static_cast<TEnum>(selected_uint);
+        return changed;
+    }
 
     bool list(const std::string& label, const std::vector<std::string>& options, unsigned int& selected, float width = 0);
 

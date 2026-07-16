@@ -7,6 +7,8 @@
 #include "fss.h"
 #include "imgui.h"
 #include <iostream>
+#include <type_traits>
+#include "magic_enum/magic_enum.hpp"
 
 namespace grey::common {
 
@@ -28,6 +30,33 @@ namespace grey::common {
     template<typename T>
     static void write(fkyaml::node &n, const std::string &key, const T &value) {
         n[key] = value;
+    }
+
+    template<typename T>
+    bool read_enum(const fkyaml::node& node, const std::string& key, T& value_ref) {
+        if(!node.contains(key)) return false;
+        
+        static_assert(std::is_enum_v<T>, "T must be an enum");
+
+        const fkyaml::node &value = node[key];
+
+        try {
+            auto str_val = value.get_value<std::string>();
+            auto enum_val = magic_enum::enum_cast<T>(str_val);
+            if (enum_val.has_value()) {
+                value_ref = enum_val.value();
+                return true;
+            }
+        } catch(const fkyaml::exception&) {
+            // Not a string, or magic_enum failed
+        }
+        return false;
+    }
+
+    template<typename T>
+    static void write_enum(fkyaml::node &n, const std::string &key, const T &value) {
+        static_assert(std::is_enum_v<T>, "T must be an enum");
+        n[key] = std::string(magic_enum::enum_name(value));
     }
 
     static unsigned int hex_str_to_imgui_col(const std::string &hex) {
@@ -120,14 +149,14 @@ namespace grey::common {
                 // check if our version is old
                 auto new_last_write_time = get_last_write_time();
                 if(new_last_write_time > last_write_time) {
-                    from_node(root, state);
+                    deserialize();
                     last_write_time = new_last_write_time;
                     prev_state = state;
                     changed = true;
                 } else {
                     // otherwise check if we need to dump the state
                     if(state != prev_state) {
-                        to_node(root, state);
+                        serialize();
                         prev_state = state;
                         last_write_time = get_last_write_time();
                         changed = true;
