@@ -70,7 +70,7 @@ namespace grey {
 
         std::shared_ptr<texture> get_texture(const std::string& key);
 
-        bool preload_texture(const std::string& key, unsigned char* buffer, unsigned int len);
+        bool preload_texture(const std::string& key, const unsigned char* buffer, unsigned int len);
 
         bool preload_texture(const std::string& key, const std::string& path);
 

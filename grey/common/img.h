@@ -26,5 +26,5 @@ namespace grey::common
 
     raw_img load_image_from_file(const std::string& path);
 
-    raw_img load_image_from_memory(unsigned char* buffer, unsigned int len);
+    raw_img load_image_from_memory(const unsigned char* buffer, unsigned int len);
 }

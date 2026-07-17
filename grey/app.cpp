@@ -105,7 +105,7 @@ namespace grey {
         return entry->second;
     }
 
-    bool app::preload_texture(const std::string& key, unsigned char* buffer, unsigned int len) {
+    bool app::preload_texture(const std::string& key, const unsigned char* buffer, unsigned int len) {
         auto entry = textures.find(key);
         if(entry != textures.end()) {
             return true;

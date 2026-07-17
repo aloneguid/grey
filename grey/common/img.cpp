@@ -53,7 +53,7 @@ namespace grey::common
         return raw_img(image_data, width, height);
     }
 
-    raw_img load_image_from_memory(unsigned char* buffer, unsigned int len) {
+    raw_img load_image_from_memory(const unsigned char* buffer, unsigned int len) {
         int width, height;
         unsigned char* image_data = stbi_load_from_memory(buffer, len, &width, &height, nullptr, 4);
 
