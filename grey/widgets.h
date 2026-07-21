@@ -412,7 +412,8 @@ namespace grey::widgets {
     private:
         std::string id;
         bool do_open{false};
-        float open_x, open_y;
+        float open_x{.0f};
+        float open_y{.0f};
         bool rendered{false};
     };
 
@@ -439,7 +440,7 @@ namespace grey::widgets {
 
     void label(const std::string& text, rgb_colour colour);
 
-    void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0, bool enabled = true);
+    void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0, bool enabled = true, float font_size = .0f);
 
     /**
      * @brief Selectable item

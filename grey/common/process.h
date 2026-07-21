@@ -32,8 +32,7 @@ namespace grey::common {
          * @brief Creates the process class from a specific PID.
          * @param pid
         */
-        process(PidType pid) : pid{pid} {
-
+        explicit process(const PidType pid) : pid{pid} {
         }
 
         /**
