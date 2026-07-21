@@ -777,6 +777,20 @@ namespace grey::widgets {
         ImGui::SetCursorScreenPos(pos);
     }
 
+    void cur_move(float x, float y) {
+        auto pos = ImGui::GetCursorScreenPos();
+        pos.x += x;
+        pos.y += y;
+        ImGui::SetCursorScreenPos(pos);
+    }
+
+    void cur_move(ImVec2 shift) {
+        auto pos = ImGui::GetCursorScreenPos();
+        pos.x += shift.x;
+        pos.y += shift.y;
+        ImGui::SetCursorScreenPos(pos);
+    }
+
     float avail_x() {
         return ImGui::GetContentRegionAvail().x;
     }
@@ -1104,7 +1118,7 @@ namespace grey::widgets {
         ImGui::RenderNotifications();
 
 
-        //——————————————————————————————— WARNING ———————————————————————————————
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ WARNING ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         // Argument MUST match the amount of ImGui::PushStyleVar() calls 
         //ImGui::PopStyleVar(2);
         ImGui::PopStyleVar(1);
@@ -1117,7 +1131,6 @@ namespace grey::widgets {
 
     group::group(bool full_width) : full_width{full_width} {
         ImGui::BeginGroup();
-
     }
 
     group::~group() {

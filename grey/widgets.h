@@ -47,14 +47,14 @@ namespace grey::widgets {
 
         rgb_colour(float r, float g, float b, float o = 1) : r{r}, g{g}, b{b}, o{o} { }
 
-        rgb_colour(const ImColor& ic) {
+        explicit rgb_colour(const ImColor& ic) {
             r = ic.Value.x;
             g = ic.Value.y;
             b = ic.Value.z;
             o = ic.Value.w;
         }
 
-        rgb_colour(const ImVec4& vec) {
+        explicit rgb_colour(const ImVec4& vec) {
             r = vec.x;
             g = vec.y;
             b = vec.z;
@@ -62,7 +62,7 @@ namespace grey::widgets {
         }
 
         operator ImColor() const {
-            return ImColor(r, g, b, o);
+            return {r, g, b, o};
         }
 
         operator ImU32() const {
@@ -72,7 +72,7 @@ namespace grey::widgets {
         /**
          * @brief Returns true if color has any opacity at all
         */
-        operator bool() { return o > 0; }
+        operator bool() const { return o > 0; }
     };
 
     /**
@@ -94,13 +94,13 @@ namespace grey::widgets {
          * @brief Left-top corner
          * @return 
          */
-        ImVec2 lt() const { return ImVec2{x_min, y_min}; }
+        [[nodiscard]] ImVec2 lt() const { return ImVec2{x_min, y_min}; }
 
         /**
          * @brief Right-bottom corner
          * @return 
          */
-        ImVec2 rb() const { return ImVec2{x_max, y_max}; }
+        [[nodiscard]] ImVec2 rb() const { return ImVec2{x_max, y_max}; }
     };
 
     int generate_int_id();
@@ -116,12 +116,14 @@ namespace grey::widgets {
      */
     class id_frame {
     public:
-        id_frame(int scope_id);
-        id_frame(const std::string& scope_id);
+        explicit id_frame(int scope_id);
+
+        explicit id_frame(const std::string& scope_id);
+
         ~id_frame();
 
     private:
-        id_frame(ImGuiID id);
+        explicit id_frame(ImGuiID id);
     };
 
     class window : public guardable {
@@ -269,9 +271,10 @@ namespace grey::widgets {
 
     class group {
     public:
-        group(bool full_width = false);
-
+        explicit group(bool full_width = false);
         ~group();
+
+        rgb_colour bg_col;
 
     private:
         bool full_width;
@@ -422,6 +425,8 @@ namespace grey::widgets {
     ImVec2 cur_get();
     void cur_set(float x, float y);
     void cur_set(const ImVec2& pos);
+    void cur_move(float x, float y);
+    void cur_move(ImVec2 shift);
 
     float avail_x();
     float avail_y();
