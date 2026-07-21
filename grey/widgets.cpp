@@ -971,6 +971,7 @@ namespace grey::widgets {
             ImGuiColorEditFlags_NoSidePreview |
             ImGuiColorEditFlags_NoInputs |
             ImGuiColorEditFlags_NoTooltip)) {
+            col.Value.w = 1.0f; // due to no-alpha flag, set to max alpha on change
             colour = ImGui::ColorConvertFloat4ToU32(col);
             return true;
         }

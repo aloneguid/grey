@@ -95,6 +95,18 @@ namespace grey::common {
         return hex;
     }
 
+    static bool read_color(const fkyaml::node& node, const std::string& key, unsigned& color) {
+        std::string hex;
+        if(!read<std::string>(node, key, hex)) return false;
+        color = hex_str_to_imgui_col(hex);
+        return true;
+    }
+
+    static void write_color(fkyaml::node& node, const std::string& key, unsigned color) {
+        std::string hex = imgui_col_to_hex_str(color, false);
+        write<std::string>(node, key, hex);
+    }
+
     template<typename TState>
     class config {
     public:
