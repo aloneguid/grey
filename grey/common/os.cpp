@@ -32,6 +32,11 @@ namespace grey::common::os {
 
         return s.empty() ? true : s == "1";
 #elif PLATFORM_LINUX
+
+        // Typical values: KDE, GNOME, XFCE, sway, Hyprland, X-Cinnamon, or occasionally a colon-separated list like ubuntu:GNOME
+        const char* xdg = getenv("XDG_CURRENT_DESKTOP");
+        std::string desktop = xdg ? xdg : "";
+
         auto run = [](const char* cmd) {
             std::string out;
             if(FILE* p = popen(cmd, "r")) {
