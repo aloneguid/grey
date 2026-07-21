@@ -26,6 +26,8 @@ namespace grey::themes {
         ImGui::StyleColorsDark();
 
         ImGuiStyle& style = ImGui::GetStyle();
+        style.FrameBorderSize = 0.0f;
+
         ImVec4* colors = style.Colors;
 
         style.Colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -116,6 +118,8 @@ namespace grey::themes {
 
         ImGuiStyle& style = ImGui::GetStyle();
         ImVec4* colors = style.Colors;
+
+        style.FrameBorderSize = 1.0f;
 
         // my own additions
         colors[ImGuiCol_Tab] = ImVec4(0.86f, 0.86f, 0.86f, 1.00f);
