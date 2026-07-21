@@ -918,28 +918,37 @@ namespace grey::widgets {
     }
 
     bool icon_checkbox(const std::string& icon, bool& is_checked, bool reversed, const string& tooltip) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 0, 0, 0));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
+        ImGui::PushStyleColor(ImGuiCol_NavHighlight, ImVec4(0, 0, 0, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 
-        if (reversed ? !is_checked : is_checked) {
-            ImGui::Text(icon.c_str());
+        bool is_active = (reversed ? !is_checked : is_checked);
+        if (!is_active) {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
         }
-        else {
-            ImGui::TextDisabled(icon.c_str());
+
+        bool clicked = ImGui::Button(icon.c_str(), ImVec2(0, 0));
+
+        if (!is_active) {
+            ImGui::PopStyleColor();
         }
+        ImGui::PopStyleVar();
+        ImGui::PopStyleColor(4);
 
         if (ImGui::IsItemHovered()) {
             ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-
-            if(!tooltip.empty()) {
+            if (!tooltip.empty()) {
                 ImGui::SetTooltip("%s", tooltip.c_str());
-            }
-
-            if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                is_checked = !is_checked;
-                return true;
             }
         }
 
-        return false;
+        if (clicked) {
+            is_checked = !is_checked;
+        }
+
+        return clicked;
     }
 
     bool checkbox(const std::string& label, bool& is_checked) {
