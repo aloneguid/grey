@@ -19,6 +19,14 @@ namespace grey::common {
         static bool file_open_dialog_supported();
 
         /**
+         * @brief Call directory open dialog system-native to select a folder
+         * @return Path to the selected folder, or empty string if the user canceled the dialog
+         */
+        static std::string directory_open_dialog();
+
+        static bool directory_open_dialog_supported();
+
+        /**
          * Opens URL or path with the default UI shell.
          * Uses:
          * - Linux: xdg-open path

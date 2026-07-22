@@ -126,14 +126,81 @@ namespace grey::common {
         return path;
     }
 
+    std::string desktop_shell::directory_open_dialog() {
+        string path;
+
+        IFileDialog *pfd = NULL;
+        HRESULT hr = ::CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd));
+        if(SUCCEEDED(hr)) {
+            // Create an event handling object, and hook it up to the dialog.
+            IFileDialogEvents *pfde = NULL;
+            hr = ::CDialogEventHandler_CreateInstance(IID_PPV_ARGS(&pfde));
+            if(SUCCEEDED(hr)) {
+                // Hook up the event handler.
+                DWORD dwCookie;
+                hr = pfd->Advise(pfde, &dwCookie);
+                if(SUCCEEDED(hr)) {
+                    // Set the options on the dialog.
+                    DWORD dwFlags;
+
+                    // Before setting, always get the options first in order
+                    // not to override existing options.
+                    hr = pfd->GetOptions(&dwFlags);
+                    if(SUCCEEDED(hr)) {
+                        // In this case, get shell items only for file system items.
+                        // And pick folders only.
+                        hr = pfd->SetOptions(dwFlags | FOS_FORCEFILESYSTEM | FOS_PICKFOLDERS);
+                        if(SUCCEEDED(hr)) {
+                            // Show the dialog
+                            hr = pfd->Show(NULL);
+                            if(SUCCEEDED(hr)) {
+                                // Obtain the result once the user clicks
+                                // the 'Open' button.
+                                // The result is an IShellItem object.
+                                IShellItem *psiResult;
+                                hr = pfd->GetResult(&psiResult);
+                                if(SUCCEEDED(hr)) {
+                                    PWSTR pszFilePath = NULL;
+                                    hr = psiResult->GetDisplayName(SIGDN_FILESYSPATH,
+                                                                   &pszFilePath);
+                                    if(SUCCEEDED(hr)) {
+                                        // user have made a positive selection here
+                                        path = str::to_str(pszFilePath);
+                                        CoTaskMemFree(pszFilePath);
+                                    }
+                                    psiResult->Release();
+                                }
+                            }
+                        }
+                    }
+                    // Unhook the event handler.
+                    pfd->Unadvise(dwCookie);
+                }
+            }
+        }
+
+        return path;
+    }
+
 #else
     std::string desktop_shell::file_open_dialog(const std::string &file_type_name, const std::string &extension) {
         return "";
     }
 
+    std::string desktop_shell::directory_open_dialog() {
+        return "";
+    }
 #endif
 
     bool desktop_shell::file_open_dialog_supported() {
+#if PLATFORM_WINDOWS
+        return true;
+#else
+        return false;
+#endif
+    }
+
+    bool desktop_shell::directory_open_dialog_supported() {
 #if PLATFORM_WINDOWS
         return true;
 #else
