@@ -112,6 +112,7 @@ namespace grey::backends {
         void run(std::function<bool(const app& app)> render_frame) {
             // Create window with graphics context
             float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
+            this->scale = main_scale;
             window = glfwCreateWindow((int)(window_width * main_scale), (int)(window_height * main_scale), title.c_str(), nullptr, nullptr);
             if(window == nullptr)
                 return;
