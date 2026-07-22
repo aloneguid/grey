@@ -107,15 +107,42 @@ namespace grey::backends {
             : title{title}, window_width{width}, window_height{height} {
             last_frame_time = std::chrono::high_resolution_clock::now();
             gl_init();
+
+            this->scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
+            grey::widgets::scale = this->scale;
+
+            if (window_width != -1 && window_height != -1) {
+                window_width = static_cast<int>(window_width * scale);
+                window_height = static_cast<int>(window_height * scale);
+            }
+        }
+
+        void get_screen_center(int width, int height, int &x, int &y) {
+            GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+            const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+            int mx, my;
+            glfwGetMonitorPos(monitor, &mx, &my);
+            x = mx + (mode->width - width) / 2;
+            y = my + (mode->height - height) / 2;
         }
 
         void run(std::function<bool(const app& app)> render_frame) {
             // Create window with graphics context
-            float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
-            this->scale = main_scale;
-            window = glfwCreateWindow((int)(window_width * main_scale), (int)(window_height * main_scale), title.c_str(), nullptr, nullptr);
+            glfwWindowHint(GLFW_DECORATED, show_title_bar ? GLFW_TRUE : GLFW_FALSE);
+            glfwWindowHint(GLFW_FLOATING, always_on_top ? GLFW_TRUE : GLFW_FALSE);
+
+            if (center_on_screen) {
+                get_screen_center(window_width, window_height, window_left, window_top);
+            }
+
+            window = glfwCreateWindow(window_width, window_height, title.c_str(), nullptr, nullptr);
             if(window == nullptr)
                 return;
+
+            if (center_on_screen) {
+                glfwSetWindowPos(window, window_left, window_top);
+            }
+
             glfwMakeContextCurrent(window);
             glfwSwapInterval(1); // Enable vsync
 
@@ -125,10 +152,11 @@ namespace grey::backends {
             ImGuiIO& io = ImGui::GetIO(); (void)io;
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-            io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+            //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
             io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
-            //io.ConfigViewportsNoAutoMerge = true;
-            //io.ConfigViewportsNoTaskBarIcon = true;
+            io.ConfigViewportsNoAutoMerge = true;
+            io.ConfigViewportsNoTaskBarIcon = true;
+            io.ConfigViewportsNoDefaultParent = false;
 
             // Setup Dear ImGui style
             ImGui::StyleColorsDark();
@@ -136,8 +164,8 @@ namespace grey::backends {
 
             // Setup scaling
             ImGuiStyle& style = ImGui::GetStyle();
-            style.ScaleAllSizes(main_scale);
-            style.FontScaleDpi = main_scale;
+            style.ScaleAllSizes(scale);
+            style.FontScaleDpi = scale;
 #if GLFW_VERSION_MAJOR >= 3 && GLFW_VERSION_MINOR >= 3
             io.ConfigDpiScaleFonts = true;
             io.ConfigDpiScaleViewports = true;
@@ -258,16 +286,31 @@ namespace grey::backends {
             glfwTerminate();
         }
 
-        void resize_main_viewport(int width, int height) override
-        {
-
+        void resize_main_viewport(int width, int height) override {
+            window_width = static_cast<int>(width * scale);
+            window_height = static_cast<int>(height * scale);
+            if(window) {
+                if (center_on_screen) {
+                    get_screen_center(window_width, window_height, window_left, window_top);
+                    glfwSetWindowPos(window, window_left, window_top);
+                }
+                glfwSetWindowSize(window, window_width, window_height);
+            }
         }
 
         void move_main_viewport(int x, int y) override {
-
+            window_left = static_cast<int>(x * scale);
+            window_top = static_cast<int>(y * scale);
+            if(window) {
+                glfwSetWindowPos(window, window_left, window_top);
+            }
         }
 
-        void foreground_main_viewport() override {}
+        void foreground_main_viewport() override {
+            if(window) {
+                glfwFocusWindow(window);
+            }
+        }
 
         std::shared_ptr<texture> make_native_texture(grey::common::raw_img& img) override {
             // Create a OpenGL texture identifier

@@ -8,15 +8,37 @@
 #include <ShlObj_core.h>
 #include <shellapi.h>
 #include "win32/CDialogEventHandler.hpp"
-#elif PLATFORM_LINUX
+#elif PLATFORM_LINUX || PLATFORM_MACOS
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/wait.h>
+#include <cstdio>
 #endif
 
 using namespace std;
 
 namespace grey::common {
+#if PLATFORM_LINUX || PLATFORM_MACOS
+    static std::string run_command(const std::string& cmd) {
+        std::string out;
+        if (FILE* p = popen(cmd.c_str(), "r")) {
+            char buf[1024];
+            while (fgets(buf, sizeof(buf), p)) out += buf;
+            pclose(p);
+        }
+        // remove trailing newline
+        if (!out.empty() && out.back() == '\n') {
+            out.pop_back();
+        }
+        return out;
+    }
+
+    static bool has_command(const std::string& cmd) {
+        std::string check = "which " + cmd + " > /dev/null 2>&1";
+        return system(check.c_str()) == 0;
+    }
+#endif
+
     unsigned int desktop_shell::get_current_monitor_dpi() {
 #if PLATFORM_WINDOWS
         return ::GetDpiForSystem();
@@ -182,6 +204,43 @@ namespace grey::common {
         return path;
     }
 
+#elif PLATFORM_LINUX || PLATFORM_MACOS
+    std::string desktop_shell::file_open_dialog(const std::string &file_type_name, const std::string &extension) {
+        std::string extensions = extension;
+        str::replace_all(extensions, ";", " ");
+
+        if (has_command("zenity")) {
+            std::string cmd = "zenity --file-selection --title=\"Open File\" --file-filter=\"" + file_type_name + " | " + extensions + "\" 2>/dev/null";
+            return run_command(cmd);
+        }
+
+        if (has_command("kdialog")) {
+            std::string cmd = "kdialog --getopenfilename . \"" + extensions + "\" 2>/dev/null";
+            return run_command(cmd);
+        }
+
+#if PLATFORM_MACOS
+        return run_command("osascript -e 'POSIX path of (choose file with prompt \"Open File\")' 2>/dev/null");
+#endif
+
+        return "";
+    }
+
+    std::string desktop_shell::directory_open_dialog() {
+        if (has_command("zenity")) {
+            return run_command("zenity --file-selection --directory --title=\"Select Folder\" 2>/dev/null");
+        }
+
+        if (has_command("kdialog")) {
+            return run_command("kdialog --getexistingdirectory . \"Select Folder\" 2>/dev/null");
+        }
+
+#if PLATFORM_MACOS
+        return run_command("osascript -e 'POSIX path of (choose folder with prompt \"Select Folder\")' 2>/dev/null");
+#endif
+
+        return "";
+    }
 #else
     std::string desktop_shell::file_open_dialog(const std::string &file_type_name, const std::string &extension) {
         return "";
@@ -195,6 +254,8 @@ namespace grey::common {
     bool desktop_shell::file_open_dialog_supported() {
 #if PLATFORM_WINDOWS
         return true;
+#elif PLATFORM_LINUX || PLATFORM_MACOS
+        return has_command("zenity") || has_command("kdialog") || PLATFORM_MACOS;
 #else
         return false;
 #endif
@@ -203,6 +264,8 @@ namespace grey::common {
     bool desktop_shell::directory_open_dialog_supported() {
 #if PLATFORM_WINDOWS
         return true;
+#elif PLATFORM_LINUX || PLATFORM_MACOS
+        return has_command("zenity") || has_command("kdialog") || PLATFORM_MACOS;
 #else
         return false;
 #endif
@@ -222,7 +285,7 @@ namespace grey::common {
         // HINSTANCE is a pointer type; cast to INT_PTR before comparing to integer.
         return (INT_PTR)hi > 32;
 
-#elif PLATFORM_LINUX
+#elif PLATFORM_LINUX || PLATFORM_MACOS
         pid_t pid = fork();
 
         if (pid < 0) {
@@ -240,11 +303,15 @@ namespace grey::common {
 
             if (grandchild_pid == 0) {
                 // Inside Grandchild Process
-                // execlp replaces the current process image with xdg-open
+                // execlp replaces the current process image
+#if PLATFORM_LINUX
                 execlp("xdg-open", "xdg-open", path.c_str(), nullptr);
+#elif PLATFORM_MACOS
+                execlp("open", "open", path.c_str(), nullptr);
+#endif
 
                 // If execlp returns, it means it failed to execute
-                std::cerr << "Failed to execute xdg-open" << std::endl;
+                std::cerr << "Failed to execute open utility" << std::endl;
                 _exit(1);
             }
 

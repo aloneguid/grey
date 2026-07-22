@@ -135,13 +135,12 @@ namespace grey {
          */
         bool center_on_screen{false};
 
+        bool show_title_bar{true};
+        bool always_on_top{false};
+
         // platform-specific flags
 
 #if PLATFORM_WINDOWS
-        /**
-         * @brief When set to true, will enable dark mode for the application on Windows 10/11.
-         */
-        bool win32_title_bar{true};
 
         bool win32_hide_from_taskbar{false};
 
@@ -169,10 +168,6 @@ namespace grey {
          */
         bool win32_close_on_focus_lost{false};
 
-        /**
-         * @brief When set to true, the window will always be on top.
-         */
-        bool win32_always_on_top{false};
 
         /**
          * @brief When set to true, a window can be grabbed and moved by dragging inside any area of the window.

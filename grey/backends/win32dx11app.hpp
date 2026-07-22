@@ -400,7 +400,7 @@ namespace grey::backends {
 
         void apply_window_corner_preference() {
             if(!hWnd) return;
-            if(!win32_title_bar) {
+            if(!show_title_bar) {
                 grey::common::win32::window wnd{hWnd};
                 wnd.set_rounded_corners();
             }
@@ -426,7 +426,7 @@ namespace grey::backends {
 
             DWORD dwStyle = WS_OVERLAPPEDWINDOW;
 
-            if(!win32_title_bar) {
+            if(!show_title_bar) {
                 dwStyle = WS_POPUP;
             }
 
@@ -494,7 +494,7 @@ namespace grey::backends {
             //::UpdateWindow(hwnd);
             //::SetForegroundWindow(hwnd);    // just as an extra precaution
 
-            if(win32_always_on_top) {
+            if(always_on_top) {
                 ::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
             }
 
