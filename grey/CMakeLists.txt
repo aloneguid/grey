@@ -19,6 +19,7 @@ file(GLOB core_src
     "common/os.cpp"
     "common/str.cpp"
     "common/img.cpp"
+    "grey.cpp"
     "anim.cpp"
     "app.cpp"
     "themes.cpp"
