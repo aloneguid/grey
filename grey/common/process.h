@@ -42,6 +42,10 @@ namespace grey::common {
 
         ~process();
 
+        [[nodiscard]] PidType get_pid() const {
+            return pid;
+        }
+
         /**
          * @brief Enumerates all processes on the system.
          * @return
@@ -71,15 +75,15 @@ namespace grey::common {
         */
         static int exec(const std::string& cmdline, std::function<void(std::string&)> std_out_new_data);
 
-        std::string get_module_filename() const;
+        [[nodiscard]] std::string get_module_filename() const;
 
-        std::string get_name() const;
+        [[nodiscard]] std::string get_name() const;
 
         /**
          * @brief Gets a process description similar to the one displayed in Windows Task Manager.
          * @return
          */
-        std::string get_description() const;
+        [[nodiscard]] std::string get_description() const;
 
         HWND find_main_window();
 
@@ -87,7 +91,7 @@ namespace grey::common {
 
         bool enable_efficiency_mode();
 
-        bool is_valid() const { return pid != 0; }
+        [[nodiscard]] bool is_valid() const { return pid != 0; }
 
         process get_parent();
 

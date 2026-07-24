@@ -51,8 +51,5 @@ namespace grey::common {
         return false;
     }
 
-    bool keyboard::is_kbd_caps_locks_on() {
-        return false;
-    }
 #endif
 }
