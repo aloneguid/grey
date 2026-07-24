@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "platform.h"
 
 namespace grey::common::fss {
     std::string get_current_dir();
@@ -24,6 +25,10 @@ namespace grey::common::fss {
     std::string get_config_file_path(const std::string& application_name, const std::string& filename);
 
     std::string get_current_exec_path();
+
+#if PLATFORM_WINDOWS
+    std::string get_program_files_dir(bool x32 = false);
+#endif
 
     bool file_exists(const std::string &name);
 

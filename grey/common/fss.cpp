@@ -1,5 +1,4 @@
 #include "fss.h"
-#include "platform.h"
 #if PLATFORM_WINDOWS
 #include <Windows.h>
 #include <ShlObj_core.h>
@@ -90,6 +89,17 @@ namespace grey::common::fss {
         return "";
 #endif
     }
+
+#if PLATFORM_WINDOWS
+    std::string get_program_files_dir(bool x32) {
+        wchar_t path[MAX_PATH];
+        if (SUCCEEDED(::SHGetFolderPath(nullptr, x32 ? CSIDL_PROGRAM_FILESX86 : CSIDL_PROGRAM_FILES, nullptr, 0, path))) {
+            const fs::path result(path);
+            return result.string();
+        }
+        return "";
+    }
+#endif
 
     bool file_exists(const std::string& name) {
         std::ifstream f{name};
