@@ -19,15 +19,7 @@ namespace grey::common::win32::user {
     /// To keep current size, pass -1 to width and height.
     /// </summary>
     void set_window_pos(HWND hwnd, int x, int y, int width, int height);
-
-    bool is_kbd_ctrl_down();
-
-    bool is_kbd_alt_down();
-
-    bool is_kbd_shift_down();
-
-    bool is_kbd_caps_locks_on();
-
+    
     /**
      * @brief Determine if the application is running in Light theme.
      * @return True if the application is using Light theme, false otherwise. If theme cannot be determined, returns true to default to Light theme.

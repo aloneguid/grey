@@ -1,7 +1,7 @@
 #include "user.h"
 #include <WinUser.h>
-#include "../str.h"
 #include "reg.h"
+#include "../str.h"
 
 using namespace std;
 
@@ -97,31 +97,13 @@ namespace grey::common::win32::user {
         if (x == -1 || y == -1) flags |= SWP_NOMOVE;
         if (width == -1 || height == -1) flags |= SWP_NOSIZE;
 
-        ::SetWindowPos(hwnd, NULL, x, y, width, height, flags);
-    }
-
-    bool is_kbd_ctrl_down() {
-        // https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-
-        return ::GetKeyState(VK_CONTROL) & 0x8000;
-    }
-
-    bool is_kbd_alt_down() {
-        return (::GetKeyState(VK_LMENU) & 0x8000) || (::GetKeyState(VK_RMENU) & 0x8000);
-    }
-
-    bool is_kbd_shift_down() {
-        return ::GetKeyState(VK_SHIFT) & 0x8000;
-    }
-
-    bool is_kbd_caps_locks_on() {
-        return (::GetKeyState(VK_CAPITAL) & 0x0001) != 0;
+        ::SetWindowPos(hwnd, nullptr, x, y, width, height, flags);
     }
 
     bool is_app_light_theme() {
 
         string s = win32::reg::get_value(win32::reg::hive::current_user,
-            "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+            R"(Software\Microsoft\Windows\CurrentVersion\Themes\Personalize)",
             "AppsUseLightTheme");
 
         return s.empty() || s == "1";
@@ -129,7 +111,7 @@ namespace grey::common::win32::user {
 
     bool is_system_light_theme() {
         string s = win32::reg::get_value(win32::reg::hive::current_user,
-            "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+            R"(Software\Microsoft\Windows\CurrentVersion\Themes\Personalize)",
             "SystemUsesLightTheme");
 
         return s.empty() || s == "1";
