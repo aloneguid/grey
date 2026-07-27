@@ -19,6 +19,16 @@ namespace grey::common {
         static bool file_open_dialog_supported();
 
         /**
+         * @brief Call file save dialog system-native to save a file
+         * @param file_type_name Display name of the file type, for example "Word Document"
+         * @param extension Extension of the file type, for example "*.doc". You can pass multiple extensions, for instance "*.doc;*.docx"
+         * @return Path to the file to save, or empty string if the user canceled the dialog
+         */
+        static std::string file_save_dialog(const std::string &file_type_name, const std::string &extension);
+
+        static bool file_save_dialog_supported();
+
+        /**
          * @brief Call directory open dialog system-native to select a folder
          * @return Path to the selected folder, or empty string if the user canceled the dialog
          */

@@ -148,6 +148,97 @@ namespace grey::common {
         return path;
     }
 
+    std::string desktop_shell::file_save_dialog(const std::string &file_type_name, const std::string &extension) {
+        // see https://learn.microsoft.com/en-us/windows/win32/shell/common-file-dialog#basic-usage
+
+        string path;
+
+        IFileSaveDialog *pfd = NULL;
+        HRESULT hr = ::CoCreateInstance(CLSID_FileSaveDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd));
+        if(SUCCEEDED(hr)) {
+            // Create an event handling object, and hook it up to the dialog.
+            IFileDialogEvents *pfde = NULL;
+            hr = ::CDialogEventHandler_CreateInstance(IID_PPV_ARGS(&pfde));
+            if(SUCCEEDED(hr)) {
+                // Hook up the event handler.
+                DWORD dwCookie;
+                hr = pfd->Advise(pfde, &dwCookie);
+                if(SUCCEEDED(hr)) {
+                    // Set the options on the dialog.
+                    DWORD dwFlags;
+
+                    // Before setting, always get the options first in order
+                    // not to override existing options.
+                    hr = pfd->GetOptions(&dwFlags);
+                    if(SUCCEEDED(hr)) {
+                        // In this case, get shell items only for file system items.
+                        hr = pfd->SetOptions(dwFlags | FOS_FORCEFILESYSTEM);
+                        if(SUCCEEDED(hr)) {
+                            // Set the file types to display only.
+                            // Notice that this is a 1-based array.
+
+                            wstring flt_n = str::to_wstr(file_type_name);
+                            wstring flt_x = str::to_wstr(extension);
+                            COMDLG_FILTERSPEC rgSpec[] = {
+                                {flt_n.c_str(), flt_x.c_str()}
+                            };
+
+                            hr = pfd->SetFileTypes(1, rgSpec);
+                            if(SUCCEEDED(hr)) {
+                                // Set the selected file type index to Word Docs for this example.
+                                hr = pfd->SetFileTypeIndex(1);
+                                if(SUCCEEDED(hr)) {
+                                    // Set the default extension.
+                                    wstring defExt = flt_x;
+                                    // Strip multiple extensions if any
+                                    size_t semicolon = defExt.find(L';');
+                                    if (semicolon != wstring::npos) {
+                                        defExt = defExt.substr(0, semicolon);
+                                    }
+                                    // Remove leading *. or .
+                                    if (defExt.find(L"*.") == 0) {
+                                        defExt = defExt.substr(2);
+                                    } else if (defExt.find(L".") == 0) {
+                                        defExt = defExt.substr(1);
+                                    }
+                                    hr = pfd->SetDefaultExtension(defExt.c_str());
+                                    if(SUCCEEDED(hr)) {
+                                        // Show the dialog
+                                        hr = pfd->Show(NULL);
+                                        if(SUCCEEDED(hr)) {
+                                            // Obtain the result once the user clicks
+                                            // the 'Save' button.
+                                            // The result is an IShellItem object.
+                                            IShellItem *psiResult;
+                                            hr = pfd->GetResult(&psiResult);
+                                            if(SUCCEEDED(hr)) {
+                                                // We are just going to print out the
+                                                // name of the file for sample sake.
+                                                PWSTR pszFilePath = NULL;
+                                                hr = psiResult->GetDisplayName(SIGDN_FILESYSPATH,
+                                                                               &pszFilePath);
+                                                if(SUCCEEDED(hr)) {
+                                                    // user have made a positive selection here
+                                                    path = str::to_str(pszFilePath);
+                                                    CoTaskMemFree(pszFilePath);
+                                                }
+                                                psiResult->Release();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // Unhook the event handler.
+                    pfd->Unadvise(dwCookie);
+                }
+            }
+        }
+
+        return path;
+    }
+
     std::string desktop_shell::directory_open_dialog() {
         string path;
 
@@ -226,6 +317,27 @@ namespace grey::common {
         return "";
     }
 
+    std::string desktop_shell::file_save_dialog(const std::string &file_type_name, const std::string &extension) {
+        std::string extensions = extension;
+        str::replace_all(extensions, ";", " ");
+
+        if (has_command("zenity")) {
+            std::string cmd = "zenity --file-selection --save --confirm-overwrite --title=\"Save File\" --file-filter=\"" + file_type_name + " | " + extensions + "\" 2>/dev/null";
+            return run_command(cmd);
+        }
+
+        if (has_command("kdialog")) {
+            std::string cmd = "kdialog --getsavefilename . \"" + extensions + "\" 2>/dev/null";
+            return run_command(cmd);
+        }
+
+#if PLATFORM_MACOS
+        return run_command("osascript -e 'POSIX path of (choose file name with prompt \"Save File\")' 2>/dev/null");
+#endif
+
+        return "";
+    }
+
     std::string desktop_shell::directory_open_dialog() {
         if (has_command("zenity")) {
             return run_command("zenity --file-selection --directory --title=\"Select Folder\" 2>/dev/null");
@@ -246,12 +358,26 @@ namespace grey::common {
         return "";
     }
 
+    std::string desktop_shell::file_save_dialog(const std::string &file_type_name, const std::string &extension) {
+        return "";
+    }
+
     std::string desktop_shell::directory_open_dialog() {
         return "";
     }
 #endif
 
     bool desktop_shell::file_open_dialog_supported() {
+#if PLATFORM_WINDOWS
+        return true;
+#elif PLATFORM_LINUX || PLATFORM_MACOS
+        return has_command("zenity") || has_command("kdialog") || PLATFORM_MACOS;
+#else
+        return false;
+#endif
+    }
+
+    bool desktop_shell::file_save_dialog_supported() {
 #if PLATFORM_WINDOWS
         return true;
 #elif PLATFORM_LINUX || PLATFORM_MACOS
