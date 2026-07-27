@@ -1,5 +1,6 @@
 #include "os.h"
 #include "reg.h"
+#include "gdi.h"
 #include <format>
 #include "../str.h"
 #include <Windows.h>
@@ -418,6 +419,15 @@ namespace grey::common::win32::os {
         }
         // clipboard owns hDib now
 
+        return true;
+    }
+
+    bool capture_screen_to_file(const std::string& file_path, int x, int y, int w, int h) {
+        screen_capture_ctx ctx{x, y, w, h};
+        if (!ctx.valid) return false;
+
+        grey::common::win32::gdi g;
+        g.save_to_png_file(ctx.hBitmap, file_path);
         return true;
     }
 }

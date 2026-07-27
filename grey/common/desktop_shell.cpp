@@ -113,7 +113,7 @@ namespace grey::common {
                                     hr = pfd->SetDefaultExtension(flt_x.c_str());
                                     if(SUCCEEDED(hr)) {
                                         // Show the dialog
-                                        hr = pfd->Show(NULL);
+                                        hr = pfd->Show(::GetActiveWindow());
                                         if(SUCCEEDED(hr)) {
                                             // Obtain the result once the user clicks
                                             // the 'Open' button.
@@ -204,7 +204,7 @@ namespace grey::common {
                                     hr = pfd->SetDefaultExtension(defExt.c_str());
                                     if(SUCCEEDED(hr)) {
                                         // Show the dialog
-                                        hr = pfd->Show(NULL);
+                                        hr = pfd->Show(::GetActiveWindow());
                                         if(SUCCEEDED(hr)) {
                                             // Obtain the result once the user clicks
                                             // the 'Save' button.
@@ -265,7 +265,7 @@ namespace grey::common {
                         hr = pfd->SetOptions(dwFlags | FOS_FORCEFILESYSTEM | FOS_PICKFOLDERS);
                         if(SUCCEEDED(hr)) {
                             // Show the dialog
-                            hr = pfd->Show(NULL);
+                            hr = pfd->Show(::GetActiveWindow());
                             if(SUCCEEDED(hr)) {
                                 // Obtain the result once the user clicks
                                 // the 'Open' button.

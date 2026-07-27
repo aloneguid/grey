@@ -1,5 +1,4 @@
 #include "gdi.h"
-#include <Windows.h>
 #include <gdiplus.h>
 #include "../str.h"
 
@@ -68,19 +67,19 @@ namespace grey::common::win32 {
 
     gdi::gdi() {
         Gdiplus::GdiplusStartupInput gdiplusStartupInput;
-        Gdiplus::GdiplusStartup(&gdiplus_token, &gdiplusStartupInput, NULL);
+        Gdiplus::GdiplusStartup(&gdi_token, &gdiplusStartupInput, nullptr);
 
         GetEncoderClsid(L"image/png", &png_clsid);
     }
 
     gdi::~gdi() {
-        Gdiplus::GdiplusShutdown(gdiplus_token);
+        Gdiplus::GdiplusShutdown(gdi_token);
     }
 
-    void gdi::ico_to_png(const std::string &ico_path, const std::string &png_path) {
+    void gdi::ico_to_png(const std::string &ico_path, const std::string &png_path) const {
         Gdiplus::Image *ico = Gdiplus::Image::FromFile(str::to_wstr(ico_path).c_str());
 
-        ico->Save(str::to_wstr(png_path).c_str(), &png_clsid, NULL);
+        ico->Save(str::to_wstr(png_path).c_str(), &png_clsid, nullptr);
 
         delete ico;
     }
@@ -101,7 +100,7 @@ namespace grey::common::win32 {
 
         Gdiplus::Bitmap *x = Gdiplus::Bitmap::FromHICON(hIcon);
 
-        x->Save(str::to_wstr(png_path).c_str(), &png_clsid, NULL);
+        x->Save(str::to_wstr(png_path).c_str(), &png_clsid, nullptr);
 
         delete x;
 
@@ -120,5 +119,11 @@ namespace grey::common::win32 {
         ::DestroyIcon(hIcon);
 
         return buf;
+    }
+
+    void gdi::save_to_png_file(HBITMAP hBitmap, const std::string &png_path) const {
+        Gdiplus::Bitmap *bmp = Gdiplus::Bitmap::FromHBITMAP(hBitmap, nullptr);
+        bmp->Save(str::to_wstr(png_path).c_str(), &png_clsid, nullptr);
+        delete bmp;
     }
 }

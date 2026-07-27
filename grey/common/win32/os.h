@@ -62,4 +62,16 @@ namespace grey::common::win32::os {
      * @return true on success, false on failure
      */
     bool capture_screen_to_clipboard(int x = 0, int y = 0, int w = 0, int h = 0);
+
+    /**
+     * @brief Captures screen area and saves it to a PNG file.
+     *        When x/y/w/h are all 0 (default), captures the entire screen.
+     * @param file_path Output file path
+     * @param x Left coordinate of the area (pixels)
+     * @param y Top coordinate of the area (pixels)
+     * @param w Width of the area (pixels, 0 = full screen)
+     * @param h Height of the area (pixels, 0 = full screen)
+     * @return true on success, false on failure
+     */
+    bool capture_screen_to_file(const std::string& file_path, int x = 0, int y = 0, int w = 0, int h = 0);
 }
