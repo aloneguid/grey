@@ -28,11 +28,11 @@ namespace grey::common::win32::shell {
     void open_mssettings(const std::string name);
 
     /**
-     * @brief Opens system "default apps" page, optinally at application's page
+     * @brief Opens system "default apps" page, optionally at application's page
      * @param app_registered_name Application name under HKEY_CURRENT_USER\Software\Clients\StartMenuInternet\the_app\Capabilities\ApplicationName
      * @param user_scoped if app is scoped to user or machine
      */
-    void open_default_apps(const std::string app_registered_name = "", bool user_scoped = true);
+    void open_default_apps(const std::string& app_registered_name = "", bool user_scoped = true);
 
     shell_link read_link(const std::string &path);
 
@@ -40,7 +40,11 @@ namespace grey::common::win32::shell {
 
     unsigned int get_dpi(HWND hWnd);
 
-    //std::string file_save_dialog(const std::string &file_type_name, const std::string &extension);
-
     void create_start_menu_shortcut(const std::string &name);
+
+    bool create_startup_shortcut(const std::string& name, const std::string& path, const std::string& args);
+
+    bool remove_startup_shortcut(const std::string& name);
+
+    bool exists_startup_shortcut(const std::string& name);
 }

@@ -123,7 +123,7 @@ namespace grey::common::win32 {
                 SW_SHOWDEFAULT);
         }
 
-        void open_default_apps(const std::string app_registered_name, bool user_scoped) {
+        void open_default_apps(const std::string& app_registered_name, bool user_scoped) {
             string url = "defaultapps";
 
             if(!app_registered_name.empty()) {
@@ -332,6 +332,63 @@ namespace grey::common::win32 {
             if(should_uninitialize) {
                 ::CoUninitialize();
             }
+        }
+
+        std::wstring get_startup_folder_path() {
+            PWSTR path = nullptr;
+            std::wstring result;
+            if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_Startup, 0, nullptr, &path))) {
+                result = path;
+                CoTaskMemFree(path);
+            }
+            return result;
+        }
+
+        bool create_startup_shortcut(const std::string& name, const std::string& path, const std::string& args) {
+            //HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+            //bool comInitializedHere = SUCCEEDED(hr);
+
+            IShellLinkW* shellLink = nullptr;
+            HRESULT hr = CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER,
+                                   IID_IShellLinkW, (void**)&shellLink);
+            if (FAILED(hr)) {
+                return false;
+            }
+
+            wstring wname = str::to_wstr(name);
+            wstring wpath = str::to_wstr(path);
+            wstring wargs = str::to_wstr(args);
+
+            shellLink->SetPath(wpath.c_str());
+            shellLink->SetArguments(wargs.c_str());
+
+            // Working dir = exe's own directory, not Startup folder
+            std::wstring workDir = wpath.substr(0, wpath.find_last_of(L'\\'));
+            shellLink->SetWorkingDirectory(workDir.c_str());
+
+            // Optional: icon (defaults to exe's own icon if omitted)
+            shellLink->SetIconLocation(wpath.c_str(), 0);
+
+            IPersistFile* persistFile = nullptr;
+            hr = shellLink->QueryInterface(IID_IPersistFile, (void**)&persistFile);
+            if (SUCCEEDED(hr)) {
+                std::wstring shortcutPath = get_startup_folder_path() + L"\\" + wname + L".lnk";
+                hr = persistFile->Save(shortcutPath.c_str(), TRUE);
+                persistFile->Release();
+            }
+
+            shellLink->Release();
+            return SUCCEEDED(hr);
+        }
+
+        bool remove_startup_shortcut(const std::string& name) {
+            auto path = get_startup_folder_path() + L"\\" + str::to_wstr(name) + L".lnk";
+            return std::filesystem::remove(path);
+        }
+
+        bool exists_startup_shortcut(const std::string& name) {
+            auto path = get_startup_folder_path() + L"\\" + str::to_wstr(name) + L".lnk";
+            return std::filesystem::exists(path);
         }
     }
 }

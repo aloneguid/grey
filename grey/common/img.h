@@ -1,8 +1,7 @@
 // common cross-platform image loading functions
 // this is really a wrapper around stb_image quickly hacked up to follow RAII rather than provide a library-independent implementation
+#pragma once
 #include <string>
-#include <memory>
-#include <vector>
 
 namespace grey::common
 {
@@ -16,7 +15,7 @@ namespace grey::common
         size_t x;   // width
         size_t y;   // height
 
-        unsigned char* get_data() const { return data; }
+        [[nodiscard]] unsigned char* get_data() const { return data; }
 
         operator bool() const { return data != nullptr; }
 
