@@ -98,6 +98,33 @@ namespace grey::widgets {
         ImGui::PushID(id);
     }
 
+    font_scaler::font_scaler(float size_delta) {
+        needs_resize = size_delta > 0.01 || size_delta < -0.01;
+        if(needs_resize) {
+            float font_size = ImGui::GetStyle().FontSizeBase;
+            float new_size = font_size + size_delta;
+            if(new_size <= 0) {
+                needs_resize = false;
+            } else {
+                ImGui::PushFont(nullptr, new_size);
+            }
+        }
+    }
+
+    font_scaler::~font_scaler() {
+        if(needs_resize) {
+            ImGui::PopFont();
+        }
+    }
+
+    clip_rect::clip_rect(const ImVec2& min, const ImVec2& max) {
+        ImGui::PushClipRect(min, max, false);
+    }
+
+    clip_rect::~clip_rect() {
+        ImGui::PopClipRect();
+    }
+
     id_frame::id_frame(int scope_id) : id_frame(ImGui::GetID(scope_id)) {
     }
 
@@ -414,9 +441,8 @@ namespace grey::widgets {
         ImGui::PopStyleColor();
     }
 
-    void label(const std::string& text, emphasis emp, size_t text_wrap_pos, bool enabled, float font_size) {
-        if(font_size)
-            ImGui::PushFont(nullptr, font_size);
+    void label(const std::string& text, emphasis emp, size_t text_wrap_pos, bool enabled, float font_size_diff) {
+        font_scaler scaler(font_size_diff);
 
         if(emp == emphasis::none || !enabled) {
             label(text, text_wrap_pos, enabled);
@@ -430,9 +456,11 @@ namespace grey::widgets {
                 label(text, text_wrap_pos);
             }
         }
+    }
 
-        if(font_size)
-            ImGui::PopFont();
+    ImVec2 text_size_get(const string& text, float font_size_diff, float wrap_width) {
+        font_scaler scaler(font_size_diff);
+        return ImGui::CalcTextSize(text.c_str(), nullptr, false, wrap_width);
     }
 
     bool selectable(const std::string& text, bool span_columns) {
@@ -808,6 +836,28 @@ namespace grey::widgets {
 
     rect item_rect_get() {
         return rect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+    }
+
+    void draw_text(const ImVec2& pos, emphasis emp, const std::string& text) {
+        ImDrawList* dl = ImGui::GetWindowDrawList();
+
+        ImU32 col;
+        if(emp == emphasis::none) {
+            col = ImGui::GetColorU32(ImGuiCol_Text);
+        } else {
+            ImVec4 normal, hovered, active;
+            set_emphasis_colours(emp, normal, hovered, active);
+            col = rgb_colour{normal};
+        }
+        dl->AddText(pos, col, text.c_str());
+    }
+
+    void dummy(float width, float height) {
+        ImGui::Dummy(ImVec2(width, height));
+    }
+
+    void dummy(ImVec2 size) {
+        ImGui::Dummy(size);
     }
 
     // ---- image ----

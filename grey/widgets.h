@@ -107,6 +107,8 @@ namespace grey::widgets {
 
     class guardable {
     public:
+        virtual ~guardable() = default;
+
         virtual void enter() = 0;
         virtual void leave() = 0;
     };
@@ -124,6 +126,23 @@ namespace grey::widgets {
 
     private:
         explicit id_frame(ImGuiID id);
+    };
+
+    /**
+     * @brief RAII font size scaler.
+     */
+    class font_scaler {
+    public:
+        font_scaler(float size_delta);
+        ~font_scaler();
+    private:
+        bool needs_resize;
+    };
+
+    class clip_rect {
+    public:
+        clip_rect(const ImVec2& min, const ImVec2& max);
+        ~clip_rect();
     };
 
     class window : public guardable {
@@ -436,11 +455,19 @@ namespace grey::widgets {
 
     rect item_rect_get();
 
+    void draw_text(const ImVec2& pos, emphasis emp, const std::string& text);
+
+    void dummy(float width, float height);
+
+    void dummy(ImVec2 size);
+
     void label(const std::string& text, size_t text_wrap_pos = 0, bool enabled = true);
 
     void label(const std::string& text, rgb_colour colour);
 
-    void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0, bool enabled = true, float font_size = .0f);
+    void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0, bool enabled = true, float font_size_diff = .0f);
+
+    ImVec2 text_size_get(const std::string& text, float font_size_diff = .0f, float wrap_width = -1);
 
     /**
      * @brief Selectable item

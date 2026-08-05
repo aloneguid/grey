@@ -1,12 +1,11 @@
 #pragma once
 #include <string>
-#include <map>
 #include <vector>
 
 namespace grey::common {
     class url {
     public:
-        url(const std::string& abs_url);
+        explicit url(const std::string& abs_url);
 
         std::string abs_url;
         std::string protocol;

@@ -135,7 +135,14 @@ namespace grey {
          */
         bool center_on_screen{false};
 
+        /**
+         * When set (default) will show native window manager's title bar, otherwise nothing.
+         */
         bool show_title_bar{true};
+
+        /**
+         * When set, will keep the window always on top of other windows.
+         */
         bool always_on_top{false};
 
         // platform-specific flags
