@@ -271,7 +271,7 @@ namespace grey::widgets {
 
         container& padding(float x, float y) {
             flags |= ImGuiChildFlags_AlwaysUseWindowPadding;
-            pad = ImVec2{x, y};
+            pad = ImVec2{x * scale, y * scale};
             return *this;
         }
 
@@ -453,9 +453,14 @@ namespace grey::widgets {
 
     // Basic drawing
 
+    /**
+     * Gets rectangle occupied by the last rendered item.
+     */
     rect item_rect_get();
 
     void draw_text(const ImVec2& pos, emphasis emp, const std::string& text);
+
+    void draw_rect(const rect& rect, rgb_colour colour);
 
     void dummy(float width, float height);
 

@@ -861,6 +861,11 @@ namespace grey::widgets {
         dl->AddText(pos, col, text.c_str());
     }
 
+    void draw_rect(const rect& rect, rgb_colour colour) {
+        ImDrawList* dl = ImGui::GetWindowDrawList();
+        dl->AddRect(rect.lt(), rect.rb(), colour, 0, 10);
+    }
+
     void dummy(float width, float height) {
         ImGui::Dummy(ImVec2(width, height));
     }
