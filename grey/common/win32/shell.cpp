@@ -42,7 +42,7 @@ namespace grey::common::win32 {
             return get_shell_folder_path(CSIDL_APPDATA);
         }
 
-        void exec(const std::string &path, const std::string &parameters) {
+        void exec(const std::string& path, const std::string& parameters) {
             HINSTANCE hi = ::ShellExecute(
                 nullptr,
                 L"open",
@@ -95,7 +95,7 @@ namespace grey::common::win32 {
             }
         }
 
-        void send_wm_copydata(HWND hWnd, const std::string &data, long data_type) {
+        void send_wm_copydata(HWND hWnd, const std::string& data, long data_type) {
             COPYDATASTRUCT cds;
             cds.dwData = data_type;
             cds.cbData = (data.size() + 1) * sizeof(wchar_t);
@@ -104,7 +104,7 @@ namespace grey::common::win32 {
             ::SendMessage(hWnd, WM_COPYDATA, (WPARAM) hWnd, (LPARAM) (LPVOID) &cds);
         }
 
-        std::string get_wm_copydata_data(WPARAM wParam, LPARAM lParam, long &data_type) {
+        std::string get_wm_copydata_data(WPARAM wParam, LPARAM lParam, long& data_type) {
             PCOPYDATASTRUCT pcds = (PCOPYDATASTRUCT) lParam;
             data_type = pcds->dwData; // data_type
             return str::to_str(static_cast<wchar_t *>(pcds->lpData));
@@ -134,7 +134,7 @@ namespace grey::common::win32 {
             open_mssettings(url);
         }
 
-        shell_link read_link(const std::string &path) {
+        shell_link read_link(const std::string& path) {
             // see https://renenyffenegger.ch/notes/Windows/development/WinAPI/Shell/read-lnk-file
 
             ensure_co_initalised();
@@ -142,12 +142,12 @@ namespace grey::common::win32 {
             shell_link lnk;
 
             // create shell link interface
-            IShellLink *shl;
+            IShellLink* shl;
             HRESULT rc = ::CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink,
                                             (LPVOID *) &shl);
             if(SUCCEEDED(rc)) {
                 // load file into link
-                IPersistFile *ipf;
+                IPersistFile* ipf;
                 rc = shl->QueryInterface(IID_IPersistFile, (LPVOID *) &ipf);
                 if(SUCCEEDED(rc)) {
                     wstring wpath = str::to_wstr(path);
@@ -189,17 +189,6 @@ namespace grey::common::win32 {
             return lnk;
         }
 
-        //BOOL GetDpiMonitorEnumProc(
-        //    HMONITOR hMonitor,
-        //    HDC hDC,
-        //    LPRECT hRect,
-        //    LPARAM lParam) {
-
-        //    vector<HMONITOR>* hmons = (vector<HMONITOR>*)lParam;
-        //    hmons->push_back(hMonitor);
-        //    return true;
-        //}
-
         unsigned int get_dpi() {
             //vector<HMONITOR> hmons;
             //::EnumDisplayMonitors(NULL, NULL, GetDpiMonitorEnumProc, (LPARAM)&hmons);
@@ -213,113 +202,37 @@ namespace grey::common::win32 {
             return ::GetDpiForWindow(hWnd);
         }
 
-        /*std::string file_save_dialog(const std::string &file_type_name, const std::string &extension) {
-            // See https://learn.microsoft.com/en-us/windows/win32/shell/common-file-dialog#basic-usage
-
-            std::string path;
-
-            IFileDialog *pfd = nullptr;
-            HRESULT hr = ::CoCreateInstance(CLSID_FileSaveDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd));
-            if(SUCCEEDED(hr)) {
-                // Create an event handling object, and hook it up to the dialog.
-                IFileDialogEvents *pfde = nullptr;
-                hr = ::CDialogEventHandler_CreateInstance(IID_PPV_ARGS(&pfde));
-                if(SUCCEEDED(hr)) {
-                    // Hook up the event handler.
-                    DWORD dwCookie;
-                    hr = pfd->Advise(pfde, &dwCookie);
-                    if(SUCCEEDED(hr)) {
-                        // Set the options on the dialog.
-                        DWORD dwFlags;
-
-                        // Before setting, always get the options first in order
-                        // not to override existing options.
-                        hr = pfd->GetOptions(&dwFlags);
-                        if(SUCCEEDED(hr)) {
-                            // In this case, get shell items only for file system items.
-                            hr = pfd->SetOptions(dwFlags | FOS_FORCEFILESYSTEM);
-                            if(SUCCEEDED(hr)) {
-                                // Set the file types to display only.
-                                // Notice that this is a 1-based array.
-
-                                std::wstring flt_n = str::to_wstr(file_type_name);
-                                std::wstring flt_x = str::to_wstr(extension);
-                                COMDLG_FILTERSPEC rgSpec[] = {
-                                    {flt_n.c_str(), flt_x.c_str()}
-                                };
-
-                                hr = pfd->SetFileTypes(1, rgSpec);
-                                if(SUCCEEDED(hr)) {
-                                    // Set the selected file type index.
-                                    hr = pfd->SetFileTypeIndex(1);
-                                    if(SUCCEEDED(hr)) {
-                                        // Set the default extension.
-                                        hr = pfd->SetDefaultExtension(flt_x.c_str());
-                                        if(SUCCEEDED(hr)) {
-                                            // Show the dialog
-                                            hr = pfd->Show(NULL);
-                                            if(SUCCEEDED(hr)) {
-                                                // Obtain the result once the user clicks
-                                                // the 'Save' button.
-                                                IShellItem *psiResult;
-                                                hr = pfd->GetResult(&psiResult);
-                                                if(SUCCEEDED(hr)) {
-                                                    // Get the file path selected by the user.
-                                                    PWSTR pszFilePath = NULL;
-                                                    hr = psiResult->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
-                                                    if(SUCCEEDED(hr)) {
-                                                        // User has made a positive selection here.
-                                                        path = str::to_str(pszFilePath);
-                                                        CoTaskMemFree(pszFilePath);
-                                                    }
-                                                    psiResult->Release();
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        // Unhook the event handler.
-                        pfd->Unadvise(dwCookie);
-                    }
-                }
-                pfd->Release();
-            }
-
-            return path;
-        }*/
-
-        void create_start_menu_shortcut(const string &name) {
+        fs::path get_start_menu_path(const string& link_name = "") {
             PWSTR programs_path = nullptr;
             HRESULT hr = ::SHGetKnownFolderPath(FOLDERID_Programs, KF_FLAG_CREATE, nullptr, &programs_path);
             if(FAILED(hr) || programs_path == nullptr) {
-                return;
+                return "";
             }
-
             std::filesystem::path start_menu_programs(programs_path);
             ::CoTaskMemFree(programs_path);
-            wstring wname = str::to_wstr(name);
 
-            std::filesystem::path shortcut_path = start_menu_programs / (wname + L".lnk");
+            if(!link_name.empty())
+                return start_menu_programs / (link_name + ".lnk");
+
+            return start_menu_programs;
+        }
+
+        void create_start_menu_shortcut(const string& name, const std::string& path) {
+
+            fs::path shortcut_path = get_start_menu_path(name);
             std::filesystem::create_directories(shortcut_path.parent_path());
+            fs::path working_directory = fs::path{path}.parent_path();
 
-            string app_path = fss::get_current_exec_path();
-            std::filesystem::path app_fs_path(app_path);
-
-            HRESULT co_hr = ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
-            bool should_uninitialize = SUCCEEDED(co_hr);
-
-            IShellLinkW *shell_link = nullptr;
-            hr = ::CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_IShellLinkW,
+            IShellLinkW* shell_link = nullptr;
+            HRESULT hr = ::CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_IShellLinkW,
                                     reinterpret_cast<void **>(&shell_link));
             if(SUCCEEDED(hr) && shell_link != nullptr) {
-                shell_link->SetPath(app_fs_path.wstring().c_str());
-                shell_link->SetDescription(wname.c_str());
-                shell_link->SetIconLocation(app_fs_path.wstring().c_str(), 0);
-                shell_link->SetWorkingDirectory(app_fs_path.parent_path().wstring().c_str());
+                shell_link->SetPath(str::to_wstr(path).c_str());
+                shell_link->SetDescription(str::to_wstr(name).c_str());
+                shell_link->SetIconLocation(str::to_wstr(path).c_str(), 0);
+                shell_link->SetWorkingDirectory(working_directory.wstring().c_str());
 
-                IPersistFile *persist_file = nullptr;
+                IPersistFile* persist_file = nullptr;
                 hr = shell_link->QueryInterface(IID_IPersistFile, reinterpret_cast<void **>(&persist_file));
                 if(SUCCEEDED(hr) && persist_file != nullptr) {
                     persist_file->Save(shortcut_path.wstring().c_str(), TRUE);
@@ -328,16 +241,22 @@ namespace grey::common::win32 {
 
                 shell_link->Release();
             }
+        }
 
-            if(should_uninitialize) {
-                ::CoUninitialize();
-            }
+        void remove_start_menu_shortcut(const std::string& name) {
+            fs::path shortcut_path = get_start_menu_path(name);
+            fs::remove(shortcut_path);
+        }
+
+        bool exists_start_menu_shortcut(const std::string& name) {
+            fs::path shortcut_path = get_start_menu_path(name);
+            return fs::exists(shortcut_path);
         }
 
         std::wstring get_startup_folder_path() {
             PWSTR path = nullptr;
             std::wstring result;
-            if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_Startup, 0, nullptr, &path))) {
+            if(SUCCEEDED(SHGetKnownFolderPath(FOLDERID_Startup, 0, nullptr, &path))) {
                 result = path;
                 CoTaskMemFree(path);
             }
@@ -350,8 +269,8 @@ namespace grey::common::win32 {
 
             IShellLinkW* shellLink = nullptr;
             HRESULT hr = CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER,
-                                   IID_IShellLinkW, (void**)&shellLink);
-            if (FAILED(hr)) {
+                                          IID_IShellLinkW, (void **) &shellLink);
+            if(FAILED(hr)) {
                 return false;
             }
 
@@ -370,8 +289,8 @@ namespace grey::common::win32 {
             shellLink->SetIconLocation(wpath.c_str(), 0);
 
             IPersistFile* persistFile = nullptr;
-            hr = shellLink->QueryInterface(IID_IPersistFile, (void**)&persistFile);
-            if (SUCCEEDED(hr)) {
+            hr = shellLink->QueryInterface(IID_IPersistFile, (void **) &persistFile);
+            if(SUCCEEDED(hr)) {
                 std::wstring shortcutPath = get_startup_folder_path() + L"\\" + wname + L".lnk";
                 hr = persistFile->Save(shortcutPath.c_str(), TRUE);
                 persistFile->Release();

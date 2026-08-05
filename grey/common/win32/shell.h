@@ -17,13 +17,13 @@ namespace grey::common::win32::shell {
     // roaming app data
     std::string get_app_data_folder();
 
-    void exec(const std::string &path, const std::string &parameters);
+    void exec(const std::string& path, const std::string& parameters);
 
     void set_rounded_corners(HWND hWnd, int radius = 20);
 
-    void send_wm_copydata(HWND hWnd, const std::string &data, long data_type = 1);
+    void send_wm_copydata(HWND hWnd, const std::string& data, long data_type = 1);
 
-    std::string get_wm_copydata_data(WPARAM wParam, LPARAM lParam, long &data_type);
+    std::string get_wm_copydata_data(WPARAM wParam, LPARAM lParam, long& data_type);
 
     void open_mssettings(const std::string name);
 
@@ -34,13 +34,17 @@ namespace grey::common::win32::shell {
      */
     void open_default_apps(const std::string& app_registered_name = "", bool user_scoped = true);
 
-    shell_link read_link(const std::string &path);
+    shell_link read_link(const std::string& path);
 
     unsigned int get_dpi();
 
     unsigned int get_dpi(HWND hWnd);
 
-    void create_start_menu_shortcut(const std::string &name);
+    void create_start_menu_shortcut(const std::string& name, const std::string& path);
+
+    void remove_start_menu_shortcut(const std::string& name);
+
+    bool exists_start_menu_shortcut(const std::string& name);
 
     bool create_startup_shortcut(const std::string& name, const std::string& path, const std::string& args);
 
