@@ -28,6 +28,11 @@ namespace grey::common::fss {
 
 #if PLATFORM_WINDOWS
     std::string get_program_files_dir(bool x32 = false);
+
+    /**
+     * Gets folder to install user-space applications into. This will be under AppData/Local/Programs on Windows.
+     */
+    std::string get_local_programs_dir();
 #endif
 
     bool file_exists(const std::string &name);

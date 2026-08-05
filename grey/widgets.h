@@ -461,11 +461,11 @@ namespace grey::widgets {
 
     void dummy(ImVec2 size);
 
-    void label(const std::string& text, size_t text_wrap_pos = 0, bool enabled = true);
+    void label(const std::string& text, size_t text_wrap_pos = 0, bool enabled = true, bool centered = false);
 
     void label(const std::string& text, rgb_colour colour);
 
-    void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0, bool enabled = true, float font_size_diff = .0f);
+    void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0, bool enabled = true, float font_size_diff = .0f, bool center = false);
 
     ImVec2 text_size_get(const std::string& text, float font_size_diff = .0f, float wrap_width = -1);
 
@@ -552,7 +552,7 @@ namespace grey::widgets {
     void sl(float offset = 0);
     void sep(const std::string& text = "");
 
-    bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false, const std::string& tooltip_text = "", float width = 0);
+    bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false, const std::string& tooltip_text = "", float width = 0, float height = 0);
 
     inline bool button(const std::string& text, const std::string& tooltip_text) {return button(text, emphasis::none, true, false, tooltip_text);}
 

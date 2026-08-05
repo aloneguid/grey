@@ -422,9 +422,18 @@ namespace grey::widgets {
 
     // ---- label ----
 
-    void label(const std::string& text, size_t text_wrap_pos, bool enabled) {
+    void label(const std::string& text, size_t text_wrap_pos, bool enabled, bool centered) {
         if(text_wrap_pos > 0)
             ImGui::PushTextWrapPos(text_wrap_pos);
+
+        if(centered) {
+            float avail_width = avail_x();
+            float text_width = ImGui::CalcTextSize(text.c_str()).x;
+            float offset = (avail_width - text_width) / 2;
+            if(offset > 0.0f) {
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+            }
+        }
 
         if(enabled)
             ImGui::TextUnformatted(text.c_str());
@@ -441,7 +450,7 @@ namespace grey::widgets {
         ImGui::PopStyleColor();
     }
 
-    void label(const std::string& text, emphasis emp, size_t text_wrap_pos, bool enabled, float font_size_diff) {
+    void label(const std::string& text, emphasis emp, size_t text_wrap_pos, bool enabled, float font_size_diff, bool center) {
         font_scaler scaler(font_size_diff);
 
         if(emp == emphasis::none || !enabled) {
@@ -930,7 +939,7 @@ namespace grey::widgets {
     // ---- button ----
 
     bool button(const std::string& text, emphasis emp, bool is_enabled, bool is_small, const string& tooltip_text,
-                float width) {
+                float width, float height) {
         if(!is_enabled) {
             ImGui::BeginDisabled(true);
         }
@@ -948,7 +957,7 @@ namespace grey::widgets {
         if(is_small) {
             clicked = ImGui::SmallButton(text.c_str());
         } else {
-            clicked = ImGui::Button(text.c_str(), ImVec2(width, 0));
+            clicked = ImGui::Button(text.c_str(), ImVec2(width, height));
         }
 
         if(is_hovered())

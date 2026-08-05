@@ -126,7 +126,7 @@ namespace grey::backends {
             y = my + (mode->height - height) / 2;
         }
 
-        void run(std::function<bool(const app& app)> render_frame) {
+        void run(std::function<bool(app& app)> render_frame) {
             // Create window with graphics context
             glfwWindowHint(GLFW_DECORATED, show_title_bar ? GLFW_TRUE : GLFW_FALSE);
             glfwWindowHint(GLFW_FLOATING, always_on_top ? GLFW_TRUE : GLFW_FALSE);

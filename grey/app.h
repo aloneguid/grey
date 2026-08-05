@@ -66,7 +66,7 @@ namespace grey {
 
         app();
 
-        virtual void run(std::function<bool(const app&)> render_frame) = 0;
+        virtual void run(std::function<bool(app&)> render_frame) = 0;
 
         std::shared_ptr<texture> get_texture(const std::string& key);
 

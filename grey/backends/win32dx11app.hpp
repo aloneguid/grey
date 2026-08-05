@@ -406,7 +406,7 @@ namespace grey::backends {
             }
         }
 
-        void run(std::function<bool(const app &app)> render_frame) {
+        void run(std::function<bool(app &app)> render_frame) {
             // Create application window
 
             wstring class_name = grey::common::str::to_wstr(win32_window_class_name);

@@ -99,6 +99,16 @@ namespace grey::common::fss {
         }
         return "";
     }
+
+    std::string get_local_programs_dir() {
+        PWSTR path{nullptr};
+        if (SUCCEEDED(::SHGetKnownFolderPath(FOLDERID_UserProgramFiles, KF_FLAG_DEFAULT, nullptr, &path))) {
+            const fs::path result(path);
+            ::CoTaskMemFree(path);
+            return result.string();
+        }
+        return "";
+    }
 #endif
 
     bool file_exists(const std::string& name) {
