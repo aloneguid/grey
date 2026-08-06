@@ -76,6 +76,20 @@ namespace grey::widgets {
     };
 
     /**
+     * @brief Trivial point struct for storing 2D coordinates
+     */
+    struct point {
+        float x;
+        float y;
+
+        point() : x{0}, y{0} {}
+        point(const float x, const float y) : x{x}, y{y} {}
+        point(const ImVec2& pos) : x{pos.x}, y{pos.y} {}
+
+        operator ImVec2() const { return ImVec2{x, y}; }
+    };
+
+    /**
      * @brief Trivial rectangle struct for storing item bounds.
      */
     struct rect {
@@ -442,9 +456,9 @@ namespace grey::widgets {
      * @param y 
      */
     void cur_get(float& x, float& y);
-    ImVec2 cur_get();
+    point cur_get();
     void cur_set(float x, float y);
-    void cur_set(const ImVec2& pos);
+    void cur_set(const point& pos);
     void cur_move(float x, float y);
     void cur_move(ImVec2 shift);
 
@@ -466,11 +480,14 @@ namespace grey::widgets {
 
     void dummy(ImVec2 size);
 
-    void label(const std::string& text, size_t text_wrap_pos = 0, bool enabled = true, bool centered = false);
+    void label(const std::string& text, size_t text_wrap_pos = 0, bool enabled = true,
+        bool center_x = false, bool center_y = false);
 
     void label(const std::string& text, rgb_colour colour);
 
-    void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0, bool enabled = true, float font_size_diff = .0f, bool center = false);
+    void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0, bool enabled = true,
+        float font_size_diff = .0f,
+        bool center_x = false, bool center_y = false);
 
     ImVec2 text_size_get(const std::string& text, float font_size_diff = .0f, float wrap_width = -1);
 

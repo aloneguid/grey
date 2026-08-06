@@ -422,16 +422,25 @@ namespace grey::widgets {
 
     // ---- label ----
 
-    void label(const std::string& text, size_t text_wrap_pos, bool enabled, bool centered) {
+    void label(const std::string& text, size_t text_wrap_pos, bool enabled, bool center_x, bool center_y) {
         if(text_wrap_pos > 0)
             ImGui::PushTextWrapPos(text_wrap_pos);
 
-        if(centered) {
+        if(center_x) {
             float avail_width = avail_x();
             float text_width = ImGui::CalcTextSize(text.c_str()).x;
             float offset = (avail_width - text_width) / 2;
             if(offset > 0.0f) {
                 ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+            }
+        }
+
+        if(center_y) {
+            float avail_height = avail_y();
+            float text_height = ImGui::CalcTextSize(text.c_str()).y;
+            float offset = (avail_height - text_height) / 2;
+            if(offset > 0.0f) {
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + offset);
             }
         }
 
@@ -450,19 +459,20 @@ namespace grey::widgets {
         ImGui::PopStyleColor();
     }
 
-    void label(const std::string& text, emphasis emp, size_t text_wrap_pos, bool enabled, float font_size_diff, bool center) {
+    void label(const std::string& text, emphasis emp, size_t text_wrap_pos, bool enabled, float font_size_diff,
+        bool center_x, bool center_y) {
         font_scaler scaler(font_size_diff);
 
         if(emp == emphasis::none || !enabled) {
-            label(text, text_wrap_pos, enabled);
+            label(text, text_wrap_pos, enabled, center_x, center_y);
         } else {
             ImVec4 normal, hovered, active;
             if(set_emphasis_colours(emp, normal, hovered, active)) {
                 ImGui::PushStyleColor(ImGuiCol_Text, normal);
-                label(text, text_wrap_pos);
+                label(text, text_wrap_pos, enabled, center_x, center_y);
                 ImGui::PopStyleColor();
             } else {
-                label(text, text_wrap_pos);
+                label(text, text_wrap_pos, enabled, center_x, center_y);
             }
         }
     }
@@ -807,7 +817,7 @@ namespace grey::widgets {
         y = p.y;
     }
 
-    ImVec2 cur_get() {
+    point cur_get() {
         return ImGui::GetCursorScreenPos();
     }
 
@@ -815,7 +825,7 @@ namespace grey::widgets {
         ImGui::SetCursorScreenPos(ImVec2{x, y});
     }
 
-    void cur_set(const ImVec2& pos) {
+    void cur_set(const point& pos) {
         ImGui::SetCursorScreenPos(pos);
     }
 
