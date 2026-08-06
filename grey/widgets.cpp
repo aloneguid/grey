@@ -674,7 +674,12 @@ namespace grey::widgets {
                 ImGui::SetTooltip("%d", static_cast<int>(value));
             } else {
                 char buf[64];
-                sprintf(buf, "%.3f", static_cast<double>(value));
+                int decimals = 3;
+                if (step > 0) {
+                    decimals = std::max(0, (int)std::ceil(-std::log10(step)));
+                }
+                std::string fmt = "%." + std::to_string(decimals) + "f";
+                sprintf(buf, fmt.c_str(), static_cast<double>(value));
                 ImGui::SetTooltip("%s", buf);
             }
         }
