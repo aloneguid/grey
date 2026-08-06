@@ -560,9 +560,9 @@ namespace grey::widgets {
         const float w = ImGui::CalcItemWidth();
 
         // Calculate dimensions
-        const float knob_radius = style.FramePadding.y + (is_small ? 4.0f : 8.0f);
+        const float knob_radius = (is_small ? 3.0f : 6.0f) * scale;
         const float track_height = (is_small ? 1.0f : 2.0f) * scale;
-        const float height = knob_radius * scale;
+        const float height = knob_radius + style.FramePadding.y * 2;
 
         // Reserve space for the widget
         ImVec2 pos = window->DC.CursorPos;
