@@ -45,7 +45,13 @@ namespace grey::widgets {
 
         rgb_colour() : r{0}, g{0}, b{0}, o{0} { }
 
-        rgb_colour(float r, float g, float b, float o = 1) : r{r}, g{g}, b{b}, o{o} { }
+        rgb_colour(float r, float g, float b, float o = 1.0f) : r{r}, g{g}, b{b}, o{o} { }
+
+        /**
+         * Construct from hex representation in the following format: RRGGBB or RRGGBBAA.
+         * Can be optionally prefixed with a #.
+         */
+        rgb_colour(const std::string& hex);
 
         explicit rgb_colour(const ImColor& ic) {
             r = ic.Value.x;
@@ -73,6 +79,8 @@ namespace grey::widgets {
          * @brief Returns true if color has any opacity at all
         */
         operator bool() const { return o > 0; }
+
+        [[nodiscard]] const std::string to_hex(bool prepend_hash = true) const;
     };
 
     /**
@@ -590,7 +598,7 @@ namespace grey::widgets {
      * @param colour 
      * @return 
      */
-    bool colour(const std::string& label, unsigned int& colour);
+    bool colour(const std::string& label, rgb_colour& colour);
 
     /**
      * @brief 

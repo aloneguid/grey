@@ -8,6 +8,8 @@
 #include "imgui.h"
 #include <iostream>
 #include <type_traits>
+
+#include "widgets.h"
 #include "magic_enum/magic_enum.hpp"
 
 namespace grey::common {
@@ -57,54 +59,6 @@ namespace grey::common {
     static void write_enum(fkyaml::node &n, const std::string &key, const T &value) {
         static_assert(std::is_enum_v<T>, "T must be an enum");
         n[key] = std::string(magic_enum::enum_name(value));
-    }
-
-    static unsigned int hex_str_to_imgui_col(const std::string &hex) {
-        std::string h = hex;
-
-        // Remove # prefix if present
-        if(!h.empty() && h[0] == '#') {
-            h = h.substr(1);
-        }
-
-        // Parse hex string (expects RRGGBB or RRGGBBAA format)
-        if(h.length() == 6) {
-            try {
-                unsigned long value = std::stoul(h, nullptr, 16);
-                // RGB format - add full alpha
-                float r = ((value >> 16) & 0xFF) / 255.0f;
-                float g = ((value >> 8) & 0xFF) / 255.0f;
-                float b = (value & 0xFF) / 255.0f;
-
-                ImColor ic{r, g, b};
-                return ic;
-            } catch(...) {
-                return 0;
-            }
-        }
-
-        return 0;
-    }
-
-    static std::string imgui_col_to_hex_str(unsigned int color, bool prepend_hash = true) {
-        ImColor ic{color};
-        std::string hex = std::format("{}{:02X}{:02X}{:02X}",
-            prepend_hash ? "#" : "",
-            (int) (ic.Value.x * 255), (int) (ic.Value.y * 255),
-                                      (int) (ic.Value.z * 255));
-        return hex;
-    }
-
-    static bool read_color(const fkyaml::node& node, const std::string& key, unsigned& color) {
-        std::string hex;
-        if(!read<std::string>(node, key, hex)) return false;
-        color = hex_str_to_imgui_col(hex);
-        return true;
-    }
-
-    static void write_color(fkyaml::node& node, const std::string& key, unsigned color) {
-        std::string hex = imgui_col_to_hex_str(color, false);
-        write<std::string>(node, key, hex);
     }
 
     template<typename TState>
