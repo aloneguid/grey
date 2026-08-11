@@ -2,7 +2,7 @@
 
 env:
   VERSION: 0.0.0
-  PACKAGE_SUFFIX: '-pre.45'
+  PACKAGE_SUFFIX: '-pre.46'
   # PACKAGE_SUFFIX: ''
   ASM_VERSION: 0.0.0
   BUILD_TYPE: Release
@@ -57,7 +57,7 @@ jobs:
       CMAKE_OPTIONS: ${{ matrix.cmake_options }}
 
     steps:
-      
+
     - uses: actions/checkout@v4
       with:
         submodules: true
@@ -71,7 +71,7 @@ jobs:
     - uses: friendlyanon/setup-vcpkg@v1
       # seems like the absense of commit hash expects vcpkg submodule, i don't want that
       with:
-        committish: ${{ env.VCPKG_HASH }} 
+        committish: ${{ env.VCPKG_HASH }}
         # set to false to clear any cache in case of build errors
         cache: false
 
@@ -216,59 +216,59 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y xvfb scrot mesa-utils libgl1-mesa-dri libegl1 libglu1-mesa xterm
-          
-          
+
+
       - name: Run app and capture screenshot (Linux)
         if: runner.os == 'Linux'
         run: |
           # Start Xvfb with GLX extension
           Xvfb :99 -screen 0 1920x1080x24 +extension GLX +render -noreset &
           export DISPLAY=:99
-          
+
           # Use software rendering
           export LIBGL_ALWAYS_SOFTWARE=1
           export MESA_GL_VERSION_OVERRIDE=3.3
 
           # Wait for Xvfb to be ready
           sleep 2
-          
+
           # Verify display is working
           glxinfo | head -20 || echo "GLX not available"
 
           # Start xterm (optional, for debugging)
           xterm &
-          
+
           # Run the app in background
           chmod +x dotnet/ConsoleDemo/bin/Release/net10.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo
                     dotnet/ConsoleDemo/bin/Release/net10.0/${{ matrix.dotnet_rid }}/publish/ConsoleDemo 2>&1 | tee app.log &
           APP_PID=$!
-          
+
           # Wait for app to render
           sleep 5
-          
+
           # Capture screenshot
           mkdir -p screenshots
           scrot screenshots/demo-${{ matrix.dotnet_rid }}.png
 
           # Show app logs
           cat app.log || true
-          
+
           # Kill the app
           kill $APP_PID || true
-          
+
       - name: Run app and capture screenshot (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           # Start the app in background
           $app = Start-Process -FilePath "dotnet\ConsoleDemo\bin\Release\net10.0\${{ matrix.dotnet_rid }}\publish\ConsoleDemo.exe" -PassThru
-          
+
           # Wait for app to render
           Start-Sleep -Seconds 5
-          
+
           # Capture screenshot using PowerShell
           New-Item -ItemType Directory -Force -Path screenshots
-          
+
           Add-Type -AssemblyName System.Windows.Forms,System.Drawing
           $screens = [System.Windows.Forms.Screen]::AllScreens
           $bounds = $screens[0].Bounds
@@ -278,7 +278,7 @@ jobs:
           $bitmap.Save("screenshots\demo-${{ matrix.dotnet_rid }}.png", [System.Drawing.Imaging.ImageFormat]::Png)
           $graphics.Dispose()
           $bitmap.Dispose()
-          
+
           # Kill the app
           Stop-Process -Id $app.Id -Force -ErrorAction SilentlyContinue
 
@@ -303,7 +303,7 @@ jobs:
 
   release:
     name: '🕋 Release library'
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
     needs:
     - build-managed
     if: github.ref == 'refs/heads/master'
