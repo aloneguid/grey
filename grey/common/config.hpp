@@ -5,11 +5,9 @@
 #include <fstream>
 #include <fkYAML/node.hpp>
 #include "fss.h"
-#include "imgui.h"
+#include "../model.h"
 #include <iostream>
 #include <type_traits>
-
-#include "widgets.h"
 #include "magic_enum/magic_enum.hpp"
 
 namespace grey::common {
@@ -59,6 +57,19 @@ namespace grey::common {
     static void write_enum(fkyaml::node &n, const std::string &key, const T &value) {
         static_assert(std::is_enum_v<T>, "T must be an enum");
         n[key] = std::string(magic_enum::enum_name(value));
+    }
+
+    static bool read_color(const fkyaml::node& node, const std::string& key, rgb_colour& value_ref) {
+        std::string hex;
+        if(read<std::string>(node, key, hex)) {
+            value_ref = rgb_colour(hex);
+            return true;
+        }
+        return false;
+    }
+
+    static void write_color(fkyaml::node &n, const std::string& key, const rgb_colour& value_ref) {
+        n[key] = value_ref.to_hex(false);
     }
 
     template<typename TState>
