@@ -1,5 +1,6 @@
 #pragma once
 #include "imgui.h"
+#include "fonts/MaterialIcons.h"
 #include "model.h"
 #include <string>
 #include <vector>

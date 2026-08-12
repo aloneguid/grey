@@ -8,6 +8,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace grey;
 namespace w = grey::widgets;
 
 vector<string> items = {"item1", "item2", "item3"};
@@ -124,19 +125,19 @@ int main(int argc, char* argv[]) {
                 if(tab) {
                     w::label("simple text");
                     w::sl(); w::label(ICON_MD_5G " icon1");
-                    w::sl(); w::label("primary", w::emphasis::primary);
-                    w::sl(); w::label("secondary", w::emphasis::secondary);
-                    w::sl(); w::label("success", w::emphasis::success);
-                    w::sl(); w::label("error", w::emphasis::error);
-                    w::sl(); w::label("warning", w::emphasis::warning);
-                    w::sl(); w::label("info", w::emphasis::info);
+                    w::sl(); w::label("primary", emphasis::primary);
+                    w::sl(); w::label("secondary", emphasis::secondary);
+                    w::sl(); w::label("success", emphasis::success);
+                    w::sl(); w::label("error", emphasis::error);
+                    w::sl(); w::label("warning", emphasis::warning);
+                    w::sl(); w::label("info", emphasis::info);
 
                     w::label("hover for simple tooltip");
                     w::tt("simple tooltip");
 
                     w::sl();
                     w::label("hover for rich tooltip");
-                    if(w::rich_tt tt{w::show_delay::immediate}; tt) {
+                    if(w::rich_tt tt{show_delay::immediate}; tt) {
                         w::label("rich tooltip content");
                         w::sep();
                         w::button("even button here");
@@ -147,12 +148,12 @@ int main(int argc, char* argv[]) {
                     w::sep("buttons");
 
                     w::button("simple");
-                    w::sl(); w::button("Primary", w::emphasis::primary);
-                    w::sl(); w::button("Secondary", w::emphasis::secondary);
-                    w::sl(); w::button("Success", w::emphasis::success);
-                    w::sl(); w::button("Error", w::emphasis::error);
-                    w::sl(); w::button("Warning", w::emphasis::warning);
-                    w::sl(); w::button("Info", w::emphasis::info);
+                    w::sl(); w::button("Primary", emphasis::primary);
+                    w::sl(); w::button("Secondary", emphasis::secondary);
+                    w::sl(); w::button("Success", emphasis::success);
+                    w::sl(); w::button("Error", emphasis::error);
+                    w::sl(); w::button("Warning", emphasis::warning);
+                    w::sl(); w::button("Info", emphasis::info);
                     w::sl(); w::label(text);
                     if(w::button("add dot")) {
                         text += ".";
@@ -183,8 +184,8 @@ int main(int argc, char* argv[]) {
                     static bool slider_ticks = false;
                     w::checkbox("ticks", slider_ticks);
                     w::slider(slider_value_float, 0.0f, 1.0f, "slider float", 0.1f, slider_ticks);
-                    w::slider(slider_value_float, 0.0f, 1.0f, "slider float (small)", 0.1f, slider_ticks, w::emphasis::none, true);
-                    w::slider(slider_value_float, 0.0f, 1.0f, "slider float secondary", 0.1f, slider_ticks, w::emphasis::secondary);
+                    w::slider(slider_value_float, 0.0f, 1.0f, "slider float (small)", 0.1f, slider_ticks, emphasis::none, true);
+                    w::slider(slider_value_float, 0.0f, 1.0f, "slider float secondary", 0.1f, slider_ticks, emphasis::secondary);
                     w::slider_classic(slider_value_float, 0.0f, 1.0f, "slider classic");
 
                     w::slider(slider_value_int, 0, 10, "slider int", 2, slider_ticks);
@@ -509,11 +510,11 @@ This is a **bold** text and this is an *italic* text.
 
 
         with_status_bar(
-            w::label(ICON_MD_HEAT_PUMP, w::emphasis::primary);
+            w::label(ICON_MD_HEAT_PUMP, emphasis::primary);
             w::sl();
             w::label("|", 0, false);
             w::sl();
-            if(w::button("pop!", w::emphasis::none, true, true)) {
+            if(w::button("pop!", emphasis::none, true, true)) {
                 status_pop.open();
             }
             w::sl();

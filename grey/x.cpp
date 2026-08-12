@@ -6,6 +6,7 @@
 #include <stack>
 
 using namespace std;
+using namespace grey;
 namespace w = grey::widgets;
 
 #include "common/os.h"
@@ -86,7 +87,7 @@ EXPORTED void sl(float offset) {
 
 EXPORTED void label(const char* c_text, int32_t emphasis, int32_t text_wrap_pos, bool enabled) {
     string text{c_text};
-    w::label(text, (w::emphasis)emphasis, text_wrap_pos, enabled);
+    w::label(text, (grey::emphasis)emphasis, text_wrap_pos, enabled);
 }
 
 EXPORTED bool selectable(const char* c_text, bool span_columns) {
@@ -101,7 +102,7 @@ EXPORTED bool checkbox(const char* c_label, bool* is_checked, bool is_small) {
 
 EXPORTED bool button(const char* c_text, int32_t emphasis, bool is_enabled, bool is_small) {
     string text{c_text};
-    return w::button(text, (w::emphasis)emphasis, is_enabled, is_small);
+    return w::button(text, (grey::emphasis)emphasis, is_enabled, is_small);
 }
 
 EXPORTED void sep(const char* c_text) {
@@ -147,20 +148,20 @@ EXPORTED void spinner_hbo_dots(float radius, float thickness, float speed, int32
 
 EXPORTED bool slider_float(float* value, float min, float max, const char* c_label, float step, bool ticks, int32_t emphasis) {
     string label{ c_label };
-    return w::slider(*value, min, max, label, step, ticks, (w::emphasis)emphasis);
+    return w::slider(*value, min, max, label, step, ticks, (grey::emphasis)emphasis);
 }
 
 EXPORTED bool slider_int(int32_t* value, int32_t min, int32_t max, const char* c_label, int step, bool ticks, int32_t emphasis) {
     string label{ c_label };
-    return w::slider(*value, min, max, label, step, ticks, (w::emphasis)emphasis);
+    return w::slider(*value, min, max, label, step, ticks, (grey::emphasis)emphasis);
 }
 
 EXPORTED void tt(const char* text, int32_t delay) {
-    w::tt(text, static_cast<w::show_delay>(delay));
+    w::tt(text, static_cast<show_delay>(delay));
 }
 
 void rich_tt(RenderCallback c_render_callback, int32_t delay) {
-    w::rich_tt tt{static_cast<w::show_delay>(delay)};
+    w::rich_tt tt{static_cast<show_delay>(delay)};
     if(tt) {
         c_render_callback();
     }
