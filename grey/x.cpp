@@ -3,7 +3,6 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include <stack>
 
 using namespace std;
 using namespace grey;
@@ -11,9 +10,9 @@ namespace w = grey::widgets;
 
 #include "common/os.h"
 
-float scale = 1.0f; // default scale
+static float scale = 1.0f; // default scale
 
-void platform_init() {
+static void platform_init() {
 #if _WIN32
     grey::common::os::set_dpi_awareness();
 #endif
@@ -56,7 +55,7 @@ EXPORTED void app_run(
     auto app = grey::app::make(title, width, height);
     app->can_resize = true;
     app->load_fixed_font = true;
-    app->run([c_frame_callback, &is_running, &wnd](const grey::app& app) {
+    app->run([c_frame_callback, &wnd](const grey::app& app) {
 
         scale = app.scale;
 
@@ -181,9 +180,8 @@ EXPORTED void tab_bar(const char* c_id, RenderPtrCallback c_render_callback) {
 }
 
 EXPORTED void tab(void* tab_bar_ptr, const char* c_title, bool unsaved, bool selected, RenderCallback c_render_callback) {
-    w::tab_bar* tb = static_cast<w::tab_bar*>(tab_bar_ptr);
-    w::tab_bar_item tbi = tb->next_tab(c_title, unsaved, selected);
-    if(tbi) {
+    auto* tb = static_cast<w::tab_bar*>(tab_bar_ptr);
+    if(w::tab_bar_item tbi = tb->next_tab(c_title, unsaved, selected)) {
         c_render_callback();
     }
 }
@@ -213,8 +211,9 @@ EXPORTED void big_table(const char* c_id,
 {
     vector<string> cols;
     // copy columns into cols vector
+    cols.reserve(c_columns_size);
     for (int i = 0; i < c_columns_size; i++) {
-        cols.push_back(c_columns[i]);
+        cols.emplace_back(c_columns[i]);
     }
 
     w::big_table t{ c_id, cols, static_cast<size_t>(row_count), outer_width * scale, outer_height * scale, alternate_row_bg };
@@ -226,8 +225,9 @@ EXPORTED void big_table(const char* c_id,
 EXPORTED void table(const char* c_id, const char** c_columns, int32_t c_columns_size, float outer_width, float outer_height, bool alternate_row_bg, RenderPtrCallback c_ptr_callback) {
     vector<string> cols;
     // copy columns into cols vector
+    cols.reserve(c_columns_size);
     for(int i = 0; i < c_columns_size; i++) {
-        cols.push_back(c_columns[i]);
+        cols.emplace_back(c_columns[i]);
     }
 
     w::table t{c_id, cols, outer_width * scale, outer_height * scale, alternate_row_bg};
@@ -237,22 +237,22 @@ EXPORTED void table(const char* c_id, const char** c_columns, int32_t c_columns_
 }
 
 EXPORTED bool table_begin_row(void* table_ptr) {
-    w::table* t = static_cast<w::table*>(table_ptr);
+    auto* t = static_cast<w::table*>(table_ptr);
     return t->begin_row();
 }
 
 bool table_next_column(void* table_ptr) {
-    w::table* t = static_cast<w::table*>(table_ptr);
+    auto* t = static_cast<w::table*>(table_ptr);
     return t->next_column();
 }
 
 EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, bool span_all_cols, RenderTreeNodeCallback c_render_callback) {
-    w::tree_node tn{c_label, open_by_default, is_leaf, span_all_cols};
+    const w::tree_node tn{c_label, open_by_default, is_leaf, span_all_cols};
     c_render_callback(tn);
 }
 
 EXPORTED void menu_bar(RenderCallback c_render_callback) {
-    if(w::menu_bar mb; mb) {
+    if(const w::menu_bar mb; mb) {
         c_render_callback();
     }
 }
@@ -267,8 +267,8 @@ void menu(const char* c_title, RenderCallback c_render_callback) {
 // -- application menus
 
 EXPORTED bool menu_item(const char* c_text, bool reserve_icon_space, const char* c_icon) {
-    string text{c_text};
-    string icon{c_icon ? c_icon : ""};
+    const string text{c_text};
+    const string icon{c_icon ? c_icon : ""};
     return w::mi(text, reserve_icon_space, icon);
 }
 
