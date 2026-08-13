@@ -3,16 +3,16 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include <stack>
 
 using namespace std;
+using namespace grey;
 namespace w = grey::widgets;
 
 #include "common/os.h"
 
-float scale = 1.0f; // default scale
+static float scale = 1.0f; // default scale
 
-void platform_init() {
+static void platform_init() {
 #if _WIN32
     grey::common::os::set_dpi_awareness();
 #endif
@@ -55,7 +55,7 @@ EXPORTED void app_run(
     auto app = grey::app::make(title, width, height);
     app->can_resize = true;
     app->load_fixed_font = true;
-    app->run([c_frame_callback, &is_running, &wnd](const grey::app& app) {
+    app->run([c_frame_callback, &wnd](const grey::app& app) {
 
         scale = app.scale;
 
@@ -86,7 +86,7 @@ EXPORTED void sl(float offset) {
 
 EXPORTED void label(const char* c_text, int32_t emphasis, int32_t text_wrap_pos, bool enabled) {
     string text{c_text};
-    w::label(text, (w::emphasis)emphasis, text_wrap_pos, enabled);
+    w::label(text, (grey::emphasis)emphasis, text_wrap_pos, enabled);
 }
 
 EXPORTED bool selectable(const char* c_text, bool span_columns) {
@@ -101,7 +101,7 @@ EXPORTED bool checkbox(const char* c_label, bool* is_checked, bool is_small) {
 
 EXPORTED bool button(const char* c_text, int32_t emphasis, bool is_enabled, bool is_small) {
     string text{c_text};
-    return w::button(text, (w::emphasis)emphasis, is_enabled, is_small);
+    return w::button(text, (grey::emphasis)emphasis, is_enabled, is_small);
 }
 
 EXPORTED void sep(const char* c_text) {
@@ -147,20 +147,20 @@ EXPORTED void spinner_hbo_dots(float radius, float thickness, float speed, int32
 
 EXPORTED bool slider_float(float* value, float min, float max, const char* c_label, float step, bool ticks, int32_t emphasis) {
     string label{ c_label };
-    return w::slider(*value, min, max, label, step, ticks, (w::emphasis)emphasis);
+    return w::slider(*value, min, max, label, step, ticks, (grey::emphasis)emphasis);
 }
 
 EXPORTED bool slider_int(int32_t* value, int32_t min, int32_t max, const char* c_label, int step, bool ticks, int32_t emphasis) {
     string label{ c_label };
-    return w::slider(*value, min, max, label, step, ticks, (w::emphasis)emphasis);
+    return w::slider(*value, min, max, label, step, ticks, (grey::emphasis)emphasis);
 }
 
 EXPORTED void tt(const char* text, int32_t delay) {
-    w::tt(text, static_cast<w::show_delay>(delay));
+    w::tt(text, static_cast<show_delay>(delay));
 }
 
 void rich_tt(RenderCallback c_render_callback, int32_t delay) {
-    w::rich_tt tt{static_cast<w::show_delay>(delay)};
+    w::rich_tt tt{static_cast<show_delay>(delay)};
     if(tt) {
         c_render_callback();
     }
@@ -180,9 +180,8 @@ EXPORTED void tab_bar(const char* c_id, RenderPtrCallback c_render_callback) {
 }
 
 EXPORTED void tab(void* tab_bar_ptr, const char* c_title, bool unsaved, bool selected, RenderCallback c_render_callback) {
-    w::tab_bar* tb = static_cast<w::tab_bar*>(tab_bar_ptr);
-    w::tab_bar_item tbi = tb->next_tab(c_title, unsaved, selected);
-    if(tbi) {
+    auto* tb = static_cast<w::tab_bar*>(tab_bar_ptr);
+    if(w::tab_bar_item tbi = tb->next_tab(c_title, unsaved, selected)) {
         c_render_callback();
     }
 }
@@ -212,8 +211,9 @@ EXPORTED void big_table(const char* c_id,
 {
     vector<string> cols;
     // copy columns into cols vector
+    cols.reserve(c_columns_size);
     for (int i = 0; i < c_columns_size; i++) {
-        cols.push_back(c_columns[i]);
+        cols.emplace_back(c_columns[i]);
     }
 
     w::big_table t{ c_id, cols, static_cast<size_t>(row_count), outer_width * scale, outer_height * scale, alternate_row_bg };
@@ -225,8 +225,9 @@ EXPORTED void big_table(const char* c_id,
 EXPORTED void table(const char* c_id, const char** c_columns, int32_t c_columns_size, float outer_width, float outer_height, bool alternate_row_bg, RenderPtrCallback c_ptr_callback) {
     vector<string> cols;
     // copy columns into cols vector
+    cols.reserve(c_columns_size);
     for(int i = 0; i < c_columns_size; i++) {
-        cols.push_back(c_columns[i]);
+        cols.emplace_back(c_columns[i]);
     }
 
     w::table t{c_id, cols, outer_width * scale, outer_height * scale, alternate_row_bg};
@@ -236,22 +237,22 @@ EXPORTED void table(const char* c_id, const char** c_columns, int32_t c_columns_
 }
 
 EXPORTED bool table_begin_row(void* table_ptr) {
-    w::table* t = static_cast<w::table*>(table_ptr);
+    auto* t = static_cast<w::table*>(table_ptr);
     return t->begin_row();
 }
 
 bool table_next_column(void* table_ptr) {
-    w::table* t = static_cast<w::table*>(table_ptr);
+    auto* t = static_cast<w::table*>(table_ptr);
     return t->next_column();
 }
 
 EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, bool span_all_cols, RenderTreeNodeCallback c_render_callback) {
-    w::tree_node tn{c_label, open_by_default, is_leaf, span_all_cols};
+    const w::tree_node tn{c_label, open_by_default, is_leaf, span_all_cols};
     c_render_callback(tn);
 }
 
 EXPORTED void menu_bar(RenderCallback c_render_callback) {
-    if(w::menu_bar mb; mb) {
+    if(const w::menu_bar mb; mb) {
         c_render_callback();
     }
 }
@@ -266,8 +267,8 @@ void menu(const char* c_title, RenderCallback c_render_callback) {
 // -- application menus
 
 EXPORTED bool menu_item(const char* c_text, bool reserve_icon_space, const char* c_icon) {
-    string text{c_text};
-    string icon{c_icon ? c_icon : ""};
+    const string text{c_text};
+    const string icon{c_icon ? c_icon : ""};
     return w::mi(text, reserve_icon_space, icon);
 }
 

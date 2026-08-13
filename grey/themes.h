@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <functional>
 #include "imgui.h"
 
 namespace grey::themes {
