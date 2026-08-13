@@ -968,7 +968,6 @@ namespace grey::widgets {
 
     bool icon_selector(app& app, const std::string& path, size_t square_size) {
         group g;
-        //g.border_hover(ImGuiCol_ButtonHovered).render();
 
         if(path.empty()) {
             ImGui::Dummy(ImVec2(square_size, square_size));
