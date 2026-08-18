@@ -1067,16 +1067,15 @@ namespace grey::widgets {
         return r;
     }
 
-    bool icon_list(const std::vector<std::pair<std::string, string> >& options, size_t& selected) {
+    bool icon_list(const std::vector<std::pair<std::string, string> >& options, unsigned int& selected) {
         bool changed{false};
         for(int si = 0; si < options.size(); si++) {
             if(si > 0) ImGui::SameLine();
-            bool is_selected = selected == si;
 
-            if(is_selected) {
-                ImGui::Text(options[si].first.c_str());
+            if(bool is_selected = selected == si) {
+                label(options[si].first);
             } else {
-                ImGui::TextDisabled(options[si].first.c_str());
+                label(options[si].first, 0, false);
 
                 // show "hand" cursor for disabled (selectable) options
                 if(ImGui::IsItemHovered()) {

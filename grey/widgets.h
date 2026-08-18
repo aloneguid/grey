@@ -508,7 +508,7 @@ namespace grey::widgets {
      * @param selected 
      * @return 
      */
-    bool icon_list(const std::vector<std::pair<std::string, std::string>>& options, size_t& selected);
+    bool icon_list(const std::vector<std::pair<std::string, std::string>>& options, unsigned int& selected);
 
     bool accordion(const std::string& header, bool default_open = false);
 

@@ -15,6 +15,7 @@ using namespace std::chrono;
 #include <tlhelp32.h>
 #include <winnt.h>
 #include <winternl.h>
+#include "win32/os.h"
 
 #pragma comment(lib, "pdh.lib")
 #pragma comment(lib, "version.lib")
@@ -50,17 +51,21 @@ namespace grey::common {
         return r;
     }
 
-    DWORD process::start(const std::string &cmdline, bool wait_for_exit) {
+    process process::start(const std::string &cmdline, bool wait_for_exit, bool hide_window) {
         STARTUPINFO si{};
         PROCESS_INFORMATION pi{};
         DWORD pid{0};
+        DWORD creation_flags = 0;
+        if(hide_window) {
+            creation_flags |= CREATE_NO_WINDOW;
+        }
 
         if(::CreateProcess(nullptr,
                            const_cast<wchar_t *>(str::to_wstr(cmdline).c_str()),
                            nullptr,
                            nullptr,
                            false,
-                           0,
+                           creation_flags,
                            nullptr,
                            nullptr,
                            &si,
@@ -73,9 +78,12 @@ namespace grey::common {
 
             ::CloseHandle(pi.hProcess);
             ::CloseHandle(pi.hThread);
-                           }
 
-        return pid;
+            return process{pid};
+        }
+
+        string error = win32::os::get_last_error_text();
+        return process{error};
     }
 
     int process::exec(const std::string &cmdline, std::function<void(std::string &)> std_out_new_data) {
@@ -157,14 +165,13 @@ namespace grey::common {
         });
     }
 
-    std::string process::get_module_filename() const {
+    std::string process::get_path() const {
         // Try the modern API first: needs only LIMITED_INFORMATION,
         // works on elevated/protected processes, handles long paths.
         {
-            HANDLE hProcess = ::OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
-            if(hProcess) {
+            if(HANDLE hProcess = ::OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid)) {
                 wchar_t buf[32768];
-                DWORD len = static_cast<DWORD>(std::size(buf));
+                DWORD len = std::size(buf);
                 if(::QueryFullProcessImageNameW(hProcess, 0, buf, &len)) {
                     ::CloseHandle(hProcess);
                     return str::to_str(std::wstring(buf, len));
@@ -174,20 +181,20 @@ namespace grey::common {
         }
 
         // Fall back to the older API.
-        HANDLE hProcess = ::OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
-        if(!hProcess) return "";
-
-        wchar_t buf[MAX_PATH];
-        std::string r;
-        if(::GetModuleFileNameExW(hProcess, nullptr, buf, MAX_PATH)) {
-            r = str::to_str(std::wstring(buf));
+        if(HANDLE hProcess = ::OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid)) {
+            wchar_t buf[MAX_PATH];
+            std::string r;
+            if(::GetModuleFileNameExW(hProcess, nullptr, buf, MAX_PATH)) {
+                r = str::to_str(std::wstring(buf));
+            }
+            ::CloseHandle(hProcess);
+            return r;
         }
-        ::CloseHandle(hProcess);
-        return r;
+        return "";
     }
 
     std::string process::get_name() const {
-        string mfn = get_module_filename();
+        string mfn = get_path();
 
         size_t idx = mfn.find_last_of('\\');
         if(idx != string::npos) {
@@ -221,7 +228,7 @@ namespace grey::common {
 
     std::string process::get_description() const {
         // --- 1. Get executable path ---
-        std::wstring exePath = str::to_wstr(get_module_filename());
+        std::wstring exePath = str::to_wstr(get_path());
         if(exePath.empty()) return "";
 
         // --- 2. Load version-info block ---
@@ -470,7 +477,7 @@ namespace grey::common {
         return r;
     }
 
-    process::PidType process::start(const std::string &cmdline, bool wait_for_exit) {
+    process process::start(const std::string &cmdline, bool wait_for_exit, bool hide_window) {
         pid_t pid = fork();
         if(pid == 0) {
             // Child process
@@ -482,9 +489,9 @@ namespace grey::common {
                 int status;
                 waitpid(pid, &status, 0);
             }
-            return pid;
+            return process{pid};
         }
-        return 0;
+        return process{0};
     }
 
     int process::exec(const std::string &cmdline, std::function<void(std::string &)> std_out_new_data) {
@@ -529,7 +536,7 @@ namespace grey::common {
         });
     }
 
-    std::string process::get_module_filename() const {
+    std::string process::get_path() const {
         char buf[PATH_MAX];
         string path = "/proc/" + to_string(pid) + "/exe";
         ssize_t len = readlink(path.c_str(), buf, sizeof(buf) - 1);

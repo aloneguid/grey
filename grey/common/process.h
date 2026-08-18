@@ -1,6 +1,7 @@
 #pragma once
 #include "platform.h"
 #include <string>
+#include <utility>
 #include <vector>
 #include <functional>
 #include <cstdint>
@@ -35,6 +36,9 @@ namespace grey::common {
         explicit process(const PidType pid) : pid{pid} {
         }
 
+        explicit process(std::string error) : pid{0}, error{std::move(error)} {
+        }
+
         /**
          * @brief Creates the process from the current process.
         */
@@ -46,6 +50,12 @@ namespace grey::common {
             return pid;
         }
 
+        operator bool() const { return pid != 0; }
+
+        [[nodiscard]] std::string get_error() const {
+            return error;
+        }
+
         /**
          * @brief Enumerates all processes on the system.
          * @return
@@ -53,11 +63,13 @@ namespace grey::common {
         static std::vector<process> enumerate();
 
         /**
-         * @brief Starts a process and returns PID on success
-         * @param cmdline
-         * @return PID
+         * @brief Starts a process and returns PID on success. Optionally wait for process exit
+         * @param cmdline command line, including arguments if any.
+         * @param wait_for_exit when true, wait for process exit before returning from the function.
+         * @param hide_window when true, hide process window, or rather attempts to hide it.
+         * @return process instance
         */
-        static PidType start(const std::string& cmdline, bool wait_for_exit = false);
+        static process start(const std::string& cmdline, bool wait_for_exit = false, bool hide_window = false);
 
         /**
          * @brief Executes a command line, captures output and adds to std_out
@@ -75,8 +87,16 @@ namespace grey::common {
         */
         static int exec(const std::string& cmdline, std::function<void(std::string&)> std_out_new_data);
 
-        [[nodiscard]] std::string get_module_filename() const;
+        /**
+         * @brief Gets process path on disk
+         * @return process path
+         */
+        [[nodiscard]] std::string get_path() const;
 
+        /**
+         * @brief Gets process name (name part of the path, including extension on Windows)
+         * @return process name
+         */
         [[nodiscard]] std::string get_name() const;
 
         /**
@@ -109,6 +129,7 @@ namespace grey::common {
 
     private:
         PidType pid;
+        std::string error;
 
 #if PLATFORM_WINDOWS
         // cpu perf counter
