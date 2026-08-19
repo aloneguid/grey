@@ -1,4 +1,4 @@
-﻿cmake_minimum_required (VERSION 3.20)
+﻿cmake_minimum_required (VERSION 3.31)
 
 set (STATIC_NAME libgrey)
 set (DYNAMIC_NAME xgrey)
