@@ -7,6 +7,12 @@
 using namespace std;
 using namespace std::chrono;
 
+namespace grey::common {
+    std::string process::get_name() const {
+        return filesystem::path(get_path()).filename().string();
+    }
+}
+
 #if PLATFORM_WINDOWS
 
 #include <Pdh.h>
@@ -191,17 +197,6 @@ namespace grey::common {
             return r;
         }
         return "";
-    }
-
-    std::string process::get_name() const {
-        string mfn = get_path();
-
-        size_t idx = mfn.find_last_of('\\');
-        if(idx != string::npos) {
-            mfn = mfn.substr(idx + 1);
-        }
-
-        return mfn;
     }
 
     struct find_token {
@@ -545,16 +540,6 @@ namespace grey::common {
             return string(buf);
         }
         return "";
-    }
-
-    std::string process::get_name() const {
-        string mfn = get_module_filename();
-        if(mfn.empty()) return "";
-        size_t idx = mfn.find_last_of('/');
-        if(idx != string::npos) {
-            return mfn.substr(idx + 1);
-        }
-        return mfn;
     }
 
     std::string process::get_description() const {
