@@ -60,7 +60,8 @@ namespace grey {
     }
 
     std::array<float, 4> app::get_clear_color() const {
-        return { ClearColor[0], ClearColor[1], ClearColor[2], ClearColor[3] };
+        float alpha = use_transparency_colour_key_value ? 0.0f : ClearColor[3];
+        return { ClearColor[0], ClearColor[1], ClearColor[2], alpha };
     }
 
     int app::find_monitor_for_main_viewport() {

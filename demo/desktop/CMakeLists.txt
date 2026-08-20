@@ -16,6 +16,12 @@ if(WIN32)
 
     # common settings for Windows
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:wmainCRTStartup")
+else()
+    add_executable (tdemo "main_transparent.cpp")
+
+    target_compile_definitions(tdemo PRIVATE GREY_INCLUDE_IMNODES)
+    target_link_libraries(tdemo libgrey)
+    target_include_directories(tdemo PRIVATE "../../grey")
 endif()
 
 target_compile_definitions(demo PRIVATE GREY_INCLUDE_IMNODES)

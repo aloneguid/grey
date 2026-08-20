@@ -145,24 +145,23 @@ namespace grey {
          */
         bool always_on_top{false};
 
-        // platform-specific flags
-
-#if PLATFORM_WINDOWS
-
-        bool win32_hide_from_taskbar{false};
-
         // transparency
 
         /**
          * @brief If set to true, clear colour will be fully transparent
          */
-        bool win32_use_transparency_colour_key_value{false};
+        bool use_transparency_colour_key_value{false};
 
         /**
          * @brief If less than 255, this value will be used as the alpha value for the entire window, making it semi-transparent.
          */
-        int win32_transparency_window_alpha{255};
+        int transparency_window_alpha{255};
 
+        // platform-specific flags
+
+#if PLATFORM_WINDOWS
+
+        bool win32_hide_from_taskbar{false};
 
         /**
          * @brief sets WS_EX_NOACTIVATE on the window (if you need to create a tool window that does not take focus, useful for notification windows)

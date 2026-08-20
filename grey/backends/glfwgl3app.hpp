@@ -9,6 +9,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include <algorithm>
 #include <chrono>
 #include <thread>
 #include <stdio.h>
@@ -33,10 +34,11 @@
 namespace grey::backends {
     using namespace std;
 
-    struct gl_texture : public grey::texture {
+    struct gl_texture : texture {
         GLuint texture_id;
 
-        gl_texture(GLuint texture_id) : texture{reinterpret_cast<void*>(texture_id)}, texture_id{texture_id} {}
+        explicit gl_texture(const GLuint texture_id) :
+        texture{reinterpret_cast<void*>(texture_id)}, texture_id{texture_id} {}
 
         ~gl_texture() override {
 
@@ -52,7 +54,7 @@ namespace grey::backends {
         fprintf(stderr, "GLFW Error %d: %s\n", error, description);
     }
 
-    static char* g_glsl_version{nullptr};
+    static const char* g_glsl_version{nullptr};
 
     static bool gl_init() {
         glfwSetErrorCallback(glfw_error_callback);
@@ -126,10 +128,23 @@ namespace grey::backends {
             y = my + (mode->height - height) / 2;
         }
 
+        void apply_transparency() {
+            if(!window) return;
+            int alpha = transparency_window_alpha;
+            if(alpha != last_transparency_window_alpha) {
+                last_transparency_window_alpha = alpha;
+                float normalized_alpha = std::clamp(alpha / 255.0f, 0.0f, 1.0f);
+                glfwSetWindowOpacity(window, normalized_alpha);
+            }
+        }
+
         void run(std::function<bool(app& app)> render_frame) {
             // Create window with graphics context
             glfwWindowHint(GLFW_DECORATED, show_title_bar ? GLFW_TRUE : GLFW_FALSE);
             glfwWindowHint(GLFW_FLOATING, always_on_top ? GLFW_TRUE : GLFW_FALSE);
+            if(use_transparency_colour_key_value) {
+                glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+            }
 
             if (center_on_screen) {
                 get_screen_center(window_width, window_height, window_left, window_top);
@@ -142,6 +157,8 @@ namespace grey::backends {
             if (center_on_screen) {
                 glfwSetWindowPos(window, window_left, window_top);
             }
+
+            apply_transparency();
 
             glfwMakeContextCurrent(window);
             glfwSwapInterval(1); // Enable vsync
@@ -174,7 +191,9 @@ namespace grey::backends {
              // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
             if(io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
                 style.WindowRounding = 0.0f;
-                style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+                if(!use_transparency_colour_key_value) {
+                    style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+                }
             }
 
             // Setup Platform/Renderer backends
@@ -221,6 +240,8 @@ namespace grey::backends {
             while(!glfwWindowShouldClose(window) && !done)
 #endif
             {
+                apply_transparency();
+
                 // Poll and handle events (inputs, window resize, etc.)
                 // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
                 // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
@@ -246,7 +267,11 @@ namespace grey::backends {
                 int display_w, display_h;
                 glfwGetFramebufferSize(window, &display_w, &display_h);
                 glViewport(0, 0, display_w, display_h);
-                glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+                if(use_transparency_colour_key_value) {
+                    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+                } else {
+                    glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+                }
                 glClear(GL_COLOR_BUFFER_BIT);
                 ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -339,6 +364,7 @@ namespace grey::backends {
         int window_top{-1};
         int window_width{-1};
         int window_height{-1};
+        int last_transparency_window_alpha{255};
         std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_time;
     };
 }
