@@ -25,14 +25,6 @@ namespace grey {
         virtual ~texture() = default;
     };
 
-#if PLATFORM_WINDOWS
-    enum class win32_transparency_mode {
-        none,
-        colour_key,
-        window
-    };
-#endif
-
     class app {
     public:
         virtual ~app() = default;

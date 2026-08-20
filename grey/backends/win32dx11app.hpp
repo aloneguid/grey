@@ -364,8 +364,8 @@ namespace grey::backends {
         void apply_transparency() {
             if(!hWnd) return;
 
-            bool use_color_key = win32_use_transparency_colour_key_value;
-            int alpha = win32_transparency_window_alpha;
+            bool use_color_key = use_transparency_colour_key_value;
+            int alpha = transparency_window_alpha;
             if(use_color_key == last_use_transparency_colour_key_value &&
                alpha == last_transparency_window_alpha) {
                 return;

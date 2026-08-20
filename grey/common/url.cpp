@@ -67,12 +67,12 @@ namespace grey::common {
         string r = format("{}://{}{}", protocol, host, query_without_parameters);
 
         if(!parameters.empty()) {
-            r += "?";
+            r += '?';
             for(int i = 0; i < parameters.size(); i++) {
-                if(i > 0) r += "&";
+                if(i > 0) r += '&';
                 r += parameters[i].first;
                 if(!parameters[i].second.empty()) {
-                    r += "=";
+                    r += '=';
                     r += parameters[i].second;
                 }
             }
