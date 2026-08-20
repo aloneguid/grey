@@ -185,6 +185,10 @@ namespace grey::common {
          * Called automatically by is_key_down/are_keys_down when their `rescan` parameter is true.
          * Call this directly if you want to batch multiple is_key_down/are_keys_down calls
          * (with rescan = false) against a single, consistent snapshot.
+         *
+         * Note that on Linux this does not work by default due to the lack of permissions to read input events globally.
+         * The easiest way to enable this is to add yourself to "input" group: `sudo usermod -aG input $USER`.
+         *
          */
         static void refresh_state();
 

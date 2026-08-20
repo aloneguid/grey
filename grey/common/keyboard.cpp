@@ -1,5 +1,6 @@
 #include "keyboard.h"
 #include "platform.h"
+#include <string>
 
 #if PLATFORM_WINDOWS
 #include <windows.h>
