@@ -609,7 +609,7 @@ namespace grey::backends {
                 if(!render_frame(*this)) {
                     // Post message to close the window, which should be handled in the next iteration of the message loop.
                     ::PostMessage(hWnd, WM_CLOSE, 0, 0);
-                    done = true;
+                    // done = true;
                 }
 
                 // Rendering

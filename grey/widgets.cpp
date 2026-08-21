@@ -7,6 +7,7 @@
 #include "3rdparty/imgui_markdown/imgui_markdown.h"
 #include "fonts/font_loader.h"
 #include <iostream>
+#include <utility>
 // for Windows-specific hacks
 #ifdef _WIN32
 #include <Windows.h>
@@ -22,6 +23,9 @@ namespace grey::widgets {
     float scale = 1.0f;
 
     static int incrementing_id;
+
+    // Windows Draw List, re-assigned on window initialisation on every frame redraw
+    static ImDrawList* wdl{nullptr};
 
     int generate_int_id() {
         return incrementing_id++;
@@ -140,7 +144,7 @@ namespace grey::widgets {
 
     // ---- window ----
 
-    window::window(const std::string& title, bool* p_open) : title{title} {
+    window::window(std::string title, bool* p_open) : title{std::move(title)} {
         this->p_open = p_open;
         wc.ViewportFlagsOverrideSet = ImGuiViewportFlags_NoAutoMerge;
     }
@@ -263,6 +267,7 @@ namespace grey::widgets {
         }
 
         ImGui::Begin(title.c_str(), p_open, flags);
+        wdl = ImGui::GetWindowDrawList();
     }
 
     void window::leave() {
@@ -296,6 +301,7 @@ namespace grey::widgets {
         if(border_size >= 0)
             ImGui::PopStyleVar();
 
+        wdl = nullptr;
         ImGui::End();
 
         if(fill_viewport_enabled) {
@@ -479,7 +485,7 @@ namespace grey::widgets {
         }
     }
 
-    ImVec2 text_size_get(const string& text, float font_size_diff, float wrap_width) {
+    sz text_size_get(const string& text, float font_size_diff, float wrap_width) {
         font_scaler scaler(font_size_diff);
         return ImGui::CalcTextSize(text.c_str(), nullptr, false, wrap_width);
     }
@@ -864,9 +870,7 @@ namespace grey::widgets {
         return rect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
     }
 
-    void draw_text(const ImVec2& pos, emphasis emp, const std::string& text) {
-        ImDrawList* dl = ImGui::GetWindowDrawList();
-
+    void draw_text(const point& pos, emphasis emp, const std::string& text) {
         ImU32 col;
         if(emp == emphasis::none) {
             col = ImGui::GetColorU32(ImGuiCol_Text);
@@ -875,12 +879,23 @@ namespace grey::widgets {
             set_emphasis_colours(emp, normal, hovered, active);
             col = rgb_colour{normal};
         }
-        dl->AddText(pos, col, text.c_str());
+        wdl->AddText(pos, col, text.c_str());
+    }
+
+    void draw_text(const point& pos, const rgb_colour& colour, const std::string& text) {
+        wdl->AddText(pos, colour, text.c_str());
     }
 
     void draw_rect(const rect& rect, rgb_colour colour) {
-        ImDrawList* dl = ImGui::GetWindowDrawList();
-        dl->AddRect(rect.lt(), rect.rb(), colour, 0, 10);
+        wdl->AddRect(rect.lt(), rect.rb(), colour, 0, 10);
+    }
+
+    void draw_circle(const point& center, float radius, rgb_colour colour, bool filled, float thickness, int num_segments) {
+        if(filled) {
+            wdl->AddCircleFilled(center, radius, colour, num_segments);
+        } else {
+            wdl->AddCircle(center, radius, colour, num_segments, thickness);
+        }
     }
 
     void dummy(float width, float height) {

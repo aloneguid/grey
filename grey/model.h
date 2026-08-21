@@ -36,6 +36,20 @@ namespace grey {
     };
 
     /**
+     * @brief Trivial size struct for storing 2D dimensions
+     */
+    struct sz {
+        float width;
+        float height;
+
+        sz() : width{0}, height{0} {}
+        sz(const float width, const float height) : width{width}, height{height} {}
+        sz(const ImVec2& dim) : width{dim.x}, height{dim.y} {}
+
+        operator ImVec2() const { return ImVec2{width, height}; }
+    };
+
+    /**
      * @brief Trivial rectangle struct for storing item bounds.
      */
     struct rect {

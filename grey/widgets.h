@@ -62,7 +62,7 @@ namespace grey::widgets {
 
     class window : public guardable {
     public:
-        window(const std::string& title, bool* p_open = nullptr);
+        window(std::string title, bool* p_open = nullptr);
 
 #ifdef _WIN32
         bool win32_exclude_from_capture{false};
@@ -373,9 +373,13 @@ namespace grey::widgets {
      */
     rect item_rect_get();
 
-    void draw_text(const ImVec2& pos, emphasis emp, const std::string& text);
+    void draw_text(const point& pos, emphasis emp, const std::string& text);
+
+    void draw_text(const point& pos, const rgb_colour& colour, const std::string& text);
 
     void draw_rect(const rect& rect, rgb_colour colour);
+
+    void draw_circle(const point& center, float radius, rgb_colour colour, bool filled = false, float thickness = 1.0f, int num_segments = 0);
 
     void dummy(float width, float height);
 
@@ -390,7 +394,7 @@ namespace grey::widgets {
         float font_size_diff = .0f,
         bool center_x = false, bool center_y = false);
 
-    ImVec2 text_size_get(const std::string& text, float font_size_diff = .0f, float wrap_width = -1);
+    sz text_size_get(const std::string& text, float font_size_diff = .0f, float wrap_width = -1);
 
     /**
      * @brief Selectable item
