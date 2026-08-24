@@ -201,6 +201,14 @@ namespace grey::common {
         static bool is_key_down(key k, bool rescan = true);
 
         /**
+         * @brief Check whether a key is currently toggled. Makes sense for keys like Caps Locks, Num Lock, Scroll Lock.
+         *
+         * @param k Key to check
+         * @param rescan If true (default), the cached keyboard state is refreshed first; pass false to reuse the last refreshed state
+         */
+        static bool is_key_toggled(key k, bool rescan = true);
+
+        /**
          * @brief Check whether all of the given keys are currently pressed
          *
          * @param keys Keys to check
@@ -250,6 +258,7 @@ namespace grey::common {
 #elif PLATFORM_LINUX
         static constexpr size_t bits_per_long = 8 * sizeof(unsigned long);
         static inline unsigned long state_[(KEY_MAX / bits_per_long) + 1]{};
+        static inline unsigned long led_state_[(LED_MAX / bits_per_long) + 1]{};
 #endif
     };
 }

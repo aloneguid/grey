@@ -26,6 +26,14 @@ namespace grey::common {
 
         return (state_[static_cast<int>(k)] & 0x80) != 0;
     }
+
+    bool keyboard::is_key_toggled(key k, bool rescan) {
+        if(rescan) {
+            refresh_state();
+        }
+
+        return (state_[static_cast<int>(k)] & 0x1) != 0;
+    }
 #endif
 
 #if PLATFORM_LINUX
@@ -72,20 +80,17 @@ namespace grey::common {
             ::closedir(dir);
         }
 
-        // scans /dev/input/event* devices for a lit LED, used for caps lock state.
-        bool is_evdev_led_on(int code) {
-            if(code < 0 || code > LED_MAX) {
-                return false;
-            }
+        // scans /dev/input/event* devices and ORs each device's LED bitmask into `state`.
+        void scan_all_leds(unsigned long* state, size_t state_size) {
+            std::memset(state, 0, state_size * sizeof(unsigned long));
 
             DIR* dir = ::opendir("/dev/input");
             if(!dir) {
-                return false;
+                return;
             }
 
-            bool on = false;
             dirent* entry;
-            while(!on && (entry = ::readdir(dir)) != nullptr) {
+            while((entry = ::readdir(dir)) != nullptr) {
                 std::string name = entry->d_name;
                 if(name.rfind("event", 0) != 0) {
                     continue;
@@ -98,20 +103,22 @@ namespace grey::common {
                 }
 
                 unsigned long led_bits[(LED_MAX / bits_per_long) + 1]{};
-                if(::ioctl(fd, EVIOCGLED(sizeof(led_bits)), led_bits) >= 0 && is_bit_set(led_bits, code)) {
-                    on = true;
+                if(::ioctl(fd, EVIOCGLED(sizeof(led_bits)), led_bits) >= 0) {
+                    for(size_t i = 0; i < state_size; i++) {
+                        state[i] |= led_bits[i];
+                    }
                 }
 
                 ::close(fd);
             }
 
             ::closedir(dir);
-            return on;
         }
     }
 
     void keyboard::refresh_state() {
         scan_all_keys(state_, sizeof(state_) / sizeof(state_[0]));
+        scan_all_leds(led_state_, sizeof(led_state_) / sizeof(led_state_[0]));
     }
 
     bool keyboard::is_key_down(key k, bool rescan) {
@@ -125,6 +132,29 @@ namespace grey::common {
         }
 
         return is_bit_set(state_, code);
+    }
+
+    bool keyboard::is_key_toggled(key k, bool rescan) {
+        if(rescan) {
+            refresh_state();
+        }
+
+        int code;
+        switch(k) {
+            case key::caps_lock:
+                code = LED_CAPSL;
+                break;
+            case key::num_lock:
+                code = LED_NUML;
+                break;
+            case key::scroll_lock:
+                code = LED_SCROLLL;
+                break;
+            default:
+                return false;
+        }
+
+        return is_bit_set(led_state_, code);
     }
 
 #endif
