@@ -15,6 +15,11 @@
 
 namespace grey::common {
 #if PLATFORM_WINDOWS
+    void keyboard::clear_state() {
+        ::ZeroMemory(state_, sizeof(state_));
+        ::SetKeyboardState(state_);
+    }
+
     void keyboard::refresh_state() {
         ::GetKeyboardState(state_);
     }
@@ -114,6 +119,11 @@ namespace grey::common {
 
             ::closedir(dir);
         }
+    }
+
+    void keyboard::clear_state() {
+        std::memset(state_, 0, sizeof(state_));
+        std::memset(led_state_, 0, sizeof(led_state_));
     }
 
     void keyboard::refresh_state() {

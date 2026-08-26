@@ -193,6 +193,11 @@ namespace grey::common {
         static void refresh_state();
 
         /**
+         * Forces internal keyboard buffer to clear. This is useful for instance when installing a Windows low-level hook and keyboard functions are not working as expected.
+         */
+        static void clear_state();
+
+        /**
          * @brief Check whether a key is currently pressed
          *
          * @param k Key to check
