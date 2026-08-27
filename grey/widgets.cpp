@@ -856,6 +856,12 @@ namespace grey::widgets {
         ImGui::SetCursorScreenPos(pos);
     }
 
+    rect window_rect_get() {
+        point pos = ImGui::GetWindowPos();
+        sz size = ImGui::GetWindowSize();
+        return rect{pos, pos + size};
+    }
+
     float avail_x() {
         return ImGui::GetContentRegionAvail().x;
     }

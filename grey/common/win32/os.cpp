@@ -240,16 +240,6 @@ namespace grey::common::win32::os {
         return r;
     }
 
-    bool get_mouse_pos(long& x, long& y) {
-        POINT pt;
-        if(!::GetCursorPos(&pt)) return false;
-
-        x = pt.x;
-        y = pt.y;
-        return true;
-    }
-
-
     // RAII wrapper for screen capture GDI resources
     struct screen_capture_ctx {
         int w{0}, h{0};

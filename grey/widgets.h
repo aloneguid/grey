@@ -363,6 +363,12 @@ namespace grey::widgets {
     void cur_move(float x, float y);
     void cur_move(ImVec2 shift);
 
+    /**
+     * @brief Get window position and dimensions in screen space;
+     * @return rect
+     */
+    rect window_rect_get();
+
     float avail_x();
     float avail_y();
 

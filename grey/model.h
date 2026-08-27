@@ -4,6 +4,8 @@
 
 namespace grey {
 
+    struct sz;
+
     enum class emphasis : int32_t {
         none = 0,
         primary = 1,
@@ -32,6 +34,8 @@ namespace grey {
         point(const float x, const float y) : x{x}, y{y} {}
         point(const ImVec2& pos) : x{pos.x}, y{pos.y} {}
 
+        point operator+(const sz& dimensions) const;
+
         operator ImVec2() const { return ImVec2{x, y}; }
     };
 
@@ -48,6 +52,10 @@ namespace grey {
 
         operator ImVec2() const { return ImVec2{width, height}; }
     };
+
+    inline point point::operator+(const sz& dimensions) const {
+        return point{x + dimensions.width, y + dimensions.height};
+    }
 
     /**
      * @brief Trivial rectangle struct for storing item bounds.
@@ -68,13 +76,19 @@ namespace grey {
          * @brief Left-top corner
          * @return
          */
-        [[nodiscard]] ImVec2 lt() const { return ImVec2{x_min, y_min}; }
+        [[nodiscard]] point lt() const { return  point{x_min, y_min}; }
 
         /**
          * @brief Right-bottom corner
          * @return
          */
-        [[nodiscard]] ImVec2 rb() const { return ImVec2{x_max, y_max}; }
+        [[nodiscard]] point rb() const { return point{x_max, y_max}; }
+
+        [[nodiscard]] float width() const { return x_max - x_min; }
+
+        [[nodiscard]] float height() const { return y_max - y_min; }
+
+        [[nodiscard]] point centre() const { return point{(x_min + x_max) / 2, (y_min + y_max) / 2}; }
     };
 
     class rgb_colour {

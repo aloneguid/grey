@@ -46,8 +46,6 @@ namespace grey::common::win32::os {
      */
     std::string get_pressed_keys_text();
 
-    bool get_mouse_pos(long& x, long& y);
-
     // imaging
 
     bool capture_screen(int& width, int& height, std::vector<unsigned char>& out_pixels);
