@@ -49,20 +49,23 @@ using namespace std;
 namespace grey::fonts {
 
     ImFont* font_loader::fixed_size_font{nullptr};
+    ImFont* font_loader::bold_font{nullptr};
 
-    ImFont* font_loader::load_system_font(ImGuiIO& io) {
-        ImFont* f{nullptr};
+    void font_loader::load_system_fonts(ImGuiIO& io, ImFont** system_font,
+        bool load_bold_font, ImFont** bold_font) {
 #if PLATFORM_WINDOWS
         string path = grey::common::os::get_system_fonts_path();
         // Segoe UI is the default UI font for Windows 10 and 11.
-        path += "\\segoeui.ttf";
-        f = io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f);
+        string path_normal = path + "\\segoeui.ttf";
+        *system_font = io.Fonts->AddFontFromFileTTF(path_normal.c_str(), 18.0f);
+        if(load_bold_font) {
+            string path_bold = path + "\\segoeuib.ttf";
+            *bold_font = io.Fonts->AddFontFromFileTTF(path_bold.c_str(), 18.0f);
+        }
 #else
         string path = GetDefaultFontPath();
-        f = io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f);
+        *system_font = io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f);
 #endif
-        return f;
-
     }
 
     ImFont* font_loader::load_fixed_font(ImGuiIO& io) {
@@ -79,12 +82,13 @@ namespace grey::fonts {
         return f;
     }
 
-    void font_loader::load_font(bool load_fa, bool load_fixed) {
+    void font_loader::load_font(bool load_fa, bool load_fixed, bool load_bold) {
         ImGuiIO& io = ImGui::GetIO();
 
-        ImFont* f = load_system_font(io);
+        ImFont* default_font;
+        load_system_fonts(io, &default_font, load_bold, &bold_font);
 
-        if(f && load_fa) {
+        if(default_font && load_fa) {
 
             // note that FA are very RAM heavy, it adds more than 100mb!!!
 
@@ -157,5 +161,11 @@ namespace grey::fonts {
 
     ImFont* font_loader::get_fixed_size_font(float scale) {
         return fixed_size_font;
+    }
+
+    ImFont* font_loader::get_font(font_weight weight) {
+        if(weight == font_weight::fixed_size)   return fixed_size_font;
+        if(weight == font_weight::bold)         return bold_font;
+        return nullptr;
     }
 }

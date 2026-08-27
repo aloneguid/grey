@@ -50,6 +50,8 @@ namespace grey {
 
         bool load_fixed_font{false};
 
+        bool load_bold_font{true};
+
         float scale{1.0f};
 
         std::function<void()> on_initialised;

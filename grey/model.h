@@ -23,6 +23,12 @@ namespace grey {
         slow
     };
 
+    enum class font_weight : int32_t {
+        regular = 0,
+        fixed_size = 1,
+        bold = 2
+    };
+
     /**
      * @brief Trivial point struct for storing 2D coordinates
      */

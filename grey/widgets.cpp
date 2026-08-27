@@ -104,21 +104,22 @@ namespace grey::widgets {
         ImGui::PushID(id);
     }
 
-    font_scaler::font_scaler(float size_delta) {
-        needs_resize = size_delta > 0.01 || size_delta < -0.01;
-        if(needs_resize) {
+    font_adj::font_adj(float size_delta, font_weight weight) {
+        font_pushed = size_delta > 0.01 || size_delta < -0.01 || weight != font_weight::regular;
+        if(font_pushed) {
             float font_size = ImGui::GetStyle().FontSizeBase;
             float new_size = font_size + size_delta;
+            ImFont* font = fonts::font_loader::get_font(weight);
             if(new_size <= 0) {
-                needs_resize = false;
+                font_pushed = false;
             } else {
-                ImGui::PushFont(nullptr, new_size);
+                ImGui::PushFont(font, new_size);
             }
         }
     }
 
-    font_scaler::~font_scaler() {
-        if(needs_resize) {
+    font_adj::~font_adj() {
+        if(font_pushed) {
             ImGui::PopFont();
         }
     }
@@ -468,8 +469,8 @@ namespace grey::widgets {
     }
 
     void label(const std::string& text, emphasis emp, size_t text_wrap_pos, bool enabled, float font_size_diff,
-        bool center_x, bool center_y) {
-        font_scaler scaler(font_size_diff);
+               bool center_x, bool center_y) {
+        font_adj scaler(font_size_diff);
 
         if(emp == emphasis::none || !enabled) {
             label(text, text_wrap_pos, enabled, center_x, center_y);
@@ -486,7 +487,7 @@ namespace grey::widgets {
     }
 
     sz text_size_get(const string& text, float font_size_diff, float wrap_width) {
-        font_scaler scaler(font_size_diff);
+        font_adj scaler(font_size_diff);
         return ImGui::CalcTextSize(text.c_str(), nullptr, false, wrap_width);
     }
 
@@ -683,8 +684,8 @@ namespace grey::widgets {
             } else {
                 char buf[64];
                 int decimals = 3;
-                if (step > 0) {
-                    decimals = std::max(0, (int)std::ceil(-std::log10(step)));
+                if(step > 0) {
+                    decimals = std::max(0, (int) std::ceil(-std::log10(step)));
                 }
                 std::string fmt = "%." + std::to_string(decimals) + "f";
                 sprintf(buf, fmt.c_str(), static_cast<double>(value));
@@ -786,16 +787,77 @@ namespace grey::widgets {
         return input_ml<char *>(id, value, value_length, height, autoscroll, enabled, use_fixed_font);
     }
 
-    static ImGui::MarkdownConfig mdConfig{
-        nullptr,
-        nullptr,
-        nullptr,
-        ICON_MD_LINK
-    };
+    void markdown_callback_link(ImGui::MarkdownLinkCallbackData data) {
+        if(!data.isImage) {
+            ImGuiPlatformIO& pio = ImGui::GetPlatformIO();
+            if(pio.Platform_OpenInShellFn) {
+                const std::string url(data.link, data.linkLength);
+                pio.Platform_OpenInShellFn(ImGui::GetCurrentContext(), url.c_str());
+            }
+        }
+    }
 
-    void markdown(const std::string& text) {
+    void markdown_callback_tooltip(ImGui::MarkdownTooltipCallbackData data) {
+        if(!data.linkData.isImage && data.linkData.link) {
+            string text{data.linkData.link, static_cast<string::size_type>(data.linkData.linkLength)};
+            tt(text);
+        }
+    }
+
+    void markdown_callback_format(const ImGui::MarkdownFormatInfo& mfi, bool start) {
+        // Call the default first so any settings can be overwritten by our implementation.
+        // Alternatively could be called or not called in a switch statement on a case by case basis.
+        // See defaultMarkdownFormatCallback definition for further examples of how to use it.
+        ImGui::defaultMarkdownFormatCallback(mfi, start);
+
+        const markdown_config* config = static_cast<markdown_config *>(mfi.config->userData);
+
+        switch(mfi.type) {
+            case ImGui::MarkdownFormatType::HEADING:
+                if(start) {
+                    float font_size = ImGui::GetStyle().FontSizeBase;
+                    float new_size = font_size;
+
+                    if(mfi.level == 1) {
+                        new_size += config->h1_size_delta;
+                    } else if(mfi.level == 2) {
+                        new_size += config->h2_size_delta;
+                    } else if(mfi.level == 3) {
+                        new_size += config->h3_size_delta;
+                    }
+
+                    ImGui::PushFont(nullptr, new_size);
+                } else {
+                    ImGui::PopFont();
+                }
+                break;
+
+            case ImGui::MarkdownFormatType::LINK:
+                // if(!start) {
+                //     mouse_cursor(mouse_cursor_type::hand);
+                // }
+                break;
+
+            case ImGui::MarkdownFormatType::EMPHASIS:
+                label(format("emp level {}, start: {}", mfi.level, start));
+                break;
+        }
+    }
+
+    void markdown(const std::string& text, const markdown_config& config) {
         // integration example: https://github.com/enkisoftware/imgui_markdown?tab=readme-ov-file#example-use-on-windows-with-links-opening-in-browser
-        ImGui::Markdown(text.c_str(), text.size(), mdConfig);
+
+        ImGui::MarkdownConfig md_config{
+            .linkCallback = markdown_callback_link,
+            .tooltipCallback = markdown_callback_tooltip,
+            .imageCallback = nullptr,
+            .linkIcon = ICON_MD_LINK,
+            .userData = const_cast<markdown_config *>(&config),
+            .formatCallback = markdown_callback_format,
+            .formatFlags = ImGuiMarkdownFormatFlags_GithubStyle
+        };
+
+        ImGui::Markdown(text.c_str(), text.size(), md_config);
     }
 
     // ---- tooltip ----
@@ -896,7 +958,8 @@ namespace grey::widgets {
         wdl->AddRect(rect.lt(), rect.rb(), colour, 0, 10);
     }
 
-    void draw_circle(const point& center, float radius, rgb_colour colour, bool filled, float thickness, int num_segments) {
+    void draw_circle(const point& center, float radius, rgb_colour colour, bool filled, float thickness,
+                     int num_segments) {
         if(filled) {
             wdl->AddCircleFilled(center, radius, colour, num_segments);
         } else {

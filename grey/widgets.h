@@ -46,12 +46,12 @@ namespace grey::widgets {
     /**
      * @brief RAII font size scaler.
      */
-    class font_scaler {
+    class font_adj {
     public:
-        font_scaler(float size_delta);
-        ~font_scaler();
+        font_adj(float size_delta = .0f, font_weight weight = font_weight::regular);
+        ~font_adj();
     private:
-        bool needs_resize;
+        bool font_pushed;
     };
 
     class clip_rect {
@@ -432,11 +432,17 @@ namespace grey::widgets {
 
     bool input_ml(const std::string& id, char* value, int value_length, float height = 0, bool autoscroll = false, bool enabled = true, bool use_fixed_font = false);
 
+    struct markdown_config {
+        float h1_size_delta{15};
+        float h2_size_delta{8};
+        float h3_size_delta{4};
+    };
+
     /**
      * @brief Renders markdown text using https://github.com/enkisoftware/imgui_markdown. This is not ready for public consumption yet.
      * @param text 
      */
-    void markdown(const std::string& text);
+    void markdown(const std::string& text, const markdown_config& config);
 
     bool slider(float& value, float min, float max, const std::string& label = "", float step = 0.0f, bool ticks = false, emphasis emp = emphasis::none, bool is_small = false);
     bool slider(int& value, int min, int max, const std::string& label = "", int step = 0, bool ticks = false, emphasis emp = emphasis::none, bool is_small = false);
