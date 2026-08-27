@@ -44,12 +44,14 @@ namespace grey::widgets {
     };
 
     /**
-     * @brief RAII font size scaler.
+     * @brief RAII font size and weight adjuster.
      */
     class font_adj {
     public:
         font_adj(float size_delta = .0f, font_weight weight = font_weight::regular);
         ~font_adj();
+
+        static bool make_font(float size_delta, font_weight weight, ImFont** out_font, float& out_font_size);
     private:
         bool font_pushed;
     };

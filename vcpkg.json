@@ -30,6 +30,7 @@
         },
         "implot",
         "simpleini",
-        "magic-enum"
+        "magic-enum",
+        "md4c"
     ]
 }

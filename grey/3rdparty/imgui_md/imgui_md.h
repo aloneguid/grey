@@ -91,7 +91,7 @@ protected:
 	//use m_href to identify image
 	virtual bool get_image(image_info& nfo) const;
 
-	virtual ImFont* get_font() const;
+	virtual bool make_font(ImFont** font, float& font_size) const;
 	virtual ImVec4 get_color() const;
 
 

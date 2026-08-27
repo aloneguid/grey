@@ -5,6 +5,7 @@ set (DYNAMIC_NAME xgrey)
 
 find_package(imgui CONFIG REQUIRED)
 find_package(implot CONFIG REQUIRED)
+find_package(md4c CONFIG REQUIRED)
 
 # all non-Windows build use OpenGL+GLFW3
 if(UNIX)
@@ -28,6 +29,7 @@ file(GLOB core_src
     "guid.cpp"
     "3rdparty/imgui-node-editor/*.cpp"
     "3rdparty/ImGuiColorTextEdit/*.cpp"
+    "3rdparty/imgui_md/*.cpp"
     "fonts/*.cpp"
     "x/*.cpp")
 
@@ -38,11 +40,13 @@ if (WIN32)
             "common/win32/reg.cpp")
     set(private_libs
         implot::implot
-        D3D11.lib)
+        D3D11.lib
+        md4c::md4c)
 elseif (UNIX)
     # file(GLOB core_src ${core_src} "common/lin/*.cpp")
     set(private_libs
         implot::implot
+        md4c::md4c
         glfw
         OpenGL::GL
         Fontconfig::Fontconfig)

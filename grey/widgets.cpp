@@ -4,10 +4,12 @@
 #include "imgui_stdlib.h"
 #include "3rdparty/ImGuiNotify.hpp"
 #include "3rdparty/imspinner.h"
-#include "3rdparty/imgui_markdown/imgui_markdown.h"
+#include "3rdparty/imgui_md/imgui_md.h"
+// #include "3rdparty/imgui_markdown/imgui_markdown.h"
 #include "fonts/font_loader.h"
 #include <iostream>
 #include <utility>
+
 // for Windows-specific hacks
 #ifdef _WIN32
 #include <Windows.h>
@@ -105,16 +107,14 @@ namespace grey::widgets {
     }
 
     font_adj::font_adj(float size_delta, font_weight weight) {
-        font_pushed = size_delta > 0.01 || size_delta < -0.01 || weight != font_weight::regular;
-        if(font_pushed) {
-            float font_size = ImGui::GetStyle().FontSizeBase;
-            float new_size = font_size + size_delta;
-            ImFont* font = fonts::font_loader::get_font(weight);
-            if(new_size <= 0) {
-                font_pushed = false;
-            } else {
-                ImGui::PushFont(font, new_size);
-            }
+        ImFont* font{nullptr};
+        float font_size{0.0f};
+
+        if(make_font(size_delta, weight, &font, font_size)) {
+            ImGui::PushFont(font, font_size);
+            font_pushed = true;
+        } else {
+            font_pushed = false;
         }
     }
 
@@ -122,6 +122,22 @@ namespace grey::widgets {
         if(font_pushed) {
             ImGui::PopFont();
         }
+    }
+
+    bool font_adj::make_font(float size_delta, font_weight weight, ImFont** out_font, float& out_font_size) {
+        out_font_size = ImGui::GetStyle().FontSizeBase;
+        if(size_delta > 0.01 || size_delta < -0.01 || weight != font_weight::regular) {
+            float new_size = out_font_size + size_delta;
+            ImFont* font = fonts::font_loader::get_font(weight);
+            if(new_size > 0) {
+                *out_font = font;
+                out_font_size = new_size;
+                return true;
+            }
+        }
+        *out_font = nullptr;
+        out_font_size = 0.0f;
+        return false;
     }
 
     clip_rect::clip_rect(const ImVec2& min, const ImVec2& max) {
@@ -787,7 +803,7 @@ namespace grey::widgets {
         return input_ml<char *>(id, value, value_length, height, autoscroll, enabled, use_fixed_font);
     }
 
-    void markdown_callback_link(ImGui::MarkdownLinkCallbackData data) {
+    /*void markdown_callback_link(ImGui::MarkdownLinkCallbackData data) {
         if(!data.isImage) {
             ImGuiPlatformIO& pio = ImGui::GetPlatformIO();
             if(pio.Platform_OpenInShellFn) {
@@ -844,7 +860,7 @@ namespace grey::widgets {
         }
     }
 
-    void markdown(const std::string& text, const markdown_config& config) {
+    void markdown1(const std::string& text, const markdown_config& config) {
         // integration example: https://github.com/enkisoftware/imgui_markdown?tab=readme-ov-file#example-use-on-windows-with-links-opening-in-browser
 
         ImGui::MarkdownConfig md_config{
@@ -858,6 +874,53 @@ namespace grey::widgets {
         };
 
         ImGui::Markdown(text.c_str(), text.size(), md_config);
+    }*/
+
+    class grey_md : public imgui_md {
+        bool make_font(ImFont** font, float& font_size) const override {
+            *font = nullptr;
+            font_size = ImGui::GetStyle().FontSizeBase;
+
+            if(m_is_table_header) {
+                font_adj::make_font(0, font_weight::bold, font, font_size);
+                return true;
+            }
+
+            switch(m_hlevel) {
+                case 0:
+                    if(m_is_strong) {
+                        font_adj::make_font(0, font_weight::bold, font, font_size);
+                        return true;
+                    }
+                    break;
+
+                case 1:
+                    font_adj::make_font(15, font_weight::regular, font, font_size);
+                    return true;
+
+                case 2:
+                    font_adj::make_font(8, font_weight::regular, font, font_size);
+                    return true;
+
+                case 3:
+                    font_adj::make_font(4, font_weight::regular, font, font_size);
+                    return true;
+            }
+
+            return false;
+        }
+
+        void open_url() const override {
+            ImGuiPlatformIO& pio = ImGui::GetPlatformIO();
+            if(pio.Platform_OpenInShellFn) {
+                pio.Platform_OpenInShellFn(ImGui::GetCurrentContext(), m_href.c_str());
+            }
+        }
+    };
+
+    void markdown(const std::string& text, const markdown_config& config) {
+        static grey_md md;
+        md.print(text.c_str(), text.c_str() + text.size());
     }
 
     // ---- tooltip ----

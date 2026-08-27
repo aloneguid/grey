@@ -17,6 +17,7 @@ endif()
 add_compile_definitions(
     GREY_INCLUDE_IMNODES
     GREY_INCLUDE_IMPLOT
+    GREY_INCLUDE_IMGUI_MD
 )
 
 # statically link MSVC runtime in thrift to being fully self-contained.

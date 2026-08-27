@@ -293,7 +293,10 @@ void imgui_md::set_href(bool e, const MD_ATTRIBUTE& src)
 void imgui_md::set_font(bool e)
 {
 	if (e) {
-		ImGui::PushFont(get_font());
+	    ImFont* font{nullptr};
+	    float font_size;
+	    make_font(&font, font_size);
+		ImGui::PushFont(font, font_size);
 	} else {
 		ImGui::PopFont();
 	}
@@ -753,9 +756,10 @@ int imgui_md::print(const char* str, const char* str_end)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-ImFont* imgui_md::get_font() const
+bool imgui_md::make_font(ImFont** font, float& font_size) const
 {
-	return nullptr;//default font
+    return false;
+	// return nullptr;//default font
 
 	//Example:
 #if 0
@@ -790,7 +794,7 @@ bool imgui_md::get_image(image_info& nfo) const
 	//Use m_href to identify images
 	
 	//Example - Imgui font texture
-	nfo.texture_id = ImGui::GetIO().Fonts->TexID;
+	// nfo.texture_id = ImGui::GetIO().Fonts->TexID;
 	nfo.size = { 100,50 };
 	nfo.uv0 = { 0,0 };
 	nfo.uv1 = { 1,1 };

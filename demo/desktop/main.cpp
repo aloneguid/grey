@@ -57,6 +57,7 @@ int main(int argc, char* argv[]) {
 
     //app->load_icon_font = false;
     app->load_fixed_font = true;
+    app->load_bold_font = true;
     app->center_on_screen = true;
 
     wnd
@@ -147,7 +148,9 @@ int main(int argc, char* argv[]) {
 
                     w::sep("buttons");
 
-                    w::button("simple");
+                    if(w::button("simply add dot")) {
+                        text += ".";
+                    }
                     w::sl(); w::button("Primary", emphasis::primary);
                     w::sl(); w::button("Secondary", emphasis::secondary);
                     w::sl(); w::button("Success", emphasis::success);
@@ -155,24 +158,24 @@ int main(int argc, char* argv[]) {
                     w::sl(); w::button("Warning", emphasis::warning);
                     w::sl(); w::button("Info", emphasis::info);
                     w::sl(); w::label(text);
-                    if(w::button("add dot")) {
-                        text += ".";
-                    }
 
                     w::sep("radios");
                     w::radio("radio1", selected);
+                    w::sl();
                     w::radio("radio2", !selected);
                     w::small_radio("small radio1", selected);
+                    w::sl();
                     w::small_radio("small radio2", !selected);
 
                     w::sep("checkboxes");
                     w::checkbox("basic", selected);
+                    w::sl();
                     w::small_checkbox("small", selected);
 
                     if(w::hyperlink("click me")) {
                         w::notify_info("hyperlink clicked");
                     }
-
+                    w::sl();
                     w::hyperlink("blog", "https://www.aloneguid.uk/posts/");
 
                     w::input(text, "##input1");
@@ -196,6 +199,20 @@ int main(int argc, char* argv[]) {
                         w::button("collide");
                     }
 
+                    if(w::button("info message")) {
+                        w::notify_info("inof");
+                    }
+
+                    {
+                        static float fa_delta{0.0f};
+                        static font_weight fa_weight{font_weight::regular};
+
+                        w::slider(fa_delta, -100.0f, 100.0f, "size delta");
+                        w::enum_combo("weight", fa_weight);
+
+                        widgets::font_adj adj{fa_delta, fa_weight};
+                        w::label("rendered font");
+                    }
                 }
             }
 
@@ -309,16 +326,6 @@ int main(int argc, char* argv[]) {
 
                     if(w::button("center on screen")) {
                         wnd.center();
-                    }
-                }
-            }
-
-            // notifications
-            {
-                auto tab = tabs.next_tab("Notifications");
-                if(tab) {
-                    if(w::button("info message")) {
-                        w::notify_info("inof");
                     }
                 }
             }
@@ -451,14 +458,75 @@ int main(int argc, char* argv[]) {
             // markdown
             {
                 auto tab = tabs.next_tab("Markdown");
+                static w::markdown_config md_config;
                 if(tab) {
                     float w = w::avail_x();
-                    static string md_text = R"(# Markdown Example
-This is a **bold** text and this is an *italic* text.
-## List
-- Item 1
-- Item 2
-- Item 3
+
+                    w::slider(md_config.h1_size_delta, 0.0f, 100.0f, "h1");
+                    w::slider(md_config.h2_size_delta, 0.0f, 100.0f, "h2");
+                    w::slider(md_config.h3_size_delta, 0.0f, 100.0f, "h3");
+
+                    static string md_text = R"(Syntax Tests for markdown
+
+See [integration example](https://github.com/enkisoftware/imgui_markdown?tab=readme-ov-file#example-use-on-windows-with-links-opening-in-browser)
+
+Headers
+
+# Header 1
+Paragraph
+## Header 2
+Paragraph
+### Header 3
+Paragraph
+
+Test - Emphasis
+
+*Emphasis with stars*
+
+_Emphasis with underscores_
+
+**Strong emphasis with stars**
+
+__Strong emphasis with underscores__
+
+
+Emphasis In List
+
+* *List emphasis with stars*
+  * *Sublist with emphasis*
+  * Sublist without emphasis
+  * **Sublist** with *some* emphasis
+* _List emphasis with underscores_
+
+Emphasis In Indented Paragraph
+
+  *Indented emphasis with stars*
+    *Double indent with emphasis*
+    Double indent without emphasis
+    **Double indent** with *some* emphasis
+  _Indented emphasis with underscores_
+
+Table
+
+Name | Multiline <br>header  | [Link&nbsp;](#link1)
+:------|:-------------------|:--
+Value-One | Long <br>explanation <br>with \<br\>\'s|1
+~~Value-Two~~ | __text auto wrapped__\: long explanation here |25 37 43 56 78 90
+**etc** | [~~Some **link**~~](https://github.com/mekhontsev/imgui_md)|3
+
+
+code:
+
+```
+no syntax
+```
+
+```cpp
+void function() {
+    do_job();   // c++ syntax
+```
+
+done.
 )";
                     {
                         md_wnd.resize(w / 2, .0f);
@@ -468,7 +536,7 @@ This is a **bold** text and this is an *italic* text.
                     w::sl();
                     {
                         w::guard g{md_wnd1};
-                        w::markdown(md_text);
+                        w::markdown(md_text, md_config);
                     }
                 }
             }
