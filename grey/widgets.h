@@ -44,12 +44,12 @@ namespace grey::widgets {
     };
 
     /**
-     * @brief RAII font size and weight adjuster.
+     * @brief RAII text parameters adjuster
      */
-    class font_adj {
+    class texter {
     public:
-        font_adj(float size_delta = .0f, font_weight weight = font_weight::regular);
-        ~font_adj();
+        texter(float size_delta = .0f, font_weight weight = font_weight::regular);
+        ~texter();
 
         static bool make_font(float size_delta, font_weight weight, ImFont** out_font, float& out_font_size);
     private:
@@ -444,7 +444,7 @@ namespace grey::widgets {
      * @brief Renders markdown text using https://github.com/enkisoftware/imgui_markdown. This is not ready for public consumption yet.
      * @param text 
      */
-    void markdown(const std::string& text, const markdown_config& config);
+    void markdown(const std::string& text, const markdown_config& config = {});
 
     bool slider(float& value, float min, float max, const std::string& label = "", float step = 0.0f, bool ticks = false, emphasis emp = emphasis::none, bool is_small = false);
     bool slider(int& value, int min, int max, const std::string& label = "", int step = 0, bool ticks = false, emphasis emp = emphasis::none, bool is_small = false);
@@ -657,7 +657,9 @@ namespace grey::widgets {
 
         language lng;
 
-        code_editor(language l = language::none, bool border = false);
+        code_editor(language l = language::none,
+            bool border = false,
+            bool show_line_numbers = false);
 
         void set_text(const std::string& text);
         std::string get_text();
@@ -670,6 +672,7 @@ namespace grey::widgets {
     private:
         std::string id;
         bool border;
+        bool show_line_numbers;
         TextEditor editor;
         language current_lng{language::none};
 

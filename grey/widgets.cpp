@@ -4,8 +4,7 @@
 #include "imgui_stdlib.h"
 #include "3rdparty/ImGuiNotify.hpp"
 #include "3rdparty/imspinner.h"
-#include "3rdparty/imgui_md/imgui_md.h"
-// #include "3rdparty/imgui_markdown/imgui_markdown.h"
+#include "x/md.h"
 #include "fonts/font_loader.h"
 #include <iostream>
 #include <utility>
@@ -106,7 +105,7 @@ namespace grey::widgets {
         ImGui::PushID(id);
     }
 
-    font_adj::font_adj(float size_delta, font_weight weight) {
+    texter::texter(float size_delta, font_weight weight) {
         ImFont* font{nullptr};
         float font_size{0.0f};
 
@@ -118,13 +117,13 @@ namespace grey::widgets {
         }
     }
 
-    font_adj::~font_adj() {
+    texter::~texter() {
         if(font_pushed) {
             ImGui::PopFont();
         }
     }
 
-    bool font_adj::make_font(float size_delta, font_weight weight, ImFont** out_font, float& out_font_size) {
+    bool texter::make_font(float size_delta, font_weight weight, ImFont** out_font, float& out_font_size) {
         out_font_size = ImGui::GetStyle().FontSizeBase;
         if(size_delta > 0.01 || size_delta < -0.01 || weight != font_weight::regular) {
             float new_size = out_font_size + size_delta;
@@ -486,7 +485,7 @@ namespace grey::widgets {
 
     void label(const std::string& text, emphasis emp, size_t text_wrap_pos, bool enabled, float font_size_diff,
                bool center_x, bool center_y) {
-        font_adj scaler(font_size_diff);
+        texter scaler(font_size_diff);
 
         if(emp == emphasis::none || !enabled) {
             label(text, text_wrap_pos, enabled, center_x, center_y);
@@ -503,7 +502,7 @@ namespace grey::widgets {
     }
 
     sz text_size_get(const string& text, float font_size_diff, float wrap_width) {
-        font_adj scaler(font_size_diff);
+        texter scaler(font_size_diff);
         return ImGui::CalcTextSize(text.c_str(), nullptr, false, wrap_width);
     }
 
@@ -803,124 +802,12 @@ namespace grey::widgets {
         return input_ml<char *>(id, value, value_length, height, autoscroll, enabled, use_fixed_font);
     }
 
-    /*void markdown_callback_link(ImGui::MarkdownLinkCallbackData data) {
-        if(!data.isImage) {
-            ImGuiPlatformIO& pio = ImGui::GetPlatformIO();
-            if(pio.Platform_OpenInShellFn) {
-                const std::string url(data.link, data.linkLength);
-                pio.Platform_OpenInShellFn(ImGui::GetCurrentContext(), url.c_str());
-            }
-        }
-    }
-
-    void markdown_callback_tooltip(ImGui::MarkdownTooltipCallbackData data) {
-        if(!data.linkData.isImage && data.linkData.link) {
-            string text{data.linkData.link, static_cast<string::size_type>(data.linkData.linkLength)};
-            tt(text);
-        }
-    }
-
-    void markdown_callback_format(const ImGui::MarkdownFormatInfo& mfi, bool start) {
-        // Call the default first so any settings can be overwritten by our implementation.
-        // Alternatively could be called or not called in a switch statement on a case by case basis.
-        // See defaultMarkdownFormatCallback definition for further examples of how to use it.
-        ImGui::defaultMarkdownFormatCallback(mfi, start);
-
-        const markdown_config* config = static_cast<markdown_config *>(mfi.config->userData);
-
-        switch(mfi.type) {
-            case ImGui::MarkdownFormatType::HEADING:
-                if(start) {
-                    float font_size = ImGui::GetStyle().FontSizeBase;
-                    float new_size = font_size;
-
-                    if(mfi.level == 1) {
-                        new_size += config->h1_size_delta;
-                    } else if(mfi.level == 2) {
-                        new_size += config->h2_size_delta;
-                    } else if(mfi.level == 3) {
-                        new_size += config->h3_size_delta;
-                    }
-
-                    ImGui::PushFont(nullptr, new_size);
-                } else {
-                    ImGui::PopFont();
-                }
-                break;
-
-            case ImGui::MarkdownFormatType::LINK:
-                // if(!start) {
-                //     mouse_cursor(mouse_cursor_type::hand);
-                // }
-                break;
-
-            case ImGui::MarkdownFormatType::EMPHASIS:
-                label(format("emp level {}, start: {}", mfi.level, start));
-                break;
-        }
-    }
-
-    void markdown1(const std::string& text, const markdown_config& config) {
-        // integration example: https://github.com/enkisoftware/imgui_markdown?tab=readme-ov-file#example-use-on-windows-with-links-opening-in-browser
-
-        ImGui::MarkdownConfig md_config{
-            .linkCallback = markdown_callback_link,
-            .tooltipCallback = markdown_callback_tooltip,
-            .imageCallback = nullptr,
-            .linkIcon = ICON_MD_LINK,
-            .userData = const_cast<markdown_config *>(&config),
-            .formatCallback = markdown_callback_format,
-            .formatFlags = ImGuiMarkdownFormatFlags_GithubStyle
-        };
-
-        ImGui::Markdown(text.c_str(), text.size(), md_config);
-    }*/
-
-    class grey_md : public imgui_md {
-        bool make_font(ImFont** font, float& font_size) const override {
-            *font = nullptr;
-            font_size = ImGui::GetStyle().FontSizeBase;
-
-            if(m_is_table_header) {
-                font_adj::make_font(0, font_weight::bold, font, font_size);
-                return true;
-            }
-
-            switch(m_hlevel) {
-                case 0:
-                    if(m_is_strong) {
-                        font_adj::make_font(0, font_weight::bold, font, font_size);
-                        return true;
-                    }
-                    break;
-
-                case 1:
-                    font_adj::make_font(15, font_weight::regular, font, font_size);
-                    return true;
-
-                case 2:
-                    font_adj::make_font(8, font_weight::regular, font, font_size);
-                    return true;
-
-                case 3:
-                    font_adj::make_font(4, font_weight::regular, font, font_size);
-                    return true;
-            }
-
-            return false;
-        }
-
-        void open_url() const override {
-            ImGuiPlatformIO& pio = ImGui::GetPlatformIO();
-            if(pio.Platform_OpenInShellFn) {
-                pio.Platform_OpenInShellFn(ImGui::GetCurrentContext(), m_href.c_str());
-            }
-        }
-    };
-
     void markdown(const std::string& text, const markdown_config& config) {
-        static grey_md md;
-        md.print(text.c_str(), text.c_str() + text.size());
+        static x::md md;
+        // container c;
+        // c.auto_size_y();
+        // guard gc{c};
+        md.print(text.c_str(), text.c_str() + text.size(), config);
     }
 
     // ---- tooltip ----
@@ -1594,13 +1481,18 @@ namespace grey::widgets {
 
     // ImGuiColorTextEdit
 
-    code_editor::code_editor(code_editor::language l, bool border) : id{generate_id("TextEditor")},
-                                                                     border{border},
-                                                                     lng{l}, current_lng{-1} {
+    code_editor::code_editor(code_editor::language l, bool border, bool show_line_numbers) : id{
+            generate_id("TextEditor")
+        },
+        border{border},
+        show_line_numbers{show_line_numbers},
+        lng{l}, current_lng{-1} {
+
         //editor.SetShowWhitespaces(true);
         editor.SetTabSize(2);
         editor.SetShowLineNumbersEnabled(false);
         //editor.SetShowKeywordTooltips(false);
+
     }
 
     void code_editor::set_text(const std::string& text) {
@@ -1624,7 +1516,7 @@ namespace grey::widgets {
         }
 
         //editor.SetAutoIndentEnabled(true);
-        //editor.SetShowLineNumbersEnabled(false);
+        editor.SetShowLineNumbersEnabled(show_line_numbers);
         editor.Render(id.c_str(), ImVec2(width, height), border);
         //editor.Render(id.c_str(), false, ImVec2(width, height), border);
 

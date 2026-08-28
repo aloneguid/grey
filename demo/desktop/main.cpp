@@ -210,7 +210,7 @@ int main(int argc, char* argv[]) {
                         w::slider(fa_delta, -100.0f, 100.0f, "size delta");
                         w::enum_combo("weight", fa_weight);
 
-                        widgets::font_adj adj{fa_delta, fa_weight};
+                        widgets::texter adj{fa_delta, fa_weight};
                         w::label("rendered font");
                     }
                 }
@@ -459,84 +459,90 @@ int main(int argc, char* argv[]) {
             {
                 auto tab = tabs.next_tab("Markdown");
                 static w::markdown_config md_config;
+                static bool preview_only{false};
                 if(tab) {
                     float w = w::avail_x();
 
                     w::slider(md_config.h1_size_delta, 0.0f, 100.0f, "h1");
                     w::slider(md_config.h2_size_delta, 0.0f, 100.0f, "h2");
                     w::slider(md_config.h3_size_delta, 0.0f, 100.0f, "h3");
+                    w::checkbox("preview only", preview_only);
 
-                    static string md_text = R"(Syntax Tests for markdown
+                    static string md_text = R"(# Built-in markdown support
 
-See [integration example](https://github.com/enkisoftware/imgui_markdown?tab=readme-ov-file#example-use-on-windows-with-links-opening-in-browser)
+Uses [MD4C](https://github.com/mity/md4c) parser and takes ideas from [imgui_md](https://github.com/mekhontsev/imgui_md) (but does *not* include it).
 
-Headers
+## Emphasis
 
-# Header 1
-Paragraph
-## Header 2
-Paragraph
-### Header 3
-Paragraph
+Supports **bold**, _underlined_, ~strikethrough~. However, *italic* is not there yet.
 
-Test - Emphasis
+In tables, formatting is supported as well, as well as **content alignment**. In the example below, first column is right-aligned, second is centered, and third is left-aligned.
 
-*Emphasis with stars*
+id | name | description
+---: | :---: | :---
+1 | aloneguid | Tables are supported.
+2 | uncle | For**matting** inside _tables_.
 
-_Emphasis with underscores_
+## Lists
 
-**Strong emphasis with stars**
+1. First ordered list item
+2. Another item
+   * Unordered sub-list 1.
+   * Unordered sub-list 2.
+1. Actual numbers don't matter, just that it's a number
+   1. **Ordered** sub-list 1
+   2. **Ordered** sub-list 2
+4. And another item with minuses.
+   - __sub-list with underline__
+   - sub-list with escapes: \[looks like\]\(a link\)
+5. ~~Item with pluses and strikethrough~~.
+   + sub-list 1
+   + sub-list 2
+   + [Just a link](https://github.com/mekhontsev/imgui_md).
+      * Item with [link1](#link1)
+      * Item with bold [**link2**](#link1)
 
-__Strong emphasis with underscores__
+Supports `inline code` text and code fences like these:
 
-
-Emphasis In List
-
-* *List emphasis with stars*
-  * *Sublist with emphasis*
-  * Sublist without emphasis
-  * **Sublist** with *some* emphasis
-* _List emphasis with underscores_
-
-Emphasis In Indented Paragraph
-
-  *Indented emphasis with stars*
-    *Double indent with emphasis*
-    Double indent without emphasis
-    **Double indent** with *some* emphasis
-  _Indented emphasis with underscores_
-
-Table
-
-Name | Multiline <br>header  | [Link&nbsp;](#link1)
-:------|:-------------------|:--
-Value-One | Long <br>explanation <br>with \<br\>\'s|1
-~~Value-Two~~ | __text auto wrapped__\: long explanation here |25 37 43 56 78 90
-**etc** | [~~Some **link**~~](https://github.com/mekhontsev/imgui_md)|3
-
-
-code:
-
-```
-no syntax
+```bash
+sudo apt update
 ```
 
-```cpp
-void function() {
-    do_job();   // c++ syntax
-```
+quoted text:
 
-done.
+> this is a quote.
+
+Also, [GitHub alerts](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts) are supported as well:
+
+> [!NOTE]
+> Useful information that users should know, even when skimming content.
+
+> [!TIP]
+> Helpful advice for doing things better or more easily.
+
+> [!IMPORTANT]
+> Key information users need to know to achieve their goal.
+
+> [!WARNING]
+> Urgent info that needs immediate user attention to avoid problems.
+
+> [!CAUTION]
+> Advises about risks or negative outcomes of certain actions.
+
 )";
-                    {
-                        md_wnd.resize(w / 2, .0f);
-                        w::guard g{md_wnd};
-                        w::input_ml("##md_input", md_text, 0.0f);
-                    }
-                    w::sl();
-                    {
-                        w::guard g{md_wnd1};
+                    if(preview_only) {
                         w::markdown(md_text, md_config);
+                    } else {
+                        {
+                            md_wnd.resize(w / 2, .0f);
+                            w::guard g{md_wnd};
+                            w::input_ml("##md_input", md_text, 0.0f);
+                        }
+                        w::sl();
+                        {
+                            w::guard g{md_wnd1};
+                            w::markdown(md_text, md_config);
+                        }
                     }
                 }
             }

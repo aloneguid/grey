@@ -117,6 +117,7 @@ namespace grey::fonts {
                 config.PixelSnapH = true;
                 config.GlyphOffset.y = 3.0f;
                 config.GlyphMinAdvanceX = icon_font_size; // Use if you want to make the icon monospaced
+                config.DstFont = default_font;
                 static const ImWchar icon_ranges[] = {ICON_MIN_MD, ICON_MAX_16_MD, 0};
                 io.Fonts->AddFontFromMemoryCompressedTTF(
                     MaterialIconsRegular_compressed_data, MaterialIconsRegular_compressed_size,
