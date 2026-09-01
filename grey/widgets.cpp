@@ -140,11 +140,11 @@ namespace grey::widgets {
     }
 
     clip_rect::clip_rect(const ImVec2& min, const ImVec2& max) {
-        ImGui::PushClipRect(min, max, false);
+        wdl->PushClipRect(min, max, false);
     }
 
     clip_rect::~clip_rect() {
-        ImGui::PopClipRect();
+        wdl->PopClipRect();
     }
 
     id_frame::id_frame(int scope_id) : id_frame(ImGui::GetID(scope_id)) {
@@ -904,8 +904,12 @@ namespace grey::widgets {
         wdl->AddText(pos, colour, text.c_str());
     }
 
-    void draw_rect(const rect& rect, rgb_colour colour) {
-        wdl->AddRect(rect.lt(), rect.rb(), colour, 0, 10);
+    void draw_rect(const rect& rect, rgb_colour colour, float thickness, float rounding) {
+        wdl->AddRect(rect.lt(), rect.rb(), colour, rounding, ImDrawFlags_None, thickness);
+    }
+
+    void draw_rect_filled(const rect& rect, rgb_colour colour, float rounding) {
+        wdl->AddRectFilled(rect.lt(), rect.rb(), colour, rounding);
     }
 
     void draw_circle(const point& center, float radius, rgb_colour colour, bool filled, float thickness,

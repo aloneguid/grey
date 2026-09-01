@@ -46,6 +46,8 @@ namespace grey {
 
         point operator+(const sz& dimensions) const;
 
+        point operator+(float offset_both) const;
+
         operator ImVec2() const { return ImVec2{x, y}; }
     };
 
@@ -72,6 +74,10 @@ namespace grey {
         return point{x + dimensions.width, y + dimensions.height};
     }
 
+    inline point point::operator+(const float offset_both) const {
+        return point{x + offset_both, y + offset_both};
+    }
+
     /**
      * @brief Trivial rectangle struct for storing item bounds.
      */
@@ -86,6 +92,10 @@ namespace grey {
 
         constexpr rect(float x_min, float y_min, float x_max, float y_max)
             : x_min{x_min}, y_min{y_min}, x_max{x_max}, y_max{y_max} {
+        }
+
+        constexpr rect(const point& min, const point& max)
+            : x_min{min.x}, y_min{min.y}, x_max{max.x}, y_max{max.y} {
         }
 
         constexpr rect(const ImVec2& min, const ImVec2& max)
@@ -142,6 +152,14 @@ namespace grey {
             g = vec.y;
             b = vec.z;
             o = vec.w;
+        }
+
+        explicit rgb_colour(ImGuiCol_ col) {
+            ImColor ucol = ImGui::GetColorU32(col);
+            r = ucol.Value.x;
+            g = ucol.Value.y;
+            b = ucol.Value.z;
+            o = ucol.Value.w;
         }
 
         operator ImColor() const {

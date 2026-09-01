@@ -385,7 +385,9 @@ namespace grey::widgets {
 
     void draw_text(const point& pos, const rgb_colour& colour, const std::string& text);
 
-    void draw_rect(const rect& rect, rgb_colour colour);
+    void draw_rect(const rect& rect, rgb_colour colour, float thickness = 1.0f, float rounding = .0f);
+
+    void draw_rect_filled(const rect& rect, rgb_colour colour, float rounding = .0f);
 
     void draw_circle(const point& center, float radius, rgb_colour colour, bool filled = false, float thickness = 1.0f, int num_segments = 0);
 
