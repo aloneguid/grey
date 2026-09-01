@@ -54,6 +54,12 @@ if (UNIX)
         OpenGL::GL)
 endif()
 
+if (APPLE)
+    find_library(CORETEXT_FRAMEWORK CoreText REQUIRED)
+    set(private_libs ${private_libs}
+        ${CORETEXT_FRAMEWORK})
+endif()
+
 if(UNIX AND NOT APPLE)
     set(private_libs ${private_libs}
         Fontconfig::Fontconfig)

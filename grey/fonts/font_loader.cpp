@@ -5,9 +5,16 @@
 #include "imgui.h"
 #include "../common/os.h"
 
+#if PLATFORM_MACOS
+#include <CoreText/CoreText.h>
+#include <limits.h>
+#endif
+
 #if PLATFORM_WINDOWS
 // use built-in system fonts
-#elif PLATFORM_LINUX
+#endif
+
+#if PLATFORM_LINUX
 // on *nix use fontconfig to discover fonts, rather than embedding them inline
 #include <fontconfig/fontconfig.h>
 
@@ -81,6 +88,42 @@ private:
 
 #endif
 
+#if PLATFORM_MACOS
+namespace {
+    struct apple_font {
+        std::string path;
+        std::string postscript_name;
+    };
+
+    apple_font apple_font_for(CTFontUIFontType font_type) {
+        CTFontRef font = CTFontCreateUIFontForLanguage(font_type, 0.0, nullptr);
+        if (!font) return {};
+
+        CFURLRef url = static_cast<CFURLRef>(CTFontCopyAttribute(font, kCTFontURLAttribute));
+        CFStringRef name = static_cast<CFStringRef>(CTFontCopyAttribute(font, kCTFontNameAttribute));
+        CFRelease(font);
+        if (!url) {
+            if (name) CFRelease(name);
+            return {};
+        }
+
+        char path[PATH_MAX];
+        apple_font result;
+        if (CFURLGetFileSystemRepresentation(url, true, reinterpret_cast<UInt8*>(path), sizeof(path))) {
+            result.path = path;
+        }
+        if (name) {
+            char name_buffer[256];
+            if (CFStringGetCString(name, name_buffer, sizeof(name_buffer), kCFStringEncodingUTF8))
+                result.postscript_name = name_buffer;
+            CFRelease(name);
+        }
+        CFRelease(url);
+        return result;
+    }
+}
+#endif
+
 using namespace std;
 
 namespace grey::fonts {
@@ -91,6 +134,8 @@ namespace grey::fonts {
     void font_loader::preload_fonts(const font_config& cfg) {
         ImGuiIO& io = ImGui::GetIO();
         constexpr float default_font_size = 18.0f;
+        font_bold = nullptr;
+        font_fixed = nullptr;
 
 #if PLATFORM_WINDOWS
         // always load default system font
@@ -125,7 +170,25 @@ namespace grey::fonts {
             font_fixed = io.Fonts->AddFontFromFileTTF(monospace_font_path.c_str(), 18.0f);
         }
 #elif PLATFORM_MACOS
-        ImFont* font_system = io.Fonts->AddFontDefault();
+        const apple_font normal_font = apple_font_for(kCTFontUIFontSystem);
+        ImFont* font_system = normal_font.path.empty()
+            ? io.Fonts->AddFontDefault()
+            : io.Fonts->AddFontFromFileTTF(normal_font.path.c_str(), default_font_size);
+        if (!font_system) font_system = io.Fonts->AddFontDefault();
+
+        if (cfg.load_bold) {
+            const apple_font bold_font = apple_font_for(kCTFontUIFontEmphasizedSystem);
+            if (!bold_font.path.empty() && bold_font.postscript_name != normal_font.postscript_name) {
+                font_bold = io.Fonts->AddFontFromFileTTF(bold_font.path.c_str(), default_font_size);
+            }
+        }
+
+        if (cfg.load_fixed) {
+            const apple_font fixed_font = apple_font_for(kCTFontUIFontUserFixedPitch);
+            if (!fixed_font.path.empty()) {
+                font_fixed = io.Fonts->AddFontFromFileTTF(fixed_font.path.c_str(), default_font_size);
+            }
+        }
 #endif
 
         if(cfg.load_icons) {
