@@ -11,7 +11,9 @@ find_package(md4c CONFIG REQUIRED)
 if(UNIX)
     find_package(OpenGL REQUIRED)
     find_package(glfw3 CONFIG REQUIRED)
-    find_package(Fontconfig REQUIRED) # since CMake 3.14
+    if(NOT APPLE)
+        find_package(Fontconfig REQUIRED) # since CMake 3.14
+    endif()
  endif()
 
 find_path(STB_INCLUDE_DIRS "stb.h")
@@ -33,22 +35,27 @@ file(GLOB core_src
     "fonts/*.cpp"
     "x/*.cpp")
 
+set(private_libs
+    implot::implot
+    md4c::md4c)
+
 if (WIN32)
     file(GLOB core_src ${core_src}
             "common/win32/gdi.cpp"
             "common/win32/window.cpp"
             "common/win32/reg.cpp")
-    set(private_libs
-        implot::implot
-        D3D11.lib
-        md4c::md4c)
-elseif (UNIX)
-    # file(GLOB core_src ${core_src} "common/lin/*.cpp")
-    set(private_libs
-        implot::implot
-        md4c::md4c
+    set(private_libs ${private_libs}
+        D3D11.lib)
+endif()
+
+if (UNIX)
+    set(private_libs ${private_libs}
         glfw
-        OpenGL::GL
+        OpenGL::GL)
+endif()
+
+if(UNIX AND NOT APPLE)
+    set(private_libs ${private_libs}
         Fontconfig::Fontconfig)
 endif()
 

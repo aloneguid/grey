@@ -7,7 +7,7 @@
 
 #if PLATFORM_WINDOWS
 // use built-in system fonts
-#else
+#elif PLATFORM_LINUX
 // on *nix use fontconfig to discover fonts, rather than embedding them inline
 #include <fontconfig/fontconfig.h>
 
@@ -109,7 +109,7 @@ namespace grey::fonts {
                 fixed_font_path = fonts_path + "\\consola.ttf";
             font_fixed = io.Fonts->AddFontFromFileTTF(fixed_font_path.c_str(), default_font_size);
         }
-#else
+#elif PLATFORM_LINUX
         font_locator fl;
 
         string normal_font_path = fl.get_default_font_path("sans-serif");
@@ -124,6 +124,8 @@ namespace grey::fonts {
             string monospace_font_path = fl.get_default_font_path("monospace");
             font_fixed = io.Fonts->AddFontFromFileTTF(monospace_font_path.c_str(), 18.0f);
         }
+#elif PLATFORM_MACOS
+        ImFont* font_system = io.Fonts->AddFontDefault();
 #endif
 
         if(cfg.load_icons) {
