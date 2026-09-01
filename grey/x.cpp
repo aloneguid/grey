@@ -54,7 +54,7 @@ EXPORTED void app_run(
 
     auto app = grey::app::make(title, width, height);
     app->can_resize = true;
-    app->load_fixed_font = true;
+    app->fonts.load_all();
     app->run([c_frame_callback, &wnd](const grey::app& app) {
 
         scale = app.scale;

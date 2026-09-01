@@ -9,7 +9,7 @@
 namespace grey::widgets::x {
     namespace {
         struct userdata {
-            md* md;
+            md* m;
             const markdown_config& config;
         };
     }
@@ -21,26 +21,26 @@ namespace grey::widgets::x {
 
         m_md.enter_block = [](MD_BLOCKTYPE t, void* detail, void* u) {
             auto* ud = static_cast<userdata *>(u);
-            return ud->md->any_block(t, detail, true, ud->config);
+            return ud->m->any_block(t, detail, true, ud->config);
         };
 
         m_md.leave_block = [](MD_BLOCKTYPE t, void* d, void* u) {
             auto* ud = static_cast<userdata *>(u);
-            return ud->md->any_block(t, d, false, ud->config);
+            return ud->m->any_block(t, d, false, ud->config);
         };
 
         m_md.enter_span = [](MD_SPANTYPE t, void* d, void* u) {
             auto ud = static_cast<userdata *>(u);
-            return ud->md->span(t, d, true, ud->config);
+            return ud->m->span(t, d, true, ud->config);
         };
 
         m_md.leave_span = [](MD_SPANTYPE t, void* d, void* u) {
             auto ud = static_cast<userdata *>(u);
-            return ud->md->span(t, d, false, ud->config);
+            return ud->m->span(t, d, false, ud->config);
         };
 
         m_md.text = [](MD_TEXTTYPE t, const MD_CHAR* text, MD_SIZE size, void* u) {
-            return ((userdata *) u)->md->text(t, text, text + size);
+            return ((userdata *) u)->m->text(t, text, text + size);
         };
 
         m_md.debug_log = nullptr;
