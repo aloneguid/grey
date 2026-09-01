@@ -11,6 +11,9 @@
 #include <linux/input.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#elif PLATFORM_MACOS
+#include <CoreGraphics/CGEvent.h>
+#include <cstring>
 #endif
 
 namespace grey::common {
@@ -167,6 +170,48 @@ namespace grey::common {
         return is_bit_set(led_state_, code);
     }
 
+#endif
+
+#if PLATFORM_MACOS
+    void keyboard::clear_state() {
+        std::memset(state_, 0, sizeof(state_));
+        caps_lock_state_ = false;
+    }
+
+    void keyboard::refresh_state() {
+        for(size_t code = 0; code <= max_key_code; ++code) {
+            state_[code] = CGEventSourceKeyState(kCGEventSourceStateHIDSystemState,
+                static_cast<CGKeyCode>(code));
+        }
+
+        caps_lock_state_ = (CGEventSourceFlagsState(kCGEventSourceStateHIDSystemState) &
+            kCGEventFlagMaskAlphaShift) != 0;
+    }
+
+    bool keyboard::is_key_down(key k, bool rescan) {
+        if(rescan) {
+            refresh_state();
+        }
+
+        int code = static_cast<int>(k);
+        if(code < 0 || code > static_cast<int>(max_key_code)) {
+            return false;
+        }
+
+        return state_[code];
+    }
+
+    bool keyboard::is_key_toggled(key k, bool rescan) {
+        if(rescan) {
+            refresh_state();
+        }
+
+        if(k == key::caps_lock) {
+            return caps_lock_state_;
+        }
+
+        return false;
+    }
 #endif
 
     bool keyboard::are_keys_down(const std::vector<key>& keys, bool rescan) {

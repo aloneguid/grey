@@ -4,7 +4,7 @@
 
 #if PLATFORM_WINDOWS
 #include <windows.h>
-#elif PLATFORM_LINUX
+#elif PLATFORM_LINUX || PLATFORM_MACOS
 #include <cstdio>
 #endif
 
@@ -74,6 +74,34 @@ namespace grey::common::clipboard {
             }
             pclose(pipe);
         }
+        return out;
+    }
+
+#elif PLATFORM_MACOS
+
+    void set_text(const std::string& text) {
+        FILE* pipe = popen("pbcopy", "w");
+        if (!pipe) return;
+
+        size_t written = 0;
+        while (written < text.size()) {
+            const size_t count = fwrite(text.data() + written, 1, text.size() - written, pipe);
+            if (count == 0) break;
+            written += count;
+        }
+        pclose(pipe);
+    }
+
+    std::string get_text() {
+        std::string out;
+        FILE* pipe = popen("pbpaste", "r");
+        if (!pipe) return out;
+
+        char buffer[4096];
+        while (fgets(buffer, sizeof(buffer), pipe)) {
+            out += buffer;
+        }
+        if (pclose(pipe) != 0) return "";
         return out;
     }
 

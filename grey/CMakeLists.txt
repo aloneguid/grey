@@ -20,6 +20,7 @@ find_path(STB_INCLUDE_DIRS "stb.h")
 
 file(GLOB core_src
     "common/os.cpp"
+    "common/keyboard.cpp"
     "common/str.cpp"
     "common/img.cpp"
     "model.cpp"
@@ -56,8 +57,10 @@ endif()
 
 if (APPLE)
     find_library(CORETEXT_FRAMEWORK CoreText REQUIRED)
+    find_library(COREGRAPHICS_FRAMEWORK CoreGraphics REQUIRED)
     set(private_libs ${private_libs}
-        ${CORETEXT_FRAMEWORK})
+        ${CORETEXT_FRAMEWORK}
+        ${COREGRAPHICS_FRAMEWORK})
 endif()
 
 if(UNIX AND NOT APPLE)
