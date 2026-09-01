@@ -33,7 +33,7 @@ namespace grey {
 
     void app::on_after_initialised() {
 
-        grey::widgets::scale = scale;
+        widgets::scale = scale;
 
         ImGuiIO& io = ImGui::GetIO();
 
@@ -43,7 +43,7 @@ namespace grey {
         string theme_id = initial_theme_id.empty() ? grey::themes::FollowOsThemeId : initial_theme_id;
         set_theme(theme_id);
 
-        grey::fonts::font_loader::load_font(load_icon_font, load_fixed_font, load_bold_font);
+        fonts::font_loader::preload_fonts(fonts);
 
         if(on_initialised)
             on_initialised();

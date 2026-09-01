@@ -765,7 +765,7 @@ namespace grey::widgets {
 
         if(!enabled) ImGui::BeginDisabled();
 
-        ImFont* f = use_fixed_font ? grey::fonts::font_loader::get_fixed_size_font(scale) : nullptr;
+        ImFont* f = use_fixed_font ? fonts::font_loader::get_font(font_weight::bold) : nullptr;
 
         if(f) {
             ImGui::PushFont(f);
@@ -978,8 +978,8 @@ namespace grey::widgets {
 
     // ---- same line ----
 
-    void sl(float offset) {
-        ImGui::SameLine(offset);
+    void sl(float offset, bool spacing) {
+        ImGui::SameLine(offset, spacing ? -1 : 0);
     }
 
     // ---- separator ----
@@ -1504,7 +1504,7 @@ namespace grey::widgets {
     }
 
     bool code_editor::render(float width, float height) {
-        ImFont* f = fonts::font_loader::get_fixed_size_font(scale);
+        ImFont* f = fonts::font_loader::get_font(font_weight::fixed_size);
         if(f) {
             ImGui::PushFont(f);
         }

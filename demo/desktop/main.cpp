@@ -55,9 +55,7 @@ int main(int argc, char* argv[]) {
     };
 
 
-    //app->load_icon_font = false;
-    app->load_fixed_font = true;
-    app->load_bold_font = true;
+    app->fonts.load_all();
     app->center_on_screen = true;
 
     wnd
@@ -205,13 +203,22 @@ int main(int argc, char* argv[]) {
 
                     {
                         static float fa_delta{0.0f};
-                        static font_weight fa_weight{font_weight::regular};
-
                         w::slider(fa_delta, -100.0f, 100.0f, "size delta");
-                        w::enum_combo("weight", fa_weight);
 
-                        widgets::texter adj{fa_delta, fa_weight};
-                        w::label("rendered font");
+                        {
+                            widgets::texter adj{fa_delta, font_weight::regular};
+                            w::label("Fonts: regular, ");
+                        }
+
+                        {
+                            widgets::texter adj{fa_delta, font_weight::bold};
+                            w::sl(0, false); w::label("bold, ");
+                        }
+
+                        {
+                            widgets::texter adj{fa_delta, font_weight::fixed_size};
+                            w::sl(0, false); w::label("and monospace");
+                        }
                     }
                 }
             }

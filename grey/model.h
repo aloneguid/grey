@@ -3,7 +3,6 @@
 #include <string>
 
 namespace grey {
-
     struct sz;
 
     enum class emphasis : int32_t {
@@ -36,9 +35,14 @@ namespace grey {
         float x;
         float y;
 
-        point() : x{0}, y{0} {}
-        point(const float x, const float y) : x{x}, y{y} {}
-        point(const ImVec2& pos) : x{pos.x}, y{pos.y} {}
+        point() : x{0}, y{0} {
+        }
+
+        point(const float x, const float y) : x{x}, y{y} {
+        }
+
+        point(const ImVec2& pos) : x{pos.x}, y{pos.y} {
+        }
 
         point operator+(const sz& dimensions) const;
 
@@ -52,9 +56,14 @@ namespace grey {
         float width;
         float height;
 
-        sz() : width{0}, height{0} {}
-        sz(const float width, const float height) : width{width}, height{height} {}
-        sz(const ImVec2& dim) : width{dim.x}, height{dim.y} {}
+        sz() : width{0}, height{0} {
+        }
+
+        sz(const float width, const float height) : width{width}, height{height} {
+        }
+
+        sz(const ImVec2& dim) : width{dim.x}, height{dim.y} {
+        }
 
         operator ImVec2() const { return ImVec2{width, height}; }
     };
@@ -72,17 +81,22 @@ namespace grey {
         float x_max;
         float y_max;
 
-        constexpr rect() : x_min{0}, y_min{0}, x_max{0}, y_max{0} {}
+        constexpr rect() : x_min{0}, y_min{0}, x_max{0}, y_max{0} {
+        }
+
         constexpr rect(float x_min, float y_min, float x_max, float y_max)
-            : x_min{x_min}, y_min{y_min}, x_max{x_max}, y_max{y_max} {}
+            : x_min{x_min}, y_min{y_min}, x_max{x_max}, y_max{y_max} {
+        }
+
         constexpr rect(const ImVec2& min, const ImVec2& max)
-            : x_min{min.x}, y_min{min.y}, x_max{max.x}, y_max{max.y} {}
+            : x_min{min.x}, y_min{min.y}, x_max{max.x}, y_max{max.y} {
+        }
 
         /**
          * @brief Left-top corner
          * @return
          */
-        [[nodiscard]] point lt() const { return  point{x_min, y_min}; }
+        [[nodiscard]] point lt() const { return point{x_min, y_min}; }
 
         /**
          * @brief Right-bottom corner
@@ -104,9 +118,11 @@ namespace grey {
         float b;
         float o;
 
-        rgb_colour() : r{0}, g{0}, b{0}, o{0} { }
+        rgb_colour() : r{0}, g{0}, b{0}, o{0} {
+        }
 
-        rgb_colour(float r, float g, float b, float o = 1.0f) : r{r}, g{g}, b{b}, o{o} { }
+        rgb_colour(float r, float g, float b, float o = 1.0f) : r{r}, g{g}, b{b}, o{o} {
+        }
 
         /**
          * Construct from hex representation in the following format: RRGGBB or RRGGBBAA.
@@ -133,7 +149,7 @@ namespace grey {
         }
 
         operator ImU32() const {
-            return (ImU32)ImColor(r, g, b, o);
+            return (ImU32) ImColor(r, g, b, o);
         }
 
         /**
@@ -146,5 +162,17 @@ namespace grey {
         }
 
         [[nodiscard]] const std::string to_hex(bool prepend_hash = true) const;
+    };
+
+    struct font_config {
+        bool load_icons{false};
+        bool load_fixed{false};
+        bool load_bold{false};
+
+        void load_all() {
+            load_icons =
+                    load_fixed =
+                    load_bold = true;
+        }
     };
 }

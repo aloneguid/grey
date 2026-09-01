@@ -402,7 +402,7 @@ namespace grey::widgets::x {
                 break;
         }
         ImGui::TextUnformatted(alert->icon);
-        ImGui::SameLine(0.0f, style.ItemInnerSpacing.x);
+        sl();
         ImGui::PushFont(font, font_size);
         ImGui::TextUnformatted(alert->label);
         ImGui::PopFont();

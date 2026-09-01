@@ -1,17 +1,7 @@
 #include "font_loader.h"
-
-//#include "font_awesome_6_regular_400.inl"
-//#include "font_awesome_6.h"
-//
-//#include "font_awesome_6_brands_400.inl"
-//#include "font_awesome_6_brands.h"
-
-//#include "forkawesome.inl"
-//#include "forkawesome.h"
-
 #include "MaterialIcons-Regular.inl"
 #include "MaterialIcons.h"
-
+#include <filesystem>
 #include "imgui.h"
 #include "../common/os.h"
 
@@ -48,125 +38,61 @@ using namespace std;
 
 namespace grey::fonts {
 
-    ImFont* font_loader::fixed_size_font{nullptr};
-    ImFont* font_loader::bold_font{nullptr};
+    ImFont* font_loader::font_fixed{nullptr};
+    ImFont* font_loader::font_bold{nullptr};
 
-    void font_loader::load_system_fonts(ImGuiIO& io, ImFont** system_font,
-        bool load_bold_font, ImFont** bold_font) {
+    void font_loader::preload_fonts(const font_config& cfg) {
+        ImGuiIO& io = ImGui::GetIO();
+        constexpr float default_font_size = 18.0f;
+
 #if PLATFORM_WINDOWS
-        string path = grey::common::os::get_system_fonts_path();
+        // always load default system font
+        string fonts_path = grey::common::os::get_system_fonts_path();
         // Segoe UI is the default UI font for Windows 10 and 11.
-        string path_normal = path + "\\segoeui.ttf";
-        *system_font = io.Fonts->AddFontFromFileTTF(path_normal.c_str(), 18.0f);
-        if(load_bold_font) {
-            string path_bold = path + "\\segoeuib.ttf";
-            *bold_font = io.Fonts->AddFontFromFileTTF(path_bold.c_str(), 18.0f);
+        string default_font_path = fonts_path + "\\segoeui.ttf";
+        ImFont* font_system = io.Fonts->AddFontFromFileTTF(default_font_path.c_str(), default_font_size);
+        if(cfg.load_bold) {
+            string bold_font_path = fonts_path + "\\segoeuib.ttf";
+            font_bold = io.Fonts->AddFontFromFileTTF(bold_font_path.c_str(), default_font_size);
+        }
+        if(cfg.load_fixed) {
+            // prefer Cascadia Code on Windows, but fall-back to Consolas
+            string fixed_font_path = fonts_path + "\\cascadiacode.ttf";
+            if(!std::filesystem::exists(fixed_font_path))
+                fixed_font_path = fonts_path + "\\consola.ttf";
+            font_fixed = io.Fonts->AddFontFromFileTTF(fixed_font_path.c_str(), default_font_size);
         }
 #else
         string path = GetDefaultFontPath();
-        *system_font = io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f);
+        ImFont* font_system = io.Fonts->AddFontFromFileTTF(path.c_str(), default_font_size);
+
+        if(cfg.load_fixed) {
+            string path = GetDefaultFontPath("nonospace");
+            font_fixed = io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f);
+        }
 #endif
-    }
 
-    ImFont* font_loader::load_fixed_font(ImGuiIO& io) {
-        ImFont* f{nullptr};
-#if PLATFORM_WINDOWS
-        string path = grey::common::os::get_system_fonts_path();
-        // Segoe UI is the default UI font for Windows 10 and 11.
-        path += "\\consola.ttf";
-        f = io.Fonts->AddFontFromFileTTF(path.c_str(), 15.0f);
-#else
-        string path = GetDefaultFontPath("nonospace");
-        f = io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f);
-#endif
-        return f;
-    }
-
-    void font_loader::load_font(bool load_fa, bool load_fixed, bool load_bold) {
-        ImGuiIO& io = ImGui::GetIO();
-
-        ImFont* default_font;
-        load_system_fonts(io, &default_font, load_bold, &bold_font);
-
-        if(default_font && load_fa) {
-
-            // note that FA are very RAM heavy, it adds more than 100mb!!!
-
-            // FontAwesome fonts need to have their sizes reduced by 2.0f/3.0f in order to align correctly
-            //float icon_font_size = 16.0f * 2.0f / 3.0f * scale;
-
-            // forkawesome
-            /*{
-                ImFontConfig config;
-                config.MergeMode = true;
-                config.PixelSnapH = true;
-                config.GlyphMinAdvanceX = icon_font_size; // Use if you want to make the icon monospaced
-                static const ImWchar icon_ranges[] = {ICON_MIN_FK, ICON_MAX_16_FK, 0};
-                io.Fonts->AddFontFromMemoryCompressedTTF(
-                    forkawesome_compressed_data, forkawesome_compressed_size,
-                    icon_font_size,
-                    &config, icon_ranges);
-            }*/
-
+        if(cfg.load_icons) {
             // Google Material Icons
-            {
-                float icon_font_size = 16.0f;
-                ImFontConfig config;
-                config.OversampleH = 1;
-                config.MergeMode = true;
-                config.PixelSnapH = true;
-                config.GlyphOffset.y = 3.0f;
-                config.GlyphMinAdvanceX = icon_font_size; // Use if you want to make the icon monospaced
-                config.DstFont = default_font;
-                static const ImWchar icon_ranges[] = {ICON_MIN_MD, ICON_MAX_16_MD, 0};
-                io.Fonts->AddFontFromMemoryCompressedTTF(
-                    MaterialIconsRegular_compressed_data, MaterialIconsRegular_compressed_size,
-                    icon_font_size,
-                    &config, icon_ranges);
-            }
-
-            /*
-            // fontawesome v6
-            {
-                ImFontConfig config;
-                config.MergeMode = true;
-                config.PixelSnapH = true;
-                config.GlyphMinAdvanceX = icon_font_size; // Use if you want to make the icon monospaced
-                static const ImWchar icon_ranges[] = {ICON_MIN_FA, ICON_MAX_16_FA, 0};
-                io.Fonts->AddFontFromMemoryCompressedTTF(
-                    font_awesome_regular_400_compressed_data, font_awesome_regular_400_compressed_size,
-                    icon_font_size,
-                    &config, icon_ranges);
-            }
-
-            // fontawesome v6 (brands)
-            {
-                ImFontConfig config;
-                config.MergeMode = true;
-                config.PixelSnapH = true;
-                config.GlyphMinAdvanceX = icon_font_size; // Use if you want to make the icon monospaced
-                static const ImWchar icon_ranges[] = {ICON_MIN_FAB, ICON_MAX_16_FAB, 0};
-                io.Fonts->AddFontFromMemoryCompressedTTF(
-                    font_awesome_6_brands_400_compressed_data,
-                    font_awesome_6_brands_400_compressed_size,
-                    icon_font_size,
-                    &config, icon_ranges);
-            }*/
-
+            float icon_font_size = 16.0f;
+            ImFontConfig config;
+            config.OversampleH = 1;
+            config.MergeMode = true;
+            config.PixelSnapH = true;
+            config.GlyphOffset.y = 3.0f;
+            config.GlyphMinAdvanceX = icon_font_size; // Use if you want to make the icon monospaced
+            config.DstFont = font_system;
+            static const ImWchar icon_ranges[] = {ICON_MIN_MD, ICON_MAX_16_MD, 0};
+            io.Fonts->AddFontFromMemoryCompressedTTF(
+                MaterialIconsRegular_compressed_data, MaterialIconsRegular_compressed_size,
+                icon_font_size,
+                &config, icon_ranges);
         }
-
-        if(load_fixed) {
-            fixed_size_font = load_fixed_font(io);
-        }
-    }
-
-    ImFont* font_loader::get_fixed_size_font(float scale) {
-        return fixed_size_font;
     }
 
     ImFont* font_loader::get_font(font_weight weight) {
-        if(weight == font_weight::fixed_size)   return fixed_size_font;
-        if(weight == font_weight::bold)         return bold_font;
+        if(weight == font_weight::fixed_size)   return font_fixed;
+        if(weight == font_weight::bold)         return font_bold;
         return nullptr;
     }
 }

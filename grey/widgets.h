@@ -438,6 +438,7 @@ namespace grey::widgets {
         float h1_size_delta{15};
         float h2_size_delta{8};
         float h3_size_delta{4};
+        bool show_cursor{false};
     };
 
     /**
@@ -490,7 +491,7 @@ namespace grey::widgets {
     bool icon_selector(app& app, const std::string& path, size_t square_size);
 
     void spc(size_t repeat = 1);
-    void sl(float offset = 0);
+    void sl(float offset = 0, bool spacing = true);
     void sep(const std::string& text = "");
 
     bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false, const std::string& tooltip_text = "", float width = 0, float height = 0);

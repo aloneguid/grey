@@ -5,6 +5,7 @@
 #include <map>
 #include "common/img.h"
 #include "common/platform.h"
+#include "model.h"
 
 #if PLATFORM_WINDOWS
 #include <Windows.h>
@@ -43,14 +44,9 @@ namespace grey {
         std::string initial_theme_id;
 
         /**
-         * @brief When true, loads icon font on startup. You can set this to "false" after creating the app instance
-         *        (but before running it) to save some memory.
+         * tells which fonts to load on startup. By default, only the system font is loaded.
          */
-        bool load_icon_font{true};
-
-        bool load_fixed_font{false};
-
-        bool load_bold_font{true};
+        font_config fonts{};
 
         float scale{1.0f};
 
