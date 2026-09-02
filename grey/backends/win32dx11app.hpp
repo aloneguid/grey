@@ -649,7 +649,7 @@ namespace grey::backends {
             ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
         }
 
-        std::shared_ptr<texture> make_native_texture(grey::common::raw_img &img) {
+        std::shared_ptr<texture> make_native_texture(common::raw_img &img) {
             D3D11_TEXTURE2D_DESC desc{0};
             desc.Width = img.x;
             desc.Height = img.y;

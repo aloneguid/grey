@@ -4,6 +4,20 @@
 #include <sstream>
 
 namespace grey::common::str {
+    template<class... Strings>
+    std::string longest(const Strings&... strings) {
+        std::string result;
+        ((result = strings.size() > result.size() ? strings : result), ...);
+        return result;
+    }
+
+    template<class... Strings>
+    std::string first_non_empty(const Strings&... strings) {
+        std::string result;
+        ((result.empty() && !strings.empty() ? result = strings : result), ...);
+        return result;
+    }
+
     std::wstring to_wstr(const std::string& str);
 
     std::string to_str(const std::wstring& wstr);
