@@ -20,6 +20,11 @@ namespace grey::widgets {
     extern float scale;
     int generate_int_id();
 
+    /**
+     * Checks if UI system is initialized.
+     */
+    [[nodiscard]] bool initialized();
+
     class guardable {
     public:
         virtual ~guardable() = default;
@@ -333,7 +338,7 @@ namespace grey::widgets {
      */
     class popup : public guardable {
     public:
-        popup(const std::string& id);
+        explicit popup(std::string id);
 
         void enter() override;
         void leave() override;
@@ -341,7 +346,7 @@ namespace grey::widgets {
         void open();
         void open(float x, float y);
 
-        operator bool() const {
+        explicit operator bool() const {
             return rendered;
         }
 
@@ -552,8 +557,8 @@ namespace grey::widgets {
             return v;
         }();
 
-        unsigned int selected_uint = static_cast<unsigned int>(selected);
-        bool changed = combo(label, names, selected_uint, width);
+        auto selected_uint = static_cast<unsigned int>(selected);
+        const bool changed = combo(label, names, selected_uint, width);
         if(changed) selected = static_cast<TEnum>(selected_uint);
         return changed;
     }

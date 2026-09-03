@@ -32,6 +32,10 @@ namespace grey::widgets {
         return incrementing_id++;
     }
 
+    bool initialized() {
+        return nullptr != ImGui::GetCurrentContext();
+    }
+
     static string generate_id(const string& prefix = "") {
         return prefix + std::to_string(incrementing_id++);
     }
@@ -239,10 +243,10 @@ namespace grey::widgets {
         // set window class to prevent viewports to be merged with main window
         //ImGui::SetNextWindowClass(&wc);
 
-        if(init_size.x)
+        if(init_size.x > 0)
             ImGui::SetNextWindowSize(init_size, ImGuiCond_Once);
 
-        if(resize_to.x) {
+        if(resize_to.x > 0) {
             ImGui::SetNextWindowSize(resize_to);
             resize_to = ImVec2{0, 0};
         }
@@ -1322,15 +1326,18 @@ namespace grey::widgets {
     }
 
     float frame_delta() {
-        return ImGui::GetIO().DeltaTime;
+        return initialized() ? ImGui::GetIO().DeltaTime : 0.0f;
     }
 
     void mouse_cursor(mouse_cursor_type mct) {
-        ImGui::SetMouseCursor((ImGuiMouseCursor_) mct);
+        ImGui::SetMouseCursor(static_cast<ImGuiMouseCursor_>(mct));
     }
 
-    tree_node::tree_node(const std::string& label, bool open_by_default, bool is_leaf, bool span_all_cols,
-                         emphasis emp) {
+    tree_node::tree_node(const std::string& label,
+        const bool open_by_default,
+        const bool is_leaf,
+        const bool span_all_cols,
+        const emphasis emp) {
         ImGuiTreeNodeFlags flags{0};
         if(open_by_default) {
             flags |= ImGuiTreeNodeFlags_DefaultOpen;
@@ -1364,26 +1371,6 @@ namespace grey::widgets {
             ImGui::TreePop();
         }
     }
-
-    /*bool tree_node(const std::string& label, ImGuiTreeNodeFlags flags, emphasis emp) {
-        bool ok;
-        if (emp == emphasis::none) {
-            ok = ImGui::TreeNodeEx(label.c_str(), flags);
-        }
-        else {
-            ImVec4 normal, hovered, active;
-            if (set_emphasis_colours(emp, normal, hovered, active)) {
-                ImGui::PushStyleColor(ImGuiCol_Text, normal);
-                ok = ImGui::TreeNodeEx(label.c_str(), flags);
-                ImGui::PopStyleColor();
-            }
-            else {
-                ok = ImGui::TreeNodeEx(label.c_str(), flags);
-            }
-        }
-
-        return ok;
-    }*/
 
     // colour helpers
 
@@ -1432,7 +1419,6 @@ namespace grey::widgets {
     }
 
     tab_bar_item::tab_bar_item(const std::string& id, bool unsaved, bool selected) : id{id} {
-        //cout << "tab_bar_item::tab_bar_item " << id << endl;
         if(unsaved) {
             flags |= ImGuiTabItemFlags_UnsavedDocument;
         }
@@ -1443,7 +1429,6 @@ namespace grey::widgets {
     }
 
     tab_bar_item::~tab_bar_item() {
-        //cout << "tab_bar_item::~tab_bar_item " << id << endl;
         if(rendered) {
             ImGui::EndTabItem();
             rendered = false;
@@ -1452,7 +1437,7 @@ namespace grey::widgets {
 
     // ---- popup ----
 
-    popup::popup(const std::string& id) : id{id} {
+    popup::popup(std::string id) : id{std::move(id)} {
     }
 
     void popup::enter() {
