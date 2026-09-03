@@ -73,13 +73,13 @@ void Basics() {
         Label("accordion content (open)");
     }
     if(Hyperlink("click me")) {
-        Notify("hyperlink clicked");
+        Toast(Emphasis.Info, "hyperlink clicked");
     }
 
     Hyperlink("blog", "https://www.aloneguid.uk/posts/");
 
     if(Input(ref message, "default input")) {
-        Notify("input changed");
+        Toast(Emphasis.Info, "input changed");
     }
 
     Input(ref message, "disabled input", false);
@@ -149,10 +149,10 @@ Grey.App.Run("Grey# Demo", () => {
 
         tb.TabItem("Lists", () => {
             if(Combo("combo", choices, ref currentChoice)) {
-                Notify($"COMBO choice changed to {choices[currentChoice]}");
+                Toast(Emphasis.Info, $"COMBO choice changed to {choices[currentChoice]}");
             }
             if(List("list", choices, ref currentChoice)) {
-                Notify($"LIST choice changed to {choices[currentChoice]}");
+                Toast(Emphasis.Info, $"LIST choice changed to {choices[currentChoice]}");
             }
             Label($"current: {currentChoice}");
         });
@@ -183,7 +183,7 @@ Grey.App.Run("Grey# Demo", () => {
                 ce.Render();
             } else {
                 if(InputMultiline("multiline", multilineText, mlHeight, false, mlEnabled, mlUseFixedFont)) {
-                    Notify("multiline changed");
+                    Toast(Emphasis.Info, "multiline changed");
                 }
             }
         });
@@ -245,7 +245,7 @@ Grey.App.Run("Grey# Demo", () => {
           if(column == 0) {
               if(tableSelectables) {
                   if(Selectable($"{row}", tableSelectableRow)) {
-                      Notify($"clicked {row}x{column}");
+                      Toast(Emphasis.Info, $"clicked {row}x{column}");
                   }
               } else {
                   Label(row.ToString());

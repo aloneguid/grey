@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
                     w::menu m("View");
                     if(m) {
                         w::mi_themes([&app](const std::string& id) {
-                            w::notify_info("theme changed to " + id);
+                            w::toast(emphasis::info, "theme changed to " + id);
                             app->set_theme(id);
                         });
                         w::small_checkbox("Show ImGui demo", show_demo);
@@ -120,8 +120,7 @@ int main(int argc, char* argv[]) {
 
             // basics
             {
-                auto tab = tabs.next_tab("Basics");
-                if(tab) {
+                if(auto tab = tabs.next_tab("Basics")) {
                     w::label("simple text");
                     w::sl(); w::label(ICON_MD_5G " icon1");
                     w::sl(); w::label("primary", emphasis::primary);
@@ -171,7 +170,7 @@ int main(int argc, char* argv[]) {
                     w::small_checkbox("small", selected);
 
                     if(w::hyperlink("click me")) {
-                        w::notify_info("hyperlink clicked");
+                        w::toast(emphasis::info, "hyperlink clicked");
                     }
                     w::sl();
                     w::hyperlink("blog", "https://www.aloneguid.uk/posts/");
@@ -198,7 +197,11 @@ int main(int argc, char* argv[]) {
                     }
 
                     if(w::button("info message")) {
-                        w::notify_info("inof");
+                        w::toast(emphasis::info, "informational message");
+                    }
+                    w::sl();
+                    if(w::button("warning")) {
+                        w::toast(emphasis::warning, "warning message");
                     }
 
                     {
@@ -395,7 +398,7 @@ int main(int argc, char* argv[]) {
                             if(col == 0) {
                                 if(row_selectable) {
                                     if(w::selectable(to_string(row), row_selectable_span)) {
-                                        w::notify_info("row " + to_string(row) + " selected");
+                                        w::toast(emphasis::info, "row " + to_string(row) + " selected");
                                     }
                                 } else {
                                     w::label(to_string(row));

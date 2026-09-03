@@ -51,7 +51,7 @@ extern "C" {
 
     EXPORTED bool hyperlink(const char* c_text, const char* c_url_to_open);
 
-    EXPORTED void notify(const char* c_message);
+    EXPORTED void toast(int32_t emphasis, const char* c_message);
 
     EXPORTED bool input_string(char* c_value, int32_t value_max_length,
             const char* c_label, bool enabled, float width, bool is_readonly);

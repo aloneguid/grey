@@ -60,7 +60,7 @@ namespace Grey {
             [MarshalAs(UnmanagedType.LPUTF8Str)] string? url_to_open);
 
         [DllImport(LibName)]
-        internal static extern void notify([MarshalAs(UnmanagedType.LPUTF8Str)] string message);
+        internal static extern void toast(Emphasis emphasis, [MarshalAs(UnmanagedType.LPUTF8Str)] string message);
 
         [DllImport(LibName)]
         internal static extern bool input_string(

@@ -62,8 +62,8 @@ namespace Grey {
             return Native.hyperlink(text, urlToOpen);
         }
 
-        public static void Notify(string message) {
-            Native.notify(message);
+        public static void Toast(Emphasis emphasis, string message) {
+            Native.toast(emphasis, message);
         }
 
         public static bool Input(StringBuilder value, string label,
