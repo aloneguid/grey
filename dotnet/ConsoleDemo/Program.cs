@@ -29,7 +29,7 @@ void Basics() {
     Label("labels:");
     foreach(Emphasis emp in Enum.GetValues<Emphasis>()) {
         SL();
-        Label(emp.ToString(), emp);
+        Label(emp.ToString(), new Style{Emp = emp});
     }
 
     Label("Buttons:");

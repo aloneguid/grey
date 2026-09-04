@@ -2,7 +2,7 @@
 
 env:
   VERSION: 0.0.0
-  PACKAGE_SUFFIX: '-pre.46'
+  PACKAGE_SUFFIX: '-pre.47'
   # PACKAGE_SUFFIX: ''
   ASM_VERSION: 0.0.0
   BUILD_TYPE: Release
@@ -27,6 +27,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        # .NET RID catalog: https://learn.microsoft.com/en-us/dotnet/core/rid-catalog
         include:
           - os: windows-latest
             name: Windows x64
