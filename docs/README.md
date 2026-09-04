@@ -2,46 +2,27 @@
 
 ![logo](icon64.png)
 
-Grey is a minimalistic, blazing fast, disposable, cross-platform, zero configuration UI library for C++ and C# that frees up developers' grey matter to do something that matters.
+> [!WARNING]
+> This project is not yet completely ready for public consumption as a product. It's mostly used internally by 10+ projects and some public projects that are either open or closed source.
 
-Grey is designed to display user interface in one line of code with no ceremony at all, mostly for debugging or diagnostics, or small internal tools. It is not a full featured UI framework for end-user applications, however you can [try](https://github.com/aloneguid/bt) to do that as well.
+Grey is a minimalistic, blazing fast, disposable, self-container, cross-platform, zero-configuration UI library for C++ (C# wrapper available) that frees up developers' grey matter to do something that matters.
 
-It's based on the awesome [ImGui](https://github.com/ocornut/imgui) framework and follows it's design principles, specifically the immediate mode paradigm.
+Grey is designed to display the user interface in one line of code with no ceremony at all, mostly for debugging or diagnostics, or small internal tools. It is not a full-featured UI framework for end-user applications. However, you can [try](https://github.com/aloneguid/bt) to do that as well.
+
+It's based on the awesome [ImGui](https://github.com/ocornut/imgui) framework and follows its design principles, specifically the immediate mode paradigm.
 
 ## Features
 
-- Cross-platform - currently supports **Windows x64** and **Linux x64**.
+- Cross-platform:
+  - Windows x64
+  - Linux x64
+  - Apple Silicon
+  - Intel Mac
 - Completely stateless i.e., no widgets, state synchronization and so on.
-- Looks beautiful by default i.e., renders in high DPI, using system fonts and colours, supports themes and material icons.
+- Looks beautiful by default i.e., renders in high DPI, using system fonts and colors, supports themes and material icons.
 
 ## Getting started
 
-To get started in C++, simply include this repository as a git submodule and follow the examples. For a real-life, production sample, check out [bt](https://github.com/aloneguid/bt).
+To get started in C++, include this repository as a git submodule and follow the examples. For a real-life, production sample, check out [bt](https://github.com/aloneguid/bt).
 
-To get started in C#, reference [GreyMatter](https://www.nuget.org/packages/GreyMatter/) package, which includes C# interface and pre-built binaries for Windows and Linux.
-
-# Roadmap
-- Markdown component support.
-- [ ] [Knobs](https://github.com/altschuler/imgui-knobs)
-
-## Building
-
-In general, have a look at GHA definitions, because those are kept up to date.
-
-### Windows
-
-You only need **cmake** and **vcpkg**.
-
-### Linux
-
-To build native part on Linux or WSL2, you need:
-- [vcpkg](https://learn.microsoft.com/en-gb/vcpkg/get_started/get-started?pivots=shell-bash).
-- CMake. `sudo apt install cmake`.
-- Build tools. `sudo apt install g++ gdb make ninja-build rsync zip`.
-- GLFW3 dependencies. `sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config`.
-
-todo: sudo apt install autoconf autoconf-archive automake libtool
-
-### MacOSX
-
-Coming soon.
+To get started in C#, reference [the GreyMatter](https://www.nuget.org/packages/GreyMatter/) package, which includes C# interface and pre-built binaries for Windows and Linux.
