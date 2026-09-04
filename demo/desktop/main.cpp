@@ -19,7 +19,7 @@ string window_title = "Demo app";
 w::window wnd{window_title, &app_open};
 string text;
 w::container scroller{400, 100};
-w::popup status_pop {"status_pop"};
+w::popup status_pop{"status_pop"};
 bool ned_initialised{false};
 bool selected{false};
 // multiline string with sample for text editor
@@ -35,13 +35,12 @@ w::container md_wnd1;
 grey::x::graph gr;
 
 void plot_demo() {
-
 }
 
 #if WIN32
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 #else
-int main(int argc, char* argv[]) {
+    int main(int argc, char* argv[]) {
 #endif
 
     //auto backend = grey::backend::make_platform_default(APP_LONG_NAME);
@@ -59,14 +58,14 @@ int main(int argc, char* argv[]) {
     app->center_on_screen = true;
 
     wnd
-        .no_titlebar()
-        .no_scroll()
-        .no_resize()
-        .fill_viewport()
-        .border(0)
-        .has_menubar();
+            .no_titlebar()
+            .no_scroll()
+            .no_resize()
+            .fill_viewport()
+            .border(0)
+            .has_menubar();
 
-   
+
     gr.add_node(1);
     gr.add_node(2);
     gr.add_node(3);
@@ -77,7 +76,6 @@ int main(int argc, char* argv[]) {
 
 
     app->run([&app](const grey::app& c_app) {
-        
         w::guard wg{wnd};
 
         // menu
@@ -121,40 +119,44 @@ int main(int argc, char* argv[]) {
             // basics
             {
                 if(auto tab = tabs.next_tab("Basics")) {
-                    w::label("simple text");
-                    w::sl(); w::label(ICON_MD_5G " icon1");
-                    w::sl(); w::label("primary", emphasis::primary);
-                    w::sl(); w::label("secondary", emphasis::secondary);
-                    w::sl(); w::label("success", emphasis::success);
-                    w::sl(); w::label("error", emphasis::error);
-                    w::sl(); w::label("warning", emphasis::warning);
-                    w::sl(); w::label("info", emphasis::info);
+                    w::sl();
+                    w::lbl(ICON_MD_5G " icon1");
+                    w::lbl("label styles");
+                    w::lbl("");
+                    for(pair<emphasis, string_view> emp: magic_enum::enum_entries<emphasis>()) {
+                        string title = format("emp: {}", emp.second);
+                        w::sl();
+                        w::lbl(title, {.emp = emp.first});
+                    }
 
-                    w::label("hover for simple tooltip");
+                    w::lbl("hover for simple tooltip");
                     w::tt("simple tooltip");
 
                     w::sl();
-                    w::label("hover for rich tooltip");
+                    w::lbl("hover for rich tooltip");
                     if(w::rich_tt tt{show_delay::immediate}; tt) {
-                        w::label("rich tooltip content");
+                        w::lbl("rich tooltip content");
                         w::sep();
                         w::button("even button here");
                     }
 
                     w::sep();
 
-                    w::sep("buttons");
+                    w::sep("buttons (click for toast of the same emphasis)");
 
                     if(w::button("simply add dot")) {
                         text += ".";
                     }
-                    w::sl(); w::button("Primary", emphasis::primary);
-                    w::sl(); w::button("Secondary", emphasis::secondary);
-                    w::sl(); w::button("Success", emphasis::success);
-                    w::sl(); w::button("Error", emphasis::error);
-                    w::sl(); w::button("Warning", emphasis::warning);
-                    w::sl(); w::button("Info", emphasis::info);
-                    w::sl(); w::label(text);
+
+                    for(pair<emphasis, string_view> emp: magic_enum::enum_entries<emphasis>()) {
+                        w::sl();
+                        if(w::button(string{emp.second}, emp.first)) {
+                            w::toast(emp.first, format("Toast of {} emphasis", emp.second));
+                        }
+                    }
+
+                    w::sl();
+                    w::lbl(text);
 
                     w::sep("radios");
                     w::radio("radio1", selected);
@@ -184,24 +186,18 @@ int main(int argc, char* argv[]) {
                     static bool slider_ticks = false;
                     w::checkbox("ticks", slider_ticks);
                     w::slider(slider_value_float, 0.0f, 1.0f, "slider float", 0.1f, slider_ticks);
-                    w::slider(slider_value_float, 0.0f, 1.0f, "slider float (small)", 0.1f, slider_ticks, emphasis::none, true);
-                    w::slider(slider_value_float, 0.0f, 1.0f, "slider float secondary", 0.1f, slider_ticks, emphasis::secondary);
+                    w::slider(slider_value_float, 0.0f, 1.0f, "slider float (small)", 0.1f, slider_ticks,
+                              emphasis::none, true);
+                    w::slider(slider_value_float, 0.0f, 1.0f, "slider float secondary", 0.1f, slider_ticks,
+                              emphasis::secondary);
                     w::slider_classic(slider_value_float, 0.0f, 1.0f, "slider classic");
 
                     w::slider(slider_value_int, 0, 10, "slider int", 2, slider_ticks);
 
                     for(int i = 0; i < 10; i++) {
-                        w::id_frame f{i};   // demonstrates collision avoidance when using id_frame
+                        w::id_frame f{i}; // demonstrates collision avoidance when using id_frame
                         if(i > 0) w::sl();
                         w::button("collide");
-                    }
-
-                    if(w::button("info message")) {
-                        w::toast(emphasis::info, "informational message");
-                    }
-                    w::sl();
-                    if(w::button("warning")) {
-                        w::toast(emphasis::warning, "warning message");
                     }
 
                     {
@@ -210,17 +206,19 @@ int main(int argc, char* argv[]) {
 
                         {
                             widgets::texter adj{fa_delta, font_weight::regular};
-                            w::label("Fonts: regular, ");
+                            w::lbl("Fonts: regular, ");
                         }
 
                         {
                             widgets::texter adj{fa_delta, font_weight::bold};
-                            w::sl(0, false); w::label("bold, ");
+                            w::sl(0, false);
+                            w::lbl("bold, ");
                         }
 
                         {
                             widgets::texter adj{fa_delta, font_weight::fixed_size};
-                            w::sl(0, false); w::label("and monospace");
+                            w::sl(0, false);
+                            w::lbl("and monospace");
                         }
                     }
                 }
@@ -240,12 +238,12 @@ int main(int argc, char* argv[]) {
                         w::slider(img_scale, 0.1f, 3.0f, "scale");
                         if(img_rounded) {
                             w::slider(img_rounding, 1, 50, "rounding");
-                            w::image_rounded(*app, "luna", texture->width * img_scale, texture->height * img_scale, img_rounding);
+                            w::image_rounded(*app, "luna", texture->width * img_scale, texture->height * img_scale,
+                                             img_rounding);
                         } else {
                             w::image(*app, "luna", texture->width * img_scale, texture->height * img_scale);
                         }
                     }
-
                 }
             }
 
@@ -253,7 +251,6 @@ int main(int argc, char* argv[]) {
             {
                 auto tab = tabs.next_tab("Containers");
                 if(tab) {
-
                     static bool grp_bg{false};
                     static bool grp_border{false};
                     static bool grp_fw{false};
@@ -264,8 +261,8 @@ int main(int argc, char* argv[]) {
 
                     {
                         w::group g{grp_fw};
-                        w::label("group content");
-                        w::label("a label");
+                        w::lbl("group content");
+                        w::lbl("a label");
                         w::button("a button");
                     }
 
@@ -279,8 +276,8 @@ int main(int argc, char* argv[]) {
                         w::checkbox("hover border", grp_hover_border);
                     }
 
-                    w::label("(" + to_string((int)item_rect.x_min) + "x" + to_string((int)item_rect.y_min) + ") - (" +
-                         to_string((int)item_rect.x_max) + "x" + to_string((int)item_rect.y_max) + ")");
+                    w::lbl("(" + to_string((int) item_rect.x_min) + "x" + to_string((int) item_rect.y_min) + ") - (" +
+                           to_string((int) item_rect.x_max) + "x" + to_string((int) item_rect.y_max) + ")");
 
                     ImDrawList* fdl = ImGui::GetWindowDrawList();
                     ImDrawList* bdl = ImGui::GetForegroundDrawList();
@@ -290,7 +287,8 @@ int main(int argc, char* argv[]) {
                         fdl->AddRect(item_rect.lt(), item_rect.rb(), w::imcol32(ImGuiCol_Border), style.FrameRounding);
 
                     if(grp_bg || (grp_hover_bg && is_hovered))
-                        bdl->AddRectFilled(item_rect.lt(), item_rect.rb(), w::imcol32(ImGuiCol_Border), style.FrameRounding);
+                        bdl->AddRectFilled(item_rect.lt(), item_rect.rb(), w::imcol32(ImGuiCol_Border),
+                                           style.FrameRounding);
 
 
                     w::sep("scroller");
@@ -302,7 +300,6 @@ int main(int argc, char* argv[]) {
                             w::button("button " + to_string(i));
                         }
                     }
-
                 }
             }
 
@@ -311,13 +308,13 @@ int main(int argc, char* argv[]) {
                 auto tab = tabs.next_tab("Collapsibles");
                 if(tab) {
                     if(w::accordion("Accordion")) {
-                        w::label("accordion content");
+                        w::lbl("accordion content");
                     }
 
                     if(w::tree_node p("Tree Node", true); p) {
                         if(w::tree_node c1("Child 1"); c1) {
                             if(w::tree_node l0("Leaf 0", false, true); l0) {
-                                w::label("leaf content");
+                                w::lbl("leaf content");
                             }
                         }
                     }
@@ -331,8 +328,12 @@ int main(int argc, char* argv[]) {
                     w::combo("combo", items, current_item);
                     w::list("list", items, current_item);
 
-                    w::label("selected item: "); w::sl(); w::label(items[current_item]);
-                    w::label("selected index: "); w::sl(); w::label(to_string(current_item));
+                    w::lbl("selected item: ");
+                    w::sl();
+                    w::lbl(items[current_item]);
+                    w::lbl("selected index: ");
+                    w::sl();
+                    w::lbl(to_string(current_item));
 
                     if(w::button("center on screen")) {
                         wnd.center();
@@ -351,19 +352,21 @@ int main(int argc, char* argv[]) {
                         for(int i = 0; i < row_count; i++) {
                             if(tbl.begin_row()) {
                                 rows_rendered++;
-                                w::label("row " + to_string(i));
+                                w::lbl("row " + to_string(i));
                                 for(int c = 1; c < 3; c++) {
                                     if(tbl.next_column()) {
-                                        w::label(to_string(i) + " x " + to_string(c));
+                                        w::lbl(to_string(i) + " x " + to_string(c));
                                     }
                                 }
                             }
                         }
                     }
-                    w::label("rows rendered: "); w::sl(); w::label(to_string(rows_rendered));
+                    w::lbl("rows rendered: ");
+                    w::sl();
+                    w::lbl(to_string(rows_rendered));
                 }
             }
-           
+
             // big table
             {
                 auto tab = tabs.next_tab("Big table");
@@ -392,7 +395,7 @@ int main(int argc, char* argv[]) {
                     static bool row_bg = false;
                     w::checkbox("alternate row bg", row_bg);
 
-                    w::big_table t{"table2", columns, (size_t)row_count, 0.0f, -20 * w::scale, row_bg};
+                    w::big_table t{"table2", columns, (size_t) row_count, 0.0f, -20 * w::scale, row_bg};
                     if(t) {
                         t.render_data([](int row, int col) {
                             if(col == 0) {
@@ -401,10 +404,10 @@ int main(int argc, char* argv[]) {
                                         w::toast(emphasis::info, "row " + to_string(row) + " selected");
                                     }
                                 } else {
-                                    w::label(to_string(row));
+                                    w::lbl(to_string(row));
                                 }
                             } else {
-                                w::label(to_string(row) + "x" + to_string(col));
+                                w::lbl(to_string(row) + "x" + to_string(col));
                             }
                         });
                     }
@@ -455,15 +458,16 @@ int main(int argc, char* argv[]) {
 
                         ted.render();
                     } else {
-                        w::input_ml("##ml", text_editor_text, height == 0 ? -FLT_MIN : height, autoscroll, enabled, use_fixed_font);
+                        w::input_ml("##ml", text_editor_text, height == 0 ? -FLT_MIN : height, autoscroll, enabled,
+                                    use_fixed_font);
                     }
                 }
             }
 
             // ImPlot
             with_tab(tabs, "Plots",
-                //w::plot_demo();
-                plot_demo();)
+                     //w::plot_demo();
+                     plot_demo();)
 
             // markdown
             {
@@ -574,7 +578,7 @@ Also, [GitHub alerts](https://docs.github.com/en/get-started/writing-on-github/g
                     w::sl();
                     w::input(gr_connect_to, "connect to", true, 50 * w::scale);
                     w::sl();
-                    w::label("|");
+                    w::lbl("|");
                     w::sl();
                     if(w::button("circle")) {
                         gr.layout_circle();
@@ -589,14 +593,13 @@ Also, [GitHub alerts](https://docs.github.com/en/get-started/writing-on-github/g
                     gr.render();
                 }
             }
-
         }
 
 
         with_status_bar(
-            w::label(ICON_MD_HEAT_PUMP, emphasis::primary);
+            w::lbl(ICON_MD_HEAT_PUMP, {.emp=emphasis::primary});
             w::sl();
-            w::label("|", 0, false);
+            w::lbl("|", {.emp=emphasis::disabled});
             w::sl();
             if(w::button("pop!", emphasis::none, true, true)) {
                 status_pop.open();
@@ -605,14 +608,14 @@ Also, [GitHub alerts](https://docs.github.com/en/get-started/writing-on-github/g
 
             w::guard g{status_pop};
             if(status_pop) {
-                w::label("popup content");
+                w::lbl("popup content");
             }
 
-            w::sl(); w::label("|", 0, false);
+            w::sl(); w::lbl("|", {.emp=emphasis::disabled});
             w::sl(); w::label_debug_info();
 
-            w::sl(); w::label("|", 0, false);
-            w::sl(); w::label(ImGui::GetVersion());
+            w::sl(); w::lbl("|", {.emp=emphasis::disabled});
+            w::sl(); w::lbl(ImGui::GetVersion());
         )
 
 

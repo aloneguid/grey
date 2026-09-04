@@ -34,10 +34,9 @@ namespace grey::widgets::x {
         static void render_frame();
         static void push(emphasis emp, const std::string& title, const std::string& message, int dismiss_time_ms);
 
-
-
     private:
-        static constexpr int64_t FadeInOutMs = 200;
+        static constexpr int64_t FadeInMs = 100;
+        static constexpr int64_t FadeOutMs = 1000;
         static constexpr float Opacity = 0.8f;  // final toast opacity
         static constexpr float WindowPadding = 10.0f;
 

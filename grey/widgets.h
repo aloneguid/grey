@@ -7,6 +7,7 @@
 #include <functional>
 #include "app.h"
 #include "magic_enum/magic_enum.hpp"
+#include "common/platform.h"
 
 // 3rdparty
 #include "3rdparty/ImGuiColorTextEdit/TextEditor.h"
@@ -18,7 +19,11 @@
 namespace grey::widgets {
 
     extern float scale;
-    int generate_int_id();
+
+    /**
+     * Generates a unique ID to be used in widgets etc.
+     */
+    [[nodiscard]] int generate_int_id();
 
     /**
      * Checks if UI system is initialized.
@@ -43,9 +48,6 @@ namespace grey::widgets {
         explicit id_frame(const std::string& scope_id);
 
         ~id_frame();
-
-    private:
-        explicit id_frame(ImGuiID id);
     };
 
     /**
@@ -70,6 +72,8 @@ namespace grey::widgets {
     class window : public guardable {
     public:
         window(std::string title, bool* p_open = nullptr);
+
+        float opacity{1.0f};
 
 #ifdef _WIN32
         bool win32_exclude_from_capture{false};
@@ -99,11 +103,12 @@ namespace grey::widgets {
         void enter() override;
         void leave() override;
 
-        ~window();
+        ~window() override;
 
     private:
-        ImVec2 init_size{0, 0};
-        ImVec2 resize_to{0, 0};
+        float last_opacity{1.0f};
+        sz init_size{0, 0};
+        sz resize_to{0, 0};
 
         // centering
         bool init_center{false};    // whether to center window
@@ -118,7 +123,7 @@ namespace grey::widgets {
         float border_size{-1};
         bool fill_viewport_enabled{false};
 
-#ifdef _WIN32
+#ifdef PLATFORM_WINDOWS
         bool win32_brought_forward{false};
         bool win32_exclude_from_capture_current{false};
         bool win32_always_on_top_current{false};
@@ -128,7 +133,7 @@ namespace grey::widgets {
 
     class guard {
     public:
-        guard(guardable& g) : g{g} {
+        explicit guard(guardable& g) : g{g} {
             g.enter();
         }
 
@@ -232,14 +237,14 @@ namespace grey::widgets {
      */
     bool mi(const std::string& text, bool reserve_icon_space = false, const std::string& icon = "");
 
-    void mi_themes(std::function<void(const std::string&)> on_changed);
+    void mi_themes(const std::function<void(const std::string&)>& on_changed);
 
     class menu {
     public:
-        menu(const std::string& title, bool reserve_icon_space = false, const std::string& icon = "");
+        explicit menu(const std::string& title, bool reserve_icon_space = false, std::string icon = "");
         ~menu();
 
-        operator bool() const {
+        explicit operator bool() const {
             return rendered;
         }
 
@@ -400,14 +405,12 @@ namespace grey::widgets {
 
     void dummy(ImVec2 size);
 
-    void label(const std::string& text, size_t text_wrap_pos = 0, bool enabled = true,
-        bool center_x = false, bool center_y = false);
-
-    void label(const std::string& text, rgb_colour colour);
-
-    void label(const std::string& text, emphasis emp, size_t text_wrap_pos = 0, bool enabled = true,
-        float font_size_diff = .0f,
-        bool center_x = false, bool center_y = false);
+    /**
+     * Draws a label with optional style
+     * @param text label text
+     * @param style label style
+     */
+    void lbl(const std::string& text, const style& style = {});
 
     sz text_size_get(const std::string& text, float font_size_diff = .0f, float wrap_width = -1);
 
@@ -640,6 +643,8 @@ namespace grey::widgets {
 
     ImU32 imcol32(ImGuiCol idx);
 
+    rgb_colour get_color(emphasis emp, sub_emphasis as = sub_emphasis::normal);
+
     // system debug info
     void label_debug_info();
 
@@ -707,7 +712,7 @@ namespace grey::widgets {
          * @brief Call to initialize table data rendering. Accepts lambda callback to be invoked for each cell.
          * @param cell_render Callback that will be called for each cell in the table. Row and column indices are passed as parameters.
          */
-        void render_data(std::function<void(int, int)> cell_render);
+        void render_data(const std::function<void(int, int)>& cell_render);
 
     private:
         size_t columns_size;

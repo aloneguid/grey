@@ -113,6 +113,14 @@ namespace grey::common::win32 {
 
     }
 
+    bool window::set_opacity(const float opacity) const {
+        if(opacity < 0.0f || opacity > 1.0f) return false;
+        const BYTE alpha = static_cast<BYTE>(opacity * 255);
+        LONG_PTR exStyle = ::GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+        ::SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
+        return ::SetLayeredWindowAttributes(hwnd, 0, alpha, LWA_ALPHA);
+    }
+
     void window::excluded_from_capture(bool exclude) {
         // WDA_MONITOR makes window black, but it's still visible (difference from WDA_EXCLUDEFROMCAPTURE)
         ::SetWindowDisplayAffinity(hwnd, exclude ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);

@@ -12,10 +12,12 @@ on:
   push:
     branches:
       - master
+      - version/*
 
   pull_request:
     branches:
       - master
+      - version/*
 
   workflow_dispatch:
 
@@ -28,19 +30,21 @@ jobs:
         include:
           - os: windows-latest
             name: Windows x64
-            arch: x64
             vcpkg_triplet: x64-windows-static
             vcpkg_config: Release
             dotnet_rid: win-x64
+          - os: windows-11-arm
+            name: Windows ARM64
+            vcpkg_triplet: arm64-windows-static
+            vcpkg_config: Release
+            dotnet_rid: win-arm64
           - os: ubuntu-latest
             name: Linux x64
-            arch: x64
             vcpkg_triplet: x64-linux
             vcpkg_config: MinSizeRel
             dotnet_rid: linux-x64
           - os: macos-latest
             name: MacOS
-            arch: arm64
             vcpkg_triplet: arm64-osx
             vcpkg_config: MinSizeRel
             dotnet_rid: osx-arm64
@@ -305,8 +309,8 @@ jobs:
     name: '🕋 Release library'
     runs-on: ubuntu-latest
     needs:
-    - build-managed
-    if: github.ref == 'refs/heads/master'
+      - build-managed
+    if: github.ref_name == 'master' || startsWith(github.ref_name, 'version/')
 
     steps:
 

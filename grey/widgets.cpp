@@ -10,7 +10,7 @@
 #include <utility>
 
 // for Windows-specific hacks
-#ifdef _WIN32
+#if PLATFORM_WINDOWS
 #include <Windows.h>
 #include "common/win32/window.h"
 #endif
@@ -61,53 +61,7 @@ namespace grey::widgets {
         return flags;
     }
 
-
-    //inline std::string sys_label(const std::string& label) { return label + "##" + id; }
-
-    bool set_emphasis_colours(emphasis em, ImVec4& normal, ImVec4& hovered, ImVec4& active) {
-        if(em == emphasis::none) return false;
-
-        switch(em) {
-            case emphasis::primary:
-                normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisPrimary];
-                hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisPrimaryHovered];
-                active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisPrimaryActive];
-                return true;
-            case emphasis::secondary:
-                normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisSecondary];
-                hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisSecondaryHovered];
-                active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisSecondaryActive];
-                return true;
-            case emphasis::success:
-                normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisSuccess];
-                hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisSuccessHovered];
-                active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisSuccessActive];
-                return true;
-            case emphasis::error:
-                normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisError];
-                hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisErrorHovered];
-                active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisErrorActive];
-                return true;
-            case emphasis::warning:
-                normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisWarning];
-                hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisWarningHovered];
-                active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisWarningActive];
-                return true;
-            case emphasis::info:
-                normal = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisInfo];
-                hovered = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisInfoHovered];
-                active = grey::themes::GreyColors[grey::themes::GreyCol_EmphasisInfoActive];
-                return true;
-        }
-
-        return false;
-    }
-
     // ---- guard ----
-
-    id_frame::id_frame(ImGuiID id) {
-        ImGui::PushID(id);
-    }
 
     texter::texter(float size_delta, font_weight weight) {
         ImFont* font{nullptr};
@@ -151,10 +105,12 @@ namespace grey::widgets {
         wdl->PopClipRect();
     }
 
-    id_frame::id_frame(int scope_id) : id_frame(ImGui::GetID(scope_id)) {
+    id_frame::id_frame(int scope_id) {
+        ImGui::PushID(scope_id);
     }
 
-    id_frame::id_frame(const std::string& scope_id) : id_frame(ImGui::GetID(scope_id.c_str())) {
+    id_frame::id_frame(const std::string& scope_id) {
+        ImGui::PushID(scope_id.c_str());
     }
 
     id_frame::~id_frame() {
@@ -170,12 +126,12 @@ namespace grey::widgets {
     }
 
     window& window::size(int width, int height) {
-        init_size = ImVec2(width * scale, height * scale);
+        init_size = sz(width * scale, height * scale);
         return *this;
     }
 
     window& window::resize(float width, float height) {
-        resize_to = ImVec2(width * scale, height * scale);
+        resize_to = sz(width * scale, height * scale);
         return *this;
     }
 
@@ -209,7 +165,7 @@ namespace grey::widgets {
         return *this;
     }
 
-    window& window::border(float width) {
+    window& window::border(const float width) {
         border_size = width;
         return *this;
     }
@@ -243,10 +199,10 @@ namespace grey::widgets {
         // set window class to prevent viewports to be merged with main window
         //ImGui::SetNextWindowClass(&wc);
 
-        if(init_size.x > 0)
+        if(init_size.width > 0)
             ImGui::SetNextWindowSize(init_size, ImGuiCond_Once);
 
-        if(resize_to.x > 0) {
+        if(resize_to.width > 0) {
             ImGui::SetNextWindowSize(resize_to);
             resize_to = ImVec2{0, 0};
         }
@@ -264,8 +220,8 @@ namespace grey::widgets {
             init_center_imgui_monitor = monitors[midx];
 
             init_center_pos = ImVec2(
-                init_center_imgui_monitor.WorkSize.x / 2 - init_size.x / 2 + init_center_imgui_monitor.WorkPos.x,
-                init_center_imgui_monitor.WorkSize.y / 2 - init_size.y / 2 + init_center_imgui_monitor.WorkPos.y);
+                init_center_imgui_monitor.WorkSize.x / 2 - init_size.width / 2 + init_center_imgui_monitor.WorkPos.x,
+                init_center_imgui_monitor.WorkSize.y / 2 - init_size.height / 2 + init_center_imgui_monitor.WorkPos.y);
         }
 
         if(init_center && init_center_pos.x) {
@@ -291,15 +247,20 @@ namespace grey::widgets {
     }
 
     void window::leave() {
-#ifdef _WIN32
-        ImGuiViewport* vp = ImGui::GetWindowViewport();
+#if PLATFORM_WINDOWS
+        const ImGuiViewport* vp = ImGui::GetWindowViewport();
         if(vp && vp->PlatformWindowCreated && vp->PlatformHandleRaw) {
-            HWND hWnd = (HWND) vp->PlatformHandleRaw;
-            grey::common::win32::window wnd{hWnd};
+            auto h_wnd = static_cast<HWND>(vp->PlatformHandleRaw);
+            common::win32::window wnd{h_wnd};
 
             if(win32_x_style_applied_to_handle != vp->PlatformHandleRaw) {
                 wnd.set_rounded_corners(false);
                 win32_x_style_applied_to_handle = vp->PlatformHandleRaw;
+            }
+
+            if(opacity != last_opacity) {
+                wnd.set_opacity(opacity);
+                last_opacity = opacity;
             }
 
             if(!win32_brought_forward) {
@@ -307,11 +268,11 @@ namespace grey::widgets {
                 win32_brought_forward = true;
             }
             if(win32_exclude_from_capture_current != win32_exclude_from_capture) {
-                ::SetWindowDisplayAffinity(hWnd, win32_exclude_from_capture ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
+                ::SetWindowDisplayAffinity(h_wnd, win32_exclude_from_capture ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
                 win32_exclude_from_capture_current = win32_exclude_from_capture;
             }
             if(win32_always_on_top_current != win32_always_on_top) {
-                ::SetWindowPos(hWnd, win32_always_on_top ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0,
+                ::SetWindowPos(h_wnd, win32_always_on_top ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0,
                                SWP_NOMOVE | SWP_NOSIZE);
                 win32_always_on_top_current = win32_always_on_top;
             }
@@ -371,14 +332,14 @@ namespace grey::widgets {
 
     bool mi(const std::string& text, bool reserve_icon_space, const std::string& icon) {
         bool r;
-        const string IconedPrefix = "       ";
+        const string prefix = "       ";
 
         if(reserve_icon_space) {
-            ImVec2 cp = ImGui::GetCursorPos();
-            r = ImGui::MenuItem((IconedPrefix + text).c_str());
+            const ImVec2 cp = ImGui::GetCursorPos();
+            r = ImGui::MenuItem((prefix + text).c_str());
             if(!icon.empty()) {
                 ImGui::SetCursorPos(cp);
-                ImGui::Text(icon.c_str());
+                lbl(icon);
             }
         } else {
             r = ImGui::MenuItem(text.c_str());
@@ -387,13 +348,12 @@ namespace grey::widgets {
         return r;
     }
 
-    void mi_themes(std::function<void(const std::string&)> on_changed) {
-        menu m{"Theme", true, ICON_MD_BRUSH};
-        if(m) {
+    void mi_themes(const std::function<void(const std::string&)>& on_changed) {
+        if(menu m{"Theme", true, ICON_MD_BRUSH}) {
             ImDrawList* dl = ImGui::GetWindowDrawList();
 
-            for(auto& theme: grey::themes::list_themes()) {
-                float sz = ImGui::GetTextLineHeight();
+            for(auto& theme: themes::list_themes()) {
+                const float sz = ImGui::GetTextLineHeight();
                 ImVec2 p = ImGui::GetCursorScreenPos();
 
                 // draw a triangle with accent colour in top left corner
@@ -408,7 +368,7 @@ namespace grey::widgets {
                 sl();
 
                 if(mi(theme.name)) {
-                    //grey::themes::set_theme(theme.id, scale);
+                    //themes::set_theme(theme.id, scale);
                     on_changed(theme.id);
                 }
             }
@@ -417,11 +377,11 @@ namespace grey::widgets {
 
     // ---- menu_bar ----
 
-    menu::menu(const std::string& title, bool reserve_icon_space, const std::string& icon) : icon{icon} {
-        const string IconedPrefix = "       ";
+    menu::menu(const std::string& title, bool reserve_icon_space, std::string icon) : icon{std::move(icon)} {
+        const string icon_prefix = "       ";
         if(reserve_icon_space) {
             cp = ImGui::GetCursorPos();
-            rendered = ImGui::BeginMenu((IconedPrefix + title).c_str());
+            rendered = ImGui::BeginMenu((icon_prefix + title).c_str());
         } else {
             rendered = ImGui::BeginMenu(title.c_str());
         }
@@ -434,7 +394,7 @@ namespace grey::widgets {
 
         if(!icon.empty()) {
             ImGui::SetCursorPos(cp);
-            ImGui::Text(icon.c_str());
+            lbl(icon);
         }
     }
 
@@ -450,11 +410,16 @@ namespace grey::widgets {
 
     // ---- label ----
 
-    void label(const std::string& text, size_t text_wrap_pos, bool enabled, bool center_x, bool center_y) {
-        if(text_wrap_pos > 0)
-            ImGui::PushTextWrapPos(text_wrap_pos);
+    void lbl(const std::string& text, const style& style) {
+        const rgb_colour text_color = style.colour ? style.colour : get_color(style.emp, sub_emphasis::normal);
+        ImGui::PushStyleColor(ImGuiCol_Text, text_color);
 
-        if(center_x) {
+        optional<texter> tx; // used for RAII
+        if(style.font_size != .0f || style.font_weight != font_weight::regular) {
+            tx.emplace(style.font_size, style.font_weight);
+        }
+
+        if(style.center_x) {
             float avail_width = avail_x();
             float text_width = ImGui::CalcTextSize(text.c_str()).x;
             float offset = (avail_width - text_width) / 2;
@@ -463,7 +428,7 @@ namespace grey::widgets {
             }
         }
 
-        if(center_y) {
+        if(style.center_y) {
             float avail_height = avail_y();
             float text_height = ImGui::CalcTextSize(text.c_str()).y;
             float offset = (avail_height - text_height) / 2;
@@ -472,37 +437,15 @@ namespace grey::widgets {
             }
         }
 
-        if(enabled)
-            ImGui::TextUnformatted(text.c_str());
-        else
-            ImGui::TextDisabled(text.c_str());
+        if(style.text_wrap_pos > .0f)
+            ImGui::PushTextWrapPos(style.text_wrap_pos);
 
-        if(text_wrap_pos > 0)
+        ImGui::TextUnformatted(text.c_str());
+
+        if(style.text_wrap_pos > .0f)
             ImGui::PopTextWrapPos();
-    }
 
-    void label(const std::string& text, rgb_colour colour) {
-        ImGui::PushStyleColor(ImGuiCol_Text, colour);
-        label(text);
         ImGui::PopStyleColor();
-    }
-
-    void label(const std::string& text, emphasis emp, size_t text_wrap_pos, bool enabled, float font_size_diff,
-               bool center_x, bool center_y) {
-        texter scaler(font_size_diff);
-
-        if(emp == emphasis::none || !enabled) {
-            label(text, text_wrap_pos, enabled, center_x, center_y);
-        } else {
-            ImVec4 normal, hovered, active;
-            if(set_emphasis_colours(emp, normal, hovered, active)) {
-                ImGui::PushStyleColor(ImGuiCol_Text, normal);
-                label(text, text_wrap_pos, enabled, center_x, center_y);
-                ImGui::PopStyleColor();
-            } else {
-                label(text, text_wrap_pos, enabled, center_x, center_y);
-            }
-        }
     }
 
     sz text_size_get(const string& text, float font_size_diff, float wrap_width) {
@@ -633,23 +576,21 @@ namespace grey::widgets {
         }
 
         // Calculate knob position based on current value
-        float t = (max > min)
-                      ? ImClamp(static_cast<float>(value - min) / static_cast<float>(max - min), 0.0f, 1.0f)
-                      : 0.0f;
-        float knob_x = bb.Min.x + knob_radius + t * (bb.GetWidth() - knob_radius * 2.0f);
-        float knob_y = bb.Min.y + height / 2.0f;
+        const float t = (max > min)
+                            ? ImClamp(static_cast<float>(value - min) / static_cast<float>(max - min), 0.0f, 1.0f)
+                            : 0.0f;
+        const float knob_x = bb.Min.x + knob_radius + t * (bb.GetWidth() - knob_radius * 2.0f);
+        const float knob_y = bb.Min.y + height / 2.0f;
 
         // Determine colors based on emphasis
-        ImVec4 emp_normal, emp_hovered, emp_active;
-        bool has_emphasis = set_emphasis_colours(emp, emp_normal, emp_hovered, emp_active);
+        const auto track_filled_color = emp == emphasis::none
+            ? rgb_colour{ImGuiCol_SliderGrabActive}
+            : get_color(emp, sub_emphasis::normal);
 
         // Draw track (line)
         ImDrawList* draw_list = window->DrawList;
         float track_y = knob_y;
         ImU32 track_color = ImGui::GetColorU32(ImGuiCol_FrameBg);
-        ImU32 track_filled_color = has_emphasis
-                                       ? ImGui::GetColorU32(emp_normal)
-                                       : ImGui::GetColorU32(ImGuiCol_SliderGrabActive);
 
         // Background track
         draw_list->AddLine(
@@ -682,15 +623,11 @@ namespace grey::widgets {
         }
 
         // Draw knob (bubble)
-        ImU32 knob_color;
-        if(has_emphasis) {
-            knob_color = ImGui::GetColorU32(held ? emp_active : (hovered ? emp_hovered : emp_normal));
-        } else {
-            knob_color = ImGui::GetColorU32(held
-                                                ? ImGuiCol_SliderGrabActive
-                                                : (hovered ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab));
-        }
-        draw_list->AddCircleFilled(ImVec2(knob_x, knob_y), knob_radius, knob_color);
+        const auto knob_colour = emp == emphasis::none
+            ? rgb_colour{held ? ImGuiCol_SliderGrabActive : (hovered ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab)}
+            : get_color(emp, held ? sub_emphasis::active : hovered ? sub_emphasis::hovered : sub_emphasis::normal);
+
+        draw_list->AddCircleFilled(ImVec2(knob_x, knob_y), knob_radius, knob_colour);
 
         // Show tooltip only when the knob itself is hovered (not the whole widget)
         ImVec2 mouse_pos = g.IO.MousePos;
@@ -893,15 +830,7 @@ namespace grey::widgets {
     }
 
     void draw_text(const point& pos, emphasis emp, const std::string& text) {
-        ImU32 col;
-        if(emp == emphasis::none) {
-            col = ImGui::GetColorU32(ImGuiCol_Text);
-        } else {
-            ImVec4 normal, hovered, active;
-            set_emphasis_colours(emp, normal, hovered, active);
-            col = rgb_colour{normal};
-        }
-        wdl->AddText(pos, col, text.c_str());
+        wdl->AddText(pos, get_color(emp, sub_emphasis::normal), text.c_str());
     }
 
     void draw_text(const point& pos, const rgb_colour& colour, const std::string& text) {
@@ -1010,11 +939,10 @@ namespace grey::widgets {
         bool clicked;
 
         if(emp != emphasis::none) {
-            ImVec4 normal, hovered, active;
-            set_emphasis_colours(emp, normal, hovered, active);
-            ImGui::PushStyleColor(ImGuiCol_Button, normal);
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hovered);
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, active);
+            ImGui::PushStyleColor(ImGuiCol_Button, get_color(emp, sub_emphasis::normal));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, get_color(emp, sub_emphasis::hovered));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, get_color(emp, sub_emphasis::active));
+            ImGui::PushStyleColor(ImGuiCol_Text, get_color(emp, sub_emphasis::normal_text));
         }
 
         if(is_small) {
@@ -1023,11 +951,11 @@ namespace grey::widgets {
             clicked = ImGui::Button(text.c_str(), ImVec2(width, height));
         }
 
-        if(is_hovered())
+        if(is_enabled && is_hovered())
             mouse_cursor(mouse_cursor_type::hand);
 
         if(emp != emphasis::none) {
-            ImGui::PopStyleColor(3);
+            ImGui::PopStyleColor(4);
         }
 
         if(!is_enabled) {
@@ -1115,9 +1043,9 @@ namespace grey::widgets {
             if(si > 0) ImGui::SameLine();
 
             if(bool is_selected = selected == si) {
-                label(options[si].first);
+                lbl(options[si].first);
             } else {
-                label(options[si].first, 0, false);
+                lbl(options[si].first, {.emp = emphasis::disabled});
 
                 // show "hand" cursor for disabled (selectable) options
                 if(ImGui::IsItemHovered()) {
@@ -1334,10 +1262,10 @@ namespace grey::widgets {
     }
 
     tree_node::tree_node(const std::string& label,
-        const bool open_by_default,
-        const bool is_leaf,
-        const bool span_all_cols,
-        const emphasis emp) {
+                         const bool open_by_default,
+                         const bool is_leaf,
+                         const bool span_all_cols,
+                         const emphasis emp) {
         ImGuiTreeNodeFlags flags{0};
         if(open_by_default) {
             flags |= ImGuiTreeNodeFlags_DefaultOpen;
@@ -1355,14 +1283,9 @@ namespace grey::widgets {
         if(emp == emphasis::none) {
             opened = ImGui::TreeNodeEx(label.c_str(), flags);
         } else {
-            ImVec4 normal, hovered, active;
-            if(set_emphasis_colours(emp, normal, hovered, active)) {
-                ImGui::PushStyleColor(ImGuiCol_Text, normal);
-                opened = ImGui::TreeNodeEx(label.c_str(), flags);
-                ImGui::PopStyleColor();
-            } else {
-                opened = ImGui::TreeNodeEx(label.c_str(), flags);
-            }
+            ImGui::PushStyleColor(ImGuiCol_Text, get_color(emp, sub_emphasis::normal));
+            opened = ImGui::TreeNodeEx(label.c_str(), flags);
+            ImGui::PopStyleColor();
         }
     }
 
@@ -1381,20 +1304,104 @@ namespace grey::widgets {
                         (int)(color.w * 255.0f));
     }
 
+    rgb_colour get_color(const emphasis emp, const sub_emphasis as) {
+        switch(emp) {
+            case emphasis::primary:
+                switch(as) {
+                    case sub_emphasis::normal:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisPrimary]};
+                    case sub_emphasis::normal_text:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisPrimaryText]};
+                    case sub_emphasis::hovered:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisPrimaryHovered]};
+                    case sub_emphasis::active:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisPrimaryActive]};
+                }
+                break;
+            case emphasis::secondary:
+                switch(as) {
+                    case sub_emphasis::normal:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisSecondary]};
+                    case sub_emphasis::normal_text:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisSecondaryText]};
+                    case sub_emphasis::hovered:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisSecondaryHovered]};
+                    case sub_emphasis::active:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisSecondaryActive]};
+                }
+                break;
+            case emphasis::success:
+                switch(as) {
+                    case sub_emphasis::normal:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisSuccess]};
+                    case sub_emphasis::normal_text:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisSuccessText]};
+                    case sub_emphasis::hovered:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisSuccessHovered]};
+                    case sub_emphasis::active:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisSuccessActive]};
+                }
+                break;
+            case emphasis::error:
+                switch(as) {
+                    case sub_emphasis::normal:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisError]};
+                    case sub_emphasis::normal_text:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisErrorText]};
+                    case sub_emphasis::hovered:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisErrorHovered]};
+                    case sub_emphasis::active:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisErrorActive]};
+                }
+                break;
+            case emphasis::warning:
+                switch(as) {
+                    case sub_emphasis::normal:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisWarning]};
+                    case sub_emphasis::normal_text:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisWarningText]};
+                    case sub_emphasis::hovered:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisWarningHovered]};
+                    case sub_emphasis::active:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisWarningActive]};
+                }
+                break;
+            case emphasis::info:
+                switch(as) {
+                    case sub_emphasis::normal:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisInfo]};
+                    case sub_emphasis::normal_text:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisInfoText]};
+                    case sub_emphasis::hovered:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisInfoHovered]};
+                    case sub_emphasis::active:
+                        return rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisInfoActive]};
+                }
+                break;
+            case emphasis::disabled:
+                return as == sub_emphasis::normal_text
+                    ? rgb_colour{themes::GreyColors[themes::GreyCol_EmphasisDisabledText]}
+                    : rgb_colour{ImGuiCol_TextDisabled};
+            default:
+                return rgb_colour{ImGuiCol_Text};
+        }
+        return rgb_colour{ImGuiCol_Text};
+    }
+
     void label_debug_info() {
         // FPS
-        float fps = ImGui::GetIO().Framerate;
+        const float fps = ImGui::GetIO().Framerate;
         char buf[32];
         sprintf(buf, "%.2f", fps);
-        label("fps: ");
+        lbl("fps: ");
         sl();
-        label(buf);
+        lbl(buf);
 
         // scale
         sl();
-        label(", scale: ");
+        lbl(", scale: ");
         sl();
-        label(std::to_string(scale));
+        lbl(std::to_string(scale));
     }
 
     // ---- tab bar ----
@@ -1476,12 +1483,10 @@ namespace grey::widgets {
         border{border},
         show_line_numbers{show_line_numbers},
         lng{l}, current_lng{-1} {
-
         //editor.SetShowWhitespaces(true);
         editor.SetTabSize(2);
         editor.SetShowLineNumbersEnabled(false);
         //editor.SetShowKeywordTooltips(false);
-
     }
 
     void code_editor::set_text(const std::string& text) {
@@ -1544,6 +1549,9 @@ namespace grey::widgets {
             case language::markdown:
                 editor.SetLanguage(TextEditor::Language::Markdown());
                 break;
+            default:
+                editor.SetLanguage(nullptr);
+                break;
         }
     }
 
@@ -1554,14 +1562,14 @@ namespace grey::widgets {
         if(alternate_row_bg) {
             flags |= ImGuiTableFlags_RowBg;
         }
-        rendered = ImGui::BeginTable(id.c_str(), columns.size(), flags, outer_size);
+        rendered = ImGui::BeginTable(id.c_str(), static_cast<int>(columns.size()), flags, outer_size);
         if(rendered) {
             ImGui::TableSetupScrollFreeze(0, 1);
-            clipper.Begin(row_count);
+            clipper.Begin(static_cast<int>(row_count));
 
             // setup columns
             for(const string& cn: columns) {
-                if(cn.empty() || !cn.ends_with("+")) {
+                if(cn.empty() || !cn.ends_with('+')) {
                     ImGui::TableSetupColumn(cn.c_str());
                 } else {
                     string n = cn.substr(0, cn.size() - 1);
@@ -1578,7 +1586,7 @@ namespace grey::widgets {
         }
     }
 
-    void big_table::render_data(std::function<void(int, int)> cell_render) {
+    void big_table::render_data(const std::function<void(int, int)>& cell_render) {
         if(!rendered) return;
 
         while(clipper.Step()) {
