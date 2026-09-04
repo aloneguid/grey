@@ -50,7 +50,7 @@ jobs:
             vcpkg_triplet: arm64-osx
             vcpkg_config: MinSizeRel
             dotnet_rid: osx-arm64
-          - os: macos-latest-large
+          - os: macos-26-intel
             name: Apple x64 Intel
             vcpkg_triplet: x64-osx
             vcpkg_config: MinSizeRel
