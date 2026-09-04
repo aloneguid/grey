@@ -415,8 +415,8 @@ namespace grey::widgets {
         ImGui::PushStyleColor(ImGuiCol_Text, text_color);
 
         optional<texter> tx; // used for RAII
-        if(style.font_size != .0f || style.font_weight != font_weight::regular) {
-            tx.emplace(style.font_size, style.font_weight);
+        if(style.font_size != .0f || style.font_w != font_weight::regular) {
+            tx.emplace(style.font_size, style.font_w);
         }
 
         if(style.center_x) {

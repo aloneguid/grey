@@ -206,7 +206,7 @@ namespace grey {
 
         float font_size{.0f};
 
-        font_weight font_weight{font_weight::regular};
+        font_weight font_w{font_weight::regular};
     };
 
     struct font_config {

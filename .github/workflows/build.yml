@@ -28,6 +28,7 @@ jobs:
     strategy:
       matrix:
         # .NET RID catalog: https://learn.microsoft.com/en-us/dotnet/core/rid-catalog
+        # Available GH images: https://github.com/actions/runner-images#available-images
         include:
           - os: windows-latest
             name: Windows x64
@@ -45,10 +46,15 @@ jobs:
             vcpkg_config: MinSizeRel
             dotnet_rid: linux-x64
           - os: macos-latest
-            name: MacOS
+            name: Apple Silicon
             vcpkg_triplet: arm64-osx
             vcpkg_config: MinSizeRel
             dotnet_rid: osx-arm64
+          - os: macos-latest-large
+            name: Apple x64 Intel
+            vcpkg_triplet: x64-osx
+            vcpkg_config: MinSizeRel
+            dotnet_rid: osx-x64
 
 
       fail-fast: false
