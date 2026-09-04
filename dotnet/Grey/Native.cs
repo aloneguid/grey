@@ -6,16 +6,22 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Grey {
+    
     static class Native {
-        const string LibName = "xgrey";
+        const string _libName = "xgrey";
 
         public delegate bool RenderFrameCallback();
 
         public delegate void RenderCallback();
 
         public delegate void RenderTreeNodeCallback(bool is_open);
-
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        
+        [StructLayout(LayoutKind.Sequential)]
+        public struct Style {
+            public Emphasis emp;
+        }
+        
+        [DllImport(_libName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void app_run(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string title,
             int width,
@@ -25,57 +31,56 @@ namespace Grey {
             bool center_on_screen,
             RenderFrameCallback callback);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern void id_frame(int scope_id, RenderCallback c_callback);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern void sl(float offset);
 
-        [DllImport(LibName)]
-        internal static extern void label([MarshalAs(UnmanagedType.LPUTF8Str)] string text,
-            Emphasis emphasis, int text_wrap_pos, bool enabled);
+        [DllImport(_libName)]
+        internal static extern void lbl([MarshalAs(UnmanagedType.LPUTF8Str)] string text, ref Style style);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern bool selectable([MarshalAs(UnmanagedType.LPUTF8Str)] string text, bool span_columns);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern bool checkbox([MarshalAs(UnmanagedType.LPUTF8Str)] string label, ref bool is_checked, bool is_small);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern bool button(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string text,
             Emphasis emphasis,
             bool is_enabled,
             bool is_small);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern void sep([MarshalAs(UnmanagedType.LPUTF8Str)] string text);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern bool accordion([MarshalAs(UnmanagedType.LPUTF8Str)] string header, bool default_open);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern bool hyperlink(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string text,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string? url_to_open);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern void toast(Emphasis emphasis, [MarshalAs(UnmanagedType.LPUTF8Str)] string message);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern bool input_string(
             [MarshalAs(UnmanagedType.LPUTF8Str)] StringBuilder value,
             int value_max_length,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
             bool enabled, float width, bool is_readonly);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern bool input_int(
             ref int value,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
             bool enabled, float width, bool is_readonly);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern bool input_multiline(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string id,
             [MarshalAs(UnmanagedType.LPUTF8Str)] StringBuilder value,
@@ -85,26 +90,26 @@ namespace Grey {
             bool enabled,
             bool use_fixed_font);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern void spinner_hbo_dots(float radius, float thickness, float speed, int dot_count);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern bool slider_float(ref float value, float min, float max,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
             float step, bool ticks, Emphasis emphasis);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern bool slider_int(ref int value, int min, int max,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
             int step, bool ticks, Emphasis emphasis);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern void tt([MarshalAs(UnmanagedType.LPUTF8Str)] string text, ShowDelay delay);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern void rich_tt(RenderCallback c_callback, ShowDelay delay);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(_libName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern bool combo(
             [MarshalAs(UnmanagedType.LPUTF8Str)]  string label,
             [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] options,
@@ -112,7 +117,7 @@ namespace Grey {
             ref uint selected,
             float width);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(_libName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern bool list(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
             [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] options,
@@ -126,7 +131,7 @@ namespace Grey {
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void RenderPtrCallback(IntPtr user_data);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(_libName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void big_table(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string id,
             [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] columns,
@@ -137,7 +142,7 @@ namespace Grey {
             bool alternate_row_bg,
             RenderTableCellCallback cell_callback);
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(_libName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void table(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string id,
             [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] columns,
@@ -147,14 +152,14 @@ namespace Grey {
             bool alternate_row_bg,
             RenderPtrCallback cell_callback);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern bool table_begin_row(nint table_ptr);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern bool table_next_column(nint table_ptr);
 
 
-        [DllImport(LibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(_libName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void tree_node(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
             bool open_by_default,
@@ -164,36 +169,36 @@ namespace Grey {
 
         // -- tabs
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern void tab_bar([MarshalAs(UnmanagedType.LPUTF8Str)] string id, RenderPtrCallback render_callback);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern void tab(nint tab_bar_ptr,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string title,
             bool unsaved, bool selected,
             RenderCallback c_render_callback);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern void status_bar(RenderCallback c_callback);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern bool is_hovered();
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern bool is_leftclicked();
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern bool is_rightclicked();
 
         // application menus
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern void menu_bar(RenderCallback c_callback);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern void menu([MarshalAs(UnmanagedType.LPUTF8Str)] string label, RenderCallback c_callback);
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern bool menu_item(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string c_text,
             bool reserve_icon_space,
@@ -201,7 +206,7 @@ namespace Grey {
 
         // windowing
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern int window(
             int id,
             bool unregister,
@@ -212,14 +217,14 @@ namespace Grey {
             );
 
         // code editor
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern int code_editor(int id, bool unregister, int language,
             [MarshalAs (UnmanagedType.LPUTF8Str)]
             string? c_text);
 
         // system debug
 
-        [DllImport(LibName)]
+        [DllImport(_libName)]
         internal static extern void get_debug_info(ref float fps);
 
     }

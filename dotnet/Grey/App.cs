@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using Microsoft.VisualBasic;
 
 namespace Grey {
 
@@ -11,6 +12,19 @@ namespace Grey {
     }
 
     public static class App {
+
+        private static readonly Native.Style _defaultStyle = new() {
+            emp = Emphasis.None
+        };
+
+        private static Native.Style ToNativeStyle(Style? style) {
+            if(style == null) return _defaultStyle;
+            Style s = style.Value;
+            return new Native.Style {
+                emp = s.Emp
+            };
+        }
+        
         public static void Run(string title, Func<bool> renderFrame,
             int width = 800, int height = 600,
             bool hasMenuBar = false,
@@ -29,8 +43,9 @@ namespace Grey {
         public static void SL(float offset = 0) {
             Native.sl(offset);
         }
-        public static void Label(string text, Emphasis emphasis = Emphasis.None, int textWrapPos = 0, bool isEnabled = true) {
-            Native.label(text, emphasis, textWrapPos, isEnabled);
+        public static void Label(string text, Style? style = null) {
+            Native.Style cstyle = ToNativeStyle(style);
+            Native.lbl(text, ref cstyle);
         }
 
         public static bool Selectable(string text, bool spanColumns = false) {

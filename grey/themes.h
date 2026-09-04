@@ -13,28 +13,36 @@ namespace grey::themes {
 
     enum GreyCol_ {
         GreyCol_EmphasisPrimary = 0,
+        GreyCol_EmphasisPrimaryText,
         GreyCol_EmphasisPrimaryHovered,
         GreyCol_EmphasisPrimaryActive,
 
         GreyCol_EmphasisSecondary,
+        GreyCol_EmphasisSecondaryText,
         GreyCol_EmphasisSecondaryHovered,
         GreyCol_EmphasisSecondaryActive,
 
         GreyCol_EmphasisSuccess,
+        GreyCol_EmphasisSuccessText,
         GreyCol_EmphasisSuccessHovered,
         GreyCol_EmphasisSuccessActive,
 
         GreyCol_EmphasisError,
+        GreyCol_EmphasisErrorText,
         GreyCol_EmphasisErrorHovered,
         GreyCol_EmphasisErrorActive,
 
         GreyCol_EmphasisWarning,
+        GreyCol_EmphasisWarningText,
         GreyCol_EmphasisWarningHovered,
         GreyCol_EmphasisWarningActive,
 
         GreyCol_EmphasisInfo,
+        GreyCol_EmphasisInfoText,
         GreyCol_EmphasisInfoHovered,
         GreyCol_EmphasisInfoActive,
+
+        GreyCol_EmphasisDisabledText,
 
         GreyCol_Count
     };

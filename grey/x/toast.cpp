@@ -24,12 +24,12 @@ namespace grey::widgets::x {
         const int64_t elapsed = get_elapsed_time_ms();
 
         if(phase == toast_phase::fade_in) {
-            return (static_cast<float>(elapsed) / static_cast<float>(FadeInOutMs)) * Opacity;
+            return (static_cast<float>(elapsed) / static_cast<float>(FadeInMs)) * Opacity;
         }
 
         if(phase == toast_phase::fade_out) {
-            return (1.f - (static_cast<float>(elapsed) - static_cast<float>(FadeInOutMs) - static_cast<float>(
-                               dismiss_time_ms)) / static_cast<float>(FadeInOutMs)) * Opacity;
+            return (1.f - (static_cast<float>(elapsed) - static_cast<float>(FadeInMs) - static_cast<float>(
+                               dismiss_time_ms)) / static_cast<float>(FadeOutMs)) * Opacity;
         }
 
         return Opacity;
@@ -53,20 +53,8 @@ namespace grey::widgets::x {
     }
 
     std::string toast::get_title(const emphasis emp) {
-        switch(emp) {
-            case emphasis::success:
-                return "success";
-            case emphasis::info:
-                return "info";
-            case emphasis::warning:
-                return "warning";
-            case emphasis::error:
-                return "error";
-            case emphasis::primary:
-                return "info";
-            default:
-                return "";
-        }
+        if(emp == emphasis::none) return "";
+        return string{magic_enum::enum_name(emp)};
     }
 
     std::vector<toast> toast::toasts;
@@ -97,13 +85,13 @@ namespace grey::widgets::x {
     toast_phase toast::get_phase() const {
         const int64_t elapsed_time_ms = get_elapsed_time_ms();
 
-        if(elapsed_time_ms > FadeInOutMs + dismiss_time_ms + FadeInOutMs)
+        if(elapsed_time_ms > FadeInMs + dismiss_time_ms + FadeOutMs)
             return toast_phase::expired;
 
-        if(elapsed_time_ms > FadeInOutMs + dismiss_time_ms)
+        if(elapsed_time_ms > FadeInMs + dismiss_time_ms)
             return toast_phase::fade_out;
 
-        if(elapsed_time_ms > FadeInOutMs) {
+        if(elapsed_time_ms > FadeInMs) {
             return toast_phase::wait;
         }
 
@@ -123,7 +111,7 @@ namespace grey::widgets::x {
 
         // there will be no expired notifications left in the collection
         for(auto& toast: toasts) {
-            // todo: set w opacity
+            toast.w.opacity = toast.get_fade_alpha();
 
             // Set notification window position to bottom right corner of the main window, considering the main window size and location in relation to the display
             ImVec2 parent_pos = ImGui::GetWindowPos();
@@ -134,9 +122,8 @@ namespace grey::widgets::x {
 
             guard gw{toast.w};
 
-            // todo: needs support in window widget
             // Render over all other windows
-            // ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
+            ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
 
             bool has_title{false};
 
@@ -144,7 +131,7 @@ namespace grey::widgets::x {
 
             string icon = get_icon(toast.emp);
             if(!icon.empty()) {
-                label(icon, toast.emp);
+                lbl(icon, {.emp = toast.emp});
                 has_title = true;
             }
 
@@ -152,14 +139,14 @@ namespace grey::widgets::x {
             if(title_text.empty()) title_text = get_title(toast.emp);
             if(!title_text.empty()) {
                 if(has_title) sl();
-                label(title_text, toast.emp);
+                lbl(title_text, {.emp = toast.emp});
                 has_title = true;
             }
 
             if(has_title) sep();
 
             // content
-            label(toast.message);
+            lbl(toast.message);
 
             // save height for next toasts
             height += ImGui::GetWindowHeight() + window_padding;

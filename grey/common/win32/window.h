@@ -5,6 +5,9 @@
 #include <memory>
 
 namespace grey::common::win32 {
+    /**
+     * Windows specific window overlord.
+     */
     class window {
     public:
         window(HWND hwnd) : hwnd{ hwnd } { }
@@ -13,7 +16,7 @@ namespace grey::common::win32 {
 
         bool is_valid();
 
-        HWND get_handle() const { return hwnd; }
+        [[nodiscard]] HWND get_handle() const { return hwnd; }
 
         static std::vector<window> enumerate();
 
@@ -27,7 +30,7 @@ namespace grey::common::win32 {
 
         std::shared_ptr<window> get_owner();
 
-        DWORD get_pid() const;
+        [[nodiscard]] DWORD get_pid() const;
 
         std::string get_class_name();
 
@@ -56,6 +59,11 @@ namespace grey::common::win32 {
         static void set_pos(HWND hwnd, int x, int y, int width, int height);
 
         void set_rounded_corners(bool smaller_rounding = false);
+
+        /**
+         * Sets window opacity, 0 - invisible, 1 - fully opaque.
+         */
+        bool set_opacity(float opacity) const;
 
         /**
          * @brief Mark the window as ecluded from video capture. This is useful to display in-app control that should not be recorded by screen recording software.

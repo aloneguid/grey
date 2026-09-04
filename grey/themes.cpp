@@ -87,30 +87,36 @@ namespace grey::themes {
         // grey specific
 
         GreyColors[GreyCol_EmphasisPrimary] = ImVec4(0.11f, 0.59f, 0.93f, 0.9f);
+        GreyColors[GreyCol_EmphasisPrimaryText]   = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // white on blue
         GreyColors[GreyCol_EmphasisPrimaryHovered] = ImVec4(0.11f, 0.59f, 0.93f, 1.0f);
         GreyColors[GreyCol_EmphasisPrimaryActive] = ImVec4(0.11f, 0.59f, 0.93f, 0.95f);
 
         GreyColors[GreyCol_EmphasisSecondary] = ImVec4(0.43f, 0.43f, 0.47f, 0.90f);
+        GreyColors[GreyCol_EmphasisSecondaryText] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // white on grey
         GreyColors[GreyCol_EmphasisSecondaryHovered] = ImVec4(0.43f, 0.43f, 0.47f, 1.0f);
         GreyColors[GreyCol_EmphasisSecondaryActive] = ImVec4(0.43f, 0.43f, 0.47f, 0.95f);
 
-        GreyColors[GreyCol_EmphasisSuccess] = ImVec4(50.0 / 255, 190.0 / 255, 15.0 / 255, 1.0f);
-        GreyColors[GreyCol_EmphasisSuccessHovered] = ImVec4(60.0 / 255, 200.0 / 255, 20.0 / 255, 1.0f);
-        GreyColors[GreyCol_EmphasisSuccessActive] = ImVec4(60.0 / 255, 200.0 / 255, 20.0 / 255, 1.0f);
+        GreyColors[GreyCol_EmphasisSuccess] = ImVec4(0.298f, 0.686f, 0.314f, 1.0f);
+        GreyColors[GreyCol_EmphasisSuccessText]   = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // white on green
+        GreyColors[GreyCol_EmphasisSuccessHovered] = ImVec4(0.298f, 0.686f, 0.314f, 1.0f);
+        GreyColors[GreyCol_EmphasisSuccessActive] = ImVec4(0.298f, 0.686f, 0.314f, 1.0f);
 
-        GreyColors[GreyCol_EmphasisError] = ImVec4(1.00f, 0.20f, 0.00f, 0.9f);
-        GreyColors[GreyCol_EmphasisErrorHovered] = ImVec4(1.00f, 0.20f, 0.00f, 1.0f);
-        GreyColors[GreyCol_EmphasisErrorActive] = ImVec4(1.00f, 0.21f, 0.00f, 0.95f);
+        GreyColors[GreyCol_EmphasisError] = ImVec4(1.0f, 0.298f, 0.298f, 0.9f);
+        GreyColors[GreyCol_EmphasisErrorText]     = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // white on red
+        GreyColors[GreyCol_EmphasisErrorHovered] = ImVec4(1.0f, 0.298f, 0.298f, 1.0f);
+        GreyColors[GreyCol_EmphasisErrorActive] = ImVec4(1.0f, 0.298f, 0.298f, 0.95f);
 
-        GreyColors[GreyCol_EmphasisWarning] = ImVec4(0.55f, 0.57f, 0.14f, 0.90f);
-        GreyColors[GreyCol_EmphasisWarningHovered] = ImVec4(0.55f, 0.57f, 0.14f, 1.00f);
-        GreyColors[GreyCol_EmphasisWarningActive] = ImVec4(0.55f, 0.57f, 0.14f, 0.95f);
+        GreyColors[GreyCol_EmphasisWarning] = ImVec4(1.0f, 0.647f, 0.0f, 0.90f);
+        GreyColors[GreyCol_EmphasisWarningText]   = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // black on orange
+        GreyColors[GreyCol_EmphasisWarningHovered] = ImVec4(1.0f, 0.647f, 0.0f, 1.00f);
+        GreyColors[GreyCol_EmphasisWarningActive] = ImVec4(1.0f, 0.647f, 0.0f, 0.95f);
 
         GreyColors[GreyCol_EmphasisInfo] = ImVec4(0.51f, 0.80f, 1.00f, 0.90f);
+        GreyColors[GreyCol_EmphasisInfoText]      = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // black on light blue
         GreyColors[GreyCol_EmphasisInfoHovered] = ImVec4(0.51f, 0.80f, 1.00f, 1.0f);
         GreyColors[GreyCol_EmphasisInfoActive] = ImVec4(0.51f, 0.80f, 1.00f, 0.95f);
 
-
+        GreyColors[GreyCol_EmphasisDisabledText]      = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
     }
 
     void set_theme_light() {
@@ -129,26 +135,34 @@ namespace grey::themes {
         GreyColors[GreyCol_EmphasisPrimary] = ImVec4(0.11f, 0.59f, 0.93f, 0.9f);
         GreyColors[GreyCol_EmphasisPrimaryHovered] = ImVec4(0.11f, 0.59f, 0.93f, 1.0f);
         GreyColors[GreyCol_EmphasisPrimaryActive] = ImVec4(0.11f, 0.59f, 0.93f, 0.95f);
+        GreyColors[GreyCol_EmphasisPrimaryText] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // white on blue
 
         GreyColors[GreyCol_EmphasisSecondary] = ImVec4(0.43f, 0.43f, 0.47f, 0.90f);
         GreyColors[GreyCol_EmphasisSecondaryHovered] = ImVec4(0.43f, 0.43f, 0.47f, 1.0f);
         GreyColors[GreyCol_EmphasisSecondaryActive] = ImVec4(0.43f, 0.43f, 0.47f, 0.95f);
+        GreyColors[GreyCol_EmphasisSecondaryText] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // white on grey
 
         GreyColors[GreyCol_EmphasisSuccess] = ImColor::HSV(2 / 7.0f, 0.6f, 0.9f);
         GreyColors[GreyCol_EmphasisSuccessHovered] = ImColor::HSV(2 / 7.0f, 0.6f, 1.0f);
         GreyColors[GreyCol_EmphasisSuccessActive] = ImColor::HSV(2 / 7.0f, 0.6f, 0.95f);
+        GreyColors[GreyCol_EmphasisSuccessText] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // black on light green
 
         GreyColors[GreyCol_EmphasisError] = ImVec4(1.00f, 0.20f, 0.00f, 0.9f);
         GreyColors[GreyCol_EmphasisErrorHovered] = ImVec4(1.00f, 0.20f, 0.00f, 1.0f);
         GreyColors[GreyCol_EmphasisErrorActive] = ImVec4(1.00f, 0.21f, 0.00f, 0.95f);
+        GreyColors[GreyCol_EmphasisErrorText] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // white on red-orange
 
         GreyColors[GreyCol_EmphasisWarning] = ImVec4(0.55f, 0.57f, 0.14f, 0.90f);
         GreyColors[GreyCol_EmphasisWarningHovered] = ImVec4(0.55f, 0.57f, 0.14f, 1.00f);
         GreyColors[GreyCol_EmphasisWarningActive] = ImVec4(0.55f, 0.57f, 0.14f, 0.95f);
+        GreyColors[GreyCol_EmphasisWarningText] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // black on olive
 
-        GreyColors[GreyCol_EmphasisInfo] = ImVec4(0.51f, 0.80f, 1.00f, 0.90f);
-        GreyColors[GreyCol_EmphasisInfoHovered] = ImVec4(0.51f, 0.80f, 1.00f, 1.0f);
-        GreyColors[GreyCol_EmphasisInfoActive] = ImVec4(0.51f, 0.80f, 1.00f, 0.95f);
+        GreyColors[GreyCol_EmphasisInfo] = ImVec4(0.10f, 0.46f, 0.82f, 0.90f);
+        GreyColors[GreyCol_EmphasisInfoHovered] = ImVec4(0.10f, 0.46f, 0.82f, 1.0f);
+        GreyColors[GreyCol_EmphasisInfoActive] = ImVec4(0.10f, 0.46f, 0.82f, 0.95f);
+        GreyColors[GreyCol_EmphasisInfoText] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // white on darker blue
+
+        GreyColors[GreyCol_EmphasisDisabledText] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // black on light blue
     }
 
     void set_theme_follow_os() {

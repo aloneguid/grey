@@ -12,8 +12,16 @@ namespace Grey {
         Success = 3,
         Error = 4,
         Warning = 5,
-        Info = 6
+        Info = 6,
+        Disabled = 7
     };
+
+    public enum SubEmphasis : int {
+        Normal = 0,
+        NormalText = 1,
+        Hovered = 2,
+        Active = 3
+    }
 
     public enum ShowDelay : int {
         Immediate = 0,
@@ -33,4 +41,9 @@ namespace Grey {
         Sql,
         Markdown
     }
+
+    public struct Style {
+        public Emphasis Emp;
+    }
+    
 }

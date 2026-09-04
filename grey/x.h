@@ -1,8 +1,8 @@
 #pragma once
-
+#include "common/platform.h"
 #include <cstdint>
 
-#ifdef _WIN32
+#if PLATFORM_WINDOWS
 #define EXPORTED  __declspec(dllexport)
 #else
 #define EXPORTED
@@ -14,6 +14,9 @@ typedef void (*RenderTreeNodeCallback)(bool is_open);
 typedef void (*RenderTableCellCallback)(int32_t row_index, int32_t col_index);
 typedef void (*RenderPtrCallback)(void* ptr);
 
+typedef struct cstyle {
+    int32_t emp;
+} cstyle;
 
 extern "C" {
     /**
@@ -37,7 +40,7 @@ extern "C" {
 
     EXPORTED void sl(float offset);
 
-    EXPORTED void label(const char* c_text, int32_t emphasis, int32_t text_wrap_pos, bool enabled);
+    EXPORTED void lbl(const char* c_text, cstyle* style);
 
     EXPORTED bool selectable(const char* c_text, bool span_columns = false);
 

@@ -2,7 +2,7 @@
 
 env:
   VERSION: 0.0.0
-  PACKAGE_SUFFIX: '-pre.46'
+  PACKAGE_SUFFIX: '-pre.47'
   # PACKAGE_SUFFIX: ''
   ASM_VERSION: 0.0.0
   BUILD_TYPE: Release
@@ -12,10 +12,12 @@ on:
   push:
     branches:
       - master
+      - version/*
 
   pull_request:
     branches:
       - master
+      - version/*
 
   workflow_dispatch:
 
@@ -25,25 +27,34 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        # .NET RID catalog: https://learn.microsoft.com/en-us/dotnet/core/rid-catalog
+        # Available GH images: https://github.com/actions/runner-images#available-images
         include:
           - os: windows-latest
             name: Windows x64
-            arch: x64
             vcpkg_triplet: x64-windows-static
             vcpkg_config: Release
             dotnet_rid: win-x64
+          - os: windows-11-arm
+            name: Windows ARM64
+            vcpkg_triplet: arm64-windows-static
+            vcpkg_config: Release
+            dotnet_rid: win-arm64
           - os: ubuntu-latest
             name: Linux x64
-            arch: x64
             vcpkg_triplet: x64-linux
             vcpkg_config: MinSizeRel
             dotnet_rid: linux-x64
           - os: macos-latest
-            name: MacOS
-            arch: arm64
+            name: Apple Silicon
             vcpkg_triplet: arm64-osx
             vcpkg_config: MinSizeRel
             dotnet_rid: osx-arm64
+          - os: macos-26-intel
+            name: Apple x64 Intel
+            vcpkg_triplet: x64-osx
+            vcpkg_config: MinSizeRel
+            dotnet_rid: osx-x64
 
 
       fail-fast: false
@@ -305,8 +316,8 @@ jobs:
     name: '🕋 Release library'
     runs-on: ubuntu-latest
     needs:
-    - build-managed
-    if: github.ref == 'refs/heads/master'
+      - build-managed
+    if: github.ref_name == 'master' || startsWith(github.ref_name, 'version/')
 
     steps:
 

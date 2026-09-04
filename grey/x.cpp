@@ -13,9 +13,17 @@ namespace w = grey::widgets;
 static float scale = 1.0f; // default scale
 
 static void platform_init() {
-#if _WIN32
-    grey::common::os::set_dpi_awareness();
+#if PLATFORM_WINDOWS
+    common::os::set_dpi_awareness();
 #endif
+}
+
+static style as_style(cstyle* style) {
+    grey::style s;
+    if(style) {
+        s.emp = (emphasis)style->emp;
+    }
+    return s;
 }
 
 EXPORTED void app_run(
@@ -84,9 +92,10 @@ EXPORTED void sl(float offset) {
     w::sl(offset);
 }
 
-EXPORTED void label(const char* c_text, int32_t emphasis, int32_t text_wrap_pos, bool enabled) {
-    string text{c_text};
-    w::label(text, (grey::emphasis)emphasis, text_wrap_pos, enabled);
+EXPORTED void lbl(const char* c_text, cstyle* c_cstyle) {
+    const string text{c_text};
+    const style s = as_style(c_cstyle);
+    w::lbl(text, s);
 }
 
 EXPORTED bool selectable(const char* c_text, bool span_columns) {

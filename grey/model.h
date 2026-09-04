@@ -12,7 +12,15 @@ namespace grey {
         success = 3,
         error = 4,
         warning = 5,
-        info = 6
+        info = 6,
+        disabled = 7
+    };
+
+    enum class sub_emphasis : int32_t {
+        normal = 0,
+        normal_text = 1,
+        hovered = 2,
+        active = 3
     };
 
     enum class show_delay : int32_t {
@@ -180,6 +188,25 @@ namespace grey {
         }
 
         [[nodiscard]] const std::string to_hex(bool prepend_hash = true) const;
+    };
+
+    struct style {
+        emphasis emp{emphasis::none};
+
+        /**
+         * When set, emphasis will probably be ignored.
+         */
+        rgb_colour colour{};
+
+        float text_wrap_pos{.0f};
+
+        bool center_x{false};
+
+        bool center_y{false};
+
+        float font_size{.0f};
+
+        font_weight font_w{font_weight::regular};
     };
 
     struct font_config {
