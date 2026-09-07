@@ -1210,29 +1210,26 @@ namespace grey::widgets {
 
     // ---- status bar ----
 
-    status_bar::status_bar() : style{ImGui::GetStyle()}, cursor_before{ImGui::GetCursorPos()} {
-        //auto io = ImGui::GetIO();
-
-        float height = ImGui::GetFontBaked()->Size + style.FramePadding.y * 2.0f;
-
-        ImVec2 ws = ImGui::GetWindowSize();
-
-        ImGui::SetCursorPos(ImVec2(0, ws.y - height));
-        ImGui::BeginChild("##StatusBar", ImVec2(ws.x, height));
-        ImGui::SetCursorPos(ImVec2(style.FramePadding.x, style.FramePadding.y));
+    status_bar::status_bar() {
+        rendered_bar = ImGui::BeginViewportSideBar("##StatusBar", nullptr,
+            ImGuiDir_Down,
+            ImGui::GetFrameHeight(),
+            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar);
+        if(rendered_bar) {
+            rendered_mi = ImGui::BeginMenuBar();
+        }
     }
 
     status_bar::~status_bar() {
-        ImGui::EndChild();
 
-        auto min = ImGui::GetItemRectMin();
-        auto max = ImGui::GetItemRectMax();
-        ImDrawList* fdl = ImGui::GetWindowDrawList();
+        if(rendered_mi) ImGui::EndMenuBar();
+        if(rendered_bar) ImGui::End();
+    }
 
-        fdl->AddRectFilled(min, max,
-                           (ImU32) rgb_colour{
-                               style.Colors[ImGuiCol_MenuBarBg]
-                           }, style.FrameRounding);
+    void status_bar::sep() {
+        sl();
+        lbl("|", {.emp=emphasis::disabled});
+        sl();
     }
 
     // mouse helpers

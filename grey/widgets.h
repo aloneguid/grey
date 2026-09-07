@@ -275,12 +275,16 @@ namespace grey::widgets {
         status_bar();
         ~status_bar();
 
+        static void sep();
+
+        operator bool() const { return rendered_bar && rendered_mi; }
+
     private:
-        ImGuiStyle& style;
-        ImVec2 cursor_before;
+        bool rendered_bar{false};
+        bool rendered_mi{false};
     };
 
-#define with_status_bar(...) { grey::widgets::status_bar sb; __VA_ARGS__ }
+#define with_status_bar(...) { grey::widgets::status_bar sb; if(sb) { __VA_ARGS__ } }
 
     /**
      * @brief Rich tooltip container
