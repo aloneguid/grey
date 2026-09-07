@@ -1,11 +1,12 @@
 #pragma once
 
-// OpenGL3 + GLFW backend, which is cross-platform theoretically, but we will only use it for non-Windows platforms,
-// because we will use DirectX 11 + Win32 for much better OS integration on Windows.
+// OpenGL3 + GLFW backend, which is cross-platform theoretically, but only used for Linux backend.
 // ported from: https://github.com/ocornut/imgui/blob/docking/examples/example_glfw_opengl3/main.cpp
 
 #include "../app.h"
-#include "../common/platform.h"
+
+#if PLATFORM_LINUX
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -57,7 +58,7 @@ namespace grey::backends {
     static const char* g_glsl_version{nullptr};
 
     static bool gl_init() {
-        glfwSetErrorCallback(glfw_error_callback);
+        ::glfwSetErrorCallback(glfw_error_callback);
         if(!glfwInit())
             return false;
 
@@ -368,3 +369,5 @@ namespace grey::backends {
         std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_time;
     };
 }
+
+#endif

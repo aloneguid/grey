@@ -466,13 +466,11 @@ namespace grey::widgets {
 
     /**
      * @brief Checks if the last rendered item is hovered, and if so, shows a tooltip with the given text.
-     * @param text 
      */
     void tt(const std::string& text, show_delay delay = show_delay::normal);
 
     /**
      * @brief Checks if the last rendered item is hovered, and if so, shows a tooltip with the given text.
-     * @param text 
      */
     void tt(const char* text, show_delay delay = show_delay::normal);
 

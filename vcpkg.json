@@ -18,7 +18,7 @@
                 "glfw-binding",
                 "docking-experimental"
             ],
-            "platform": "linux | osx"
+            "platform": "linux"
         },
         {
             "name": "glfw3",

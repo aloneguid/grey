@@ -224,8 +224,7 @@ namespace grey::backends {
         return ::DefWindowProcW(hWnd, msg, wParam, lParam);
     }
 
-    class win32dx11app : public grey::app {
-    private:
+    class win32_dx11_app : public app {
         HWND hWnd{nullptr};
         bool last_use_transparency_colour_key_value{false};
         int last_transparency_window_alpha{255};
@@ -244,7 +243,7 @@ namespace grey::backends {
         int window_width{-1};
         int window_height{-1};
 
-        win32dx11app(const std::string &title, int width, int height) : title{title}, window_width{width},
+        win32_dx11_app(const std::string &title, int width, int height) : title{title}, window_width{width},
                                                                         window_height{height} {
             // Make process DPI aware and obtain main monitor scale
             ImGui_ImplWin32_EnableDpiAwareness();

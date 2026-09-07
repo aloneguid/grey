@@ -5,7 +5,7 @@
 #include "common/os.h"
 
 #if PLATFORM_WINDOWS
-#include "backends/win32dx11app.hpp"
+#include "backends/win32_dx11_app.hpp"
 #else
 #include "backends/glfwgl3app.hpp"
 #endif
@@ -16,7 +16,7 @@ namespace grey {
     std::unique_ptr<grey::app> app::make(const string& title, int width, int height) {
 
 #if PLATFORM_WINDOWS
-        auto app = make_unique<grey::backends::win32dx11app>(title, width, height);
+        auto app = make_unique<grey::backends::win32_dx11_app>(title, width, height);
 #elif defined(__linux__)
         auto app = make_unique<grey::backends::glfw_gl3_app>(title, width, height);
 #elif defined(__APPLE__)

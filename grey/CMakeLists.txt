@@ -32,7 +32,6 @@ file(GLOB core_src
     "guid.cpp"
     "3rdparty/imgui-node-editor/*.cpp"
     "3rdparty/ImGuiColorTextEdit/*.cpp"
-    "3rdparty/imgui_md/*.cpp"
     "fonts/*.cpp"
     "x/*.cpp")
 
@@ -40,32 +39,31 @@ set(private_libs
     implot::implot
     md4c::md4c)
 
-if (WIN32)
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     file(GLOB core_src ${core_src}
             "common/win32/gdi.cpp"
             "common/win32/window.cpp"
             "common/win32/reg.cpp")
     set(private_libs ${private_libs}
+        # DirectX 11
         D3D11.lib)
 endif()
 
-if (UNIX)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(private_libs ${private_libs}
         glfw
-        OpenGL::GL)
+        OpenGL::GL
+        Fontconfig::Fontconfig)
 endif()
 
-if (APPLE)
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_library(CORETEXT_FRAMEWORK CoreText REQUIRED)
     find_library(COREGRAPHICS_FRAMEWORK CoreGraphics REQUIRED)
+
     set(private_libs ${private_libs}
         ${CORETEXT_FRAMEWORK}
-        ${COREGRAPHICS_FRAMEWORK})
-endif()
-
-if(UNIX AND NOT APPLE)
-    set(private_libs ${private_libs}
-        Fontconfig::Fontconfig)
+        ${COREGRAPHICS_FRAMEWORK}
+        glfw)
 endif()
 
 set(interface_libs imgui::imgui)

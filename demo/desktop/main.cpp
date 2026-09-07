@@ -18,7 +18,7 @@ bool show_demo{false};
 string window_title = "Demo app";
 w::window wnd{window_title, &app_open};
 string text;
-w::container scroller{400, 100};
+w::container scroller{400, 200};
 w::popup status_pop{"status_pop"};
 bool ned_initialised{false};
 bool selected{false};
