@@ -189,6 +189,10 @@ namespace grey::widgets {
         return *this;
     }
 
+    bool window::own_viewport() const {
+        return initialized() && ImGui::GetMainViewport() != ImGui::GetWindowViewport();
+    }
+
     void window::enter() {
         //ImGui::SetNextWindowBgAlpha(1.0f);
 
@@ -864,7 +868,7 @@ namespace grey::widgets {
 
     // ---- image ----
 
-    void image(app& app, const std::string& key, size_t width, size_t height,
+    void image(texture_loader& app, const std::string& key, size_t width, size_t height,
                float uv0_x, float uv0_y, float uv1_x, float uv1_y) {
         auto tex = app.get_texture(key);
         if(tex && tex->data) {
@@ -875,7 +879,7 @@ namespace grey::widgets {
         }
     }
 
-    void image_rounded(app& app, const std::string& key, size_t width, size_t height, float rounding,
+    void image_rounded(texture_loader& app, const std::string& key, size_t width, size_t height, float rounding,
                        float uv0_x, float uv0_y, float uv1_x, float uv1_y) {
         auto tex = app.get_texture(key);
         if(tex && tex->data) {
@@ -889,12 +893,12 @@ namespace grey::widgets {
         }
     }
 
-    void icon_image(app& app, const std::string& key) {
-        float size = 16 * app.scale;
+    void icon_image(texture_loader& app, const std::string& key) {
+        float size = 16 * scale;
         image(app, key, size, size);
     }
 
-    bool icon_selector(app& app, const std::string& path, size_t square_size) {
+    bool icon_selector(texture_loader& app, const std::string& path, size_t square_size) {
         group g;
 
         if(path.empty()) {
@@ -1211,7 +1215,7 @@ namespace grey::widgets {
     // ---- status bar ----
 
     status_bar::status_bar() {
-        rendered_bar = ImGui::BeginViewportSideBar("##StatusBar", nullptr,
+        rendered_bar = ImGui::BeginViewportSideBar("##StatusBar", ImGui::GetWindowViewport(),
             ImGuiDir_Down,
             ImGui::GetFrameHeight(),
             ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar);

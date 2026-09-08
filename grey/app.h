@@ -6,6 +6,7 @@
 #include "common/img.h"
 #include "common/platform.h"
 #include "model.h"
+#include "widgets.h"
 
 #if PLATFORM_WINDOWS
 #include <Windows.h>
@@ -13,20 +14,7 @@
 
 namespace grey {
 
-    struct texture {
-        void* data;
-        size_t width;
-        size_t height;
-
-        texture(void* data) : data{data}, width{0}, height{0} {}
-
-        /**
-         * @brief Disposing the texture is platform specific.
-         */
-        virtual ~texture() = default;
-    };
-
-    class app {
+    class app : public texture_loader {
     public:
         virtual ~app() = default;
 
@@ -36,7 +24,7 @@ namespace grey {
          * @param title 
          * @return 
          */
-        static std::unique_ptr<app> make(const std::string& title, int width, int height);
+        static std::unique_ptr<app> make(const std::string& title, sz size = sz{-1, -1});
 
         /**
          * @brief When set, application will set this theme on startup.
@@ -48,8 +36,6 @@ namespace grey {
          */
         font_config fonts{};
 
-        float scale{1.0f};
-
         std::function<void()> on_initialised;
 
         std::function<void(int, const std::string&)> on_user_message;
@@ -58,11 +44,11 @@ namespace grey {
 
         virtual void run(std::function<bool(app&)> render_frame) = 0;
 
-        std::shared_ptr<texture> get_texture(const std::string& key);
+        std::shared_ptr<texture> get_texture(const std::string& key) override;
 
-        bool preload_texture(const std::string& key, const unsigned char* buffer, unsigned int len);
+        bool preload_texture(const std::string& key, const unsigned char* buffer, unsigned int len) override;
 
-        bool preload_texture(const std::string& key, const std::string& path);
+        bool preload_texture(const std::string& key, const std::string& path) override;
 
         /**
          * @brief Releases texture from memory
@@ -79,23 +65,21 @@ namespace grey {
 
 
         /**
-         * @brief Resizes the main viewport of the application. This is the area where the application renders its main content. The width and height parameters will be multiplied by the scale factor.
-         * @param width 
-         * @param height 
+         * @brief Resizes the main viewport of the application. This is the area where the application renders its main content.
+         * @param size Logical size.
          */
-        virtual void resize_main_viewport(int width, int height) = 0;
+        virtual void resize(sz size) = 0;
 
         /**
          * @brief Moves the main viewport of the application to the specified position on the screen. This is monitor/platform-dependent and may not work on all platforms.
-         * @param x 
-         * @param y 
+         * @param pos Logical position.
          */
-        virtual void move_main_viewport(int x, int y) = 0;
+        virtual void move(point pos) = 0;
 
         /**
          * @brief Brings the main viewport of the application to the foreground.
          */
-        virtual void foreground_main_viewport() = 0;
+        virtual void foreground() = 0;
 
         /**
          * @brief Limits maximum FPS for the application. This is useful when you want to limit the CPU usage of the application.
@@ -185,7 +169,7 @@ namespace grey {
 
         void on_after_initialised();
 
-        virtual std::shared_ptr<texture> make_native_texture(grey::common::raw_img& img) = 0;
+        virtual std::shared_ptr<texture> make_native_texture(common::raw_img& img) = 0;
 
         /**
          * @brief Hints if dark mode should be enabled for this application on the OS level. For instance, on Windows 10/11 dark mode will paint window chrome in dark color.

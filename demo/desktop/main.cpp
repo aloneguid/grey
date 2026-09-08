@@ -47,7 +47,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
     //auto wnd = backend->make_window<demo::main_wnd>();
     //backend->run();
 
-    auto app = grey::app::make("demo", 700, 800);
+    auto app = grey::app::make("demo", sz{700, 800});
 
     app->on_initialised = [&app]() {
         app->preload_texture("luna", luna_jpg, luna_jpg_len);
@@ -145,7 +145,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                     w::sep("buttons (click for toast of the same emphasis)");
 
                     if(w::button("simply add dot")) {
-                        text += ".";
+                        text += '.';
                     }
 
                     for(pair<emphasis, string_view> emp: magic_enum::enum_entries<emphasis>()) {

@@ -243,20 +243,18 @@ namespace grey::backends {
         int window_width{-1};
         int window_height{-1};
 
-        win32_dx11_app(const std::string &title, int width, int height) : title{title}, window_width{width},
-                                                                        window_height{height} {
+        win32_dx11_app(const std::string &title, sz size) : title{title} {
             // Make process DPI aware and obtain main monitor scale
             ImGui_ImplWin32_EnableDpiAwareness();
-            this->scale = ImGui_ImplWin32_GetDpiScaleForMonitor(
+            widgets::scale = ImGui_ImplWin32_GetDpiScaleForMonitor(
                 ::MonitorFromPoint(POINT{0, 0}, MONITOR_DEFAULTTOPRIMARY));
-            grey::widgets::scale = this->scale;
 
-            if(window_width == -1 || window_height == -1) {
+            if(size.width == -1 || size.height == -1) {
                 window_width = window_height = CW_USEDEFAULT;
             } else {
                 // apply scaling factor
-                window_width = static_cast<int>(window_width * this->scale);
-                window_height = static_cast<int>(window_height * this->scale);
+                window_width = static_cast<int>(size.width * widgets::scale);
+                window_height = static_cast<int>(size.height * widgets::scale);
             }
         }
 
@@ -287,10 +285,10 @@ namespace grey::backends {
             y = wa.top + (sh - height) / 2;
         }
 
-        void resize_main_viewport(const int width, const int height) override {
+        void resize(const sz size) override {
             // apply scaling factor
-            window_width = static_cast<int>(width * scale);
-            window_height = static_cast<int>(height * scale);
+            window_width = static_cast<int>(size.width * widgets::scale);
+            window_height = static_cast<int>(size.height * widgets::scale);
 
             if(hWnd) {
                 UINT uFlags{0};
@@ -315,16 +313,16 @@ namespace grey::backends {
             }
         }
 
-        void move_main_viewport(const int x, const int y) override {
-            window_left = static_cast<int>(x * scale);
-            window_top = static_cast<int>(y * scale);
+        void move(const point pos) override {
+            window_left = static_cast<int>(pos.x * widgets::scale);
+            window_top = static_cast<int>(pos.y * widgets::scale);
             if(hWnd) {
                 constexpr UINT uFlags = SWP_NOSIZE;
                 ::SetWindowPos(hWnd, HWND_TOP, window_left, window_top, 0, 0, uFlags);
             }
         }
 
-        void foreground_main_viewport() override {
+        void foreground() override {
             if(!hWnd) return;
 
             // non-forced
@@ -524,9 +522,9 @@ namespace grey::backends {
             ImGuiStyle &style = ImGui::GetStyle();
 
             // Setup scaling
-            style.ScaleAllSizes(scale);
+            style.ScaleAllSizes(widgets::scale);
             // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
-            style.FontScaleDpi = scale;
+            style.FontScaleDpi = widgets::scale;
             // Set initial font scale. (in docking branch: using io.ConfigDpiScaleFonts=true automatically overrides this for every window depending on the current monitor)
             io.ConfigDpiScaleFonts = true;
             // [Experimental] Automatically overwrite style.FontScaleDpi in Begin() when Monitor DPI changes. This will scale fonts but _NOT_ scale sizes/padding for now.

@@ -13,10 +13,10 @@
 using namespace std;
 
 namespace grey {
-    std::unique_ptr<grey::app> app::make(const string& title, int width, int height) {
+    std::unique_ptr<grey::app> app::make(const string& title, sz size) {
 
 #if PLATFORM_WINDOWS
-        auto app = make_unique<grey::backends::win32_dx11_app>(title, width, height);
+        auto app = make_unique<grey::backends::win32_dx11_app>(title, size);
 #elif defined(__linux__)
         auto app = make_unique<grey::backends::glfw_gl3_app>(title, width, height);
 #elif defined(__APPLE__)
@@ -32,9 +32,6 @@ namespace grey {
     }
 
     void app::on_after_initialised() {
-
-        widgets::scale = scale;
-
         ImGuiIO& io = ImGui::GetIO();
 
         // disable built-in .ini file creation
@@ -50,8 +47,8 @@ namespace grey {
     }
 
     void app::set_theme(const std::string& theme_id) {
-        auto theme = grey::themes::get_theme(theme_id);
-        grey::themes::set_theme(theme_id, scale);
+        auto theme = themes::get_theme(theme_id);
+        themes::set_theme(theme_id, widgets::scale);
         set_dark_mode(theme.is_dark);
     }
 

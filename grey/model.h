@@ -1,9 +1,35 @@
 #pragma once
 #include "imgui.h"
 #include <string>
+#include <memory>
 
 namespace grey {
     struct sz;
+
+    struct texture {
+        void* data;
+        size_t width;
+        size_t height;
+
+        texture(void* data) : data{data}, width{0}, height{0} {}
+
+        /**
+         * @brief Disposing the texture is platform specific.
+         */
+        virtual ~texture() = default;
+    };
+
+    /**
+     * Functions to work with textures (i.e. images)
+     */
+    class texture_loader {
+    public:
+        virtual std::shared_ptr<texture> get_texture(const std::string& key) = 0;
+
+        virtual bool preload_texture(const std::string& key, const unsigned char* buffer, unsigned int len) = 0;
+
+        virtual bool preload_texture(const std::string& key, const std::string& path) = 0;
+    };
 
     enum class emphasis : int32_t {
         none = 0,

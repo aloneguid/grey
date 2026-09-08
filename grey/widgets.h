@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include "app.h"
 #include "magic_enum/magic_enum.hpp"
 #include "common/platform.h"
 
@@ -99,6 +98,8 @@ namespace grey::widgets {
         window& no_scroll();
         window& center(void* monitor_handle = nullptr);
         window& fill_viewport();
+
+        [[nodiscard]] bool own_viewport() const;
 
         void enter() override;
         void leave() override;
@@ -489,18 +490,18 @@ namespace grey::widgets {
      * @param uv1_x 
      * @param uv1_y 
      */
-    void image(app& app, const std::string& key, size_t width, size_t height,
+    void image(texture_loader& app, const std::string& key, size_t width, size_t height,
         float uv0_x = .0f, float uv0_y = .0f, float uv1_x = 1.0f, float uv1_y = 1.0f);
 
-    void image_rounded(app& app, const std::string& key, size_t width, size_t height, float rounding,
+    void image_rounded(texture_loader& app, const std::string& key, size_t width, size_t height, float rounding,
         float uv0_x = .0f, float uv0_y = .0f, float uv1_x = 1.0f, float uv1_y = 1.0f);
 
     /**
      * @brief Same as image, but width/height is pre-configured
      */
-    void icon_image(app& app, const std::string& key);
+    void icon_image(texture_loader& app, const std::string& key);
 
-    bool icon_selector(app& app, const std::string& path, size_t square_size);
+    bool icon_selector(texture_loader& app, const std::string& path, size_t square_size);
 
     void spc(size_t repeat = 1);
     void sl(float offset = 0, bool spacing = true);
