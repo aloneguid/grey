@@ -67,7 +67,7 @@ namespace grey::widgets::x {
         creation_time{chrono::system_clock::now()},
         w{format("##toast{}", generate_int_id())} {
 
-        w.no_titlebar().no_collapse().no_scroll().auto_resize();
+        w.no_title_bar().no_collapse().no_scroll().auto_resize();
     }
 
     toast& toast::operator=(const toast& other) {

@@ -31,7 +31,7 @@ extern "C" {
         const char* c_title,
         int32_t width,
         int32_t height,
-        bool has_menubar,
+        bool has_menu_bar,
         bool can_scroll,
         bool center_on_screen,
         RenderFrameCallback c_frame_callback);

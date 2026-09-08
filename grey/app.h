@@ -16,15 +16,19 @@ namespace grey {
 
     class app : public texture_loader {
     public:
+        explicit app(const std::string& title);
         virtual ~app() = default;
 
         /**
          * @brief Creates app instance, which will be different implementation depending on the platform we run on.
          *        Only one instance of the app should be created per process lifetime.
-         * @param title 
+         * @param title Application title, affects what is displayed on the taskbar and window title in your OS.
+         * @param size Main window size in logical pixels.
          * @return 
          */
         static std::unique_ptr<app> make(const std::string& title, sz size = sz{-1, -1});
+
+        widgets::window& main_window() { return wnd_main; }
 
         /**
          * @brief When set, application will set this theme on startup.
@@ -36,13 +40,21 @@ namespace grey {
          */
         font_config fonts{};
 
+        /**
+         * Called after UI framework is initialised. Useful for loading assets, etc.
+         */
         std::function<void()> on_initialised;
 
+        /**
+         * Used for IPC on Windows. Do not use.
+         */
         std::function<void(int, const std::string&)> on_user_message;
 
-        app();
-
-        virtual void run(std::function<bool(app&)> render_frame) = 0;
+        /**
+         * Call to start the application. This will block until the application is closed.
+         * @param render_frame Callback that will be called to render a frame. Return true to continue rendering, false to exit.
+         */
+        virtual void run(std::function<bool()> render_frame) = 0;
 
         std::shared_ptr<texture> get_texture(const std::string& key) override;
 
@@ -178,6 +190,11 @@ namespace grey {
         virtual void set_dark_mode(bool enabled) = 0;
 
         float max_frame_interval_ms;
+
+        // pre-initialised main window
+        widgets::window wnd_main;
+        bool wnd_main_is_open{true};
+        bool render_main_window(const std::function<bool()>& render_frame);
 
     private:
         // key is texture name, value is texture data. The app will take care of disposing of the textures when the app is closed.

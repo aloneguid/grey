@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
 
     wnd
         .no_resize()
-        .no_titlebar()
+        .no_title_bar()
         .fill_viewport()
         .border(0)
         .no_background();

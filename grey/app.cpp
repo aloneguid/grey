@@ -13,7 +13,7 @@
 using namespace std;
 
 namespace grey {
-    std::unique_ptr<grey::app> app::make(const string& title, sz size) {
+    std::unique_ptr<app> app::make(const string& title, sz size) {
 
 #if PLATFORM_WINDOWS
         auto app = make_unique<grey::backends::win32_dx11_app>(title, size);
@@ -27,8 +27,14 @@ namespace grey {
         return app;
     }
 
-    app::app() {
+    app::app(const string& title) : wnd_main{title, &wnd_main_is_open}, max_frame_interval_ms{0.0f} {
         set_target_fps(40);
+
+        // main window fills entire viewport, therefore remove any decorations
+        wnd_main
+            .no_title_bar()
+            .border(0)
+            .fill_viewport();
     }
 
     void app::on_after_initialised() {
@@ -44,6 +50,14 @@ namespace grey {
 
         if(on_initialised)
             on_initialised();
+    }
+
+    bool app::render_main_window(const std::function<bool()>& render_frame) {
+        widgets::guard g{wnd_main};
+
+        wnd_main_is_open = render_frame();
+
+        return wnd_main_is_open;
     }
 
     void app::set_theme(const std::string& theme_id) {

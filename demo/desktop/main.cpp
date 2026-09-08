@@ -16,7 +16,6 @@ unsigned int current_item = 0;
 bool app_open{true};
 bool show_demo{false};
 string window_title = "Demo app";
-w::window wnd{window_title, &app_open};
 string text;
 w::container scroller{400, 200};
 w::popup status_pop{"status_pop"};
@@ -53,18 +52,9 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
         app->preload_texture("luna", luna_jpg, luna_jpg_len);
     };
 
-
+    app->main_window().has_menu_bar();
     app->fonts.load_all();
     app->center_on_screen = true;
-
-    wnd
-            .no_titlebar()
-            .no_scroll()
-            .no_resize()
-            .fill_viewport()
-            .border(0)
-            .has_menubar();
-
 
     gr.add_node(1);
     gr.add_node(2);
@@ -75,9 +65,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
     gr.add_edge(1, 4);
 
 
-    app->run([&app](const grey::app& c_app) {
-        w::guard wg{wnd};
-
+    app->run([&app]() {
         // menu
         {
             w::menu_bar menu;
@@ -336,7 +324,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                     w::lbl(to_string(current_item));
 
                     if(w::button("center on screen")) {
-                        wnd.center();
+                        app->center_on_screen = true;
                     }
                 }
             }
@@ -622,7 +610,7 @@ Also, [GitHub alerts](https://docs.github.com/en/get-started/writing-on-github/g
         if(show_demo)
             ImGui::ShowDemoWindow();
 
-        w::notify_render_frame();
+        w::toast_render_frame();
 
         return app_open;
     });

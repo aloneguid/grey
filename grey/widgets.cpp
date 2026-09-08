@@ -135,8 +135,11 @@ namespace grey::widgets {
         return *this;
     }
 
-    window& window::has_menubar() {
-        flags |= ImGuiWindowFlags_MenuBar;
+    window& window::has_menu_bar(bool on) {
+        if (on)
+            flags |= ImGuiWindowFlags_MenuBar;
+        else
+            flags &= ~ImGuiWindowFlags_MenuBar;
         return *this;
     }
 
@@ -155,7 +158,7 @@ namespace grey::widgets {
         return *this;
     }
 
-    window& window::no_titlebar() {
+    window& window::no_title_bar() {
         flags |= ImGuiWindowFlags_NoTitleBar;
         return *this;
     }
@@ -1170,7 +1173,7 @@ namespace grey::widgets {
         x::toast::push(emp, "", message, 5000);
     }
 
-    void notify_render_frame() {
+    void toast_render_frame() {
         // Notifications style setup
         // ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.f); // Disable round borders
         //ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f); // Disable borders

@@ -6,11 +6,9 @@
 
 using namespace std;
 using namespace grey;
-namespace w = grey::widgets;
+namespace w = widgets;
 
 #include "common/os.h"
-
-static float scale = 1.0f; // default scale
 
 static void platform_init() {
 #if PLATFORM_WINDOWS
@@ -21,7 +19,7 @@ static void platform_init() {
 static style as_style(cstyle* style) {
     grey::style s;
     if(style) {
-        s.emp = (emphasis)style->emp;
+        s.emp = static_cast<emphasis>(style->emp);
     }
     return s;
 }
@@ -30,7 +28,7 @@ EXPORTED void app_run(
     const char* c_title,
     int32_t width,
     int32_t height,
-    bool has_menubar,
+    bool has_menu_bar,
     bool can_scroll,
     bool center_on_screen,
     RenderFrameCallback c_frame_callback) {
@@ -41,42 +39,22 @@ EXPORTED void app_run(
 
     // main window
     bool is_running = true;
-    w::window wnd{title, &is_running};
-    wnd
-        .no_titlebar()
-        .no_resize()
-        .fill_viewport()
-        .border(0);
 
-    if(has_menubar) {
-        wnd.has_menubar();
-    }
+    auto app = app::make(title, sz{static_cast<float>(width), static_cast<float>(height)});
+    if(has_menu_bar) app->main_window().has_menu_bar();
+    if(!can_scroll) app->main_window().no_scroll();
+    if(center_on_screen) app->main_window().center();
 
-    if(!can_scroll) {
-        wnd.no_scroll();
-    }
-
-    if(center_on_screen) {
-        wnd.center();
-    }
-
-    auto app = grey::app::make(title, width, height);
     app->can_resize = true;
     app->fonts.load_all();
-    app->run([c_frame_callback, &wnd](const grey::app& app) {
-
-        scale = app.scale;
-
-        w::guard g{wnd};
-
+    app->run([c_frame_callback]() {
         if(c_frame_callback) {
             if(!c_frame_callback()) {
                 return false;
             }
         }
 
-        w::notify_render_frame();
-
+        w::toast_render_frame();
         return true;
     });
 }
@@ -136,12 +114,12 @@ EXPORTED void toast(int32_t emphasis, const char* c_message) {
 
 EXPORTED bool input_string(char* c_value, int32_t value_max_length, const char* c_label, bool enabled, float width, bool is_readonly) {
     string label{ c_label };
-    return w::input(c_value, value_max_length, label, enabled, width * scale, is_readonly);
+    return w::input(c_value, value_max_length, label, enabled, width * w::scale, is_readonly);
 }
 
 EXPORTED bool input_int(int32_t* value, const char* c_label, bool enabled, float width, bool is_readonly) {
     string label{ c_label };
-    return w::input(*value, label, enabled, width * scale, is_readonly);
+    return w::input(*value, label, enabled, width * w::scale, is_readonly);
 }
 
 EXPORTED bool input_multiline(const char* c_id, char* c_value, int32_t value_max_length, float height, bool autoscroll, bool enabled, bool use_fixed_font) {
@@ -176,11 +154,11 @@ void rich_tt(RenderCallback c_render_callback, int32_t delay) {
 }
 
 EXPORTED bool combo(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width) {
-    return w::combo(c_label, vector<string>(options, options + options_size), *selected, width * scale);
+    return w::combo(c_label, vector<string>(options, options + options_size), *selected, width * w::scale);
 }
 
 EXPORTED bool list(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width) {
-    return w::list(c_label, vector<string>(options, options + options_size), *selected, width * scale);
+    return w::list(c_label, vector<string>(options, options + options_size), *selected, width * w::scale);
 }
 
 EXPORTED void tab_bar(const char* c_id, RenderPtrCallback c_render_callback) {
@@ -225,7 +203,7 @@ EXPORTED void big_table(const char* c_id,
         cols.emplace_back(c_columns[i]);
     }
 
-    w::big_table t{ c_id, cols, static_cast<size_t>(row_count), outer_width * scale, outer_height * scale, alternate_row_bg };
+    w::big_table t{ c_id, cols, static_cast<size_t>(row_count), outer_width * w::scale, outer_height * w::scale, alternate_row_bg };
     t.render_data([c_cell_callback](int row_idx, int column_idx) {
             c_cell_callback(row_idx, column_idx);
         });
@@ -239,7 +217,7 @@ EXPORTED void table(const char* c_id, const char** c_columns, int32_t c_columns_
         cols.emplace_back(c_columns[i]);
     }
 
-    w::table t{c_id, cols, outer_width * scale, outer_height * scale, alternate_row_bg};
+    w::table t{c_id, cols, outer_width * w::scale, outer_height * w::scale, alternate_row_bg};
     if(t) {
         c_ptr_callback(&t);
     }

@@ -87,12 +87,16 @@ namespace grey::widgets {
          */
         window& size(int width, int height);
         window& resize(float width = 0, float height = 0);
-        window& has_menubar();
+
+        /**
+         * Reserves space for a menu bar. If you are drawing menu but this is not set, menu won't be shown.
+         */
+        window& has_menu_bar(bool on = true);
         window& fullscreen();
         window& no_resize();    // no manual resize
         window& auto_resize();
         window& no_collapse();
-        window& no_titlebar();
+        window& no_title_bar();
         window& no_background();
         window& border(float width);
         window& no_scroll();
@@ -592,7 +596,7 @@ namespace grey::widgets {
      */
     void toast(emphasis emp, const std::string& message);
 
-    void notify_render_frame();
+    void toast_render_frame();
 
     // mouse helpers
 

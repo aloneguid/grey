@@ -243,7 +243,7 @@ namespace grey::backends {
         int window_width{-1};
         int window_height{-1};
 
-        win32_dx11_app(const std::string &title, sz size) : title{title} {
+        win32_dx11_app(const std::string &title, sz size) : app{title}, title{title} {
             // Make process DPI aware and obtain main monitor scale
             ImGui_ImplWin32_EnableDpiAwareness();
             widgets::scale = ImGui_ImplWin32_GetDpiScaleForMonitor(
@@ -403,7 +403,7 @@ namespace grey::backends {
             }
         }
 
-        void run(std::function<bool(app &app)> render_frame) {
+        void run(std::function<bool()> render_frame) override {
             // Create application window
 
             wstring class_name = grey::common::str::to_wstr(win32_window_class_name);
@@ -603,7 +603,7 @@ namespace grey::backends {
                 ImGui_ImplWin32_NewFrame();
                 ImGui::NewFrame();
 
-                if(!render_frame(*this)) {
+                if(!render_main_window(render_frame)) {
                     // Post message to close the window, which should be handled in the next iteration of the message loop.
                     ::PostMessage(hWnd, WM_CLOSE, 0, 0);
                     // done = true;
