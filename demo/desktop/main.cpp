@@ -68,11 +68,9 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
     app->run([&app]() {
         // menu
         {
-            w::menu_bar menu;
-            if(menu) {
+            if(w::menu_bar menu; menu) {
                 {
-                    w::menu m("File");
-                    if(m) {
+                    if(w::menu m("File"); m) {
                         w::mi("New", true, ICON_MD_DONUT_LARGE);
                         if(w::mi("Exit", true)) {
                             app_open = false;
@@ -81,8 +79,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                 }
 
                 {
-                    w::menu m("View");
-                    if(m) {
+                    if(w::menu m("View"); m) {
                         w::mi_themes([&app](const std::string& id) {
                             w::toast(emphasis::info, "theme changed to " + id);
                             app->set_theme(id);
@@ -92,8 +89,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                 }
 
                 {
-                    w::menu m("Help");
-                    if(m) {
+                    if(w::menu m("Help"); m) {
                         w::mi("About");
                     }
                 }
@@ -106,15 +102,31 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
             // basics
             {
-                if(auto tab = tabs.next_tab("Basics")) {
-                    w::sl();
-                    w::lbl(ICON_MD_5G " icon1");
-                    w::lbl("label styles");
-                    w::lbl("");
-                    for(pair<emphasis, string_view> emp: magic_enum::enum_entries<emphasis>()) {
-                        string title = format("emp: {}", emp.second);
-                        w::sl();
-                        w::lbl(title, {.emp = emp.first});
+                if(auto tab = tabs.next_tab("intro")) {
+
+                    if(w::accordion("Icons")) {
+                        w::lbl(ICON_MD_5G " icon1");
+                    }
+
+                    if(w::accordion("Label styles")) {
+                        w::lbl("");
+                        for(pair<emphasis, string_view> emp: magic_enum::enum_entries<emphasis>()) {
+                            string title = format("emp: {}", emp.second);
+                            w::sl();
+                            w::lbl(title, {.emp = emp.first});
+                        }
+                    }
+
+                    if(w::accordion("Windows")) {
+                        static w::window w1{"w1"};
+                        static bool w1_render{false};
+
+                        w::checkbox("window 1", w1_render);
+
+                        if(w1_render){
+                            w::guard g{w1};
+                            w::lbl("content of window 1");
+                        }
                     }
 
                     w::lbl("hover for simple tooltip");
@@ -214,8 +226,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
             // simple image
             {
-                auto tab = tabs.next_tab("Image");
-                if(tab) {
+                if(auto tab = tabs.next_tab("img")) {
                     static bool img_rounded{false};
                     static float img_rounding{5.0f};
                     static float img_scale{0.5f};
