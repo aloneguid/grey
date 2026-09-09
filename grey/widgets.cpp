@@ -260,7 +260,7 @@ namespace grey::widgets {
             ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         }
 
-        ImGui::Begin(title.c_str(), p_open, flags);
+        rendered = ImGui::Begin(title.c_str(), p_open, flags);
         wdl = ImGui::GetWindowDrawList();
 
         /*if (window && window->Viewport) {

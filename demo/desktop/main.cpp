@@ -125,7 +125,9 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
                         if(w1_render){
                             w::guard g{w1};
-                            w::lbl("content of window 1");
+                            if(w1) {
+                                w::lbl("content of window 1");
+                            }
                         }
                     }
 

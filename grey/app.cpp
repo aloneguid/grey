@@ -75,7 +75,9 @@ namespace grey {
     bool app::render_main_window(const std::function<bool()>& render_frame) {
         widgets::guard g{wnd_main};
 
-        wnd_main_is_open = render_frame();
+        if(wnd_main) {
+            wnd_main_is_open = render_frame();
+        }
 
         return wnd_main_is_open;
     }

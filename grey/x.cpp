@@ -288,7 +288,7 @@ EXPORTED int32_t window(int32_t id, bool unregister,
 
     w::window& w{*window_map[id]};
     w::guard wg{w};
-    if(c_render_callback) c_render_callback();
+    if(w && c_render_callback) c_render_callback();
     return id;
 }
 
@@ -323,7 +323,7 @@ EXPORTED void window_render(int32_t id, RenderCallback c_render_callback) {
 
     // otherwise, render window
     w::guard g{*it->second};
-    c_render_callback();
+    if(*it->second && c_render_callback) c_render_callback();
 }
 
 map<int, unique_ptr<w::code_editor>> code_editor_map;

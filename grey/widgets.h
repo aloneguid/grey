@@ -107,12 +107,17 @@ namespace grey::widgets {
 
         [[nodiscard]] bool own_viewport() const;
 
+        explicit operator bool() const {
+            return rendered;
+        }
+
         void enter() override;
         void leave() override;
 
         ~window() override;
 
     private:
+        bool rendered{false};
         float last_opacity{1.0f};
         sz init_size{0, 0};
         sz resize_to{0, 0};
@@ -155,7 +160,7 @@ namespace grey::widgets {
         guardable& g;
     };
 
-#define with_window(w, ...) { { grey::widgets::guard wg{w}; __VA_ARGS__ }}
+#define with_window(w, ...) { { grey::widgets::guard wg{w}; if(w) { __VA_ARGS__ } }}
 
     class container : public guardable {
     public:
@@ -646,8 +651,6 @@ namespace grey::widgets {
         const std::string label;
         bool opened{false};
     };
-
-#define with_window(w, ...) { { grey::widgets::guard wg{w}; __VA_ARGS__ }}
 
     //bool tree_node(const std::string& label, ImGuiTreeNodeFlags flags = 0, emphasis emp = emphasis::none);
 
