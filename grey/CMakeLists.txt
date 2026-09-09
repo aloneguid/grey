@@ -80,9 +80,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 endif()
 
 add_library(${DYNAMIC_NAME} SHARED ${core_src} "x.cpp")
-add_library(${STATIC_NAME} STATIC ${core_src}
-        common/ui_window.cpp
-        common/ui_window.h)
+add_library(${STATIC_NAME} STATIC ${core_src})
 
 #set_property(TARGET grey PROPERTY
 #  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")

@@ -10,13 +10,13 @@
 #elif PLATFORM_LINUX
 #include "backends/glfw_opengl3_app.hpp"
 #elif PLATFORM_MACOS
-#include "backends/glfw_metal_app.hpp"
+#include "backends/glfw_metal_app.mm"
 #endif
 
 using namespace std;
 
 namespace grey {
-    std::unique_ptr<app> app::make(const string& title, sz size) {
+    std::unique_ptr<app> app::make(const std::string& title, sz size) {
 
 #if PLATFORM_WINDOWS
         auto app = make_unique<backends::win32_dx11_app>(title, size);
@@ -29,7 +29,7 @@ namespace grey {
         return app;
     }
 
-    app::app(const string& title) : wnd_main{title, &wnd_main_is_open} {
+    app::app(const std::string& title) : wnd_main{title, &wnd_main_is_open} {
 
         // main window fills entire viewport, therefore remove any decorations
         wnd_main
@@ -44,7 +44,7 @@ namespace grey {
         // disable built-in .ini file creation
         io.IniFilename = nullptr;
 
-        string theme_id = initial_theme_id.empty() ? grey::themes::FollowOsThemeId : initial_theme_id;
+        std::string theme_id = initial_theme_id.empty() ? grey::themes::FollowOsThemeId : initial_theme_id;
         set_theme(theme_id);
 
         fonts::font_loader::preload_fonts(fonts);
