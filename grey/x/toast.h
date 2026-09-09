@@ -41,7 +41,7 @@ namespace grey::widgets::x {
         static constexpr float WindowPadding = 10.0f;
 
         std::chrono::system_clock::time_point creation_time;
-        window w;
+        std::string w_title;
 
         [[nodiscard]] std::chrono::nanoseconds get_elapsed_time() const;
         [[nodiscard]] int64_t get_elapsed_time_ms() const;

@@ -118,14 +118,14 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                     }
 
                     if(w::accordion("Windows")) {
-                        static w::window w1{"w1"};
                         static bool w1_render{false};
-
+                        static bool w1_title_bar{true};
                         w::checkbox("window 1", w1_render);
+                        w::checkbox("title bar", w1_title_bar);;
 
-                        if(w1_render){
-                            w::guard g{w1};
-                            if(w1) {
+                        if(w1_render) {
+                            if(w::wnd w1{"windows 1", {
+                                .show_title_bar = w1_title_bar}}) {
                                 w::lbl("content of window 1");
                             }
                         }

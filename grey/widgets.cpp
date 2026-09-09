@@ -111,6 +111,50 @@ namespace grey::widgets {
         wdl->PopClipRect();
     }
 
+    wnd::wnd(const std::string& title, const wnd_opts& s) {
+        ImGuiWindowFlags flags{0};
+        if(!s.show_title_bar) flags |= ImGuiWindowFlags_NoTitleBar;
+
+        if(s.pos_cond != pos_condition::never) {
+            ImGuiCond igc;
+            switch(s.pos_cond) {
+                case pos_condition::always:
+                    igc = ImGuiCond_Always;
+                    break;
+                case pos_condition::once:
+                    igc = ImGuiCond_Once;
+                    break;
+                default:
+                    igc = ImGuiCond_Once;
+                    break;
+            }
+
+            ImGui::SetNextWindowPos(s.pos, igc,point{s.pos_pivot});
+        }
+
+        needs_content = ImGui::Begin(title.c_str(), nullptr, flags);
+        auto nwnd = nw();
+
+        if(nwnd) {
+            if(s.opacity < 1.0f) nwnd.opacity(s.opacity);
+            if(s.always_on_top) nwnd.always_on_op();
+        }
+
+    }
+
+    common::ui_window wnd::nw() {
+        const ImGuiViewport* vp = ImGui::GetWindowViewport();
+        return common::ui_window{vp->PlatformHandle};
+    }
+
+
+    wnd::~wnd() {
+        wdl = nullptr;
+
+        // End needs to be called regardless of whether the window is collapsed or not
+        ImGui::End();
+    }
+
     id_frame::id_frame(int scope_id) {
         ImGui::PushID(scope_id);
     }

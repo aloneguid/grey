@@ -65,9 +65,8 @@ namespace grey::widgets::x {
         message(std::move(message)),
         dismiss_time_ms(dismiss_time_ms),
         creation_time{chrono::system_clock::now()},
-        w{format("##toast{}", generate_int_id())} {
+        w_title{format("##toast{}", generate_int_id())} {
 
-        w.no_title_bar().no_collapse().no_scroll().auto_resize().front();
     }
 
     toast& toast::operator=(const toast& other) {
@@ -102,7 +101,13 @@ namespace grey::widgets::x {
         // speedy skip, especially relevant because this is called FPS times a second.
         if(toasts.empty()) return;
 
-        ImVec2 parent_size = ImGui::GetWindowSize();
+        // draw toast on the monitor rather than relative to current window
+        const ImGuiPlatformIO& pio = ImGui::GetPlatformIO();
+        if(pio.Monitors.empty()) return;
+        const ImGuiPlatformMonitor& mon = pio.Monitors[0];
+        point mon_pos{mon.WorkPos.x, mon.WorkPos.y};
+        sz mon_size{mon.WorkSize.x, mon.WorkSize.y};
+
         float window_padding = WindowPadding * scale;
         float height = 0.f;
 
@@ -111,16 +116,19 @@ namespace grey::widgets::x {
 
         // there will be no expired notifications left in the collection
         for(auto& toast: toasts) {
-            toast.w.opacity = toast.get_fade_alpha();
 
             // Set notification window position to bottom right corner of the main window, considering the main window size and location in relation to the display
-            ImVec2 parent_pos = ImGui::GetWindowPos();
-            ImGui::SetNextWindowPos(
-                ImVec2(parent_pos.x + parent_size.x - window_padding,
-                       parent_pos.y + parent_size.y - window_padding - height), ImGuiCond_Always,
-                ImVec2(1.0f, 1.0f));
+            point toast_pos = mon_pos + mon_size - sz{window_padding, window_padding + height};
+            // ImGui::SetNextWindowPos(toast_pos, ImGuiCond_Always,ImVec2(1.0f, 1.0f));
 
-            guard gw{toast.w};
+            // w.no_title_bar().no_collapse().no_scroll().auto_resize().front();
+            wnd ww{toast.w_title,{
+                .opacity = toast.get_fade_alpha(),
+                .show_title_bar = false,
+                .always_on_top = true,
+                .pos = toast_pos,
+                .pos_pivot = point_pivot::bottom_right,
+                .pos_cond = pos_condition::always}};
 
             bool has_title{false};
 

@@ -69,6 +69,21 @@ namespace grey::widgets {
         ~clip_rect();
     };
 
+    /**
+     * window v2 - an attempt to make it completely stateless
+     */
+    class wnd {
+    public:
+        explicit wnd(const std::string& title, const wnd_opts& s = {});
+        ~wnd();
+
+        operator bool() const { return needs_content; }
+    private:
+        bool needs_content;
+
+        common::ui_window nw();
+    };
+
     class window : public guardable {
     public:
         window(std::string title, bool* p_open = nullptr);

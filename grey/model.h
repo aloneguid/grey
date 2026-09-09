@@ -62,6 +62,18 @@ namespace grey {
         bold = 2
     };
 
+    enum class point_pivot {
+        top_left,
+        top_center,
+        top_right,
+        center_left,
+        center,
+        center_right,
+        bottom_left,
+        bottom_center,
+        bottom_right,
+    };
+
     /**
      * @brief Trivial point struct for storing 2D coordinates
      */
@@ -78,7 +90,24 @@ namespace grey {
         point(const ImVec2& pos) : x{pos.x}, y{pos.y} {
         }
 
+        point(point_pivot pivot) {
+            switch (pivot) {
+                case point_pivot::top_left:      x = 0.0f; y = 0.0f; break;
+                case point_pivot::top_center:    x = 0.5f; y = 0.0f; break;
+                case point_pivot::top_right:     x = 1.0f; y = 0.0f; break;
+                case point_pivot::center_left:   x = 0.0f; y = 0.5f; break;
+                case point_pivot::center:        x = 0.5f; y = 0.5f; break;
+                case point_pivot::center_right:  x = 1.0f; y = 0.5f; break;
+                case point_pivot::bottom_left:   x = 0.0f; y = 1.0f; break;
+                case point_pivot::bottom_center: x = 0.5f; y = 1.0f; break;
+                case point_pivot::bottom_right:  x = 1.0f; y = 1.0f; break;
+                default:                         x = 0.0f; y = 0.0f; break;
+            }
+        }
+
         point operator+(const sz& dimensions) const;
+
+        point operator-(const sz& dimensions) const;
 
         point operator+(float offset_both) const;
 
@@ -110,6 +139,10 @@ namespace grey {
 
     inline point point::operator+(const sz& dimensions) const {
         return point{x + dimensions.width, y + dimensions.height};
+    }
+
+    inline point point::operator-(const sz& dimensions) const {
+        return point{x - dimensions.width, y - dimensions.height};
     }
 
     inline point point::operator+(const float offset_both) const {
@@ -237,6 +270,22 @@ namespace grey {
         float font_size{.0f};
 
         font_weight font_w{font_weight::regular};
+    };
+
+    enum class pos_condition {
+        never,
+        once,
+        always
+    };
+
+    struct wnd_opts {
+        float opacity{1.0f};
+        bool show_title_bar{true};
+        bool always_on_top{false};
+        point pos{-1, -1};
+        point_pivot pos_pivot{point_pivot::top_left};
+        pos_condition pos_cond{pos_condition::never};
+        sz size{-1, -1};
     };
 
     struct font_config {
