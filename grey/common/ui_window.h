@@ -16,7 +16,7 @@ namespace grey::common {
     public:
 #if PLATFORM_WINDOWS
         ui_window(HWND hwnd) : h{ hwnd } { }
-        ui_window(void* hwnd) h{(HWND)hwnd} {}
+        ui_window(void* hwnd) : h{(HWND)hwnd} {}
 #else
         ui_window(GLFWwindow* glw) : h{glw} {}
         ui_window(void* glw) : h{(GLFWwindow*)glw} {}

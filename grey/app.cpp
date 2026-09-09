@@ -3,6 +3,7 @@
 #include "themes.h"
 #include "widgets.h"
 #include "common/os.h"
+#include <thread>
 
 #if PLATFORM_WINDOWS
 #include "backends/win32_dx11_app.hpp"
