@@ -7,7 +7,6 @@ namespace w = grey::widgets;
 
 bool app_open{true};
 string window_title = "Demo app";
-w::window wnd{window_title, &app_open};
 
 #if WIN32
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
@@ -15,20 +14,12 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 int main(int argc, char* argv[]) {
 #endif
 
-    wnd
-        .no_resize()
-        .no_title_bar()
-        .fill_viewport()
-        .border(0)
-        .no_background();
-
-
-    auto app = grey::app::make("transparent", 800, 600);
-    float scale = app->scale;
+    auto app = grey::app::make("transparent", {800, 600});
+    float scale = w::scale;
     app->use_transparency_colour_key_value = true;
+    app->main_window().no_background();
 
-    app->run([&app](const grey::app& c_app) {
-        w::guard wg{wnd};
+    app->run([&app]() {
 
         w::button("hopefully transparent");
 

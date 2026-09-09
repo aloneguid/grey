@@ -20,9 +20,9 @@ namespace grey {
         auto app = make_unique<backends::win32_dx11_app>(title, size);
 #elif PLATFORM_LINUX
         auto app = make_unique<backends::glfw_gl3_app>(title, size);
-#elif defined(__APPLE__)
+#elif PLATFORM_MACOS
         //auto app = make_unique<grey::backends::glfw_metal_app>(title, width, height);
-        auto app = make_unique<grey::backends::glfw_gl3_app>(title, width, height);
+        auto app = make_unique<backends::glfw_gl3_app>(title, size);
 #endif
 
         return app;
