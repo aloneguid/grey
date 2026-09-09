@@ -263,7 +263,6 @@ namespace grey::widgets {
         ImGui::Begin(title.c_str(), p_open, flags);
         wdl = ImGui::GetWindowDrawList();
 
-#if PLATFORM_LINUX
         /*if (window && window->Viewport) {
             HWND hwnd = (HWND)window->Viewport->PlatformHandle;
             SetForegroundWindow(hwnd);
@@ -276,14 +275,10 @@ namespace grey::widgets {
             }
         }
 
-#endif
-
     }
 
     void window::leave() {
-
-        auto native_window = nw();
-        if(native_window) {
+        if(auto native_window = nw()) {
             if(opacity != last_opacity) {
                 native_window.opacity(opacity);
                 last_opacity = opacity;
