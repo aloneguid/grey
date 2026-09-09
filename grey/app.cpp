@@ -7,8 +7,10 @@
 
 #if PLATFORM_WINDOWS
 #include "backends/win32_dx11_app.hpp"
-#else
+#elif PLATFORM_LINUX
 #include "backends/glfw_opengl3_app.hpp"
+#elif PLATFORM_MACOS
+#include "backends/glfw_metal_app.hpp"
 #endif
 
 using namespace std;
@@ -21,8 +23,7 @@ namespace grey {
 #elif PLATFORM_LINUX
         auto app = make_unique<backends::glfw_gl3_app>(title, size);
 #elif PLATFORM_MACOS
-        //auto app = make_unique<grey::backends::glfw_metal_app>(title, width, height);
-        auto app = make_unique<backends::glfw_gl3_app>(title, size);
+        auto app = make_unique<backends::glfw_metal_app>(title, size);
 #endif
 
         return app;

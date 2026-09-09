@@ -9,6 +9,10 @@ endif()
 
 project ("GreyFramework" VERSION ${GLOBAL_VERSION})
 
+if(APPLE)
+    enable_language(OBJCXX)
+endif()
+
 add_compile_definitions(UNICODE) # required for WIN32 API to use correct versions
 if(WIN32)
     add_compile_definitions(NOMINMAX)   # Windows SDK overrides those
