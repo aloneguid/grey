@@ -3,7 +3,7 @@
 
 #if PLATFORM_WINDOWS
 #include <windows.h>
-#elif PLATFORM_LINUX
+#else
 #include <GLFW/glfw3.h>
 #endif
 
