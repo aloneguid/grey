@@ -29,3 +29,14 @@ target_link_libraries(demo libgrey)
 target_include_directories(demo PRIVATE "../../grey")
 
 target_sources(demo PRIVATE dpi-aware.manifest)
+
+if(APPLE)
+    foreach(target demo tdemo)
+        set_target_properties(${target} PROPERTIES
+            MACOSX_BUNDLE TRUE
+            MACOSX_BUNDLE_ICON_FILE icon.icns)
+        set_source_files_properties(icon.icns PROPERTIES
+            MACOSX_PACKAGE_LOCATION Resources)
+        target_sources(${target} PRIVATE icon.icns)
+    endforeach()
+endif()

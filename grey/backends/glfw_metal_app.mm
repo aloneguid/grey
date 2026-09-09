@@ -57,6 +57,8 @@ namespace grey::backends {
             if(!create_window())
                 return;
 
+            set_application_icon();
+
             device = MTLCreateSystemDefaultDevice();
             if(!device) {
                 glfwDestroyWindow(window);
@@ -207,6 +209,19 @@ namespace grey::backends {
             int width, height;
             glfwGetFramebufferSize(window, &width, &height);
             metal_layer.drawableSize = CGSizeMake(width, height);
+        }
+
+        void set_application_icon() {
+            NSString* icon_path = [[NSBundle mainBundle] pathForResource:@"icon" ofType:@"icns"];
+            if(!icon_path)
+                return;
+
+            NSImage* icon = [[NSImage alloc] initWithContentsOfFile:icon_path];
+            if(!icon)
+                return;
+
+            [NSApp setApplicationIconImage:icon];
+            [icon release];
         }
 
         id<MTLDevice> device{nil};
