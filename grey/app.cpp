@@ -7,7 +7,7 @@
 #if PLATFORM_WINDOWS
 #include "backends/win32_dx11_app.hpp"
 #else
-#include "backends/glfwgl3app.hpp"
+#include "backends/glfw_opengl3_app.hpp"
 #endif
 
 using namespace std;
@@ -16,9 +16,9 @@ namespace grey {
     std::unique_ptr<app> app::make(const string& title, sz size) {
 
 #if PLATFORM_WINDOWS
-        auto app = make_unique<grey::backends::win32_dx11_app>(title, size);
-#elif defined(__linux__)
-        auto app = make_unique<grey::backends::glfw_gl3_app>(title, width, height);
+        auto app = make_unique<backends::win32_dx11_app>(title, size);
+#elif PLATFORM_LINUX
+        auto app = make_unique<backends::glfw_gl3_app>(title, size);
 #elif defined(__APPLE__)
         //auto app = make_unique<grey::backends::glfw_metal_app>(title, width, height);
         auto app = make_unique<grey::backends::glfw_gl3_app>(title, width, height);
@@ -27,8 +27,7 @@ namespace grey {
         return app;
     }
 
-    app::app(const string& title) : wnd_main{title, &wnd_main_is_open}, max_frame_interval_ms{0.0f} {
-        set_target_fps(40);
+    app::app(const string& title) : wnd_main{title, &wnd_main_is_open} {
 
         // main window fills entire viewport, therefore remove any decorations
         wnd_main
@@ -52,6 +51,25 @@ namespace grey {
             on_initialised();
     }
 
+    void app::fps_pause() const {
+        if(fps < 0.0f) return;
+
+        // can't use ImGui::GetIO().DeltaTime for this, because it would include the pause we added on
+
+        static auto last_frame_time = std::chrono::steady_clock::now();
+        const auto now = std::chrono::steady_clock::now();
+        const std::chrono::duration<float> elapsed = now - last_frame_time;
+
+        const float target_frame_delta_sec = 1.0f / fps; // do not cache, fps can change
+        const float sleep_time_sec = target_frame_delta_sec - elapsed.count();
+
+        if (sleep_time_sec > 0.0f) {
+            std::this_thread::sleep_for(std::chrono::duration<float>(sleep_time_sec));
+        }
+
+        last_frame_time = std::chrono::steady_clock::now();
+    }
+
     bool app::render_main_window(const std::function<bool()>& render_frame) {
         widgets::guard g{wnd_main};
 
@@ -64,10 +82,6 @@ namespace grey {
         auto theme = themes::get_theme(theme_id);
         themes::set_theme(theme_id, widgets::scale);
         set_dark_mode(theme.is_dark);
-    }
-
-    void app::set_target_fps(int fps) {
-        max_frame_interval_ms = 1000.0f / fps;
     }
 
     std::array<float, 4> app::get_clear_color() const {

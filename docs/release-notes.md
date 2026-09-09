@@ -1,3 +1,5 @@
 ## 0.0.0
 
-First release of the .NET nuget package.
+Notable changes done in pre-releases:
+
+- 

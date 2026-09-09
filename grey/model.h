@@ -82,6 +82,8 @@ namespace grey {
 
         point operator+(float offset_both) const;
 
+        point operator*(const float mult) const { return point{x * mult, y * mult}; }
+
         operator ImVec2() const { return ImVec2{x, y}; }
     };
 
@@ -102,6 +104,8 @@ namespace grey {
         }
 
         operator ImVec2() const { return ImVec2{width, height}; }
+
+        sz operator*(const float mult) const { return sz{width * mult, height * mult}; }
     };
 
     inline point point::operator+(const sz& dimensions) const {

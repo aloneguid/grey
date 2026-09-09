@@ -94,10 +94,9 @@ namespace grey {
         virtual void foreground() = 0;
 
         /**
-         * @brief Limits maximum FPS for the application. This is useful when you want to limit the CPU usage of the application.
-         * @param fps 
+         * Target rendering FPS. Set to -1 to disable FPS control (default). Fractional FPS values are supported and useful for application idling.
          */
-        void set_target_fps(int fps);
+        float fps{-1};
 
         /**
          * @brief Returns the clear color of the application as the RGBA array of floats (0-1).
@@ -189,7 +188,10 @@ namespace grey {
          */
         virtual void set_dark_mode(bool enabled) = 0;
 
-        float max_frame_interval_ms;
+        /**
+         * Called by backend on each frame to pause the application if FPS control is enabled.
+         */
+        void fps_pause() const;
 
         // pre-initialised main window
         widgets::window wnd_main;

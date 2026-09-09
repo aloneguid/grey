@@ -7,6 +7,7 @@
 #include <functional>
 #include "magic_enum/magic_enum.hpp"
 #include "common/platform.h"
+#include "common/ui_window.h"
 
 // 3rdparty
 #include "3rdparty/ImGuiColorTextEdit/TextEditor.h"
@@ -102,6 +103,7 @@ namespace grey::widgets {
         window& no_scroll();
         window& center(void* monitor_handle = nullptr);
         window& fill_viewport();
+        window& front();
 
         [[nodiscard]] bool own_viewport() const;
 
@@ -114,6 +116,7 @@ namespace grey::widgets {
         float last_opacity{1.0f};
         sz init_size{0, 0};
         sz resize_to{0, 0};
+        common::ui_window nw();
 
         // centering
         bool init_center{false};    // whether to center window
@@ -127,6 +130,8 @@ namespace grey::widgets {
         ImGuiWindowClass wc;
         float border_size{-1};
         bool fill_viewport_enabled{false};
+        bool display_front{false};
+        bool display_front_set{false};
 
 #ifdef PLATFORM_WINDOWS
         bool win32_brought_forward{false};

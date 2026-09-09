@@ -581,6 +581,20 @@ Also, [GitHub alerts](https://docs.github.com/en/get-started/writing-on-github/g
                     gr.render();
                 }
             }
+
+            // system
+            {
+                if(auto tab = tabs.next_tab("System")) {
+                    bool fps_control = app->fps != -1;
+                    if(w::checkbox("FPS control", fps_control)) {
+                        app->fps = fps_control ? 10.0f : -1;
+                    }
+                    if(fps_control) {
+                        w::slider(app->fps, 0.0f, 500.0f, "FPS");
+                    }
+                }
+            }
+
         }
 
 

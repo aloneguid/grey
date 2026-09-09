@@ -10,6 +10,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "../common/ui_window.h"
 #include <algorithm>
 #include <chrono>
 #include <thread>
@@ -34,6 +35,7 @@
 
 namespace grey::backends {
     using namespace std;
+    namespace w = widgets;
 
     struct gl_texture : texture {
         GLuint texture_id;
@@ -103,30 +105,25 @@ namespace grey::backends {
     /**
      * @brief https://github.com/ocornut/imgui/blob/docking/examples/example_glfw_opengl3/main.cpp
      */
-    class glfw_gl3_app : public grey::app {
+    class glfw_gl3_app : public app {
 
     public:
-        glfw_gl3_app(const std::string& title, int width, int height)
-            : title{title}, window_width{width}, window_height{height} {
-            last_frame_time = std::chrono::high_resolution_clock::now();
+        glfw_gl3_app(const std::string& title, sz size)
+            : app{title}, title{title}, window_logical_size{size} {
             gl_init();
 
-            this->scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
-            grey::widgets::scale = this->scale;
-
-            if (window_width != -1 && window_height != -1) {
-                window_width = static_cast<int>(window_width * scale);
-                window_height = static_cast<int>(window_height * scale);
-            }
+            widgets::scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
         }
 
-        void get_screen_center(int width, int height, int &x, int &y) {
+        static point get_screen_center(const sz& physical_size) {
             GLFWmonitor* monitor = glfwGetPrimaryMonitor();
             const GLFWvidmode* mode = glfwGetVideoMode(monitor);
             int mx, my;
             glfwGetMonitorPos(monitor, &mx, &my);
-            x = mx + (mode->width - width) / 2;
-            y = my + (mode->height - height) / 2;
+            return point{
+                (mode->width - physical_size.width) / 2 + mx,
+                (mode->height - physical_size.height) / 2 + my
+            };
         }
 
         void apply_transparency() {
@@ -134,12 +131,12 @@ namespace grey::backends {
             int alpha = transparency_window_alpha;
             if(alpha != last_transparency_window_alpha) {
                 last_transparency_window_alpha = alpha;
-                float normalized_alpha = std::clamp(alpha / 255.0f, 0.0f, 1.0f);
-                glfwSetWindowOpacity(window, normalized_alpha);
+                const common::ui_window w{window};
+                w.opacity(static_cast<float>(alpha) / 255.0f);
             }
         }
 
-        void run(std::function<bool(app& app)> render_frame) {
+        void run(std::function<bool()> render_frame) override {
             // Create window with graphics context
             glfwWindowHint(GLFW_DECORATED, show_title_bar ? GLFW_TRUE : GLFW_FALSE);
             glfwWindowHint(GLFW_FLOATING, always_on_top ? GLFW_TRUE : GLFW_FALSE);
@@ -147,16 +144,19 @@ namespace grey::backends {
                 glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
             }
 
+            sz physical_size = window_logical_size * w::scale;
+
             if (center_on_screen) {
-                get_screen_center(window_width, window_height, window_left, window_top);
+                window_pos = get_screen_center(physical_size);
             }
 
-            window = glfwCreateWindow(window_width, window_height, title.c_str(), nullptr, nullptr);
+            window = glfwCreateWindow(physical_size.width, physical_size.height, title.c_str(), nullptr, nullptr);
+
             if(window == nullptr)
                 return;
 
             if (center_on_screen) {
-                glfwSetWindowPos(window, window_left, window_top);
+                glfwSetWindowPos(window, window_pos.x, window_pos.y);
             }
 
             apply_transparency();
@@ -182,8 +182,8 @@ namespace grey::backends {
 
             // Setup scaling
             ImGuiStyle& style = ImGui::GetStyle();
-            style.ScaleAllSizes(scale);
-            style.FontScaleDpi = scale;
+            style.ScaleAllSizes(w::scale);
+            style.FontScaleDpi = w::scale;
 #if GLFW_VERSION_MAJOR >= 3 && GLFW_VERSION_MINOR >= 3
             io.ConfigDpiScaleFonts = true;
             io.ConfigDpiScaleViewports = true;
@@ -259,8 +259,7 @@ namespace grey::backends {
                 ImGui_ImplGlfw_NewFrame();
                 ImGui::NewFrame();
 
-                bool has_more = render_frame(*this);
-                if(!has_more)
+                if(!render_main_window(render_frame))
                     done = true;
 
                 // Rendering
@@ -286,18 +285,9 @@ namespace grey::backends {
                     glfwMakeContextCurrent(backup_current_context);
                 }
 
-                // Manual FPS control
-                // see how much time has passed since last render
-                auto b_now = std::chrono::high_resolution_clock::now();
-                auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(b_now - last_frame_time).count();
-                if(duration_ms < max_frame_interval_ms) {
-                    float sleep_time = max_frame_interval_ms - duration_ms;
-                    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(sleep_time)));
-                }
+                fps_pause();
 
                 glfwSwapBuffers(window);
-
-                last_frame_time = b_now;
             }
 #ifdef __EMSCRIPTEN__
             EMSCRIPTEN_MAINLOOP_END;
@@ -312,27 +302,27 @@ namespace grey::backends {
             glfwTerminate();
         }
 
-        void resize_main_viewport(int width, int height) override {
-            window_width = static_cast<int>(width * scale);
-            window_height = static_cast<int>(height * scale);
+        void resize(const sz size) override {
+            window_logical_size = size;
             if(window) {
+                sz physical_size = size * w::scale;
                 if (center_on_screen) {
-                    get_screen_center(window_width, window_height, window_left, window_top);
-                    glfwSetWindowPos(window, window_left, window_top);
+                    window_pos = get_screen_center(physical_size);
+                    glfwSetWindowPos(window, window_pos.x, window_pos.y);
                 }
-                glfwSetWindowSize(window, window_width, window_height);
+                glfwSetWindowSize(window, physical_size.width, physical_size.height);
             }
         }
 
-        void move_main_viewport(int x, int y) override {
-            window_left = static_cast<int>(x * scale);
-            window_top = static_cast<int>(y * scale);
+        void move(point pos) override {
+            window_pos = pos;
             if(window) {
-                glfwSetWindowPos(window, window_left, window_top);
+                point physical_pos = pos * w::scale;
+                glfwSetWindowPos(window, physical_pos.x, physical_pos.y);
             }
         }
 
-        void foreground_main_viewport() override {
+        void foreground() override {
             if(window) {
                 glfwFocusWindow(window);
             }
@@ -361,12 +351,9 @@ namespace grey::backends {
     private:
         GLFWwindow* window{nullptr};
         string title;
-        int window_left{-1};
-        int window_top{-1};
-        int window_width{-1};
-        int window_height{-1};
+        point window_pos{-1, -1};
+        sz window_logical_size;
         int last_transparency_window_alpha{255};
-        std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_time;
     };
 }
 

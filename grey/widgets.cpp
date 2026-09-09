@@ -13,6 +13,8 @@
 #if PLATFORM_WINDOWS
 #include <Windows.h>
 #include "common/win32/window.h"
+#elif PLATFORM_LINUX
+#include <GLFW/glfw3.h>
 #endif
 
 using namespace std;
@@ -22,6 +24,10 @@ namespace grey::widgets {
     // ---- general ----
 
     float scale = 1.0f;
+
+    static float scaled(const float num) { return num * scale; }
+
+    static int iscaled(const float num) { return static_cast<int>(num * scale); }
 
     static int incrementing_id;
 
@@ -192,6 +198,11 @@ namespace grey::widgets {
         return *this;
     }
 
+    window& window::front() {
+        display_front = true;
+        return *this;
+    }
+
     bool window::own_viewport() const {
         return initialized() && ImGui::GetMainViewport() != ImGui::GetWindowViewport();
     }
@@ -251,9 +262,35 @@ namespace grey::widgets {
 
         ImGui::Begin(title.c_str(), p_open, flags);
         wdl = ImGui::GetWindowDrawList();
+
+#if PLATFORM_LINUX
+        /*if (window && window->Viewport) {
+            HWND hwnd = (HWND)window->Viewport->PlatformHandle;
+            SetForegroundWindow(hwnd);
+            // or BringWindowToTop(hwnd) if you don't want to steal input focus, just z-order
+        }*/
+
+        if(display_front && !display_front_set) {
+            if(auto w = nw()) {
+                w.always_on_op();
+            }
+        }
+
+#endif
+
     }
 
     void window::leave() {
+
+        auto native_window = nw();
+        if(native_window) {
+            if(opacity != last_opacity) {
+                native_window.opacity(opacity);
+                last_opacity = opacity;
+            }
+        }
+
+
 #if PLATFORM_WINDOWS
         const ImGuiViewport* vp = ImGui::GetWindowViewport();
         if(vp && vp->PlatformWindowCreated && vp->PlatformHandleRaw) {
@@ -263,11 +300,6 @@ namespace grey::widgets {
             if(win32_x_style_applied_to_handle != vp->PlatformHandleRaw) {
                 wnd.set_rounded_corners(false);
                 win32_x_style_applied_to_handle = vp->PlatformHandleRaw;
-            }
-
-            if(opacity != last_opacity) {
-                wnd.set_opacity(opacity);
-                last_opacity = opacity;
             }
 
             if(!win32_brought_forward) {
@@ -306,6 +338,11 @@ namespace grey::widgets {
     }
 
     window::~window() {
+    }
+
+    common::ui_window window::nw() {
+        const ImGuiViewport* vp = ImGui::GetWindowViewport();
+        return common::ui_window{vp->PlatformHandle};
     }
 
     // ---- container ----

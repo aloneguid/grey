@@ -69,7 +69,9 @@ endif()
 set(interface_libs imgui::imgui)
 
 add_library(${DYNAMIC_NAME} SHARED ${core_src} "x.cpp")
-add_library(${STATIC_NAME} STATIC ${core_src})
+add_library(${STATIC_NAME} STATIC ${core_src}
+        common/ui_window.cpp
+        common/ui_window.h)
 
 #set_property(TARGET grey PROPERTY
 #  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
