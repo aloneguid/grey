@@ -38,10 +38,8 @@ namespace grey::backends {
         }
     };
 
-    static bool glfw_macos_monitor_available{false};
-
     static void glfw_metal_error_callback(int error, const char* description) {
-        if(error == GLFW_PLATFORM_ERROR && !glfw_macos_monitor_available && description &&
+        if(error == GLFW_PLATFORM_ERROR && description &&
             std::strcmp(description, "Cocoa: Cannot query workarea without screen") == 0)
             return;
 
@@ -59,24 +57,7 @@ namespace grey::backends {
             glfw_ready = true;
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
             GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-            NSArray* screens = [NSScreen screens];
-            int monitor_count = 0;
-            GLFWmonitor** monitors = glfwGetMonitors(&monitor_count);
-            monitor_available = monitor && monitors && monitor_count > 0 && screens.count > 0;
-            for(int i = 0; monitor_available && i < monitor_count; ++i) {
-                const CGDirectDisplayID display_id = glfwGetCocoaMonitor(monitors[i]);
-                bool screen_found = false;
-                for(NSScreen* screen in screens) {
-                    NSNumber* screen_number = [screen.deviceDescription objectForKey:@"NSScreenNumber"];
-                    if(screen_number && screen_number.unsignedIntValue == display_id) {
-                        screen_found = true;
-                        break;
-                    }
-                }
-                monitor_available = screen_found;
-            }
-            widgets::scale = monitor_available ? ImGui_ImplGlfw_GetContentScaleForMonitor(monitor) : 1.0f;
-            glfw_macos_monitor_available = monitor_available;
+            widgets::scale = ImGui_ImplGlfw_GetContentScaleForMonitor(monitor);
         }
 
         ~glfw_metal_app() override = default;
@@ -117,7 +98,6 @@ namespace grey::backends {
 
             glfwWindowHint(GLFW_DECORATED, show_title_bar ? GLFW_TRUE : GLFW_FALSE);
             glfwWindowHint(GLFW_FLOATING, always_on_top ? GLFW_TRUE : GLFW_FALSE);
-            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
             if(use_transparency_colour_key_value)
                 glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
 
@@ -158,8 +138,6 @@ namespace grey::backends {
             }
 
             NSWindow* native_window = glfwGetCocoaWindow(window);
-            monitor_available = monitor_available && native_window.screen != nil;
-            glfw_macos_monitor_available = monitor_available;
             NSView* content_view = native_window.contentView;
             [content_view setWantsLayer:YES];
             content_view.autoresizingMask |= NSViewWidthSizable | NSViewHeightSizable;
@@ -170,18 +148,17 @@ namespace grey::backends {
             metal_layer.displaySyncEnabled = YES;
             content_view.layer = metal_layer;
             update_drawable_size();
+            MTLRenderPassDescriptor* pass = [MTLRenderPassDescriptor renderPassDescriptor];
 
             IMGUI_CHECKVERSION();
             ImGui::CreateContext();
             ImGuiIO& io = ImGui::GetIO();
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-            if(monitor_available) {
-                io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-                io.ConfigViewportsNoAutoMerge = true;
-                io.ConfigViewportsNoTaskBarIcon = true;
-                io.ConfigViewportsNoDefaultParent = false;
-            }
+            io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+            io.ConfigViewportsNoAutoMerge = true;
+            io.ConfigViewportsNoTaskBarIcon = true;
+            io.ConfigViewportsNoDefaultParent = false;
 
             ImGui::StyleColorsDark();
             ImGuiStyle& style = ImGui::GetStyle();
@@ -215,7 +192,6 @@ namespace grey::backends {
                 if(!drawable)
                     continue;
 
-                MTLRenderPassDescriptor* pass = [MTLRenderPassDescriptor renderPassDescriptor];
                 const auto clear_color = get_clear_color();
                 MTLRenderPassColorAttachmentDescriptor* color = pass.colorAttachments[0];
                 color.texture = drawable.texture;
@@ -224,24 +200,24 @@ namespace grey::backends {
                 color.clearColor = MTLClearColorMake(
                     clear_color[0], clear_color[1], clear_color[2], clear_color[3]);
 
-                ImGui_ImplGlfw_NewFrame();
+                id<MTLCommandBuffer> command_buffer = [command_queue commandBuffer];
+                id<MTLRenderCommandEncoder> command_encoder = [command_buffer
+                    renderCommandEncoderWithDescriptor:pass];
                 ImGui_ImplMetal_NewFrame(pass);
+                ImGui_ImplGlfw_NewFrame();
                 ImGui::NewFrame();
                 if(!render_main_window(render_frame))
                     done = true;
 
                 ImGui::Render();
-                id<MTLCommandBuffer> command_buffer = [command_queue commandBuffer];
-                id<MTLRenderCommandEncoder> command_encoder = [command_buffer
-                    renderCommandEncoderWithDescriptor:pass];
                 ImGui_ImplMetal_RenderDrawData(ImGui::GetDrawData(), command_buffer, command_encoder);
-                [command_encoder endEncoding];
 
-                if(monitor_available && (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)) {
+                if(io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
                     ImGui::UpdatePlatformWindows();
                     ImGui::RenderPlatformWindowsDefault();
                 }
 
+                [command_encoder endEncoding];
                 [command_buffer presentDrawable:drawable];
                 [command_buffer commit];
 
@@ -319,7 +295,6 @@ namespace grey::backends {
 
         GLFWwindow* window{nullptr};
         bool glfw_ready{false};
-        bool monitor_available{false};
         std::string title;
         point window_pos{-1, -1};
         sz window_logical_size;
