@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../app.h"
+#include "glfw_app.hpp"
 
 #if PLATFORM_MACOS
 
@@ -9,21 +9,16 @@
 #include <GLFW/glfw3native.h>
 
 #include "imgui.h"
-#include "imgui_impl_glfw.h"
 #include "imgui_impl_metal.h"
-#include "../common/ui_window.h"
 
 #include <Cocoa/Cocoa.h>
 #include <Metal/Metal.h>
 #include <QuartzCore/CAMetalLayer.h>
 
-#include <algorithm>
 #include <cstdio>
 #include <cstring>
 
 namespace grey::backends {
-    namespace w = widgets;
-
     struct metal_texture final : texture {
         id<MTLTexture> texture_id;
 
@@ -46,83 +41,27 @@ namespace grey::backends {
         std::fprintf(stderr, "GLFW Error %d: %s\n", error, description);
     }
 
-    class glfw_metal_app final : public app {
+    class glfw_metal_app final : public glfw_app {
     public:
         glfw_metal_app(const std::string& title, sz size)
-            : app{title}, title{title}, window_logical_size{size} {
-            ::glfwSetErrorCallback(glfw_metal_error_callback);
-            if(!glfwInit())
+            : glfw_app{title, size, glfw_metal_error_callback} {
+            if(!glfw_ready)
                 return;
 
-            glfw_ready = true;
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-            GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-            widgets::scale = ImGui_ImplGlfw_GetContentScaleForMonitor(monitor);
         }
 
         ~glfw_metal_app() override = default;
 
-        static point get_screen_center(const sz& physical_size) {
-            GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-            if(!monitor)
-                return {};
-
-            const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-            if(!mode)
-                return {};
-
-            int mx, my;
-            glfwGetMonitorPos(monitor, &mx, &my);
-            return point{
-                (mode->width - physical_size.width) / 2 + mx,
-                (mode->height - physical_size.height) / 2 + my
-            };
-        }
-
-        void apply_transparency() {
-            if(!window)
-                return;
-
-            const int alpha = std::clamp(transparency_window_alpha, 0, 255);
-            if(alpha == last_transparency_window_alpha)
-                return;
-
-            last_transparency_window_alpha = alpha;
-            const common::ui_window w{window};
-            w.opacity(static_cast<float>(alpha) / 255.0f);
-        }
-
         void run(std::function<bool()> render_frame) override {
-            if(!glfw_ready)
+            if(!create_window())
                 return;
-
-            glfwWindowHint(GLFW_DECORATED, show_title_bar ? GLFW_TRUE : GLFW_FALSE);
-            glfwWindowHint(GLFW_FLOATING, always_on_top ? GLFW_TRUE : GLFW_FALSE);
-            if(use_transparency_colour_key_value)
-                glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
-
-            const sz physical_size = window_logical_size * w::scale;
-            if(center_on_screen)
-                window_pos = get_screen_center(physical_size);
-
-            window = glfwCreateWindow(
-                static_cast<int>(physical_size.width),
-                static_cast<int>(physical_size.height),
-                title.c_str(), nullptr, nullptr);
-            if(!window)
-                return;
-
-            if(center_on_screen)
-                glfwSetWindowPos(window, static_cast<int>(window_pos.x), static_cast<int>(window_pos.y));
-
-            apply_transparency();
 
             device = MTLCreateSystemDefaultDevice();
             if(!device) {
                 glfwDestroyWindow(window);
                 window = nullptr;
-                glfwTerminate();
-                glfw_ready = false;
+                terminate_glfw();
                 return;
             }
 
@@ -132,8 +71,7 @@ namespace grey::backends {
                 device = nil;
                 glfwDestroyWindow(window);
                 window = nullptr;
-                glfwTerminate();
-                glfw_ready = false;
+                terminate_glfw();
                 return;
             }
 
@@ -234,33 +172,12 @@ namespace grey::backends {
             device = nil;
             glfwDestroyWindow(window);
             window = nullptr;
-            glfwTerminate();
-            glfw_ready = false;
+            terminate_glfw();
         }
 
         void resize(const sz size) override {
-            window_logical_size = size;
-            if(!window)
-                return;
-
-            const sz physical_size = size * w::scale;
-            if(center_on_screen) {
-                window_pos = get_screen_center(physical_size);
-                glfwSetWindowPos(window, static_cast<int>(window_pos.x), static_cast<int>(window_pos.y));
-            }
-            glfwSetWindowSize(window, static_cast<int>(physical_size.width), static_cast<int>(physical_size.height));
+            glfw_app::resize(size);
             update_drawable_size();
-        }
-
-        void move(point pos) override {
-            window_pos = pos;
-            if(window)
-                glfwSetWindowPos(window, static_cast<int>(pos.x * w::scale), static_cast<int>(pos.y * w::scale));
-        }
-
-        void foreground() override {
-            if(window)
-                glfwFocusWindow(window);
         }
 
         std::shared_ptr<texture> make_native_texture(grey::common::raw_img& img) override {
@@ -283,7 +200,6 @@ namespace grey::backends {
         void set_dark_mode(bool) override {
         }
 
-    private:
         void update_drawable_size() {
             if(!window || !metal_layer)
                 return;
@@ -293,12 +209,6 @@ namespace grey::backends {
             metal_layer.drawableSize = CGSizeMake(width, height);
         }
 
-        GLFWwindow* window{nullptr};
-        bool glfw_ready{false};
-        std::string title;
-        point window_pos{-1, -1};
-        sz window_logical_size;
-        int last_transparency_window_alpha{255};
         id<MTLDevice> device{nil};
         id<MTLCommandQueue> command_queue{nil};
         CAMetalLayer* metal_layer{nil};

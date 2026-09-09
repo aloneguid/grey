@@ -3,14 +3,12 @@
 // OpenGL3 + GLFW backend, which is cross-platform theoretically, but only used for Linux backend.
 // ported from: https://github.com/ocornut/imgui/blob/docking/examples/example_glfw_opengl3/main.cpp
 
-#include "../app.h"
+#include "glfw_app.hpp"
 
 #if PLATFORM_LINUX
 
 #include "imgui.h"
-#include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include "../common/ui_window.h"
 #include <algorithm>
 #include <chrono>
 #include <thread>
@@ -34,8 +32,6 @@
 #endif
 
 namespace grey::backends {
-    using namespace std;
-    namespace w = widgets;
 
     struct gl_texture : texture {
         GLuint texture_id;
@@ -53,16 +49,9 @@ namespace grey::backends {
     };
 
 
-    static void glfw_error_callback(int error, const char* description) {
-        fprintf(stderr, "GLFW Error %d: %s\n", error, description);
-    }
-
     static const char* g_glsl_version{nullptr};
 
-    static bool gl_init() {
-        ::glfwSetErrorCallback(glfw_error_callback);
-        if(!glfwInit())
-            return false;
+    static void gl_init() {
 
         // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -99,67 +88,22 @@ namespace grey::backends {
         //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
 
-        return true;
     }
 
     /**
      * @brief https://github.com/ocornut/imgui/blob/docking/examples/example_glfw_opengl3/main.cpp
      */
-    class glfw_gl3_app : public app {
+    class glfw_gl3_app final : public glfw_app {
 
     public:
         glfw_gl3_app(const std::string& title, sz size)
-            : app{title}, title{title}, window_logical_size{size} {
+            : glfw_app{title, size} {
             gl_init();
-
-            widgets::scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
-        }
-
-        static point get_screen_center(const sz& physical_size) {
-            GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-            const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-            int mx, my;
-            glfwGetMonitorPos(monitor, &mx, &my);
-            return point{
-                (mode->width - physical_size.width) / 2 + mx,
-                (mode->height - physical_size.height) / 2 + my
-            };
-        }
-
-        void apply_transparency() {
-            if(!window) return;
-            int alpha = transparency_window_alpha;
-            if(alpha != last_transparency_window_alpha) {
-                last_transparency_window_alpha = alpha;
-                const common::ui_window w{window};
-                w.opacity(static_cast<float>(alpha) / 255.0f);
-            }
         }
 
         void run(std::function<bool()> render_frame) override {
-            // Create window with graphics context
-            glfwWindowHint(GLFW_DECORATED, show_title_bar ? GLFW_TRUE : GLFW_FALSE);
-            glfwWindowHint(GLFW_FLOATING, always_on_top ? GLFW_TRUE : GLFW_FALSE);
-            if(use_transparency_colour_key_value) {
-                glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
-            }
-
-            sz physical_size = window_logical_size * w::scale;
-
-            if (center_on_screen) {
-                window_pos = get_screen_center(physical_size);
-            }
-
-            window = glfwCreateWindow(physical_size.width, physical_size.height, title.c_str(), nullptr, nullptr);
-
-            if(window == nullptr)
+            if(!create_window())
                 return;
-
-            if (center_on_screen) {
-                glfwSetWindowPos(window, window_pos.x, window_pos.y);
-            }
-
-            apply_transparency();
 
             glfwMakeContextCurrent(window);
             glfwSwapInterval(1); // Enable vsync
@@ -299,34 +243,10 @@ namespace grey::backends {
             ImGui::DestroyContext();
 
             glfwDestroyWindow(window);
-            glfwTerminate();
+            window = nullptr;
+            terminate_glfw();
         }
 
-        void resize(const sz size) override {
-            window_logical_size = size;
-            if(window) {
-                sz physical_size = size * w::scale;
-                if (center_on_screen) {
-                    window_pos = get_screen_center(physical_size);
-                    glfwSetWindowPos(window, window_pos.x, window_pos.y);
-                }
-                glfwSetWindowSize(window, physical_size.width, physical_size.height);
-            }
-        }
-
-        void move(point pos) override {
-            window_pos = pos;
-            if(window) {
-                point physical_pos = pos * w::scale;
-                glfwSetWindowPos(window, physical_pos.x, physical_pos.y);
-            }
-        }
-
-        void foreground() override {
-            if(window) {
-                glfwFocusWindow(window);
-            }
-        }
 
         std::shared_ptr<texture> make_native_texture(grey::common::raw_img& img) override {
             // Create a OpenGL texture identifier
@@ -348,12 +268,6 @@ namespace grey::backends {
         void set_dark_mode(bool enabled) override {
         }
 
-    private:
-        GLFWwindow* window{nullptr};
-        string title;
-        point window_pos{-1, -1};
-        sz window_logical_size;
-        int last_transparency_window_alpha{255};
     };
 }
 
