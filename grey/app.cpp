@@ -29,13 +29,8 @@ namespace grey {
         return app;
     }
 
-    app::app(const std::string& title) : wnd_main{title, &wnd_main_is_open} {
-
-        // main window fills entire viewport, therefore remove any decorations
-        wnd_main
-            .no_title_bar()
-            .border(0)
-            .fill_viewport();
+    app::app(const std::string& title) : title{title}  {
+        wnd_main_opts.open_ptr = &wnd_main_is_open;
     }
 
     void app::on_after_initialised() {
@@ -73,7 +68,7 @@ namespace grey {
     }
 
     bool app::render_main_window(const std::function<bool()>& render_frame) {
-        widgets::guard g{wnd_main};
+        widgets::wnd wnd_main{title, wnd_main_opts};
 
         if(wnd_main) {
             wnd_main_is_open = render_frame();

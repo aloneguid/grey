@@ -20,6 +20,8 @@ namespace grey::widgets {
 
     extern float scale;
 
+    [[nodiscard]] inline float scaled(const float value) { return value * scale; }
+
     /**
      * Generates a unique ID to be used in widgets etc.
      */
@@ -76,6 +78,13 @@ namespace grey::widgets {
     public:
         explicit wnd(const std::string& title, const wnd_opts& s = {});
         ~wnd();
+
+        /**
+         * Gets current window height
+         */
+        [[nodiscard]] float height() const;
+
+        [[nodiscard]] point pos() const;
 
         operator bool() const { return needs_content; }
     private:
@@ -398,16 +407,23 @@ namespace grey::widgets {
     };
 
     /**
-     * @brief Get cursor position
-     * @param x 
-     * @param y 
+     * @brief Get cursor position in logical coordinates.
      */
-    void cur_get(float& x, float& y);
     point cur_get();
-    void cur_set(float x, float y);
     void cur_set(const point& pos);
-    void cur_move(float x, float y);
-    void cur_move(ImVec2 shift);
+    void cur_move(const point& shift);
+
+    // monitor API
+
+    /**
+     * Gets number of monitors on this system.
+     */
+    int mon_count();
+
+    /**
+     * Get monitor working area by index. Size is scaled.
+     */
+    rect mon(int index);
 
     /**
      * @brief Get window position and dimensions in screen space;
@@ -435,9 +451,7 @@ namespace grey::widgets {
 
     void draw_circle(const point& center, float radius, rgb_colour colour, bool filled = false, float thickness = 1.0f, int num_segments = 0);
 
-    void dummy(float width, float height);
-
-    void dummy(ImVec2 size);
+    void dummy(sz size);
 
     /**
      * Draws a label with optional style

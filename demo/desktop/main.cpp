@@ -52,7 +52,6 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
         app->preload_texture("luna", luna_jpg, luna_jpg_len);
     };
 
-    app->main_window().has_menu_bar();
     app->fonts.load_all();
     app->center_on_screen = true;
 
@@ -118,14 +117,27 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                     }
 
                     if(w::accordion("Windows")) {
-                        static bool w1_render{false};
-                        static bool w1_title_bar{true};
-                        w::checkbox("window 1", w1_render);
-                        w::checkbox("title bar", w1_title_bar);;
+                        static bool title_bar{true};
+                        static bool is_open{false};
+                        static bool use_is_open{true};
+                        static float opacity{1.0f};
+                        static float border{.0f};
+                        static bool scrollable{true};
 
-                        if(w1_render) {
+                        w::checkbox("show window", is_open);
+                        w::checkbox("display close button", use_is_open);
+                        w::checkbox("title bar", title_bar);
+                        w::slider(opacity, 0.0f, 1.0f, "opacity", 0.1f);
+                        w::checkbox("scrollable", scrollable);
+                        w::slider(border, 0.0f, 10.0f, "border", 0.1f);
+
+                        if(is_open) {
                             if(w::wnd w1{"windows 1", {
-                                .show_title_bar = w1_title_bar}}) {
+                                .open_ptr = use_is_open ? &is_open : nullptr,
+                                .opacity = opacity,
+                                .show_title_bar = title_bar,
+                                .border = border,
+                                .scrollable = scrollable}}) {
                                 w::lbl("content of window 1");
                             }
                         }
@@ -597,13 +609,13 @@ Also, [GitHub alerts](https://docs.github.com/en/get-started/writing-on-github/g
 
             // system
             {
-                if(auto tab = tabs.next_tab("System")) {
+                if(auto tab = tabs.next_tab("sys")) {
                     bool fps_control = app->fps != -1;
                     if(w::checkbox("FPS control", fps_control)) {
                         app->fps = fps_control ? 10.0f : -1;
                     }
                     if(fps_control) {
-                        w::slider(app->fps, 0.0f, 500.0f, "FPS");
+                        w::slider(app->fps, 0.0f, 500.0f, "FPS", 0.1f);
                     }
                 }
             }

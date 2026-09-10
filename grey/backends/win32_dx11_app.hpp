@@ -395,14 +395,6 @@ namespace grey::backends {
             }
         }
 
-        void apply_window_corner_preference() {
-            if(!hWnd) return;
-            if(!show_title_bar) {
-                grey::common::win32::window wnd{hWnd};
-                wnd.set_rounded_corners();
-            }
-        }
-
         void run(std::function<bool()> render_frame) override {
             // Create application window
 
@@ -423,7 +415,7 @@ namespace grey::backends {
 
             DWORD dwStyle = WS_OVERLAPPEDWINDOW;
 
-            if(!show_title_bar) {
+            if(chrome != system_chrome::native) {
                 dwStyle = WS_POPUP;
             }
 
@@ -464,7 +456,7 @@ namespace grey::backends {
             ::SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
             // Hide from taskbar if requested
-            if(win32_hide_from_taskbar) {
+            if(hide_from_taskbar) {
                 LONG_PTR ex = ::GetWindowLongPtr(hWnd, GWL_EXSTYLE);
                 // Remove WS_EX_APPWINDOW if present, add WS_EX_TOOLWINDOW
                 ex &= ~WS_EX_APPWINDOW;
@@ -476,7 +468,10 @@ namespace grey::backends {
             }
 
             apply_transparency();
-            apply_window_corner_preference();
+            if(chrome == system_chrome::headerless) {
+                const common::ui_window wnd{hWnd};
+                wnd.apply_native_decorations();
+            }
 
             // Initialize Direct3D
             if(!CreateDeviceD3D(hWnd)) {
@@ -631,6 +626,8 @@ namespace grey::backends {
                     ::ShowWindow(hWnd, SW_SHOWNORMAL);
                     shown = true;
                 }
+
+                fps_pause();
             }
 
             // Cleanup

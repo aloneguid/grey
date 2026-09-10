@@ -32,6 +32,13 @@ namespace grey::common {
          */
         void always_on_op() const;
 
+        void apply_native_decorations() const;
+
+        /**
+         * Changes whether the window is excluded from screen capture (video recording / screen capturing software)
+         */
+        void allow_screen_capture(bool allow) const;
+
         operator bool() const { return h != nullptr; }
 
 

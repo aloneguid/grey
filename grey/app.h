@@ -28,7 +28,7 @@ namespace grey {
          */
         static std::unique_ptr<app> make(const std::string& title, sz size = sz{-1, -1});
 
-        widgets::window& main_window() { return wnd_main; }
+        wnd_opts& main_window_opts() { return wnd_main_opts; }
 
         /**
          * @brief When set, application will set this theme on startup.
@@ -121,9 +121,9 @@ namespace grey {
         bool center_on_screen{false};
 
         /**
-         * When set (default) will show native window manager's title bar, otherwise nothing.
+         * Specifies how to decorate the main window.
          */
-        bool show_title_bar{true};
+        system_chrome chrome{system_chrome::native};
 
         /**
          * When set, will keep the window always on top of other windows.
@@ -142,12 +142,14 @@ namespace grey {
          */
         int transparency_window_alpha{255};
 
+        /**
+         * Hide main window from Taskbar/Dock or whatever the platform calls it.
+         */
+        bool hide_from_taskbar{false};
+
         // platform-specific flags
 
 #if PLATFORM_WINDOWS
-
-        bool win32_hide_from_taskbar{false};
-
         /**
          * @brief sets WS_EX_NOACTIVATE on the window (if you need to create a tool window that does not take focus, useful for notification windows)
          */
@@ -194,7 +196,11 @@ namespace grey {
         void fps_pause() const;
 
         // pre-initialised main window
-        widgets::window wnd_main;
+        wnd_opts wnd_main_opts{
+            .fill_viewport = true,
+            .show_title_bar = false
+        };
+        std::string title;
         bool wnd_main_is_open{true};
         bool render_main_window(const std::function<bool()>& render_frame);
 

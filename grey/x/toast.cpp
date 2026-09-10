@@ -102,14 +102,9 @@ namespace grey::widgets::x {
         if(toasts.empty()) return;
 
         // draw toast on the monitor rather than relative to current window
-        const ImGuiPlatformIO& pio = ImGui::GetPlatformIO();
-        if(pio.Monitors.empty()) return;
-        const ImGuiPlatformMonitor& mon = pio.Monitors[0];
-        point mon_pos{mon.WorkPos.x, mon.WorkPos.y};
-        sz mon_size{mon.WorkSize.x, mon.WorkSize.y};
+        rect monitor = mon(0);
 
-        float window_padding = WindowPadding * scale;
-        float height = 0.f;
+        float height_shift = 0.f;
 
         // erase all notifications that are expired, because we need to delete the collection first
         std::erase_if(toasts, [](const toast& t) { return t.get_phase() == toast_phase::expired; });
@@ -118,17 +113,20 @@ namespace grey::widgets::x {
         for(auto& toast: toasts) {
 
             // Set notification window position to bottom right corner of the main window, considering the main window size and location in relation to the display
-            point toast_pos = mon_pos + mon_size - sz{window_padding, window_padding + height};
-            // ImGui::SetNextWindowPos(toast_pos, ImGuiCond_Always,ImVec2(1.0f, 1.0f));
+            // const point toast_pos = mon_pos + mon_size - sz{window_padding, window_padding + height_shift};
+            point toast_pos = monitor.rb();
+            toast_pos.y -= height_shift;
+            toast_pos.x -= scaled(WindowPadding);
 
-            // w.no_title_bar().no_collapse().no_scroll().auto_resize().front();
+            const float fade_alpha = toast.get_fade_alpha();
+
             wnd ww{toast.w_title,{
-                .opacity = toast.get_fade_alpha(),
+                .opacity = fade_alpha,
                 .show_title_bar = false,
                 .always_on_top = true,
                 .pos = toast_pos,
                 .pos_pivot = point_pivot::bottom_right,
-                .pos_cond = pos_condition::always}};
+                .pos_cond = act_condition::always}};
 
             bool has_title{false};
 
@@ -153,7 +151,9 @@ namespace grey::widgets::x {
             lbl(toast.message);
 
             // save height for next toasts
-            height += ImGui::GetWindowHeight() + window_padding;
+            // decrease height relative to fade alpha i.e. decrease height by fade alpha animated value
+            float anim_height = fade_alpha / Opacity;
+            height_shift += ww.height() * anim_height + scaled(WindowPadding);
         }
     }
 

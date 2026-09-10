@@ -37,8 +37,8 @@ namespace grey::widgets::x {
     private:
         static constexpr int64_t FadeInMs = 100;
         static constexpr int64_t FadeOutMs = 1000;
-        static constexpr float Opacity = 0.8f;  // final toast opacity
-        static constexpr float WindowPadding = 10.0f;
+        static constexpr float Opacity = 0.9f;  // final toast opacity
+        static constexpr float WindowPadding = 5.0f;
 
         std::chrono::system_clock::time_point creation_time;
         std::string w_title;

@@ -2,6 +2,7 @@
 #include "imgui.h"
 #include <string>
 #include <memory>
+#include <optional>
 
 namespace grey {
     struct sz;
@@ -17,6 +18,26 @@ namespace grey {
          * @brief Disposing the texture is platform specific.
          */
         virtual ~texture() = default;
+    };
+
+    /**
+     * @brief Represents different styles of system window chrome.
+     */
+    enum class system_chrome {
+        /**
+         * Make the window look like a native window.
+         */
+        native = 0,
+
+        /**
+         * Looks like a native window, but without header.
+         */
+        headerless = 1,
+
+        /**
+         * No decorations at all, looks like a boring rectangle.
+         */
+        none = 2
     };
 
     /**
@@ -113,6 +134,8 @@ namespace grey {
 
         point operator*(const float mult) const { return point{x * mult, y * mult}; }
 
+        point operator/(const float div) const { return point{x / div, y / div}; }
+
         operator ImVec2() const { return ImVec2{x, y}; }
     };
 
@@ -135,6 +158,8 @@ namespace grey {
         operator ImVec2() const { return ImVec2{width, height}; }
 
         sz operator*(const float mult) const { return sz{width * mult, height * mult}; }
+
+        sz operator/(const float div) const { return sz{width / div, height / div}; }
     };
 
     inline point point::operator+(const sz& dimensions) const {
@@ -190,6 +215,8 @@ namespace grey {
         [[nodiscard]] float height() const { return y_max - y_min; }
 
         [[nodiscard]] point centre() const { return point{(x_min + x_max) / 2, (y_min + y_max) / 2}; }
+
+        [[nodiscard]] bool empty() const { return x_min == x_max && y_min == y_max; }
     };
 
     class rgb_colour {
@@ -272,20 +299,49 @@ namespace grey {
         font_weight font_w{font_weight::regular};
     };
 
-    enum class pos_condition {
+    enum class act_condition {
         never,
         once,
         always
     };
 
+    inline ImGuiCond to_imgui_cond(act_condition cond) {
+        switch(cond) {
+            case act_condition::once: return ImGuiCond_Once;
+            case act_condition::always: return ImGuiCond_Always;
+            default: return ImGuiCond_None;
+        }
+    }
+
     struct wnd_opts {
+        bool* open_ptr{nullptr};
+        bool fill_viewport{false};
         float opacity{1.0f};
         bool show_title_bar{true};
         bool always_on_top{false};
-        point pos{-1, -1};
+        point pos{};
         point_pivot pos_pivot{point_pivot::top_left};
-        pos_condition pos_cond{pos_condition::never};
-        sz size{-1, -1};
+        act_condition pos_cond{act_condition::never};
+        sz size{};
+        act_condition size_cond{act_condition::never};
+        float border{.0f};
+        bool scrollable{true};
+
+        /**
+         * When true, user can manually resize the window.
+         */
+        bool resizeable{true};
+
+        /**
+         * Window will auto-resize automatically based on the rendered content. Does not apply to main application window.
+         */
+        bool auto_resize{false};
+
+        /**
+         * Prevents screen capture of this window (Windows only for now).
+         */
+        std::optional<bool> screen_capture_allowed{false};
+        bool native_decorations{true};
     };
 
     struct font_config {

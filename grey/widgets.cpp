@@ -25,10 +25,6 @@ namespace grey::widgets {
 
     float scale = 1.0f;
 
-    static float scaled(const float num) { return num * scale; }
-
-    static int iscaled(const float num) { return static_cast<int>(num * scale); }
-
     static int incrementing_id;
 
     // Windows Draw List, re-assigned on window initialisation on every frame redraw
@@ -115,29 +111,59 @@ namespace grey::widgets {
         ImGuiWindowFlags flags{0};
         if(!s.show_title_bar) flags |= ImGuiWindowFlags_NoTitleBar;
 
-        if(s.pos_cond != pos_condition::never) {
-            ImGuiCond igc;
-            switch(s.pos_cond) {
-                case pos_condition::always:
-                    igc = ImGuiCond_Always;
-                    break;
-                case pos_condition::once:
-                    igc = ImGuiCond_Once;
-                    break;
-                default:
-                    igc = ImGuiCond_Once;
-                    break;
-            }
+        if(s.pos_cond != act_condition::never)
+            ImGui::SetNextWindowPos(s.pos * scale, to_imgui_cond(s.pos_cond),point{s.pos_pivot});
 
-            ImGui::SetNextWindowPos(s.pos, igc,point{s.pos_pivot});
+        if(s.size_cond != act_condition::never)
+            ImGui::SetNextWindowSize(s.size * scale, to_imgui_cond(s.size_cond));
+
+        if(!s.scrollable) {
+            flags |= ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
         }
 
-        needs_content = ImGui::Begin(title.c_str(), nullptr, flags);
-        auto nwnd = nw();
+        if(!s.resizeable)
+            flags |= ImGuiWindowFlags_NoResize;
 
-        if(nwnd) {
-            if(s.opacity < 1.0f) nwnd.opacity(s.opacity);
-            if(s.always_on_top) nwnd.always_on_op();
+        if(s.auto_resize)
+            flags |= ImGuiWindowFlags_AlwaysAutoResize;
+
+        if(s.fill_viewport) {
+            flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+#ifdef IMGUI_HAS_VIEWPORT
+            ImGuiViewport* viewport = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(viewport->WorkPos);
+            ImGui::SetNextWindowSize(viewport->WorkSize);
+            ImGui::SetNextWindowViewport(viewport->ID);
+#else
+            ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+            ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+#endif
+        }
+
+        if(s.border >= 0)
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, scaled(s.border));
+
+        needs_content = ImGui::Begin(title.c_str(), s.open_ptr, flags);
+
+        if(s.border >= 0)
+            ImGui::PopStyleVar();
+
+        if(const auto native_wnd = nw()) {
+            ImGuiStorage* state = ImGui::GetStateStorage();
+            ImGuiID native_window_style_applied_id = ImGui::GetID(1);
+            bool system_state_applied = state->GetBool(native_window_style_applied_id, false);
+
+            if(s.opacity < 1.0f) native_wnd.opacity(s.opacity);
+            if(s.always_on_top) native_wnd.always_on_op();
+            if(s.screen_capture_allowed.has_value()) native_wnd.allow_screen_capture(s.screen_capture_allowed.value());
+
+            if(!system_state_applied) {
+                if(s.native_decorations) {
+                    native_wnd.apply_native_decorations();
+                }
+                state->SetBool(native_window_style_applied_id, true);
+            }
         }
 
     }
@@ -153,6 +179,15 @@ namespace grey::widgets {
 
         // End needs to be called regardless of whether the window is collapsed or not
         ImGui::End();
+    }
+
+    float wnd::height() const {
+        return ImGui::GetWindowHeight() / scale;
+    }
+
+    point wnd::pos() const {
+        const ImVec2 pos = ImGui::GetWindowPos();
+        return point{pos.x, pos.y} / scale;
     }
 
     id_frame::id_frame(int scope_id) {
@@ -533,7 +568,7 @@ namespace grey::widgets {
 
     sz text_size_get(const string& text, float font_size_diff, float wrap_width) {
         texter scaler(font_size_diff);
-        return ImGui::CalcTextSize(text.c_str(), nullptr, false, wrap_width);
+        return sz{ImGui::CalcTextSize(text.c_str(), nullptr, false, wrap_width)} / scale;
     }
 
     bool selectable(const std::string& text, bool span_columns) {
@@ -854,42 +889,40 @@ namespace grey::widgets {
 
     // ---- position ----
 
-    void get_pos(float& x, float& y) {
-        ImVec2 p = ImGui::GetCursorPos();
-        x = p.x;
-        y = p.y;
-    }
-
-    void cur_get(float& x, float& y) {
-        ImVec2 p = ImGui::GetCursorScreenPos();
-        x = p.x;
-        y = p.y;
-    }
-
     point cur_get() {
-        return ImGui::GetCursorScreenPos();
-    }
-
-    void cur_set(float x, float y) {
-        ImGui::SetCursorScreenPos(ImVec2{x, y});
+        return point{ImGui::GetCursorScreenPos()} / scale;
     }
 
     void cur_set(const point& pos) {
+        ImGui::SetCursorScreenPos(pos * scale);
+    }
+
+    void cur_move(const point& shift) {
+        auto pos = ImGui::GetCursorScreenPos();
+        point shift_scaled = shift * scale;
+        pos.x += shift_scaled.x;
+        pos.y += shift_scaled.y;
         ImGui::SetCursorScreenPos(pos);
     }
 
-    void cur_move(float x, float y) {
-        auto pos = ImGui::GetCursorScreenPos();
-        pos.x += x;
-        pos.y += y;
-        ImGui::SetCursorScreenPos(pos);
+    int mon_count() {
+        const ImGuiPlatformIO& pio = ImGui::GetPlatformIO();
+        return pio.Monitors.size();
     }
 
-    void cur_move(ImVec2 shift) {
-        auto pos = ImGui::GetCursorScreenPos();
-        pos.x += shift.x;
-        pos.y += shift.y;
-        ImGui::SetCursorScreenPos(pos);
+    rect mon(const int index) {
+        const ImGuiPlatformIO& pio = ImGui::GetPlatformIO();
+        if(pio.Monitors.empty() || index >= pio.Monitors.size()) return rect{};
+
+        const ImGuiPlatformMonitor& imon = pio.Monitors[index];
+
+        const auto& pos = imon.WorkPos;
+        const auto& size = imon.WorkSize;
+
+        return rect{pos.x / scale,
+            pos.y / scale,
+            size.x / scale + pos.x / scale,
+            size.y / scale + pos.y / scale};
     }
 
     rect window_rect_get() {
@@ -937,12 +970,8 @@ namespace grey::widgets {
         }
     }
 
-    void dummy(float width, float height) {
-        ImGui::Dummy(ImVec2(width, height));
-    }
-
-    void dummy(ImVec2 size) {
-        ImGui::Dummy(size);
+    void dummy(sz size) {
+        ImGui::Dummy(size * scale);
     }
 
     // ---- image ----
