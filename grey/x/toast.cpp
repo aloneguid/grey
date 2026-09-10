@@ -102,7 +102,7 @@ namespace grey::widgets::x {
         if(toasts.empty()) return;
 
         // draw toast on the monitor rather than relative to current window
-        rect monitor = mon(0);
+        const monitor mm = mon(0).value();
 
         float height_shift = 0.f;
 
@@ -114,9 +114,9 @@ namespace grey::widgets::x {
 
             // Set notification window position to bottom right corner of the main window, considering the main window size and location in relation to the display
             // const point toast_pos = mon_pos + mon_size - sz{window_padding, window_padding + height_shift};
-            point toast_pos = monitor.rb();
+            point toast_pos = mm.work_area.rb();
             toast_pos.y -= height_shift;
-            toast_pos.x -= scaled(WindowPadding);
+            toast_pos.x -= WindowPadding * mm.dpi_scale;
 
             const float fade_alpha = toast.get_fade_alpha();
 

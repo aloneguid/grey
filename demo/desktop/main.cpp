@@ -138,7 +138,18 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                                 .show_title_bar = title_bar,
                                 .border = border,
                                 .scrollable = scrollable}}) {
-                                w::lbl("content of window 1");
+
+                                w::lbl("DPI: ", {.emp = emphasis::primary});
+                                w::sl();
+                                w::lbl(format("{}", w::scale));
+
+                                w::lbl("Position:", {.emp = emphasis::primary});
+                                w::sl();
+                                w::lbl(format("{}", w1.pos()));
+
+                                w::lbl("Size: ", {.emp = emphasis::primary});
+                                w::sl();
+                                w::lbl(format("{}", w1.size()));
                             }
                         }
                     }
@@ -617,6 +628,18 @@ Also, [GitHub alerts](https://docs.github.com/en/get-started/writing-on-github/g
                     if(fps_control) {
                         w::slider(app->fps, 0.0f, 500.0f, "FPS", 0.1f);
                     }
+
+                    w::sep("Monitors");
+                    w::lbl(format("mouse pos: {}", w::mouse_pos()));
+                    for(int i = 0; i < w::mon_count(); i++) {
+                        auto mm = w::mon(i).value();
+                        w::lbl(format("{:2d}: ", i));
+                        w::sl(40);
+                        w::lbl(format("scale: {}", mm.dpi_scale));
+                        w::sl(160);
+                        w::lbl(format("{} (work: {})", mm.area, mm.work_area));
+                    }
+
                 }
             }
 

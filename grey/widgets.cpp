@@ -8,6 +8,7 @@
 #include "fonts/font_loader.h"
 #include <iostream>
 #include <utility>
+#include <stack>
 
 // for Windows-specific hacks
 #if PLATFORM_WINDOWS
@@ -26,6 +27,8 @@ namespace grey::widgets {
     float scale = 1.0f;
 
     static int incrementing_id;
+    static stack<float> window_dpis;
+    static stack<ImDrawList*> window_draw_lists;
 
     // Windows Draw List, re-assigned on window initialisation on every frame redraw
     static ImDrawList* wdl{nullptr};
@@ -112,10 +115,10 @@ namespace grey::widgets {
         if(!s.show_title_bar) flags |= ImGuiWindowFlags_NoTitleBar;
 
         if(s.pos_cond != act_condition::never)
-            ImGui::SetNextWindowPos(s.pos * scale, to_imgui_cond(s.pos_cond),point{s.pos_pivot});
+            ImGui::SetNextWindowPos(s.pos, to_imgui_cond(s.pos_cond),point{s.pos_pivot});
 
         if(s.size_cond != act_condition::never)
-            ImGui::SetNextWindowSize(s.size * scale, to_imgui_cond(s.size_cond));
+            ImGui::SetNextWindowSize(s.size, to_imgui_cond(s.size_cond));
 
         if(!s.scrollable) {
             flags |= ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
@@ -144,7 +147,14 @@ namespace grey::widgets {
         if(s.border >= 0)
             ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, scaled(s.border));
 
+        // push window-scoped vars
+        window_dpis.push(scale);
+        window_draw_lists.push(wdl);
+
         needs_content = ImGui::Begin(title.c_str(), s.open_ptr, flags);
+
+        scale = ImGui::GetWindowViewport()->DpiScale;
+        wdl = ImGui::GetWindowDrawList();
 
         if(s.border >= 0)
             ImGui::PopStyleVar();
@@ -175,19 +185,27 @@ namespace grey::widgets {
 
 
     wnd::~wnd() {
-        wdl = nullptr;
+        // restore window-scoped vars
+        wdl = window_draw_lists.top();
+        window_draw_lists.pop();
+        scale = window_dpis.top();
+        window_dpis.pop();
 
         // End needs to be called regardless of whether the window is collapsed or not
         ImGui::End();
     }
 
     float wnd::height() const {
-        return ImGui::GetWindowHeight() / scale;
+        return ImGui::GetWindowHeight();
     }
 
     point wnd::pos() const {
         const ImVec2 pos = ImGui::GetWindowPos();
-        return point{pos.x, pos.y} / scale;
+        return point{pos.x, pos.y};
+    }
+
+    sz wnd::size() const {
+        return sz{ImGui::GetWindowSize()};
     }
 
     id_frame::id_frame(int scope_id) {
@@ -568,7 +586,7 @@ namespace grey::widgets {
 
     sz text_size_get(const string& text, float font_size_diff, float wrap_width) {
         texter scaler(font_size_diff);
-        return sz{ImGui::CalcTextSize(text.c_str(), nullptr, false, wrap_width)} / scale;
+        return sz{ImGui::CalcTextSize(text.c_str(), nullptr, false, wrap_width)};
     }
 
     bool selectable(const std::string& text, bool span_columns) {
@@ -890,18 +908,17 @@ namespace grey::widgets {
     // ---- position ----
 
     point cur_get() {
-        return point{ImGui::GetCursorScreenPos()} / scale;
+        return point{ImGui::GetCursorScreenPos()};
     }
 
     void cur_set(const point& pos) {
-        ImGui::SetCursorScreenPos(pos * scale);
+        ImGui::SetCursorScreenPos(pos);
     }
 
     void cur_move(const point& shift) {
         auto pos = ImGui::GetCursorScreenPos();
-        point shift_scaled = shift * scale;
-        pos.x += shift_scaled.x;
-        pos.y += shift_scaled.y;
+        pos.x += shift.x;
+        pos.y += shift.y;
         ImGui::SetCursorScreenPos(pos);
     }
 
@@ -910,19 +927,43 @@ namespace grey::widgets {
         return pio.Monitors.size();
     }
 
-    rect mon(const int index) {
+    monitor mon(const ImGuiPlatformMonitor& mon) {
+
+        return monitor{
+            .area = rect{
+                mon.MainPos.x,
+                mon.MainPos.y,
+                 mon.MainSize.x + mon.MainPos.x,
+              mon.MainSize.y + mon.MainPos.y },
+            .work_area = rect{
+              mon.WorkPos.x,
+              mon.WorkPos.y,
+              mon.WorkSize.x + mon.WorkPos.x,
+              mon.WorkSize.y + mon.WorkPos.y
+            },
+            .dpi_scale = mon.DpiScale
+        };
+    }
+
+    optional<monitor> mon(const int index) {
         const ImGuiPlatformIO& pio = ImGui::GetPlatformIO();
-        if(pio.Monitors.empty() || index >= pio.Monitors.size()) return rect{};
+        if(pio.Monitors.empty() || index >= pio.Monitors.size()) return nullopt;
+        return mon(pio.Monitors[index]);
+    }
 
-        const ImGuiPlatformMonitor& imon = pio.Monitors[index];
+    optional<monitor> mon() {
+        const ImGuiPlatformIO& pio = ImGui::GetPlatformIO();
+        ImVector<ImGuiPlatformMonitor> mons = pio.Monitors;
+        point mouse_pos = ImGui::GetMousePos();
 
-        const auto& pos = imon.WorkPos;
-        const auto& size = imon.WorkSize;
+        for(auto& imon : mons) {
+            // check if mouse_pos is inside this monitor area
+            bool inside = mouse_pos.x >= imon.MainPos.x && mouse_pos.x <= imon.MainPos.x + imon.MainSize.x &&
+                          mouse_pos.y >= imon.MainPos.y && mouse_pos.y <= imon.MainPos.y + imon.MainSize.y;
+            if(inside) return mon(imon);
+        }
 
-        return rect{pos.x / scale,
-            pos.y / scale,
-            size.x / scale + pos.x / scale,
-            size.y / scale + pos.y / scale};
+        return nullopt;
     }
 
     rect window_rect_get() {
@@ -971,7 +1012,7 @@ namespace grey::widgets {
     }
 
     void dummy(sz size) {
-        ImGui::Dummy(size * scale);
+        ImGui::Dummy(size);
     }
 
     // ---- image ----
@@ -1299,6 +1340,10 @@ namespace grey::widgets {
 
         // Argument MUST match the amount of ImGui::PushStyleColor() calls
         //ImGui::PopStyleColor(1);
+    }
+
+    point mouse_pos() {
+        return ImGui::GetMousePos();
     }
 
     // ---- group ----

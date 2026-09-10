@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include <optional>
+#include <format>
 
 namespace grey {
     struct sz;
@@ -219,6 +220,16 @@ namespace grey {
         [[nodiscard]] bool empty() const { return x_min == x_max && y_min == y_max; }
     };
 
+    struct monitor {
+        rect area;
+        rect work_area;
+
+        /**
+         * DPI scale factor. 96 DPI == 1.0f
+         */
+        float dpi_scale;
+    };
+
     class rgb_colour {
     public:
         float r;
@@ -353,6 +364,29 @@ namespace grey {
             load_icons =
                     load_fixed =
                     load_bold = true;
+        }
+    };
+}
+
+namespace std {
+    template <> struct std::formatter<grey::point> : std::formatter<std::string> {
+        auto format(const grey::point& p, std::format_context& ctx) const {
+            return std::formatter<std::string>::format(
+                std::format("({:.1f}, {:.1f})", p.x, p.y), ctx);
+        }
+    };
+
+    template <> struct std::formatter<grey::sz> : std::formatter<std::string> {
+        auto format(const grey::sz& s, std::format_context& ctx) const {
+            return std::formatter<std::string>::format(
+                std::format("({:.1f}, {:.1f})", s.width, s.height), ctx);
+        }
+    };
+
+    template <> struct std::formatter<grey::rect> : std::formatter<std::string> {
+        auto format(const grey::rect& r, std::format_context& ctx) const {
+            return std::formatter<std::string>::format(
+                std::format("({} - {})", r.lt(), r.rb()), ctx);
         }
     };
 }

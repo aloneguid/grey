@@ -16,6 +16,10 @@
 #include "implot.h"
 #endif
 
+// On coordinates.
+// Generally, all the out-of-window processing must use unscaled, raw, physical coordinates. This is because system monitors are lined up in a virtual physical space i.e. if you have a laptop and and external minitor on top, your laptop have are coodinates starting from below the external monitor and so on. Not all of the physical coordinate space is valid or visible.
+// Monitors generally do have different DPIs (unless you have identical monitors, but even there it's possible to set differen DPIs). DPI normally indicate physical dimentions (but not necessarily) And affects the rendering of artifacts inside the monitor, such as shapes, fonts, etc. Generally it's not possible for one shape to look great if it spawns multiple monitors. For once, they may not perfectly align in physical space, and second, due to different DPIs, a thick line, for example, will be thicker on one screen and thinner on the other. Generally, we deside how "big" the shape should be by using DPI of a monitor where most of the shape resides (or DPI of the monitor where most of the dwindow resides) and call it a "window DPI". Global "scale" variable here represents the DPI scale of the currently rendering window, and can change between calls if window moves or user changes monitor settings while the program is running.
+
 namespace grey::widgets {
 
     extern float scale;
@@ -85,6 +89,8 @@ namespace grey::widgets {
         [[nodiscard]] float height() const;
 
         [[nodiscard]] point pos() const;
+
+        [[nodiscard]] sz size() const;
 
         operator bool() const { return needs_content; }
     private:
@@ -421,9 +427,14 @@ namespace grey::widgets {
     int mon_count();
 
     /**
-     * Get monitor working area by index. Size is scaled.
+     * Get monitor area by index. Size is not scaled, it's in the absolute coordinates, because each monitor may (and usually does) have different DPI.
      */
-    rect mon(int index);
+    std::optional<monitor> mon(int index);
+
+    /**
+     * Get monitor area for the current monitor.
+     */
+    std::optional<monitor> mon();
 
     /**
      * @brief Get window position and dimensions in screen space;
@@ -638,6 +649,11 @@ namespace grey::widgets {
     void toast_render_frame();
 
     // mouse helpers
+
+    /**
+     * Get mouse position in absolute coordinates, not scaled to any monitor DPI.
+     */
+    point mouse_pos();
 
     bool is_leftclicked();
 
