@@ -188,16 +188,20 @@ jobs:
         include:
           - os: windows-latest
             name: Windows x64
-            arch: x64
             vcpkg_triplet: x64-windows-static
             vcpkg_config: Release
             dotnet_rid: win-x64
           - os: ubuntu-latest
             name: Linux x64
-            arch: x64
             vcpkg_triplet: x64-linux
             vcpkg_config: MinSizeRel
             dotnet_rid: linux-x64
+          - os: macos-latest
+            name: Apple Silicon
+            vcpkg_triplet: arm64-osx
+            vcpkg_config: MinSizeRel
+            dotnet_rid: osx-arm64
+
 
       fail-fast: false
     name: 'demo app: ${{ matrix.name }}'
