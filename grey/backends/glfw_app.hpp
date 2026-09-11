@@ -1,14 +1,9 @@
-#pragma once
-
-#include "../app.h"
-
 #if PLATFORM_LINUX || PLATFORM_MACOS
-
+#pragma once
+#include "../app.h"
 #include "imgui_impl_glfw.h"
 #include "../common/ui_window.h"
-
 #include <GLFW/glfw3.h>
-
 #include <algorithm>
 #include <cstdio>
 
@@ -21,8 +16,8 @@ namespace grey::backends {
 
     class glfw_app : public app {
     public:
-        glfw_app(const std::string& title, sz size, GLFWerrorfun error_callback = glfw_error_callback)
-            : app{title}, title{title}, window_logical_size{size} {
+        glfw_app(const std::string& title, sz initial_size, GLFWerrorfun error_callback = glfw_error_callback)
+            : app{title, initial_size}, title{title}, window_logical_size{initial_size} {
             ::glfwSetErrorCallback(error_callback);
             glfw_ready = glfwInit();
             if(!glfw_ready)
@@ -74,6 +69,14 @@ namespace grey::backends {
             }
         }
 
+        void center() override {
+            if(window) {
+                const sz physical_size = window_logical_size * w::scale;
+                window_pos = get_screen_center(physical_size);
+                glfwSetWindowPos(window, static_cast<int>(window_pos.x), static_cast<int>(window_pos.y));
+            }
+        }
+
         void foreground() override {
             if(window)
                 glfwFocusWindow(window);
@@ -84,7 +87,7 @@ namespace grey::backends {
             if(!glfw_ready)
                 return false;
 
-            glfwWindowHint(GLFW_DECORATED, show_title_bar ? GLFW_TRUE : GLFW_FALSE);
+            glfwWindowHint(GLFW_DECORATED, chrome == system_chrome::native  ? GLFW_TRUE : GLFW_FALSE);
             glfwWindowHint(GLFW_FLOATING, always_on_top ? GLFW_TRUE : GLFW_FALSE);
             if(use_transparency_colour_key_value)
                 glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);

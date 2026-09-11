@@ -9,12 +9,12 @@
 #include <iostream>
 #include <utility>
 #include <stack>
+#include "common/mouse.h"
 
 // for Windows-specific hacks
 #if PLATFORM_WINDOWS
 #include <Windows.h>
 #include "common/win32/window.h"
-#include "common/mouse.h"
 #elif PLATFORM_LINUX
 #include <GLFW/glfw3.h>
 #endif

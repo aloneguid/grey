@@ -101,7 +101,7 @@ namespace grey::backends {
             gl_init();
         }
 
-        void run(std::function<bool()> render_frame) override {
+        void run(std::function<bool()> render_frame, bool create_main_window) override {
             if(!create_window())
                 return;
 

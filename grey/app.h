@@ -58,6 +58,7 @@ namespace grey {
         /**
          * Call to start the application. This will block until the application is closed.
          * @param render_frame Callback that will be called to render a frame. Return true to continue rendering, false to exit.
+         * @param create_main_window Pre-creates UI window inside the application window and fill app windows completely (default).
          */
         virtual void run(std::function<bool()> render_frame, bool create_main_window = true) = 0;
 

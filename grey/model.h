@@ -380,21 +380,21 @@ namespace grey {
 }
 
 namespace std {
-    template <> struct std::formatter<grey::point> : std::formatter<std::string> {
+    template <> struct formatter<grey::point> : std::formatter<std::string> {
         auto format(const grey::point& p, std::format_context& ctx) const {
             return std::formatter<std::string>::format(
                 std::format("({:.1f}, {:.1f})", p.x, p.y), ctx);
         }
     };
 
-    template <> struct std::formatter<grey::sz> : std::formatter<std::string> {
+    template <> struct formatter<grey::sz> : std::formatter<std::string> {
         auto format(const grey::sz& s, std::format_context& ctx) const {
             return std::formatter<std::string>::format(
                 std::format("({:.1f}, {:.1f})", s.width, s.height), ctx);
         }
     };
 
-    template <> struct std::formatter<grey::rect> : std::formatter<std::string> {
+    template <> struct formatter<grey::rect> : std::formatter<std::string> {
         auto format(const grey::rect& r, std::format_context& ctx) const {
             return std::formatter<std::string>::format(
                 std::format("({} - {})", r.lt(), r.rb()), ctx);
