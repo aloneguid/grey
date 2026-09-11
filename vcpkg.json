@@ -40,6 +40,7 @@
         },
         "implot",
         "simpleini",
+        "fkyaml",
         "magic-enum",
         "md4c"
     ]

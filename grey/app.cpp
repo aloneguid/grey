@@ -4,6 +4,7 @@
 #include "widgets.h"
 #include "common/os.h"
 #include <thread>
+#include <utility>
 
 #if PLATFORM_WINDOWS
 #include "backends/win32_dx11_app.hpp"
@@ -29,7 +30,7 @@ namespace grey {
         return app;
     }
 
-    app::app(const std::string& title) : title{title}  {
+    app::app(std::string title, sz initial_size) : title{std::move(title)}, initial_size{initial_size}  {
         wnd_main_opts.open_ptr = &wnd_main_is_open;
     }
 
@@ -79,7 +80,7 @@ namespace grey {
 
     void app::set_theme(const std::string& theme_id) {
         auto theme = themes::get_theme(theme_id);
-        themes::set_theme(theme_id, widgets::scale);
+        themes::set_theme(theme_id, widgets::main_scale);
         set_dark_mode(theme.is_dark);
     }
 
@@ -141,8 +142,8 @@ namespace grey {
         std::shared_ptr<texture> native_texture = make_native_texture(img_data);
         if(!native_texture) return false;
 
-        native_texture->width = img_data.x;
-        native_texture->height = img_data.y;
+        native_texture->size.width = img_data.x;
+        native_texture->size.height = img_data.y;
         textures[key] = native_texture;
 
         return true;
@@ -154,14 +155,14 @@ namespace grey {
             return true;
         }
 
-        grey::common::raw_img img_data = grey::common::load_image_from_file(path);
+        grey::common::raw_img img_data = common::load_image_from_file(path);
         if(!img_data) return false;
 
         std::shared_ptr<texture> native_texture = make_native_texture(img_data);
         if(!native_texture) return false;
 
-        native_texture->width = img_data.x;
-        native_texture->height = img_data.y;
+        native_texture->size.width = img_data.x;
+        native_texture->size.height = img_data.y;
         textures[key] = native_texture;
 
 

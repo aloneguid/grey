@@ -1,5 +1,7 @@
 ## 0.0.0
 
-Notable changes done in pre-releases:
+### todo:
+- mac: https://github.com/WerWolv/ImHex/blob/master/main/gui/source/window/platform/macos.cpp
 
-- 
+### done:
+-

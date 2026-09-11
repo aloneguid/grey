@@ -41,12 +41,14 @@ EXPORTED void app_run(
     bool is_running = true;
 
     auto app = app::make(title, sz{static_cast<float>(width), static_cast<float>(height)});
-    if(has_menu_bar) app->main_window().has_menu_bar();
-    if(!can_scroll) app->main_window().no_scroll();
-    if(center_on_screen) app->main_window().center();
+    wnd_opts& opts = app->main_window_opts();
 
+    opts.has_menu_bar = has_menu_bar;
+    if(!can_scroll) opts.scrollable = false;
+    if(center_on_screen) app->center_on_screen = true;
     app->can_resize = true;
     app->fonts.load_all();
+
     app->run([c_frame_callback]() {
         if(c_frame_callback) {
             if(!c_frame_callback()) {
@@ -259,73 +261,6 @@ EXPORTED bool menu_item(const char* c_text, bool reserve_icon_space, const char*
     return w::mi(text, reserve_icon_space, icon);
 }
 
-
-// -- windowing
-
-map<int, unique_ptr<w::window>> window_map;
-
-EXPORTED int32_t window(int32_t id, bool unregister,
-    const char* title,
-    int32_t width, int32_t height,
-    bool* p_open,
-    RenderCallback c_render_callback) {
-
-    auto it = window_map.find(id);
-    if(it == window_map.end()) {
-        if(unregister) return -1;
-
-        // create new window
-        id = w::generate_int_id();
-        string t{title};
-        auto wnd = make_unique<w::window>(t, p_open);
-        wnd->size(width, height);
-        window_map[id] = std::move(wnd);
-    } else if(unregister) {
-        // delete window from map
-        window_map.erase(it);
-        return -1;
-    }
-
-    w::window& w{*window_map[id]};
-    w::guard wg{w};
-    if(w && c_render_callback) c_render_callback();
-    return id;
-}
-
-EXPORTED int32_t window_register(const char* title, bool* is_open) {
-
-    int id = w::generate_int_id();
-    string t{title};
-    window_map[id] = make_unique<w::window>(t, is_open);
-    return id;
-}
-
-EXPORTED bool window_unregister(int32_t id) {
-    // delete window from map
-    auto it = window_map.find(id);
-    if(it == window_map.end()) return false;
-
-    window_map.erase(it);
-    return true;
-}
-
-EXPORTED void window_render(int32_t id, RenderCallback c_render_callback) {
-    if(!c_render_callback) {
-        return;
-    }
-
-    // get window from map
-    auto it = window_map.find(id);
-    if(it == window_map.end()) {
-        // window not found
-        return;
-    }
-
-    // otherwise, render window
-    w::guard g{*it->second};
-    if(*it->second && c_render_callback) c_render_callback();
-}
-
 map<int, unique_ptr<w::code_editor>> code_editor_map;
 
 EXPORTED int32_t code_editor(int32_t id, bool unregister, int32_t language, const char* c_text) {
@@ -352,8 +287,17 @@ EXPORTED int32_t code_editor(int32_t id, bool unregister, int32_t language, cons
 }
 
 
-void get_debug_info(float* fps) {
-    if(fps) {
-        *fps = ImGui::GetIO().Framerate;
+float get_fps() {
+    return ImGui::GetIO().Framerate;
+}
+
+int get_version(char* buffer, int32_t buffer_size) {
+    string version{ImGui::GetVersion()};
+    int required = version.size() + 1;
+    if(buffer == nullptr || buffer_size < required) {
+        return required;
     }
+
+    strcpy_s(buffer, required, version.c_str());
+    return required;
 }

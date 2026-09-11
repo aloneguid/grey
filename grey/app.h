@@ -16,7 +16,12 @@ namespace grey {
 
     class app : public texture_loader {
     public:
-        explicit app(const std::string& title);
+        /**
+         *
+         * @param title
+         * @param initial_size To help with scaling, initial size is in logical pixels that will be multiplied by active monitor's DPI when creating the window.
+         */
+        explicit app(std::string  title, sz initial_size);
         virtual ~app() = default;
 
         /**
@@ -54,7 +59,7 @@ namespace grey {
          * Call to start the application. This will block until the application is closed.
          * @param render_frame Callback that will be called to render a frame. Return true to continue rendering, false to exit.
          */
-        virtual void run(std::function<bool()> render_frame) = 0;
+        virtual void run(std::function<bool()> render_frame, bool create_main_window = true) = 0;
 
         std::shared_ptr<texture> get_texture(const std::string& key) override;
 
@@ -75,7 +80,6 @@ namespace grey {
          */
         void set_theme(const std::string& theme_id);
 
-
         /**
          * @brief Resizes the main viewport of the application. This is the area where the application renders its main content.
          * @param size Logical size.
@@ -83,10 +87,16 @@ namespace grey {
         virtual void resize(sz size) = 0;
 
         /**
-         * @brief Moves the main viewport of the application to the specified position on the screen. This is monitor/platform-dependent and may not work on all platforms.
-         * @param pos Logical position.
+         * @brief Moves the main viewport of the application to the specified position on the screen.
+         * This is monitor/platform-dependent and may not work on all platforms.
+         * @param pos Absolute position.
          */
         virtual void move(point pos) = 0;
+
+        /**
+         * @brief Centers the main application window on the screen it's at.
+         */
+        virtual void center() = 0;
 
         /**
          * @brief Brings the main viewport of the application to the foreground.
@@ -116,7 +126,7 @@ namespace grey {
         bool can_resize{true};
 
         /**
-         * @brief When set to true, will center the window on the screen where mouse is currently located.
+         * @brief When set to true, will center the window on the screen where mouse is currently located. Centering occurs on window creation and resize operations, but move() will ignore centering.
          */
         bool center_on_screen{false};
 
@@ -198,9 +208,11 @@ namespace grey {
         // pre-initialised main window
         wnd_opts wnd_main_opts{
             .fill_viewport = true,
-            .show_title_bar = false
+            .show_title_bar = false,
+            .resizeable = false
         };
-        std::string title;
+        std::string title;  // todo: make it public and reactive
+        sz initial_size;
         bool wnd_main_is_open{true};
         bool render_main_window(const std::function<bool()>& render_frame);
 

@@ -23,6 +23,7 @@
 namespace grey::widgets {
 
     extern float scale;
+    extern float main_scale;
 
     [[nodiscard]] inline float scaled(const float value) { return value * scale; }
 
@@ -97,83 +98,6 @@ namespace grey::widgets {
         bool needs_content;
 
         common::ui_window nw();
-    };
-
-    class window : public guardable {
-    public:
-        window(std::string title, bool* p_open = nullptr);
-
-        float opacity{1.0f};
-
-#ifdef _WIN32
-        bool win32_exclude_from_capture{false};
-        bool win32_always_on_top{false};
-#endif
-
-        /**
-         * @brief Set initial window size. The size will be scaled.
-         * @param width 
-         * @param height 
-         * @return 
-         */
-        window& size(int width, int height);
-        window& resize(float width = 0, float height = 0);
-
-        /**
-         * Reserves space for a menu bar. If you are drawing menu but this is not set, menu won't be shown.
-         */
-        window& has_menu_bar(bool on = true);
-        window& fullscreen();
-        window& no_resize();    // no manual resize
-        window& auto_resize();
-        window& no_collapse();
-        window& no_title_bar();
-        window& no_background();
-        window& border(float width);
-        window& no_scroll();
-        window& center(void* monitor_handle = nullptr);
-        window& fill_viewport();
-        window& front();
-
-        [[nodiscard]] bool own_viewport() const;
-
-        explicit operator bool() const {
-            return rendered;
-        }
-
-        void enter() override;
-        void leave() override;
-
-        ~window() override;
-
-    private:
-        bool rendered{false};
-        float last_opacity{1.0f};
-        sz init_size{0, 0};
-        sz resize_to{0, 0};
-        common::ui_window nw();
-
-        // centering
-        bool init_center{false};    // whether to center window
-        ImVec2 init_center_pos;     // position to center at (calculated)
-        void* init_center_monitor{nullptr}; // monitor to center at (native handle)
-        ImGuiPlatformMonitor init_center_imgui_monitor; // monitor to center at (imgui handle)
-
-        const std::string title;
-        bool* p_open{nullptr};
-        ImGuiWindowFlags flags{0};
-        ImGuiWindowClass wc;
-        float border_size{-1};
-        bool fill_viewport_enabled{false};
-        bool display_front{false};
-        bool display_front_set{false};
-
-#ifdef PLATFORM_WINDOWS
-        bool win32_brought_forward{false};
-        bool win32_exclude_from_capture_current{false};
-        bool win32_always_on_top_current{false};
-        void* win32_x_style_applied_to_handle{nullptr};
-#endif
     };
 
     class guard {
@@ -432,9 +356,9 @@ namespace grey::widgets {
     std::optional<monitor> mon(int index);
 
     /**
-     * Get monitor area for the current monitor.
+     * Get monitor area for the current monitor. Current monitor is the one that contains the mouse cursor.
      */
-    std::optional<monitor> mon();
+    std::optional<monitor> mon_current();
 
     /**
      * @brief Get window position and dimensions in screen space;
@@ -471,6 +395,13 @@ namespace grey::widgets {
      */
     void lbl(const std::string& text, const style& style = {});
 
+    /**
+     *
+     * @param text
+     * @param font_size_diff
+     * @param wrap_width
+     * @return Absolute size.
+     */
     sz text_size_get(const std::string& text, float font_size_diff = .0f, float wrap_width = -1);
 
     /**
@@ -537,17 +468,15 @@ namespace grey::widgets {
      * @brief Display image from texture loaded in app. The texture must be loaded with preload_texture() beforehand.
      * @param app 
      * @param key 
-     * @param width 
-     * @param height 
      * @param uv0_x "UV" coordinates for the top-left corner of the image. Ranges from 0 to 1, where (0, 0) is the top-left of the texture and (1, 1) is the bottom-right.
      * @param uv0_y 
      * @param uv1_x 
      * @param uv1_y 
      */
-    void image(texture_loader& app, const std::string& key, size_t width, size_t height,
+    void image(texture_loader& app, const std::string& key, sz size,
         float uv0_x = .0f, float uv0_y = .0f, float uv1_x = 1.0f, float uv1_y = 1.0f);
 
-    void image_rounded(texture_loader& app, const std::string& key, size_t width, size_t height, float rounding,
+    void image_rounded(texture_loader& app, const std::string& key, sz size, float rounding,
         float uv0_x = .0f, float uv0_y = .0f, float uv1_x = 1.0f, float uv1_y = 1.0f);
 
     /**

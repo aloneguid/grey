@@ -14,6 +14,7 @@
 #if PLATFORM_WINDOWS
 #include <Windows.h>
 #include "common/win32/window.h"
+#include "common/mouse.h"
 #elif PLATFORM_LINUX
 #include <GLFW/glfw3.h>
 #endif
@@ -25,6 +26,7 @@ namespace grey::widgets {
     // ---- general ----
 
     float scale = 1.0f;
+    float main_scale = 1.0f;
 
     static int incrementing_id;
     static stack<float> window_dpis;
@@ -113,6 +115,7 @@ namespace grey::widgets {
     wnd::wnd(const std::string& title, const wnd_opts& s) {
         ImGuiWindowFlags flags{0};
         if(!s.show_title_bar) flags |= ImGuiWindowFlags_NoTitleBar;
+        if(s.has_menu_bar) flags |= ImGuiWindowFlags_MenuBar;
 
         if(s.pos_cond != act_condition::never)
             ImGui::SetNextWindowPos(s.pos, to_imgui_cond(s.pos_cond),point{s.pos_pivot});
@@ -218,223 +221,6 @@ namespace grey::widgets {
 
     id_frame::~id_frame() {
         ImGui::PopID();
-    }
-
-
-    // ---- window ----
-
-    window::window(std::string title, bool* p_open) : title{std::move(title)} {
-        this->p_open = p_open;
-        wc.ViewportFlagsOverrideSet = ImGuiViewportFlags_NoAutoMerge;
-    }
-
-    window& window::size(int width, int height) {
-        init_size = sz(width * scale, height * scale);
-        return *this;
-    }
-
-    window& window::resize(float width, float height) {
-        resize_to = sz(width * scale, height * scale);
-        return *this;
-    }
-
-    window& window::has_menu_bar(bool on) {
-        if (on)
-            flags |= ImGuiWindowFlags_MenuBar;
-        else
-            flags &= ~ImGuiWindowFlags_MenuBar;
-        return *this;
-    }
-
-    window& window::no_resize() {
-        flags |= ImGuiWindowFlags_NoResize;
-        return *this;
-    }
-
-    window& window::auto_resize() {
-        flags |= ImGuiWindowFlags_AlwaysAutoResize;
-        return *this;
-    }
-
-    window& window::no_collapse() {
-        flags |= ImGuiWindowFlags_NoCollapse;
-        return *this;
-    }
-
-    window& window::no_title_bar() {
-        flags |= ImGuiWindowFlags_NoTitleBar;
-        return *this;
-    }
-
-    window& window::no_background() {
-        flags |= ImGuiWindowFlags_NoBackground;
-        return *this;
-    }
-
-    window& window::border(const float width) {
-        border_size = width;
-        return *this;
-    }
-
-    window& window::no_scroll() {
-        flags |= ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
-        return *this;
-    }
-
-
-    window& window::center(void* monitor_handle) {
-        init_center_monitor = monitor_handle;
-        init_center = true;
-
-        return *this;
-    }
-
-    window& window::fill_viewport() {
-        fill_viewport_enabled = true;
-        flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
-        return *this;
-    }
-
-    window& window::front() {
-        display_front = true;
-        return *this;
-    }
-
-    bool window::own_viewport() const {
-        return initialized() && ImGui::GetMainViewport() != ImGui::GetWindowViewport();
-    }
-
-    void window::enter() {
-        //ImGui::SetNextWindowBgAlpha(1.0f);
-
-        if(border_size >= 0) {
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, border_size);
-        }
-
-        // set window class to prevent viewports to be merged with main window
-        //ImGui::SetNextWindowClass(&wc);
-
-        if(init_size.width > 0)
-            ImGui::SetNextWindowSize(init_size, ImGuiCond_Once);
-
-        if(resize_to.width > 0) {
-            ImGui::SetNextWindowSize(resize_to);
-            resize_to = ImVec2{0, 0};
-        }
-
-        if(init_center && !init_center_pos.x) {
-            ImVector<ImGuiPlatformMonitor> monitors = ImGui::GetPlatformIO().Monitors;
-            size_t midx = 0;
-            for(size_t i = 0; i < monitors.Size; i++) {
-                if(monitors[i].PlatformHandle == init_center_monitor) {
-                    midx = i;
-                    break;
-                }
-            }
-
-            init_center_imgui_monitor = monitors[midx];
-
-            init_center_pos = ImVec2(
-                init_center_imgui_monitor.WorkSize.x / 2 - init_size.width / 2 + init_center_imgui_monitor.WorkPos.x,
-                init_center_imgui_monitor.WorkSize.y / 2 - init_size.height / 2 + init_center_imgui_monitor.WorkPos.y);
-        }
-
-        if(init_center && init_center_pos.x) {
-            ImGui::SetNextWindowPos(init_center_pos, ImGuiCond_Appearing);
-        }
-
-        if(fill_viewport_enabled) {
-#ifdef IMGUI_HAS_VIEWPORT
-            ImGuiViewport* viewport = ImGui::GetMainViewport();
-            ImGui::SetNextWindowPos(viewport->WorkPos);
-            ImGui::SetNextWindowSize(viewport->WorkSize);
-            ImGui::SetNextWindowViewport(viewport->ID);
-#else
-            ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
-            ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
-#endif
-            // window rounding will be handled by parent viewport, therefore we need to disable it
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        }
-
-        rendered = ImGui::Begin(title.c_str(), p_open, flags);
-        wdl = ImGui::GetWindowDrawList();
-
-        /*if (window && window->Viewport) {
-            HWND hwnd = (HWND)window->Viewport->PlatformHandle;
-            SetForegroundWindow(hwnd);
-            // or BringWindowToTop(hwnd) if you don't want to steal input focus, just z-order
-        }*/
-
-        if(display_front && !display_front_set) {
-            if(auto w = nw()) {
-                w.always_on_op();
-            }
-        }
-
-    }
-
-    void window::leave() {
-        if(auto native_window = nw()) {
-            if(opacity != last_opacity) {
-                native_window.opacity(opacity);
-                last_opacity = opacity;
-            }
-        }
-
-
-#if PLATFORM_WINDOWS
-        const ImGuiViewport* vp = ImGui::GetWindowViewport();
-        if(vp && vp->PlatformWindowCreated && vp->PlatformHandleRaw) {
-            auto h_wnd = static_cast<HWND>(vp->PlatformHandleRaw);
-            common::win32::window wnd{h_wnd};
-
-            if(win32_x_style_applied_to_handle != vp->PlatformHandleRaw) {
-                wnd.set_rounded_corners(false);
-                win32_x_style_applied_to_handle = vp->PlatformHandleRaw;
-            }
-
-            if(!win32_brought_forward) {
-                wnd.set_foreground();
-                win32_brought_forward = true;
-            }
-            if(win32_exclude_from_capture_current != win32_exclude_from_capture) {
-                ::SetWindowDisplayAffinity(h_wnd, win32_exclude_from_capture ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
-                win32_exclude_from_capture_current = win32_exclude_from_capture;
-            }
-            if(win32_always_on_top_current != win32_always_on_top) {
-                ::SetWindowPos(h_wnd, win32_always_on_top ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0,
-                               SWP_NOMOVE | SWP_NOSIZE);
-                win32_always_on_top_current = win32_always_on_top;
-            }
-        }
-#endif
-
-        if(border_size >= 0)
-            ImGui::PopStyleVar();
-
-        wdl = nullptr;
-        ImGui::End();
-
-        if(fill_viewport_enabled) {
-            ImGui::PopStyleVar();
-        }
-    }
-
-    window& window::fullscreen() {
-        ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->Pos, ImGuiCond_Once);
-        ImGui::SetNextWindowSize(viewport->Size, ImGuiCond_Once);
-
-        return *this;
-    }
-
-    window::~window() {
-    }
-
-    common::ui_window window::nw() {
-        const ImGuiViewport* vp = ImGui::GetWindowViewport();
-        return common::ui_window{vp->PlatformHandle};
     }
 
     // ---- container ----
@@ -951,16 +737,18 @@ namespace grey::widgets {
         return mon(pio.Monitors[index]);
     }
 
-    optional<monitor> mon() {
+    optional<monitor> mon_current() {
         const ImGuiPlatformIO& pio = ImGui::GetPlatformIO();
         ImVector<ImGuiPlatformMonitor> mons = pio.Monitors;
-        point mouse_pos = ImGui::GetMousePos();
+        long x, y;
+        common::mouse::get_pos(x, y);
+        const point mp{x, y};
 
-        for(auto& imon : mons) {
+        for(const auto& current_mon : mons) {
             // check if mouse_pos is inside this monitor area
-            bool inside = mouse_pos.x >= imon.MainPos.x && mouse_pos.x <= imon.MainPos.x + imon.MainSize.x &&
-                          mouse_pos.y >= imon.MainPos.y && mouse_pos.y <= imon.MainPos.y + imon.MainSize.y;
-            if(inside) return mon(imon);
+            const bool inside = mp.x >= current_mon.MainPos.x && mp.x <= current_mon.MainPos.x + current_mon.MainSize.x &&
+                          mp.y >= current_mon.MainPos.y && mp.y <= current_mon.MainPos.y + current_mon.MainSize.y;
+            if(inside) return mon(current_mon);
         }
 
         return nullopt;
@@ -1017,25 +805,25 @@ namespace grey::widgets {
 
     // ---- image ----
 
-    void image(texture_loader& app, const std::string& key, size_t width, size_t height,
+    void image(texture_loader& app, const std::string& key, sz size,
                float uv0_x, float uv0_y, float uv1_x, float uv1_y) {
         auto tex = app.get_texture(key);
         if(tex && tex->data) {
-            ImGui::Image((ImTextureID) tex->data, ImVec2(width, height),
+            ImGui::Image((ImTextureID) tex->data, size,
                          ImVec2(uv0_x, uv0_y), ImVec2(uv1_x, uv1_y));
         } else {
-            ImGui::Dummy(ImVec2(width, height));
+            dummy(size);
         }
     }
 
-    void image_rounded(texture_loader& app, const std::string& key, size_t width, size_t height, float rounding,
+    void image_rounded(texture_loader& app, const std::string& key, sz size, float rounding,
                        float uv0_x, float uv0_y, float uv1_x, float uv1_y) {
         auto tex = app.get_texture(key);
         if(tex && tex->data) {
             ImDrawList* dl = ImGui::GetWindowDrawList();
             ImVec2 p_min = ImGui::GetCursorScreenPos();
-            ImVec2 p_max = ImVec2(p_min.x + width, p_min.y + height);
-            ImGui::Dummy(ImVec2(width, height));
+            ImVec2 p_max = ImVec2(p_min.x + size.width, p_min.y + size.height);
+            dummy(size);
             dl->AddImageRounded((ImTextureID) tex->data, p_min, p_max,
                                 ImVec2(uv0_x, uv0_y), ImVec2(uv1_x, uv1_y), ImGui::GetColorU32(ImVec4(1, 1, 1, 1)),
                                 rounding);
@@ -1044,17 +832,18 @@ namespace grey::widgets {
 
     void icon_image(texture_loader& app, const std::string& key) {
         float size = 16 * scale;
-        image(app, key, size, size);
+        image(app, key, sz{size, size});
     }
 
     bool icon_selector(texture_loader& app, const std::string& path, size_t square_size) {
         group g;
+        sz s = sz::square(square_size);
 
         if(path.empty()) {
-            ImGui::Dummy(ImVec2(square_size, square_size));
+            dummy(s);
         } else {
             app.preload_texture(path, path);
-            image_rounded(app, path, square_size, square_size, square_size / 2);
+            image_rounded(app, path, s, square_size / 2);
         }
         return is_leftclicked();
     }
@@ -1771,7 +1560,8 @@ namespace grey::widgets {
     void plot_demo() {
         if(ImPlot::BeginPlot("##plot")) {
             ImPlot::SetupAxisTicks(ImAxis_Y1, 0, 3, 4, labels, false);
-            ImPlot::PlotBars("##bars", bar_data, 4, 0.67, 0, ImPlotBarsFlags_Horizontal);
+            // todo: fix new overload
+            // ImPlot::PlotBars("##bars", bar_data, 4, 0.67, 0, ImPlotBarsFlags_Horizontal);
 
             ImPlot::EndPlot();
         }
@@ -1787,9 +1577,11 @@ namespace grey::widgets {
             ImPlot::SetupAxisLimits(ImAxis_Y1, y_min, y_max, ImGuiCond_Always);
 
             //ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, 0.5f);
-            ImPlot::PlotLine("##realtime", &points.data[0].x, &points.data[0].y, points.data.size(),
-                             0,
-                             points.offset, 2 * sizeof(float));
+
+            // todo: fix new overload
+            // ImPlot::PlotLine("##realtime", &points.data[0].x, &points.data[0].y, points.data.size(),
+            //                  0,
+            //                  points.offset, 2 * sizeof(float));
 
 
             ImPlot::EndPlot();
@@ -1809,24 +1601,27 @@ namespace grey::widgets {
             ImPlot::SetupAxisLimits(ImAxis_Y1, y_min, y_max, ImGuiCond_Always);
 
             if(fill) {
-                ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f);
-                ImPlot::PlotShaded(name1.c_str(), &points1.data[0].x, &points1.data[0].y, points1.data.size(),
-                                   -INFINITY,
-                                   0, points1.offset, 2 * sizeof(float));
-                ImPlot::PlotShaded(name2.c_str(), &points2.data[0].x, &points2.data[0].y, points2.data.size(),
-                                   -INFINITY,
-                                   0, points2.offset, 2 * sizeof(float));
-
-                ImPlot::PopStyleVar();
+                // todo: fix new overload
+                // ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f);
+                // ImPlot::PlotShaded(name1.c_str(), &points1.data[0].x, &points1.data[0].y, points1.data.size(),
+                //                    -INFINITY,
+                //                    0, points1.offset, 2 * sizeof(float));
+                // ImPlot::PlotShaded(name2.c_str(), &points2.data[0].x, &points2.data[0].y, points2.data.size(),
+                //                    -INFINITY,
+                //                    0, points2.offset, 2 * sizeof(float));
+                //
+                // ImPlot::PopStyleVar();
             }
 
             //ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, 0.5f);
-            ImPlot::PlotLine(name1.c_str(), &points1.data[0].x, &points1.data[0].y, points1.data.size(),
-                             0,
-                             points1.offset, 2 * sizeof(float));
-            ImPlot::PlotLine(name2.c_str(), &points2.data[0].x, &points2.data[0].y, points2.data.size(),
-                             0,
-                             points2.offset, 2 * sizeof(float));
+
+            // todo: fix new overload
+            // ImPlot::PlotLine(name1.c_str(), &points1.data[0].x, &points1.data[0].y, points1.data.size(),
+            //                  0,
+            //                  points1.offset, 2 * sizeof(float));
+            // ImPlot::PlotLine(name2.c_str(), &points2.data[0].x, &points2.data[0].y, points2.data.size(),
+            //                  0,
+            //                  points2.offset, 2 * sizeof(float));
 
             ImPlot::EndPlot();
         }

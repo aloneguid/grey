@@ -8,19 +8,6 @@
 namespace grey {
     struct sz;
 
-    struct texture {
-        void* data;
-        size_t width;
-        size_t height;
-
-        texture(void* data) : data{data}, width{0}, height{0} {}
-
-        /**
-         * @brief Disposing the texture is platform specific.
-         */
-        virtual ~texture() = default;
-    };
-
     /**
      * @brief Represents different styles of system window chrome.
      */
@@ -39,18 +26,6 @@ namespace grey {
          * No decorations at all, looks like a boring rectangle.
          */
         none = 2
-    };
-
-    /**
-     * Functions to work with textures (i.e. images)
-     */
-    class texture_loader {
-    public:
-        virtual std::shared_ptr<texture> get_texture(const std::string& key) = 0;
-
-        virtual bool preload_texture(const std::string& key, const unsigned char* buffer, unsigned int len) = 0;
-
-        virtual bool preload_texture(const std::string& key, const std::string& path) = 0;
     };
 
     enum class emphasis : int32_t {
@@ -109,6 +84,12 @@ namespace grey {
         point(const float x, const float y) : x{x}, y{y} {
         }
 
+        point(const int x, const int y) : x{static_cast<float>(x)}, y{static_cast<float>(y)} {
+        }
+
+        point(const long x, const long y) : x{static_cast<float>(x)}, y{static_cast<float>(y)} {
+        }
+
         point(const ImVec2& pos) : x{pos.x}, y{pos.y} {
         }
 
@@ -155,6 +136,8 @@ namespace grey {
 
         sz(const ImVec2& dim) : width{dim.x}, height{dim.y} {
         }
+
+        [[nodiscard]] static sz square(float size) { return sz{size, size}; }
 
         operator ImVec2() const { return ImVec2{width, height}; }
 
@@ -216,6 +199,8 @@ namespace grey {
         [[nodiscard]] float height() const { return y_max - y_min; }
 
         [[nodiscard]] point centre() const { return point{(x_min + x_max) / 2, (y_min + y_max) / 2}; }
+
+        [[nodiscard]] sz size() const { return sz{width(), height()}; }
 
         [[nodiscard]] bool empty() const { return x_min == x_max && y_min == y_max; }
     };
@@ -326,6 +311,7 @@ namespace grey {
 
     struct wnd_opts {
         bool* open_ptr{nullptr};
+        bool has_menu_bar{false};
         bool fill_viewport{false};
         float opacity{1.0f};
         bool show_title_bar{true};
@@ -365,6 +351,30 @@ namespace grey {
                     load_fixed =
                     load_bold = true;
         }
+    };
+
+    struct texture {
+        void* data;
+        sz size{};
+
+        texture(void* data) : data{data} {}
+
+        /**
+         * @brief Disposing the texture is platform specific.
+         */
+        virtual ~texture() = default;
+    };
+
+    /**
+     * Functions to work with textures (i.e. images)
+     */
+    class texture_loader {
+    public:
+        virtual std::shared_ptr<texture> get_texture(const std::string& key) = 0;
+
+        virtual bool preload_texture(const std::string& key, const unsigned char* buffer, unsigned int len) = 0;
+
+        virtual bool preload_texture(const std::string& key, const std::string& path) = 0;
     };
 }
 

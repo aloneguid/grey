@@ -52,6 +52,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
         app->preload_texture("luna", luna_jpg, luna_jpg_len);
     };
 
+    app->main_window_opts().has_menu_bar = true;
     app->fonts.load_all();
     app->center_on_screen = true;
 
@@ -154,6 +155,24 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                         }
                     }
 
+                    if(w::accordion("Image")) {
+                        static bool img_rounded{false};
+                        static float img_rounding{5.0f};
+                        static float img_scale{0.5f};
+
+                        auto texture = app->get_texture("luna");
+                        if(texture) {
+                            w::checkbox("rounded", img_rounded);
+                            w::slider(img_scale, 0.1f, 3.0f, "scale");
+                            if(img_rounded) {
+                                w::slider(img_rounding, 1, 50, "rounding");
+                                w::image_rounded(*app, "luna", texture->size * img_scale, img_rounding);
+                            } else {
+                                w::image(*app, "luna", texture->size * img_scale);
+                            }
+                        }
+                    }
+
                     w::lbl("hover for simple tooltip");
                     w::tt("simple tooltip");
 
@@ -244,28 +263,6 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                             widgets::texter adj{fa_delta, font_weight::fixed_size};
                             w::sl(0, false);
                             w::lbl("and monospace");
-                        }
-                    }
-                }
-            }
-
-            // simple image
-            {
-                if(auto tab = tabs.next_tab("img")) {
-                    static bool img_rounded{false};
-                    static float img_rounding{5.0f};
-                    static float img_scale{0.5f};
-
-                    auto texture = app->get_texture("luna");
-                    if(texture) {
-                        w::checkbox("rounded", img_rounded);
-                        w::slider(img_scale, 0.1f, 3.0f, "scale");
-                        if(img_rounded) {
-                            w::slider(img_rounding, 1, 50, "rounding");
-                            w::image_rounded(*app, "luna", texture->width * img_scale, texture->height * img_scale,
-                                             img_rounding);
-                        } else {
-                            w::image(*app, "luna", texture->width * img_scale, texture->height * img_scale);
                         }
                     }
                 }
@@ -640,6 +637,9 @@ Also, [GitHub alerts](https://docs.github.com/en/get-started/writing-on-github/g
                         w::lbl(format("{} (work: {})", mm.area, mm.work_area));
                     }
 
+                    if(w::button("center on screen")) {
+                        app->center();
+                    }
                 }
             }
 
@@ -661,11 +661,17 @@ Also, [GitHub alerts](https://docs.github.com/en/get-started/writing-on-github/g
                 w::lbl("popup content");
             }
 
-            w::sl(); w::lbl("|", {.emp=emphasis::disabled});
-            w::sl(); w::label_debug_info();
+            auto sbi = [](string s, bool sep = true) {
+                if(sep) {
+                    w::sl(); w::lbl("|", {.emp=emphasis::disabled});
+                }
+                w::sl();
+                w::lbl(s);
+            };
 
-            w::sl(); w::lbl("|", {.emp=emphasis::disabled});
-            w::sl(); w::lbl(ImGui::GetVersion());
+            sbi(format("{:.2f} FPS", ImGui::GetIO().Framerate), false);
+            sbi(format("x{:.2f}", w::scale));
+            sbi(ImGui::GetVersion());
         )
 
 
