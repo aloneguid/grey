@@ -127,6 +127,9 @@ namespace grey::widgets {
             flags |= ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
         }
 
+        if(!s.background)
+            flags |= ImGuiWindowFlags_NoBackground;
+
         if(!s.resizeable)
             flags |= ImGuiWindowFlags_NoResize;
 

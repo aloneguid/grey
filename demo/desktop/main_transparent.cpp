@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     auto app = grey::app::make("transparent", {800, 600});
     float scale = w::scale;
     app->use_transparency_colour_key_value = true;
-    app->main_window().no_background();
+    app->main_window_opts().background = false;
 
     app->run([&app]() {
 

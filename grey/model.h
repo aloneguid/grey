@@ -323,6 +323,7 @@ namespace grey {
         act_condition size_cond{act_condition::never};
         float border{.0f};
         bool scrollable{true};
+        bool background{true};
 
         /**
          * When true, user can manually resize the window.
