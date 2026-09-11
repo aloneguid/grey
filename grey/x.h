@@ -124,6 +124,11 @@ extern "C" {
         int32_t language,
         const char* c_text);
 
+    // -- clipboard
+
+    EXPORTED int clipboard_get_text(char* buffer, int32_t buffer_size);
+    EXPORTED void clipboard_set_text(const char* c_text);
+
     // -- various properties
 
     EXPORTED float get_fps();

@@ -22,6 +22,7 @@ file(GLOB core_src
     "common/os.cpp"
     "common/ui_window.cpp"
     "common/keyboard.cpp"
+    "common/clipboard.cpp"
     "common/mouse.cpp"
     "common/str.cpp"
     "common/img.cpp"

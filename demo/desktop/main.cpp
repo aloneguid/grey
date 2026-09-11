@@ -6,6 +6,7 @@
 #include <imgui_internal.h>
 #include <vector>
 #include <iostream>
+#include "common/clipboard.h"
 
 using namespace std;
 using namespace grey;
@@ -640,6 +641,16 @@ Also, [GitHub alerts](https://docs.github.com/en/get-started/writing-on-github/g
                     if(w::button("center on screen")) {
                         app->center();
                     }
+
+                    w::sep("Clipboard");
+                    static string clip_text;
+                    w::input_ml("clip", clip_text, w::scaled(200));
+                    if(w::button("read"))
+                        clip_text = common::clipboard::get_text();
+                    w::sl();
+                    if(w::button("write"))
+                        common::clipboard::set_text(clip_text);
+
                 }
             }
 

@@ -606,7 +606,7 @@ namespace grey::widgets {
         }
     }
 
-    bool input_ml(const string& id, string& value, unsigned int line_height, bool autoscroll, bool enabled) {
+    /*bool input_ml(const string& id, string& value, unsigned int line_height, bool autoscroll, bool enabled) {
         ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;
         ImVec2 size{-FLT_MIN, ImGui::GetTextLineHeight() * line_height};
 
@@ -621,7 +621,7 @@ namespace grey::widgets {
         }
 
         return ret;
-    }
+    }*/
 
     template<typename T>
     bool input_ml(const string& id, T value, int value_length, float height, bool autoscroll, bool enabled,

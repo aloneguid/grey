@@ -9,6 +9,7 @@ using namespace grey;
 namespace w = widgets;
 
 #include "common/os.h"
+#include "common/clipboard.h"
 
 static void platform_init() {
 #if PLATFORM_WINDOWS
@@ -303,4 +304,22 @@ int get_version(char* buffer, int32_t buffer_size) {
     buffer[version.size()] = '\0';
 
     return required;
+}
+
+int clipboard_get_text(char* buffer, int32_t buffer_size) {
+    const string text = common::clipboard::get_text();
+    const int required = static_cast<int>(text.size()) + 1;
+
+    if (buffer == nullptr || buffer_size < required) {
+        return required;
+    }
+
+    std::copy(text.begin(), text.end(), buffer);
+    buffer[text.size()] = '\0';
+
+    return required;
+}
+
+void clipboard_set_text(const char* c_text) {
+    common::clipboard::set_text(c_text);
 }
