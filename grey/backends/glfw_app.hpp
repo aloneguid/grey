@@ -87,7 +87,11 @@ namespace grey::backends {
             if(!glfw_ready)
                 return false;
 
-            glfwWindowHint(GLFW_DECORATED, chrome == system_chrome::native  ? GLFW_TRUE : GLFW_FALSE);
+            // GLFW delegates the native title bar, frame, shadows, and rounded corners to the
+            // active window manager/compositor (including the different Ubuntu X11/Wayland paths).
+            // Every non-native chrome mode remains explicitly undecorated.
+            const int decorated = chrome == system_chrome::native ? GLFW_TRUE : GLFW_FALSE;
+            glfwWindowHint(GLFW_DECORATED, decorated);
             glfwWindowHint(GLFW_FLOATING, always_on_top ? GLFW_TRUE : GLFW_FALSE);
             if(use_transparency_colour_key_value)
                 glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);

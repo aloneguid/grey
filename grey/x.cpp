@@ -292,12 +292,15 @@ float get_fps() {
 }
 
 int get_version(char* buffer, int32_t buffer_size) {
-    string version{ImGui::GetVersion()};
-    int required = version.size() + 1;
-    if(buffer == nullptr || buffer_size < required) {
+    const std::string version{ImGui::GetVersion()};
+    const int required = static_cast<int>(version.size()) + 1;
+
+    if (buffer == nullptr || buffer_size < required) {
         return required;
     }
 
-    strcpy_s(buffer, required, version.c_str());
+    std::copy(version.begin(), version.end(), buffer);
+    buffer[version.size()] = '\0';
+
     return required;
 }
