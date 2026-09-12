@@ -114,8 +114,6 @@ namespace grey::widgets {
         guardable& g;
     };
 
-#define with_window(w, ...) { { grey::widgets::guard wg{w}; if(w) { __VA_ARGS__ } }}
-
     class container : public guardable {
     public:
         /**
@@ -460,7 +458,7 @@ namespace grey::widgets {
     void tt(const std::string& text, show_delay delay = show_delay::normal);
 
     /**
-     * @brief Checks if the last rendered item is hovered, and if so, shows a tooltip with the given text.
+     * @brief Checks if the last rendered item is hovered, and if so, shows a simple tooltip with the given text.
      */
     void tt(const char* text, show_delay delay = show_delay::normal);
 

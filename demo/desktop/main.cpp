@@ -174,15 +174,24 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                         }
                     }
 
-                    w::lbl("hover for simple tooltip");
-                    w::tt("simple tooltip");
+                    if(w::accordion("Tooltips")) {
+                        static string tooltip_text{"tooltip text"};
+                        static show_delay sd{show_delay::normal};
 
-                    w::sl();
-                    w::lbl("hover for rich tooltip");
-                    if(w::rich_tt tt{show_delay::immediate}; tt) {
-                        w::lbl("rich tooltip content");
-                        w::sep();
-                        w::button("even button here");
+                        w::input(tooltip_text, "text");
+
+                        w::enum_combo("show delay", sd);
+
+                        w::hyperlink("simple");
+                        w::tt(tooltip_text, sd);
+
+                        w::sl();
+                        w::hyperlink("rich");
+                        if(w::rich_tt tt{sd}; tt) {
+                            w::lbl("rich one", {.emp = emphasis::primary});
+                            w::sep();
+                            w::lbl(tooltip_text);
+                        }
                     }
 
                     w::sep();

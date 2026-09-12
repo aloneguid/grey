@@ -8,5 +8,11 @@
 - infra:
   - linux arm?
 
+- general
+  - ?
+
 ### done:
--
+- mac
+- linux
+- windows
+- all
