@@ -6,11 +6,10 @@
 
 using namespace std;
 using namespace grey;
-namespace w = grey::widgets;
+namespace w = widgets;
 
 #include "common/os.h"
-
-static float scale = 1.0f; // default scale
+#include "common/clipboard.h"
 
 static void platform_init() {
 #if PLATFORM_WINDOWS
@@ -21,7 +20,7 @@ static void platform_init() {
 static style as_style(cstyle* style) {
     grey::style s;
     if(style) {
-        s.emp = (emphasis)style->emp;
+        s.emp = static_cast<emphasis>(style->emp);
     }
     return s;
 }
@@ -30,7 +29,7 @@ EXPORTED void app_run(
     const char* c_title,
     int32_t width,
     int32_t height,
-    bool has_menubar,
+    bool has_menu_bar,
     bool can_scroll,
     bool center_on_screen,
     RenderFrameCallback c_frame_callback) {
@@ -41,42 +40,24 @@ EXPORTED void app_run(
 
     // main window
     bool is_running = true;
-    w::window wnd{title, &is_running};
-    wnd
-        .no_titlebar()
-        .no_resize()
-        .fill_viewport()
-        .border(0);
 
-    if(has_menubar) {
-        wnd.has_menubar();
-    }
+    auto app = app::make(title, sz{static_cast<float>(width), static_cast<float>(height)});
+    wnd_opts& opts = app->main_window_opts();
 
-    if(!can_scroll) {
-        wnd.no_scroll();
-    }
-
-    if(center_on_screen) {
-        wnd.center();
-    }
-
-    auto app = grey::app::make(title, width, height);
+    opts.has_menu_bar = has_menu_bar;
+    if(!can_scroll) opts.scrollable = false;
+    if(center_on_screen) app->center_on_screen = true;
     app->can_resize = true;
     app->fonts.load_all();
-    app->run([c_frame_callback, &wnd](const grey::app& app) {
 
-        scale = app.scale;
-
-        w::guard g{wnd};
-
+    app->run([c_frame_callback]() {
         if(c_frame_callback) {
             if(!c_frame_callback()) {
                 return false;
             }
         }
 
-        w::notify_render_frame();
-
+        w::toast_render_frame();
         return true;
     });
 }
@@ -136,12 +117,12 @@ EXPORTED void toast(int32_t emphasis, const char* c_message) {
 
 EXPORTED bool input_string(char* c_value, int32_t value_max_length, const char* c_label, bool enabled, float width, bool is_readonly) {
     string label{ c_label };
-    return w::input(c_value, value_max_length, label, enabled, width * scale, is_readonly);
+    return w::input(c_value, value_max_length, label, enabled, width * w::scale, is_readonly);
 }
 
 EXPORTED bool input_int(int32_t* value, const char* c_label, bool enabled, float width, bool is_readonly) {
     string label{ c_label };
-    return w::input(*value, label, enabled, width * scale, is_readonly);
+    return w::input(*value, label, enabled, width * w::scale, is_readonly);
 }
 
 EXPORTED bool input_multiline(const char* c_id, char* c_value, int32_t value_max_length, float height, bool autoscroll, bool enabled, bool use_fixed_font) {
@@ -176,11 +157,11 @@ void rich_tt(RenderCallback c_render_callback, int32_t delay) {
 }
 
 EXPORTED bool combo(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width) {
-    return w::combo(c_label, vector<string>(options, options + options_size), *selected, width * scale);
+    return w::combo(c_label, vector<string>(options, options + options_size), *selected, width * w::scale);
 }
 
 EXPORTED bool list(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width) {
-    return w::list(c_label, vector<string>(options, options + options_size), *selected, width * scale);
+    return w::list(c_label, vector<string>(options, options + options_size), *selected, width * w::scale);
 }
 
 EXPORTED void tab_bar(const char* c_id, RenderPtrCallback c_render_callback) {
@@ -225,7 +206,7 @@ EXPORTED void big_table(const char* c_id,
         cols.emplace_back(c_columns[i]);
     }
 
-    w::big_table t{ c_id, cols, static_cast<size_t>(row_count), outer_width * scale, outer_height * scale, alternate_row_bg };
+    w::big_table t{ c_id, cols, static_cast<size_t>(row_count), outer_width * w::scale, outer_height * w::scale, alternate_row_bg };
     t.render_data([c_cell_callback](int row_idx, int column_idx) {
             c_cell_callback(row_idx, column_idx);
         });
@@ -239,7 +220,7 @@ EXPORTED void table(const char* c_id, const char** c_columns, int32_t c_columns_
         cols.emplace_back(c_columns[i]);
     }
 
-    w::table t{c_id, cols, outer_width * scale, outer_height * scale, alternate_row_bg};
+    w::table t{c_id, cols, outer_width * w::scale, outer_height * w::scale, alternate_row_bg};
     if(t) {
         c_ptr_callback(&t);
     }
@@ -281,73 +262,6 @@ EXPORTED bool menu_item(const char* c_text, bool reserve_icon_space, const char*
     return w::mi(text, reserve_icon_space, icon);
 }
 
-
-// -- windowing
-
-map<int, unique_ptr<w::window>> window_map;
-
-EXPORTED int32_t window(int32_t id, bool unregister,
-    const char* title,
-    int32_t width, int32_t height,
-    bool* p_open,
-    RenderCallback c_render_callback) {
-
-    auto it = window_map.find(id);
-    if(it == window_map.end()) {
-        if(unregister) return -1;
-
-        // create new window
-        id = w::generate_int_id();
-        string t{title};
-        auto wnd = make_unique<w::window>(t, p_open);
-        wnd->size(width, height);
-        window_map[id] = std::move(wnd);
-    } else if(unregister) {
-        // delete window from map
-        window_map.erase(it);
-        return -1;
-    }
-
-    w::window& w{*window_map[id]};
-    w::guard wg{w};
-    if(c_render_callback) c_render_callback();
-    return id;
-}
-
-EXPORTED int32_t window_register(const char* title, bool* is_open) {
-
-    int id = w::generate_int_id();
-    string t{title};
-    window_map[id] = make_unique<w::window>(t, is_open);
-    return id;
-}
-
-EXPORTED bool window_unregister(int32_t id) {
-    // delete window from map
-    auto it = window_map.find(id);
-    if(it == window_map.end()) return false;
-
-    window_map.erase(it);
-    return true;
-}
-
-EXPORTED void window_render(int32_t id, RenderCallback c_render_callback) {
-    if(!c_render_callback) {
-        return;
-    }
-
-    // get window from map
-    auto it = window_map.find(id);
-    if(it == window_map.end()) {
-        // window not found
-        return;
-    }
-
-    // otherwise, render window
-    w::guard g{*it->second};
-    c_render_callback();
-}
-
 map<int, unique_ptr<w::code_editor>> code_editor_map;
 
 EXPORTED int32_t code_editor(int32_t id, bool unregister, int32_t language, const char* c_text) {
@@ -374,8 +288,38 @@ EXPORTED int32_t code_editor(int32_t id, bool unregister, int32_t language, cons
 }
 
 
-void get_debug_info(float* fps) {
-    if(fps) {
-        *fps = ImGui::GetIO().Framerate;
+float get_fps() {
+    return ImGui::GetIO().Framerate;
+}
+
+int get_version(char* buffer, int32_t buffer_size) {
+    const std::string version{ImGui::GetVersion()};
+    const int required = static_cast<int>(version.size()) + 1;
+
+    if (buffer == nullptr || buffer_size < required) {
+        return required;
     }
+
+    std::copy(version.begin(), version.end(), buffer);
+    buffer[version.size()] = '\0';
+
+    return required;
+}
+
+int clipboard_get_text(char* buffer, int32_t buffer_size) {
+    const string text = common::clipboard::get_text();
+    const int required = static_cast<int>(text.size()) + 1;
+
+    if (buffer == nullptr || buffer_size < required) {
+        return required;
+    }
+
+    std::copy(text.begin(), text.end(), buffer);
+    buffer[text.size()] = '\0';
+
+    return required;
+}
+
+void clipboard_set_text(const char* c_text) {
+    common::clipboard::set_text(c_text);
 }

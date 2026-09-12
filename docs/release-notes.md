@@ -1,3 +1,12 @@
 ## 0.0.0
 
-First release of the .NET nuget package.
+### todo:
+- mac: https://github.com/WerWolv/ImHex/blob/master/main/gui/source/window/platform/macos.cpp
+  - detect dark mode
+  - load all fonts
+
+- infra:
+  - linux arm?
+
+### done:
+-

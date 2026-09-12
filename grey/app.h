@@ -6,6 +6,7 @@
 #include "common/img.h"
 #include "common/platform.h"
 #include "model.h"
+#include "widgets.h"
 
 #if PLATFORM_WINDOWS
 #include <Windows.h>
@@ -13,30 +14,26 @@
 
 namespace grey {
 
-    struct texture {
-        void* data;
-        size_t width;
-        size_t height;
-
-        texture(void* data) : data{data}, width{0}, height{0} {}
-
-        /**
-         * @brief Disposing the texture is platform specific.
-         */
-        virtual ~texture() = default;
-    };
-
-    class app {
+    class app : public texture_loader {
     public:
+        /**
+         *
+         * @param title
+         * @param initial_size To help with scaling, initial size is in logical pixels that will be multiplied by active monitor's DPI when creating the window.
+         */
+        explicit app(std::string  title, sz initial_size);
         virtual ~app() = default;
 
         /**
          * @brief Creates app instance, which will be different implementation depending on the platform we run on.
          *        Only one instance of the app should be created per process lifetime.
-         * @param title 
+         * @param title Application title, affects what is displayed on the taskbar and window title in your OS.
+         * @param size Main window size in logical pixels.
          * @return 
          */
-        static std::unique_ptr<app> make(const std::string& title, int width, int height);
+        static std::unique_ptr<app> make(const std::string& title, sz size = sz{-1, -1});
+
+        wnd_opts& main_window_opts() { return wnd_main_opts; }
 
         /**
          * @brief When set, application will set this theme on startup.
@@ -48,21 +45,28 @@ namespace grey {
          */
         font_config fonts{};
 
-        float scale{1.0f};
-
+        /**
+         * Called after UI framework is initialised. Useful for loading assets, etc.
+         */
         std::function<void()> on_initialised;
 
+        /**
+         * Used for IPC on Windows. Do not use.
+         */
         std::function<void(int, const std::string&)> on_user_message;
 
-        app();
+        /**
+         * Call to start the application. This will block until the application is closed.
+         * @param render_frame Callback that will be called to render a frame. Return true to continue rendering, false to exit.
+         * @param create_main_window Pre-creates UI window inside the application window and fill app windows completely (default).
+         */
+        virtual void run(std::function<bool()> render_frame, bool create_main_window = true) = 0;
 
-        virtual void run(std::function<bool(app&)> render_frame) = 0;
+        std::shared_ptr<texture> get_texture(const std::string& key) override;
 
-        std::shared_ptr<texture> get_texture(const std::string& key);
+        bool preload_texture(const std::string& key, const unsigned char* buffer, unsigned int len) override;
 
-        bool preload_texture(const std::string& key, const unsigned char* buffer, unsigned int len);
-
-        bool preload_texture(const std::string& key, const std::string& path);
+        bool preload_texture(const std::string& key, const std::string& path) override;
 
         /**
          * @brief Releases texture from memory
@@ -77,31 +81,33 @@ namespace grey {
          */
         void set_theme(const std::string& theme_id);
 
+        /**
+         * @brief Resizes the main viewport of the application. This is the area where the application renders its main content.
+         * @param size Logical size.
+         */
+        virtual void resize(sz size) = 0;
 
         /**
-         * @brief Resizes the main viewport of the application. This is the area where the application renders its main content. The width and height parameters will be multiplied by the scale factor.
-         * @param width 
-         * @param height 
+         * @brief Moves the main viewport of the application to the specified position on the screen.
+         * This is monitor/platform-dependent and may not work on all platforms.
+         * @param pos Absolute position.
          */
-        virtual void resize_main_viewport(int width, int height) = 0;
+        virtual void move(point pos) = 0;
 
         /**
-         * @brief Moves the main viewport of the application to the specified position on the screen. This is monitor/platform-dependent and may not work on all platforms.
-         * @param x 
-         * @param y 
+         * @brief Centers the main application window on the screen it's at.
          */
-        virtual void move_main_viewport(int x, int y) = 0;
+        virtual void center() = 0;
 
         /**
          * @brief Brings the main viewport of the application to the foreground.
          */
-        virtual void foreground_main_viewport() = 0;
+        virtual void foreground() = 0;
 
         /**
-         * @brief Limits maximum FPS for the application. This is useful when you want to limit the CPU usage of the application.
-         * @param fps 
+         * Target rendering FPS. Set to -1 to disable FPS control (default). Fractional FPS values are supported and useful for application idling.
          */
-        void set_target_fps(int fps);
+        float fps{-1};
 
         /**
          * @brief Returns the clear color of the application as the RGBA array of floats (0-1).
@@ -121,14 +127,14 @@ namespace grey {
         bool can_resize{true};
 
         /**
-         * @brief When set to true, will center the window on the screen where mouse is currently located.
+         * @brief When set to true, will center the window on the screen where mouse is currently located. Centering occurs on window creation and resize operations, but move() will ignore centering.
          */
         bool center_on_screen{false};
 
         /**
-         * When set (default) will show native window manager's title bar, otherwise nothing.
+         * Specifies how to decorate the main window.
          */
-        bool show_title_bar{true};
+        system_chrome chrome{system_chrome::native};
 
         /**
          * When set, will keep the window always on top of other windows.
@@ -147,12 +153,14 @@ namespace grey {
          */
         int transparency_window_alpha{255};
 
+        /**
+         * Hide main window from Taskbar/Dock or whatever the platform calls it.
+         */
+        bool hide_from_taskbar{false};
+
         // platform-specific flags
 
 #if PLATFORM_WINDOWS
-
-        bool win32_hide_from_taskbar{false};
-
         /**
          * @brief sets WS_EX_NOACTIVATE on the window (if you need to create a tool window that does not take focus, useful for notification windows)
          */
@@ -185,7 +193,7 @@ namespace grey {
 
         void on_after_initialised();
 
-        virtual std::shared_ptr<texture> make_native_texture(grey::common::raw_img& img) = 0;
+        virtual std::shared_ptr<texture> make_native_texture(common::raw_img& img) = 0;
 
         /**
          * @brief Hints if dark mode should be enabled for this application on the OS level. For instance, on Windows 10/11 dark mode will paint window chrome in dark color.
@@ -193,7 +201,21 @@ namespace grey {
          */
         virtual void set_dark_mode(bool enabled) = 0;
 
-        float max_frame_interval_ms;
+        /**
+         * Called by backend on each frame to pause the application if FPS control is enabled.
+         */
+        void fps_pause() const;
+
+        // pre-initialised main window
+        wnd_opts wnd_main_opts{
+            .fill_viewport = true,
+            .show_title_bar = false,
+            .resizeable = false
+        };
+        std::string title;  // todo: make it public and reactive
+        sz initial_size;
+        bool wnd_main_is_open{true};
+        bool render_main_window(const std::function<bool()>& render_frame);
 
     private:
         // key is texture name, value is texture data. The app will take care of disposing of the textures when the app is closed.

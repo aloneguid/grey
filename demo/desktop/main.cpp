@@ -6,6 +6,7 @@
 #include <imgui_internal.h>
 #include <vector>
 #include <iostream>
+#include "common/clipboard.h"
 
 using namespace std;
 using namespace grey;
@@ -16,9 +17,8 @@ unsigned int current_item = 0;
 bool app_open{true};
 bool show_demo{false};
 string window_title = "Demo app";
-w::window wnd{window_title, &app_open};
 string text;
-w::container scroller{400, 100};
+w::container scroller{400, 200};
 w::popup status_pop{"status_pop"};
 bool ned_initialised{false};
 bool selected{false};
@@ -47,24 +47,15 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
     //auto wnd = backend->make_window<demo::main_wnd>();
     //backend->run();
 
-    auto app = grey::app::make("demo", 700, 800);
+    auto app = grey::app::make("demo", sz{700, 800});
 
     app->on_initialised = [&app]() {
         app->preload_texture("luna", luna_jpg, luna_jpg_len);
     };
 
-
+    app->main_window_opts().has_menu_bar = true;
     app->fonts.load_all();
     app->center_on_screen = true;
-
-    wnd
-            .no_titlebar()
-            .no_scroll()
-            .no_resize()
-            .fill_viewport()
-            .border(0)
-            .has_menubar();
-
 
     gr.add_node(1);
     gr.add_node(2);
@@ -75,16 +66,12 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
     gr.add_edge(1, 4);
 
 
-    app->run([&app](const grey::app& c_app) {
-        w::guard wg{wnd};
-
+    app->run([&app]() {
         // menu
         {
-            w::menu_bar menu;
-            if(menu) {
+            if(w::menu_bar menu; menu) {
                 {
-                    w::menu m("File");
-                    if(m) {
+                    if(w::menu m("File"); m) {
                         w::mi("New", true, ICON_MD_DONUT_LARGE);
                         if(w::mi("Exit", true)) {
                             app_open = false;
@@ -93,8 +80,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                 }
 
                 {
-                    w::menu m("View");
-                    if(m) {
+                    if(w::menu m("View"); m) {
                         w::mi_themes([&app](const std::string& id) {
                             w::toast(emphasis::info, "theme changed to " + id);
                             app->set_theme(id);
@@ -104,8 +90,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                 }
 
                 {
-                    w::menu m("Help");
-                    if(m) {
+                    if(w::menu m("Help"); m) {
                         w::mi("About");
                     }
                 }
@@ -118,15 +103,75 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
             // basics
             {
-                if(auto tab = tabs.next_tab("Basics")) {
-                    w::sl();
-                    w::lbl(ICON_MD_5G " icon1");
-                    w::lbl("label styles");
-                    w::lbl("");
-                    for(pair<emphasis, string_view> emp: magic_enum::enum_entries<emphasis>()) {
-                        string title = format("emp: {}", emp.second);
-                        w::sl();
-                        w::lbl(title, {.emp = emp.first});
+                if(auto tab = tabs.next_tab("intro")) {
+
+                    if(w::accordion("Icons")) {
+                        w::lbl(ICON_MD_5G " icon1");
+                    }
+
+                    if(w::accordion("Label styles")) {
+                        w::lbl("");
+                        for(pair<emphasis, string_view> emp: magic_enum::enum_entries<emphasis>()) {
+                            string title = format("emp: {}", emp.second);
+                            w::sl();
+                            w::lbl(title, {.emp = emp.first});
+                        }
+                    }
+
+                    if(w::accordion("Windows")) {
+                        static bool title_bar{true};
+                        static bool is_open{false};
+                        static bool use_is_open{true};
+                        static float opacity{1.0f};
+                        static float border{.0f};
+                        static bool scrollable{true};
+
+                        w::checkbox("show window", is_open);
+                        w::checkbox("display close button", use_is_open);
+                        w::checkbox("title bar", title_bar);
+                        w::slider(opacity, 0.0f, 1.0f, "opacity", 0.1f);
+                        w::checkbox("scrollable", scrollable);
+                        w::slider(border, 0.0f, 10.0f, "border", 0.1f);
+
+                        if(is_open) {
+                            if(w::wnd w1{"windows 1", {
+                                .open_ptr = use_is_open ? &is_open : nullptr,
+                                .opacity = opacity,
+                                .show_title_bar = title_bar,
+                                .border = border,
+                                .scrollable = scrollable}}) {
+
+                                w::lbl("DPI: ", {.emp = emphasis::primary});
+                                w::sl();
+                                w::lbl(format("{}", w::scale));
+
+                                w::lbl("Position:", {.emp = emphasis::primary});
+                                w::sl();
+                                w::lbl(format("{}", w1.pos()));
+
+                                w::lbl("Size: ", {.emp = emphasis::primary});
+                                w::sl();
+                                w::lbl(format("{}", w1.size()));
+                            }
+                        }
+                    }
+
+                    if(w::accordion("Image")) {
+                        static bool img_rounded{false};
+                        static float img_rounding{5.0f};
+                        static float img_scale{0.5f};
+
+                        auto texture = app->get_texture("luna");
+                        if(texture) {
+                            w::checkbox("rounded", img_rounded);
+                            w::slider(img_scale, 0.1f, 3.0f, "scale");
+                            if(img_rounded) {
+                                w::slider(img_rounding, 1, 50, "rounding");
+                                w::image_rounded(*app, "luna", texture->size * img_scale, img_rounding);
+                            } else {
+                                w::image(*app, "luna", texture->size * img_scale);
+                            }
+                        }
                     }
 
                     w::lbl("hover for simple tooltip");
@@ -145,7 +190,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                     w::sep("buttons (click for toast of the same emphasis)");
 
                     if(w::button("simply add dot")) {
-                        text += ".";
+                        text += '.';
                     }
 
                     for(pair<emphasis, string_view> emp: magic_enum::enum_entries<emphasis>()) {
@@ -219,29 +264,6 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                             widgets::texter adj{fa_delta, font_weight::fixed_size};
                             w::sl(0, false);
                             w::lbl("and monospace");
-                        }
-                    }
-                }
-            }
-
-            // simple image
-            {
-                auto tab = tabs.next_tab("Image");
-                if(tab) {
-                    static bool img_rounded{false};
-                    static float img_rounding{5.0f};
-                    static float img_scale{0.5f};
-
-                    auto texture = app->get_texture("luna");
-                    if(texture) {
-                        w::checkbox("rounded", img_rounded);
-                        w::slider(img_scale, 0.1f, 3.0f, "scale");
-                        if(img_rounded) {
-                            w::slider(img_rounding, 1, 50, "rounding");
-                            w::image_rounded(*app, "luna", texture->width * img_scale, texture->height * img_scale,
-                                             img_rounding);
-                        } else {
-                            w::image(*app, "luna", texture->width * img_scale, texture->height * img_scale);
                         }
                     }
                 }
@@ -336,7 +358,7 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                     w::lbl(to_string(current_item));
 
                     if(w::button("center on screen")) {
-                        wnd.center();
+                        app->center_on_screen = true;
                     }
                 }
             }
@@ -593,6 +615,45 @@ Also, [GitHub alerts](https://docs.github.com/en/get-started/writing-on-github/g
                     gr.render();
                 }
             }
+
+            // system
+            {
+                if(auto tab = tabs.next_tab("sys")) {
+                    bool fps_control = app->fps != -1;
+                    if(w::checkbox("FPS control", fps_control)) {
+                        app->fps = fps_control ? 10.0f : -1;
+                    }
+                    if(fps_control) {
+                        w::slider(app->fps, 0.0f, 500.0f, "FPS", 0.1f);
+                    }
+
+                    w::sep("Monitors");
+                    w::lbl(format("mouse pos: {}", w::mouse_pos()));
+                    for(int i = 0; i < w::mon_count(); i++) {
+                        auto mm = w::mon(i).value();
+                        w::lbl(format("{:2d}: ", i));
+                        w::sl(40);
+                        w::lbl(format("scale: {}", mm.dpi_scale));
+                        w::sl(160);
+                        w::lbl(format("{} (work: {})", mm.area, mm.work_area));
+                    }
+
+                    if(w::button("center on screen")) {
+                        app->center();
+                    }
+
+                    w::sep("Clipboard");
+                    static string clip_text;
+                    w::input_ml("clip", clip_text, w::scaled(200));
+                    if(w::button("read"))
+                        clip_text = common::clipboard::get_text();
+                    w::sl();
+                    if(w::button("write"))
+                        common::clipboard::set_text(clip_text);
+
+                }
+            }
+
         }
 
 
@@ -611,18 +672,24 @@ Also, [GitHub alerts](https://docs.github.com/en/get-started/writing-on-github/g
                 w::lbl("popup content");
             }
 
-            w::sl(); w::lbl("|", {.emp=emphasis::disabled});
-            w::sl(); w::label_debug_info();
+            auto sbi = [](string s, bool sep = true) {
+                if(sep) {
+                    w::sl(); w::lbl("|", {.emp=emphasis::disabled});
+                }
+                w::sl();
+                w::lbl(s);
+            };
 
-            w::sl(); w::lbl("|", {.emp=emphasis::disabled});
-            w::sl(); w::lbl(ImGui::GetVersion());
+            sbi(format("{:.2f} FPS", ImGui::GetIO().Framerate), false);
+            sbi(format("x{:.2f}", w::scale));
+            sbi(ImGui::GetVersion());
         )
 
 
         if(show_demo)
             ImGui::ShowDemoWindow();
 
-        w::notify_render_frame();
+        w::toast_render_frame();
 
         return app_open;
     });

@@ -204,18 +204,6 @@ namespace Grey {
             bool reserve_icon_space,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string c_icon);
 
-        // windowing
-
-        [DllImport(_libName)]
-        internal static extern int window(
-            int id,
-            bool unregister,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string title,
-            int width, int height,
-            ref bool is_open,
-            RenderCallback c_callback
-            );
-
         // code editor
         [DllImport(_libName)]
         internal static extern int code_editor(int id, bool unregister, int language,
@@ -225,7 +213,9 @@ namespace Grey {
         // system debug
 
         [DllImport(_libName)]
-        internal static extern void get_debug_info(ref float fps);
-
+        internal static extern float get_fps();
+        
+        [DllImport(_libName)]
+        internal static extern int get_version(StringBuilder buffer, int bufferSize);
     }
 }

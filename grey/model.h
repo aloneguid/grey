@@ -1,9 +1,32 @@
 #pragma once
 #include "imgui.h"
 #include <string>
+#include <memory>
+#include <optional>
+#include <format>
 
 namespace grey {
     struct sz;
+
+    /**
+     * @brief Represents different styles of system window chrome.
+     */
+    enum class system_chrome {
+        /**
+         * Make the window look like a native window.
+         */
+        native = 0,
+
+        /**
+         * Looks like a native window, but without header.
+         */
+        headerless = 1,
+
+        /**
+         * No decorations at all, looks like a boring rectangle.
+         */
+        none = 2
+    };
 
     enum class emphasis : int32_t {
         none = 0,
@@ -36,6 +59,18 @@ namespace grey {
         bold = 2
     };
 
+    enum class point_pivot {
+        top_left,
+        top_center,
+        top_right,
+        center_left,
+        center,
+        center_right,
+        bottom_left,
+        bottom_center,
+        bottom_right,
+    };
+
     /**
      * @brief Trivial point struct for storing 2D coordinates
      */
@@ -49,12 +84,39 @@ namespace grey {
         point(const float x, const float y) : x{x}, y{y} {
         }
 
+        point(const int x, const int y) : x{static_cast<float>(x)}, y{static_cast<float>(y)} {
+        }
+
+        point(const long x, const long y) : x{static_cast<float>(x)}, y{static_cast<float>(y)} {
+        }
+
         point(const ImVec2& pos) : x{pos.x}, y{pos.y} {
+        }
+
+        point(point_pivot pivot) {
+            switch (pivot) {
+                case point_pivot::top_left:      x = 0.0f; y = 0.0f; break;
+                case point_pivot::top_center:    x = 0.5f; y = 0.0f; break;
+                case point_pivot::top_right:     x = 1.0f; y = 0.0f; break;
+                case point_pivot::center_left:   x = 0.0f; y = 0.5f; break;
+                case point_pivot::center:        x = 0.5f; y = 0.5f; break;
+                case point_pivot::center_right:  x = 1.0f; y = 0.5f; break;
+                case point_pivot::bottom_left:   x = 0.0f; y = 1.0f; break;
+                case point_pivot::bottom_center: x = 0.5f; y = 1.0f; break;
+                case point_pivot::bottom_right:  x = 1.0f; y = 1.0f; break;
+                default:                         x = 0.0f; y = 0.0f; break;
+            }
         }
 
         point operator+(const sz& dimensions) const;
 
+        point operator-(const sz& dimensions) const;
+
         point operator+(float offset_both) const;
+
+        point operator*(const float mult) const { return point{x * mult, y * mult}; }
+
+        point operator/(const float div) const { return point{x / div, y / div}; }
 
         operator ImVec2() const { return ImVec2{x, y}; }
     };
@@ -75,11 +137,21 @@ namespace grey {
         sz(const ImVec2& dim) : width{dim.x}, height{dim.y} {
         }
 
+        [[nodiscard]] static sz square(float size) { return sz{size, size}; }
+
         operator ImVec2() const { return ImVec2{width, height}; }
+
+        sz operator*(const float mult) const { return sz{width * mult, height * mult}; }
+
+        sz operator/(const float div) const { return sz{width / div, height / div}; }
     };
 
     inline point point::operator+(const sz& dimensions) const {
         return point{x + dimensions.width, y + dimensions.height};
+    }
+
+    inline point point::operator-(const sz& dimensions) const {
+        return point{x - dimensions.width, y - dimensions.height};
     }
 
     inline point point::operator+(const float offset_both) const {
@@ -127,6 +199,20 @@ namespace grey {
         [[nodiscard]] float height() const { return y_max - y_min; }
 
         [[nodiscard]] point centre() const { return point{(x_min + x_max) / 2, (y_min + y_max) / 2}; }
+
+        [[nodiscard]] sz size() const { return sz{width(), height()}; }
+
+        [[nodiscard]] bool empty() const { return x_min == x_max && y_min == y_max; }
+    };
+
+    struct monitor {
+        rect area;
+        rect work_area;
+
+        /**
+         * DPI scale factor. 96 DPI == 1.0f
+         */
+        float dpi_scale;
     };
 
     class rgb_colour {
@@ -209,6 +295,53 @@ namespace grey {
         font_weight font_w{font_weight::regular};
     };
 
+    enum class act_condition {
+        never,
+        once,
+        always
+    };
+
+    inline ImGuiCond to_imgui_cond(act_condition cond) {
+        switch(cond) {
+            case act_condition::once: return ImGuiCond_Once;
+            case act_condition::always: return ImGuiCond_Always;
+            default: return ImGuiCond_None;
+        }
+    }
+
+    struct wnd_opts {
+        bool* open_ptr{nullptr};
+        bool has_menu_bar{false};
+        bool fill_viewport{false};
+        float opacity{1.0f};
+        bool show_title_bar{true};
+        bool always_on_top{false};
+        point pos{};
+        point_pivot pos_pivot{point_pivot::top_left};
+        act_condition pos_cond{act_condition::never};
+        sz size{};
+        act_condition size_cond{act_condition::never};
+        float border{.0f};
+        bool scrollable{true};
+        bool background{true};
+
+        /**
+         * When true, user can manually resize the window.
+         */
+        bool resizeable{true};
+
+        /**
+         * Window will auto-resize automatically based on the rendered content. Does not apply to main application window.
+         */
+        bool auto_resize{false};
+
+        /**
+         * Prevents screen capture of this window (Windows only for now).
+         */
+        std::optional<bool> screen_capture_allowed{false};
+        bool native_decorations{true};
+    };
+
     struct font_config {
         bool load_icons{false};
         bool load_fixed{false};
@@ -218,6 +351,53 @@ namespace grey {
             load_icons =
                     load_fixed =
                     load_bold = true;
+        }
+    };
+
+    struct texture {
+        void* data;
+        sz size{};
+
+        texture(void* data) : data{data} {}
+
+        /**
+         * @brief Disposing the texture is platform specific.
+         */
+        virtual ~texture() = default;
+    };
+
+    /**
+     * Functions to work with textures (i.e. images)
+     */
+    class texture_loader {
+    public:
+        virtual std::shared_ptr<texture> get_texture(const std::string& key) = 0;
+
+        virtual bool preload_texture(const std::string& key, const unsigned char* buffer, unsigned int len) = 0;
+
+        virtual bool preload_texture(const std::string& key, const std::string& path) = 0;
+    };
+}
+
+namespace std {
+    template <> struct formatter<grey::point> : std::formatter<std::string> {
+        auto format(const grey::point& p, std::format_context& ctx) const {
+            return std::formatter<std::string>::format(
+                std::format("({:.1f}, {:.1f})", p.x, p.y), ctx);
+        }
+    };
+
+    template <> struct formatter<grey::sz> : std::formatter<std::string> {
+        auto format(const grey::sz& s, std::format_context& ctx) const {
+            return std::formatter<std::string>::format(
+                std::format("({:.1f}, {:.1f})", s.width, s.height), ctx);
+        }
+    };
+
+    template <> struct formatter<grey::rect> : std::formatter<std::string> {
+        auto format(const grey::rect& r, std::format_context& ctx) const {
+            return std::formatter<std::string>::format(
+                std::format("({} - {})", r.lt(), r.rb()), ctx);
         }
     };
 }

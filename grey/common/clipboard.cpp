@@ -6,6 +6,7 @@
 #include <windows.h>
 #elif PLATFORM_LINUX || PLATFORM_MACOS
 #include <cstdio>
+#include <GLFW/glfw3.h>
 #endif
 
 using namespace std;
@@ -54,57 +55,16 @@ namespace grey::common::clipboard {
         return str::to_str(r);
     }
 
-#elif PLATFORM_LINUX
+#else
 
     void set_text(const std::string& text) {
-        FILE* pipe = popen("xclip -selection clipboard", "w");
-        if (pipe) {
-            fwrite(text.c_str(), 1, text.size(), pipe);
-            pclose(pipe);
-        }
+        ::glfwSetClipboardString(nullptr, text.c_str());
     }
 
     std::string get_text() {
-        std::string out;
-        FILE* pipe = popen("xclip -selection clipboard -o", "r");
-        if (pipe) {
-            char buffer[4096];
-            while (fgets(buffer, sizeof(buffer), pipe)) {
-                out += buffer;
-            }
-            pclose(pipe);
-        }
-        return out;
-    }
-
-#elif PLATFORM_MACOS
-
-    void set_text(const std::string& text) {
-        FILE* pipe = popen("pbcopy", "w");
-        if (!pipe) return;
-
-        size_t written = 0;
-        while (written < text.size()) {
-            const size_t count = fwrite(text.data() + written, 1, text.size() - written, pipe);
-            if (count == 0) break;
-            written += count;
-        }
-        pclose(pipe);
-    }
-
-    std::string get_text() {
-        std::string out;
-        FILE* pipe = popen("pbpaste", "r");
-        if (!pipe) return out;
-
-        char buffer[4096];
-        while (fgets(buffer, sizeof(buffer), pipe)) {
-            out += buffer;
-        }
-        if (pclose(pipe) != 0) return "";
-        return out;
+        const char* text = ::glfwGetClipboardString(nullptr);
+        return text ? std::string(text) : std::string();
     }
 
 #endif
-
 }

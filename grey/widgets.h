@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include "app.h"
 #include "magic_enum/magic_enum.hpp"
 #include "common/platform.h"
+#include "common/ui_window.h"
 
 // 3rdparty
 #include "3rdparty/ImGuiColorTextEdit/TextEditor.h"
@@ -16,9 +16,16 @@
 #include "implot.h"
 #endif
 
+// On coordinates.
+// Generally, all the out-of-window processing must use unscaled, raw, physical coordinates. This is because system monitors are lined up in a virtual physical space i.e. if you have a laptop and and external minitor on top, your laptop have are coodinates starting from below the external monitor and so on. Not all of the physical coordinate space is valid or visible.
+// Monitors generally do have different DPIs (unless you have identical monitors, but even there it's possible to set differen DPIs). DPI normally indicate physical dimentions (but not necessarily) And affects the rendering of artifacts inside the monitor, such as shapes, fonts, etc. Generally it's not possible for one shape to look great if it spawns multiple monitors. For once, they may not perfectly align in physical space, and second, due to different DPIs, a thick line, for example, will be thicker on one screen and thinner on the other. Generally, we deside how "big" the shape should be by using DPI of a monitor where most of the shape resides (or DPI of the monitor where most of the dwindow resides) and call it a "window DPI". Global "scale" variable here represents the DPI scale of the currently rendering window, and can change between calls if window moves or user changes monitor settings while the program is running.
+
 namespace grey::widgets {
 
     extern float scale;
+    extern float main_scale;
+
+    [[nodiscard]] inline float scaled(const float value) { return value * scale; }
 
     /**
      * Generates a unique ID to be used in widgets etc.
@@ -69,66 +76,28 @@ namespace grey::widgets {
         ~clip_rect();
     };
 
-    class window : public guardable {
+    /**
+     * window v2 - an attempt to make it completely stateless
+     */
+    class wnd {
     public:
-        window(std::string title, bool* p_open = nullptr);
-
-        float opacity{1.0f};
-
-#ifdef _WIN32
-        bool win32_exclude_from_capture{false};
-        bool win32_always_on_top{false};
-#endif
+        explicit wnd(const std::string& title, const wnd_opts& s = {});
+        ~wnd();
 
         /**
-         * @brief Set initial window size. The size will be scaled.
-         * @param width 
-         * @param height 
-         * @return 
+         * Gets current window height
          */
-        window& size(int width, int height);
-        window& resize(float width = 0, float height = 0);
-        window& has_menubar();
-        window& fullscreen();
-        window& no_resize();    // no manual resize
-        window& auto_resize();
-        window& no_collapse();
-        window& no_titlebar();
-        window& no_background();
-        window& border(float width);
-        window& no_scroll();
-        window& center(void* monitor_handle = nullptr);
-        window& fill_viewport();
+        [[nodiscard]] float height() const;
 
-        void enter() override;
-        void leave() override;
+        [[nodiscard]] point pos() const;
 
-        ~window() override;
+        [[nodiscard]] sz size() const;
 
+        operator bool() const { return needs_content; }
     private:
-        float last_opacity{1.0f};
-        sz init_size{0, 0};
-        sz resize_to{0, 0};
+        bool needs_content;
 
-        // centering
-        bool init_center{false};    // whether to center window
-        ImVec2 init_center_pos;     // position to center at (calculated)
-        void* init_center_monitor{nullptr}; // monitor to center at (native handle)
-        ImGuiPlatformMonitor init_center_imgui_monitor; // monitor to center at (imgui handle)
-
-        const std::string title;
-        bool* p_open{nullptr};
-        ImGuiWindowFlags flags{0};
-        ImGuiWindowClass wc;
-        float border_size{-1};
-        bool fill_viewport_enabled{false};
-
-#ifdef PLATFORM_WINDOWS
-        bool win32_brought_forward{false};
-        bool win32_exclude_from_capture_current{false};
-        bool win32_always_on_top_current{false};
-        void* win32_x_style_applied_to_handle{nullptr};
-#endif
+        common::ui_window nw();
     };
 
     class guard {
@@ -145,7 +114,7 @@ namespace grey::widgets {
         guardable& g;
     };
 
-#define with_window(w, ...) { { grey::widgets::guard wg{w}; __VA_ARGS__ }}
+#define with_window(w, ...) { { grey::widgets::guard wg{w}; if(w) { __VA_ARGS__ } }}
 
     class container : public guardable {
     public:
@@ -275,12 +244,16 @@ namespace grey::widgets {
         status_bar();
         ~status_bar();
 
+        static void sep();
+
+        operator bool() const { return rendered_bar && rendered_mi; }
+
     private:
-        ImGuiStyle& style;
-        ImVec2 cursor_before;
+        bool rendered_bar{false};
+        bool rendered_mi{false};
     };
 
-#define with_status_bar(...) { grey::widgets::status_bar sb; __VA_ARGS__ }
+#define with_status_bar(...) { grey::widgets::status_bar sb; if(sb) { __VA_ARGS__ } }
 
     /**
      * @brief Rich tooltip container
@@ -364,16 +337,28 @@ namespace grey::widgets {
     };
 
     /**
-     * @brief Get cursor position
-     * @param x 
-     * @param y 
+     * @brief Get cursor position in logical coordinates.
      */
-    void cur_get(float& x, float& y);
     point cur_get();
-    void cur_set(float x, float y);
     void cur_set(const point& pos);
-    void cur_move(float x, float y);
-    void cur_move(ImVec2 shift);
+    void cur_move(const point& shift);
+
+    // monitor API
+
+    /**
+     * Gets number of monitors on this system.
+     */
+    int mon_count();
+
+    /**
+     * Get monitor area by index. Size is not scaled, it's in the absolute coordinates, because each monitor may (and usually does) have different DPI.
+     */
+    std::optional<monitor> mon(int index);
+
+    /**
+     * Get monitor area for the current monitor. Current monitor is the one that contains the mouse cursor.
+     */
+    std::optional<monitor> mon_current();
 
     /**
      * @brief Get window position and dimensions in screen space;
@@ -401,9 +386,7 @@ namespace grey::widgets {
 
     void draw_circle(const point& center, float radius, rgb_colour colour, bool filled = false, float thickness = 1.0f, int num_segments = 0);
 
-    void dummy(float width, float height);
-
-    void dummy(ImVec2 size);
+    void dummy(sz size);
 
     /**
      * Draws a label with optional style
@@ -412,6 +395,13 @@ namespace grey::widgets {
      */
     void lbl(const std::string& text, const style& style = {});
 
+    /**
+     *
+     * @param text
+     * @param font_size_diff
+     * @param wrap_width
+     * @return Absolute size.
+     */
     sz text_size_get(const std::string& text, float font_size_diff = .0f, float wrap_width = -1);
 
     /**
@@ -428,7 +418,7 @@ namespace grey::widgets {
 
     bool input(char* value, int value_length, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
 
-    bool input_ml(const std::string& id, std::string& value, unsigned int line_height = 10, bool autoscroll = false, bool enabled = true);
+    //bool input_ml(const std::string& id, std::string& value, unsigned int line_height = 10, bool autoscroll = false, bool enabled = true);
 
     /**
      * @brief Multiline edit
@@ -466,13 +456,11 @@ namespace grey::widgets {
 
     /**
      * @brief Checks if the last rendered item is hovered, and if so, shows a tooltip with the given text.
-     * @param text 
      */
     void tt(const std::string& text, show_delay delay = show_delay::normal);
 
     /**
      * @brief Checks if the last rendered item is hovered, and if so, shows a tooltip with the given text.
-     * @param text 
      */
     void tt(const char* text, show_delay delay = show_delay::normal);
 
@@ -480,25 +468,23 @@ namespace grey::widgets {
      * @brief Display image from texture loaded in app. The texture must be loaded with preload_texture() beforehand.
      * @param app 
      * @param key 
-     * @param width 
-     * @param height 
      * @param uv0_x "UV" coordinates for the top-left corner of the image. Ranges from 0 to 1, where (0, 0) is the top-left of the texture and (1, 1) is the bottom-right.
      * @param uv0_y 
      * @param uv1_x 
      * @param uv1_y 
      */
-    void image(app& app, const std::string& key, size_t width, size_t height,
+    void image(texture_loader& app, const std::string& key, sz size,
         float uv0_x = .0f, float uv0_y = .0f, float uv1_x = 1.0f, float uv1_y = 1.0f);
 
-    void image_rounded(app& app, const std::string& key, size_t width, size_t height, float rounding,
+    void image_rounded(texture_loader& app, const std::string& key, sz size, float rounding,
         float uv0_x = .0f, float uv0_y = .0f, float uv1_x = 1.0f, float uv1_y = 1.0f);
 
     /**
      * @brief Same as image, but width/height is pre-configured
      */
-    void icon_image(app& app, const std::string& key);
+    void icon_image(texture_loader& app, const std::string& key);
 
-    bool icon_selector(app& app, const std::string& path, size_t square_size);
+    bool icon_selector(texture_loader& app, const std::string& path, size_t square_size);
 
     void spc(size_t repeat = 1);
     void sl(float offset = 0, bool spacing = true);
@@ -589,9 +575,14 @@ namespace grey::widgets {
      */
     void toast(emphasis emp, const std::string& message);
 
-    void notify_render_frame();
+    void toast_render_frame();
 
     // mouse helpers
+
+    /**
+     * Get mouse position in absolute coordinates, not scaled to any monitor DPI.
+     */
+    point mouse_pos();
 
     bool is_leftclicked();
 
@@ -634,8 +625,6 @@ namespace grey::widgets {
         const std::string label;
         bool opened{false};
     };
-
-#define with_window(w, ...) { { grey::widgets::guard wg{w}; __VA_ARGS__ }}
 
     //bool tree_node(const std::string& label, ImGuiTreeNodeFlags flags = 0, emphasis emp = emphasis::none);
 

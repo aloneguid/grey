@@ -7,11 +7,11 @@ find_package(imgui CONFIG REQUIRED)
 find_package(implot CONFIG REQUIRED)
 find_package(md4c CONFIG REQUIRED)
 
-# all non-Windows build use OpenGL+GLFW3
+# Linux uses OpenGL+GLFW3; macOS uses GLFW with native Metal.
 if(UNIX)
-    find_package(OpenGL REQUIRED)
     find_package(glfw3 CONFIG REQUIRED)
     if(NOT APPLE)
+        find_package(OpenGL REQUIRED)
         find_package(Fontconfig REQUIRED) # since CMake 3.14
     endif()
  endif()
@@ -20,7 +20,10 @@ find_path(STB_INCLUDE_DIRS "stb.h")
 
 file(GLOB core_src
     "common/os.cpp"
+    "common/ui_window.cpp"
     "common/keyboard.cpp"
+    "common/clipboard.cpp"
+    "common/mouse.cpp"
     "common/str.cpp"
     "common/img.cpp"
     "model.cpp"
@@ -32,7 +35,6 @@ file(GLOB core_src
     "guid.cpp"
     "3rdparty/imgui-node-editor/*.cpp"
     "3rdparty/ImGuiColorTextEdit/*.cpp"
-    "3rdparty/imgui_md/*.cpp"
     "fonts/*.cpp"
     "x/*.cpp")
 
@@ -40,35 +42,44 @@ set(private_libs
     implot::implot
     md4c::md4c)
 
-if (WIN32)
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     file(GLOB core_src ${core_src}
             "common/win32/gdi.cpp"
             "common/win32/window.cpp"
             "common/win32/reg.cpp")
     set(private_libs ${private_libs}
+        # DirectX 11
         D3D11.lib)
 endif()
 
-if (UNIX)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(private_libs ${private_libs}
         glfw
-        OpenGL::GL)
-endif()
-
-if (APPLE)
-    find_library(CORETEXT_FRAMEWORK CoreText REQUIRED)
-    find_library(COREGRAPHICS_FRAMEWORK CoreGraphics REQUIRED)
-    set(private_libs ${private_libs}
-        ${CORETEXT_FRAMEWORK}
-        ${COREGRAPHICS_FRAMEWORK})
-endif()
-
-if(UNIX AND NOT APPLE)
-    set(private_libs ${private_libs}
+        OpenGL::GL
         Fontconfig::Fontconfig)
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    find_library(COCOA_FRAMEWORK Cocoa REQUIRED)
+    find_library(CORETEXT_FRAMEWORK CoreText REQUIRED)
+    find_library(COREGRAPHICS_FRAMEWORK CoreGraphics REQUIRED)
+    find_library(METAL_FRAMEWORK Metal REQUIRED)
+    find_library(QUARTZCORE_FRAMEWORK QuartzCore REQUIRED)
+
+    set(private_libs ${private_libs}
+        ${COCOA_FRAMEWORK}
+        ${CORETEXT_FRAMEWORK}
+        ${COREGRAPHICS_FRAMEWORK}
+        ${METAL_FRAMEWORK}
+        ${QUARTZCORE_FRAMEWORK}
+        glfw)
+endif()
+
 set(interface_libs imgui::imgui)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/app.cpp PROPERTIES LANGUAGE OBJCXX)
+endif()
 
 add_library(${DYNAMIC_NAME} SHARED ${core_src} "x.cpp")
 add_library(${STATIC_NAME} STATIC ${core_src})

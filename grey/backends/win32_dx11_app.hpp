@@ -8,7 +8,7 @@
 #include <dwmapi.h>
 #include "../common/str.h"
 #include "../common/win32/window.h"
-
+#include <shellscalingapi.h>
 #if GREY_INCLUDE_IMPLOT
 #include "implot.h"
 #endif
@@ -224,8 +224,7 @@ namespace grey::backends {
         return ::DefWindowProcW(hWnd, msg, wParam, lParam);
     }
 
-    class win32dx11app : public grey::app {
-    private:
+    class win32_dx11_app : public app {
         HWND hWnd{nullptr};
         bool last_use_transparency_colour_key_value{false};
         int last_transparency_window_alpha{255};
@@ -238,27 +237,20 @@ namespace grey::backends {
         };
 
     public:
-        string title;
-        int window_left{-1};
-        int window_top{-1};
-        int window_width{-1};
-        int window_height{-1};
 
-        win32dx11app(const std::string &title, int width, int height) : title{title}, window_width{width},
-                                                                        window_height{height} {
+        win32_dx11_app(const std::string &title, sz initial_size) : app{title, initial_size} {
             // Make process DPI aware and obtain main monitor scale
             ImGui_ImplWin32_EnableDpiAwareness();
-            this->scale = ImGui_ImplWin32_GetDpiScaleForMonitor(
-                ::MonitorFromPoint(POINT{0, 0}, MONITOR_DEFAULTTOPRIMARY));
-            grey::widgets::scale = this->scale;
+            widgets::main_scale = ImGui_ImplWin32_GetDpiScaleForMonitor(::MonitorFromPoint(POINT{.x = 0, .y = 0}, MONITOR_DEFAULTTOPRIMARY));
 
-            if(window_width == -1 || window_height == -1) {
-                window_width = window_height = CW_USEDEFAULT;
-            } else {
-                // apply scaling factor
-                window_width = static_cast<int>(window_width * this->scale);
-                window_height = static_cast<int>(window_height * this->scale);
-            }
+            // multiply size by active monitor's DPI
+            POINT pt{};
+            ::GetCursorPos(&pt);
+            HMONITOR mon = ::MonitorFromPoint(pt, MONITOR_DEFAULTTOPRIMARY);
+            UINT dpiX, dpiY;
+            ::GetDpiForMonitor(mon, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
+            this->initial_size.width *= (dpiX / 96.0f);
+            this->initial_size.height *= (dpiY / 96.0f);
         }
 
         void set_dark_mode(bool enabled) override {
@@ -268,64 +260,92 @@ namespace grey::backends {
                 &win32_immersive_dark_mode, sizeof(win32_immersive_dark_mode));
         }
 
-        void get_screen_center(int width, int height, int &x, int &y) {
-            // get center of the screen where mouse cursor is, not just the primary monitor
+        /**
+         * Given window size, calculates window top-left point so that the window is centered.
+         * @param window_size Window size
+         * @return
+         */
+        [[nodiscard]] point get_monitor_center_window_point(const sz& window_size) const {
 
-            // mouse cursor position
-            POINT cursor;
-            ::GetCursorPos(&cursor);
+            // Detect monitor to use:
+            // If window is already created, use the monitor the window is located at.
+            // Otherwise, use the monitor where mouse is located at the moment.
 
+            HMONITOR hMon;
+            if(hWnd) {
+                hMon = ::MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+            } else {
+                POINT cursor;
+                ::GetCursorPos(&cursor);
+                hMon = ::MonitorFromPoint(cursor, MONITOR_DEFAULTTONEAREST);
+            }
             // get monitor and it's info
-            HMONITOR hMonitor = ::MonitorFromPoint(cursor, MONITOR_DEFAULTTONEAREST);
             MONITORINFO mi = {sizeof(mi)};
-            ::GetMonitorInfo(hMonitor, &mi);
-            RECT &wa = mi.rcWork;
+            ::GetMonitorInfo(hMon, &mi);
+            const RECT& mon_work_area = mi.rcWork;
 
             // calculate it
-            int sw = wa.right - wa.left;
-            int sh = wa.bottom - wa.top;
-            x = wa.left + (sw - width) / 2;
-            y = wa.top + (sh - height) / 2;
+            const int mon_width = mon_work_area.right - mon_work_area.left;
+            const int mon_height = mon_work_area.bottom - mon_work_area.top;
+            return point{
+                mon_work_area.left + (mon_width - window_size.width) / 2,
+                mon_work_area.top + (mon_height - window_size.height) / 2
+            };
         }
 
-        void resize_main_viewport(const int width, const int height) override {
-            // apply scaling factor
-            window_width = static_cast<int>(width * scale);
-            window_height = static_cast<int>(height * scale);
-
+        void resize(const sz size) override {
             if(hWnd) {
                 UINT uFlags{0};
+                RECT rc{0, 0, static_cast<LONG>(size.width), static_cast<LONG>(size.height)};
 
                 if(center_on_screen) {
-                    get_screen_center(window_width, window_height, window_left, window_top);
+                    point tl = get_monitor_center_window_point(size);
+                    rc.left = tl.x;
+                    rc.top = tl.y;
                 } else {
                     uFlags |= SWP_NOMOVE;
                 }
 
                 // take into account window decorations (chrome etc.) because SetWindowPos expects the full window size
                 {
-                    RECT rc{0, 0, window_width, window_height};
-                    const DWORD style = static_cast<DWORD>(::GetWindowLongPtr(hWnd, GWL_STYLE));
-                    const DWORD exstyle = static_cast<DWORD>(::GetWindowLongPtr(hWnd, GWL_EXSTYLE));
+                    const auto style = static_cast<DWORD>(::GetWindowLongPtr(hWnd, GWL_STYLE));
+                    const auto exstyle = static_cast<DWORD>(::GetWindowLongPtr(hWnd, GWL_EXSTYLE));
                     ::AdjustWindowRectEx(&rc, style, FALSE, exstyle);
-                    window_width = rc.right - rc.left;
-                    window_height = rc.bottom - rc.top;
                 }
 
-                ::SetWindowPos(hWnd, HWND_TOP, window_left, window_top, window_width, window_height, uFlags);
+                ::SetWindowPos(hWnd, HWND_TOP, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, uFlags);
             }
         }
 
-        void move_main_viewport(const int x, const int y) override {
-            window_left = static_cast<int>(x * scale);
-            window_top = static_cast<int>(y * scale);
-            if(hWnd) {
-                constexpr UINT uFlags = SWP_NOSIZE;
-                ::SetWindowPos(hWnd, HWND_TOP, window_left, window_top, 0, 0, uFlags);
-            }
+        void center() override
+        {
+            if(!hWnd) return;
+
+            // get monitor where window is at
+            const HMONITOR hMon = ::MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+            MONITORINFO mi{.cbSize = sizeof(mi)};
+            ::GetMonitorInfo(hMon, &mi);
+            const RECT& mon_work_area = mi.rcWork;
+
+            // get current window size
+            RECT current_size{};
+            ::GetWindowRect(hWnd, &current_size);
+
+            // calculate new window position
+            int x = (mi.rcWork.right - mi.rcWork.left) / 2 - (current_size.right - current_size.left) / 2;
+            int y = (mi.rcWork.bottom - mi.rcWork.top) / 2 - (current_size.bottom - current_size.top) / 2;
+
+            // finally, move it
+            ::SetWindowPos(hWnd, HWND_TOP, x, y, 0, 0, SWP_NOSIZE);
         }
 
-        void foreground_main_viewport() override {
+        void move(const point pos) override {
+            if(!hWnd) return;
+            constexpr UINT uFlags = SWP_NOSIZE;
+            ::SetWindowPos(hWnd, HWND_TOP, static_cast<int>(pos.x), static_cast<int>(pos.y), 0, 0, uFlags);
+        }
+
+        void foreground() override {
             if(!hWnd) return;
 
             // non-forced
@@ -398,18 +418,10 @@ namespace grey::backends {
             }
         }
 
-        void apply_window_corner_preference() {
-            if(!hWnd) return;
-            if(!show_title_bar) {
-                grey::common::win32::window wnd{hWnd};
-                wnd.set_rounded_corners();
-            }
-        }
-
-        void run(std::function<bool(app &app)> render_frame) {
+        void run(std::function<bool()> render_frame, bool create_main_window) override {
             // Create application window
 
-            wstring class_name = grey::common::str::to_wstr(win32_window_class_name);
+            wstring class_name = common::str::to_wstr(win32_window_class_name);
             WNDCLASSEXW wc = {
                 sizeof(wc),
                 CS_CLASSDC,
@@ -422,11 +434,11 @@ namespace grey::backends {
 
             ::RegisterClassExW(&wc);
 
-            wstring w_title = grey::common::str::to_wstr(title);
+            wstring w_title = common::str::to_wstr(title);
 
             DWORD dwStyle = WS_OVERLAPPEDWINDOW;
 
-            if(!show_title_bar) {
+            if(chrome != system_chrome::native) {
                 dwStyle = WS_POPUP;
             }
 
@@ -441,11 +453,17 @@ namespace grey::backends {
             //dwStyle &= ~WS_SYSMENU; // remove system menu
             //dwStyle &= ~WS_BORDER;
 
+            // decide where window will be located
+            int wx, wy;
             if(center_on_screen) {
-                get_screen_center(window_width, window_height, window_left, window_top);
+                point c = get_monitor_center_window_point(initial_size);
+                wx = static_cast<int>(c.x);
+                wy = static_cast<int>(c.y);
             } else {
-                window_left = window_top = CW_USEDEFAULT;
+                wx = wy = CW_USEDEFAULT;
             }
+            const int ww = static_cast<int>(initial_size.width);
+            const int wh = static_cast<int>(initial_size.height);
 
             DWORD dwExStyle = 0;
 
@@ -458,7 +476,7 @@ namespace grey::backends {
                 wc.lpszClassName,
                 w_title.c_str(),
                 dwStyle,
-                window_left, window_top, window_width, window_height,
+                wx, wy, ww, wh,
                 nullptr,
                 nullptr,
                 wc.hInstance,
@@ -467,7 +485,7 @@ namespace grey::backends {
             ::SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
             // Hide from taskbar if requested
-            if(win32_hide_from_taskbar) {
+            if(hide_from_taskbar) {
                 LONG_PTR ex = ::GetWindowLongPtr(hWnd, GWL_EXSTYLE);
                 // Remove WS_EX_APPWINDOW if present, add WS_EX_TOOLWINDOW
                 ex &= ~WS_EX_APPWINDOW;
@@ -479,7 +497,10 @@ namespace grey::backends {
             }
 
             apply_transparency();
-            apply_window_corner_preference();
+            if(chrome == system_chrome::headerless) {
+                const common::ui_window wnd{hWnd};
+                wnd.apply_native_decorations();
+            }
 
             // Initialize Direct3D
             if(!CreateDeviceD3D(hWnd)) {
@@ -504,8 +525,7 @@ namespace grey::backends {
 #if GREY_INCLUDE_IMPLOT
             ImPlot::CreateContext();
 #endif
-            ImGuiIO &io = ImGui::GetIO();
-            (void) io;
+            ImGuiIO &io = ImGui::GetIO(); (void) io;
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
             //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;    // Enable Gamepad Controls
             //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
@@ -525,14 +545,10 @@ namespace grey::backends {
             ImGuiStyle &style = ImGui::GetStyle();
 
             // Setup scaling
-            style.ScaleAllSizes(scale);
-            // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
-            style.FontScaleDpi = scale;
-            // Set initial font scale. (in docking branch: using io.ConfigDpiScaleFonts=true automatically overrides this for every window depending on the current monitor)
-            io.ConfigDpiScaleFonts = true;
-            // [Experimental] Automatically overwrite style.FontScaleDpi in Begin() when Monitor DPI changes. This will scale fonts but _NOT_ scale sizes/padding for now.
-            io.ConfigDpiScaleViewports = true;
-            // [Experimental] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
+            style.ScaleAllSizes(widgets::main_scale);   // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
+            style.FontScaleDpi = widgets::main_scale;   // Set initial font scale. (in docking branch: using io.ConfigDpiScaleFonts=true automatically overrides this for every window depending on the current monitor)
+            io.ConfigDpiScaleFonts = true;     // [Experimental] Automatically overwrite style.FontScaleDpi in Begin() when Monitor DPI changes. This will scale fonts but _NOT_ scale sizes/padding for now.
+            io.ConfigDpiScaleViewports = true; // [Experimental] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
 
             // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
             if(io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
@@ -606,7 +622,7 @@ namespace grey::backends {
                 ImGui_ImplWin32_NewFrame();
                 ImGui::NewFrame();
 
-                if(!render_frame(*this)) {
+                if(!(create_main_window ? render_main_window(render_frame) : render_frame())) {
                     // Post message to close the window, which should be handled in the next iteration of the message loop.
                     ::PostMessage(hWnd, WM_CLOSE, 0, 0);
                     // done = true;
@@ -634,6 +650,8 @@ namespace grey::backends {
                     ::ShowWindow(hWnd, SW_SHOWNORMAL);
                     shown = true;
                 }
+
+                fps_pause();
             }
 
             // Cleanup

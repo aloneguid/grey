@@ -43,7 +43,7 @@ namespace Grey {
         public static void SL(float offset = 0) {
             Native.sl(offset);
         }
-        public static void Label(string text, Style? style = null) {
+        public static void Lbl(string text, Style? style = null) {
             Native.Style cstyle = ToNativeStyle(style);
             Native.lbl(text, ref cstyle);
         }
@@ -251,14 +251,22 @@ namespace Grey {
 
         public static bool IsRightClicked => Native.is_rightclicked();
 
-        public static DebugInfo GetDebugInfo() {
-            var r = new DebugInfo();
+        public static float Fps => Native.get_fps();
 
-            float fps = 0;
-            Native.get_debug_info(ref fps);
-            r.FPS = fps;
+        public static string GreyVersion {
+            get {
+                if(field != null) return field!;
+                
+                var sb = new StringBuilder(64);
+                int len = Native.get_version(sb, sb.Capacity);
+                if(len > sb.Capacity) {
+                    sb = new StringBuilder(len);
+                    Native.get_version(sb, sb.Capacity);
+                }
+                field = sb.ToString();
 
-            return r;
+                return field!;
+            }
         }
     }
 }

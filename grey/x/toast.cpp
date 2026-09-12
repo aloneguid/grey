@@ -65,9 +65,8 @@ namespace grey::widgets::x {
         message(std::move(message)),
         dismiss_time_ms(dismiss_time_ms),
         creation_time{chrono::system_clock::now()},
-        w{format("##toast{}", generate_int_id())} {
+        w_title{format("##toast{}", generate_int_id())} {
 
-        w.no_titlebar().no_collapse().no_scroll().auto_resize();
     }
 
     toast& toast::operator=(const toast& other) {
@@ -102,35 +101,38 @@ namespace grey::widgets::x {
         // speedy skip, especially relevant because this is called FPS times a second.
         if(toasts.empty()) return;
 
-        ImVec2 parent_size = ImGui::GetWindowSize();
-        float window_padding = WindowPadding * scale;
-        float height = 0.f;
+        // draw toast on the monitor rather than relative to current window
+        const monitor mm = mon(0).value();
+
+        float height_shift = 0.f;
 
         // erase all notifications that are expired, because we need to delete the collection first
         std::erase_if(toasts, [](const toast& t) { return t.get_phase() == toast_phase::expired; });
 
         // there will be no expired notifications left in the collection
         for(auto& toast: toasts) {
-            toast.w.opacity = toast.get_fade_alpha();
 
             // Set notification window position to bottom right corner of the main window, considering the main window size and location in relation to the display
-            ImVec2 parent_pos = ImGui::GetWindowPos();
-            ImGui::SetNextWindowPos(
-                ImVec2(parent_pos.x + parent_size.x - window_padding,
-                       parent_pos.y + parent_size.y - window_padding - height), ImGuiCond_Always,
-                ImVec2(1.0f, 1.0f));
+            // const point toast_pos = mon_pos + mon_size - sz{window_padding, window_padding + height_shift};
+            point toast_pos = mm.work_area.rb();
+            toast_pos.y -= height_shift;
+            toast_pos.x -= WindowPadding * mm.dpi_scale;
 
-            guard gw{toast.w};
+            const float fade_alpha = toast.get_fade_alpha();
 
-            // Render over all other windows
-            ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
+            wnd ww{toast.w_title,{
+                .opacity = fade_alpha,
+                .show_title_bar = false,
+                .always_on_top = true,
+                .pos = toast_pos,
+                .pos_pivot = point_pivot::bottom_right,
+                .pos_cond = act_condition::always}};
 
             bool has_title{false};
 
             // title
 
-            string icon = get_icon(toast.emp);
-            if(!icon.empty()) {
+            if(string icon = get_icon(toast.emp); !icon.empty()) {
                 lbl(icon, {.emp = toast.emp});
                 has_title = true;
             }
@@ -149,7 +151,9 @@ namespace grey::widgets::x {
             lbl(toast.message);
 
             // save height for next toasts
-            height += ImGui::GetWindowHeight() + window_padding;
+            // decrease height relative to fade alpha i.e. decrease height by fade alpha animated value
+            float anim_height = fade_alpha / Opacity;
+            height_shift += ww.height() * anim_height + scaled(WindowPadding);
         }
     }
 

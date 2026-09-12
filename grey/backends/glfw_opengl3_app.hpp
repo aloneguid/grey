@@ -1,13 +1,13 @@
 #pragma once
 
-// OpenGL3 + GLFW backend, which is cross-platform theoretically, but we will only use it for non-Windows platforms,
-// because we will use DirectX 11 + Win32 for much better OS integration on Windows.
+// OpenGL3 + GLFW backend, which is cross-platform theoretically, but only used for Linux backend.
 // ported from: https://github.com/ocornut/imgui/blob/docking/examples/example_glfw_opengl3/main.cpp
 
-#include "../app.h"
-#include "../common/platform.h"
+#include "glfw_app.hpp"
+
+#if PLATFORM_LINUX
+
 #include "imgui.h"
-#include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <algorithm>
 #include <chrono>
@@ -32,7 +32,6 @@
 #endif
 
 namespace grey::backends {
-    using namespace std;
 
     struct gl_texture : texture {
         GLuint texture_id;
@@ -50,16 +49,9 @@ namespace grey::backends {
     };
 
 
-    static void glfw_error_callback(int error, const char* description) {
-        fprintf(stderr, "GLFW Error %d: %s\n", error, description);
-    }
-
     static const char* g_glsl_version{nullptr};
 
-    static bool gl_init() {
-        glfwSetErrorCallback(glfw_error_callback);
-        if(!glfwInit())
-            return false;
+    static void gl_init() {
 
         // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -96,69 +88,22 @@ namespace grey::backends {
         //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
 
-        return true;
     }
 
     /**
      * @brief https://github.com/ocornut/imgui/blob/docking/examples/example_glfw_opengl3/main.cpp
      */
-    class glfw_gl3_app : public grey::app {
+    class glfw_gl3_app final : public glfw_app {
 
     public:
-        glfw_gl3_app(const std::string& title, int width, int height)
-            : title{title}, window_width{width}, window_height{height} {
-            last_frame_time = std::chrono::high_resolution_clock::now();
+        glfw_gl3_app(const std::string& title, sz size)
+            : glfw_app{title, size} {
             gl_init();
-
-            this->scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
-            grey::widgets::scale = this->scale;
-
-            if (window_width != -1 && window_height != -1) {
-                window_width = static_cast<int>(window_width * scale);
-                window_height = static_cast<int>(window_height * scale);
-            }
         }
 
-        void get_screen_center(int width, int height, int &x, int &y) {
-            GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-            const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-            int mx, my;
-            glfwGetMonitorPos(monitor, &mx, &my);
-            x = mx + (mode->width - width) / 2;
-            y = my + (mode->height - height) / 2;
-        }
-
-        void apply_transparency() {
-            if(!window) return;
-            int alpha = transparency_window_alpha;
-            if(alpha != last_transparency_window_alpha) {
-                last_transparency_window_alpha = alpha;
-                float normalized_alpha = std::clamp(alpha / 255.0f, 0.0f, 1.0f);
-                glfwSetWindowOpacity(window, normalized_alpha);
-            }
-        }
-
-        void run(std::function<bool(app& app)> render_frame) {
-            // Create window with graphics context
-            glfwWindowHint(GLFW_DECORATED, show_title_bar ? GLFW_TRUE : GLFW_FALSE);
-            glfwWindowHint(GLFW_FLOATING, always_on_top ? GLFW_TRUE : GLFW_FALSE);
-            if(use_transparency_colour_key_value) {
-                glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
-            }
-
-            if (center_on_screen) {
-                get_screen_center(window_width, window_height, window_left, window_top);
-            }
-
-            window = glfwCreateWindow(window_width, window_height, title.c_str(), nullptr, nullptr);
-            if(window == nullptr)
+        void run(std::function<bool()> render_frame, bool create_main_window) override {
+            if(!create_window())
                 return;
-
-            if (center_on_screen) {
-                glfwSetWindowPos(window, window_left, window_top);
-            }
-
-            apply_transparency();
 
             glfwMakeContextCurrent(window);
             glfwSwapInterval(1); // Enable vsync
@@ -181,11 +126,13 @@ namespace grey::backends {
 
             // Setup scaling
             ImGuiStyle& style = ImGui::GetStyle();
-            style.ScaleAllSizes(scale);
-            style.FontScaleDpi = scale;
+            style.ScaleAllSizes(w::scale);
+            style.FontScaleDpi = w::scale;
 #if GLFW_VERSION_MAJOR >= 3 && GLFW_VERSION_MINOR >= 3
             io.ConfigDpiScaleFonts = true;
-            io.ConfigDpiScaleViewports = true;
+            // Grey applies logical dimensions and per-viewport widget scaling itself. Let
+            // Dear ImGui update fonts for monitor changes without rescaling platform geometry.
+            io.ConfigDpiScaleViewports = false;
 #endif
 
              // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
@@ -258,8 +205,7 @@ namespace grey::backends {
                 ImGui_ImplGlfw_NewFrame();
                 ImGui::NewFrame();
 
-                bool has_more = render_frame(*this);
-                if(!has_more)
+                if(!render_main_window(render_frame))
                     done = true;
 
                 // Rendering
@@ -285,18 +231,9 @@ namespace grey::backends {
                     glfwMakeContextCurrent(backup_current_context);
                 }
 
-                // Manual FPS control
-                // see how much time has passed since last render
-                auto b_now = std::chrono::high_resolution_clock::now();
-                auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(b_now - last_frame_time).count();
-                if(duration_ms < max_frame_interval_ms) {
-                    float sleep_time = max_frame_interval_ms - duration_ms;
-                    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(sleep_time)));
-                }
+                fps_pause();
 
                 glfwSwapBuffers(window);
-
-                last_frame_time = b_now;
             }
 #ifdef __EMSCRIPTEN__
             EMSCRIPTEN_MAINLOOP_END;
@@ -308,34 +245,10 @@ namespace grey::backends {
             ImGui::DestroyContext();
 
             glfwDestroyWindow(window);
-            glfwTerminate();
+            window = nullptr;
+            terminate_glfw();
         }
 
-        void resize_main_viewport(int width, int height) override {
-            window_width = static_cast<int>(width * scale);
-            window_height = static_cast<int>(height * scale);
-            if(window) {
-                if (center_on_screen) {
-                    get_screen_center(window_width, window_height, window_left, window_top);
-                    glfwSetWindowPos(window, window_left, window_top);
-                }
-                glfwSetWindowSize(window, window_width, window_height);
-            }
-        }
-
-        void move_main_viewport(int x, int y) override {
-            window_left = static_cast<int>(x * scale);
-            window_top = static_cast<int>(y * scale);
-            if(window) {
-                glfwSetWindowPos(window, window_left, window_top);
-            }
-        }
-
-        void foreground_main_viewport() override {
-            if(window) {
-                glfwFocusWindow(window);
-            }
-        }
 
         std::shared_ptr<texture> make_native_texture(grey::common::raw_img& img) override {
             // Create a OpenGL texture identifier
@@ -357,14 +270,7 @@ namespace grey::backends {
         void set_dark_mode(bool enabled) override {
         }
 
-    private:
-        GLFWwindow* window{nullptr};
-        string title;
-        int window_left{-1};
-        int window_top{-1};
-        int window_width{-1};
-        int window_height{-1};
-        int last_transparency_window_alpha{255};
-        std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_time;
     };
 }
+
+#endif

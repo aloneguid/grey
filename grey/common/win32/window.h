@@ -7,6 +7,7 @@
 namespace grey::common::win32 {
     /**
      * Windows specific window overlord.
+     * TODO: merge into ui_window class and delete this one.
      */
     class window {
     public:

@@ -21,35 +21,34 @@ bool tableSelectables = false;
 bool tableSelectableRow = false;
 string[] choices = ["one", "two", "three"];
 uint currentChoice = 0;
-Window? xwnd1 = null;
 bool xwnd2Show = true;
 
 void Basics() {
 
-    Label("labels:");
+    Lbl("labels:");
     foreach(Emphasis emp in Enum.GetValues<Emphasis>()) {
         SL();
-        Label(emp.ToString(), new Style{Emp = emp});
+        Lbl(emp.ToString(), new Style{Emp = emp});
     }
 
-    Label("Buttons:");
+    Lbl("Buttons:");
     foreach(Emphasis emp in Enum.GetValues<Emphasis>()) {
         SL();
         Button(emp.ToString(), emp);
     }
 
-    Label(message);
+    Lbl(message);
 
     if(Button("get current date (has tooltip)")) {
         message = DateTime.Now.ToString();
     }
 
-    Label("Tooltips:");
+    Lbl("Tooltips:");
 
-    SL(); Label("simple"); TT("simple tooltip");
-    SL(); Label("rich"); TT(() => {
+    SL(); Lbl("simple"); TT("simple tooltip");
+    SL(); Lbl("rich"); TT(() => {
         Sep("rich");
-        Label("rich tooltip");
+        Lbl("rich tooltip");
         Button("close");
     });
 
@@ -66,11 +65,11 @@ void Basics() {
     SmallCheckbox("small checkbox", ref isChecked);
 
     if(Accordion("Normal accordion")) {
-        Label("accordion content");
+        Lbl("accordion content");
     }
 
     if(Accordion("Open accordion", true)) {
-        Label("accordion content (open)");
+        Lbl("accordion content (open)");
     }
     if(Hyperlink("click me")) {
         Toast(Emphasis.Info, "hyperlink clicked");
@@ -89,17 +88,17 @@ void Basics() {
 
     Sep("Mouse helpers");
 
-    Label("hovered: ");
+    Lbl("hovered: ");
     SL();
-    Label(IsHovered ? "yes" : "no");
+    Lbl(IsHovered ? "yes" : "no");
 
-    Label("left clicked: ");
+    Lbl("left clicked: ");
     SL();
-    Label(IsLeftClicked ? "yes" : "no");
+    Lbl(IsLeftClicked ? "yes" : "no");
 
-    Label("right clicked: ");
+    Lbl("right clicked: ");
     SL();
-    Label(IsRightClicked ? "yes" : "no");
+    Lbl(IsRightClicked ? "yes" : "no");
 
     // collision demo
     for(int i = 0; i < 5; i++) {
@@ -108,25 +107,6 @@ void Basics() {
         IdFrame(i, () => {
             Button("collide");
         });
-    }
-
-    if(Button("create external window")) {
-        if(xwnd1 == null) {
-            xwnd1 = new Window("external window");
-        }
-    }
-
-    if(xwnd1 != null) {
-        xwnd1.Run(() => {
-            Label("hello from external window");
-
-            InputMultiline("xml", multilineText, 200, false, true, true);
-        });
-
-        if(!xwnd1.IsOpen) {
-            xwnd1.Dispose();
-            xwnd1 = null;
-        }
     }
 
 }
@@ -154,11 +134,11 @@ Grey.App.Run("Grey# Demo", () => {
             if(List("list", choices, ref currentChoice)) {
                 Toast(Emphasis.Info, $"LIST choice changed to {choices[currentChoice]}");
             }
-            Label($"current: {currentChoice}");
+            Lbl($"current: {currentChoice}");
         });
 
         tb.TabItem("Icons", () => {
-            Label($"{Icon.Num10k} {Icon.Fireplace} {Icon.Access_alarm}");
+            Lbl($"{Icon.Num10k} {Icon.Fireplace} {Icon.Access_alarm}");
         });
 
         tb.TabItem("Spinner", () => {
@@ -205,27 +185,27 @@ Grey.App.Run("Grey# Demo", () => {
         tb.TabItem("Table", () => {
             Table("t0", ["id", "name", "description+"], ta => {
                 ta.BeginRow();
-                Label("1");
+                Lbl("1");
                 ta.NextColumn();
-                Label("Grey");
+                Lbl("Grey");
                 ta.NextColumn();
-                Label("A cross-platform immediate mode GUI library for .NET");
+                Lbl("A cross-platform immediate mode GUI library for .NET");
 
                 // try tree inside table
                 ta.BeginRow();
                 TreeNode("root", true, false, (isOpen) => {
                     ta.NextColumn();
-                    Label("--");
+                    Lbl("--");
                     ta.NextColumn();
-                    Label("--");
+                    Lbl("--");
 
                     if(isOpen) {
                         ta.BeginRow();
-                        Label("2");
+                        Lbl("2");
                         ta.NextColumn();
-                        Label("Two");
+                        Lbl("Two");
                         ta.NextColumn();
-                        Label("Two is a good number");
+                        Lbl("Two is a good number");
                     }
                 });
             });
@@ -248,10 +228,10 @@ Grey.App.Run("Grey# Demo", () => {
                       Toast(Emphasis.Info, $"clicked {row}x{column}");
                   }
               } else {
-                  Label(row.ToString());
+                  Lbl(row.ToString());
               }
           } else {
-              Label($"{row}x{column}");
+              Lbl($"{row}x{column}");
           }
       },
                   alternateRowBg: alternateTableRowBg);
@@ -260,8 +240,7 @@ Grey.App.Run("Grey# Demo", () => {
 
     // Status bar
     StatusBar(() => {
-        DebugInfo dbg = GetDebugInfo();
-        Label($"FPS: {dbg.FPS}");
+        Lbl($"{Fps:F1} | {GreyVersion}");
     });
 
     return isRunning;

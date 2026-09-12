@@ -14,11 +14,21 @@
         {
             "name": "imgui",
             "features": [
+                "metal-binding",
+                "osx-binding",
+                "glfw-binding",
+                "docking-experimental"
+            ],
+            "platform": "osx"
+        },
+        {
+            "name": "imgui",
+            "features": [
                 "opengl3-binding",
                 "glfw-binding",
                 "docking-experimental"
             ],
-            "platform": "linux | osx"
+            "platform": "linux"
         },
         {
             "name": "glfw3",
@@ -30,6 +40,7 @@
         },
         "implot",
         "simpleini",
+        "fkyaml",
         "magic-enum",
         "md4c"
     ]

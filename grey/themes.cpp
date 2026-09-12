@@ -644,7 +644,6 @@ namespace grey::themes {
 
         ImGuiStyle& style = ImGui::GetStyle();
         style.FrameRounding =
-            style.WindowRounding =
             style.ChildRounding =
             style.TabRounding =
             3 * scale;

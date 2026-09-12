@@ -31,7 +31,7 @@ extern "C" {
         const char* c_title,
         int32_t width,
         int32_t height,
-        bool has_menubar,
+        bool has_menu_bar,
         bool can_scroll,
         bool center_on_screen,
         RenderFrameCallback c_frame_callback);
@@ -119,21 +119,19 @@ extern "C" {
 
     EXPORTED bool menu_item(const char* c_text, bool reserve_icon_space, const char* c_icon = "");
 
-    EXPORTED int32_t window(int32_t id,
-        bool unregister,
-        const char* title,
-        int32_t width, int32_t height,
-        bool* p_open,
-        RenderCallback c_render_callback);
-
-
     EXPORTED int32_t code_editor(int32_t id,
         bool unregister,
         int32_t language,
         const char* c_text);
 
-    // -- system debug
+    // -- clipboard
 
-    EXPORTED void get_debug_info(float* fps);
+    EXPORTED int clipboard_get_text(char* buffer, int32_t buffer_size);
+    EXPORTED void clipboard_set_text(const char* c_text);
+
+    // -- various properties
+
+    EXPORTED float get_fps();
+    EXPORTED int get_version(char* buffer, int32_t buffer_size);
 
 }
