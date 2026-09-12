@@ -211,10 +211,10 @@ namespace grey::common {
             if(!pair.empty()) {
                 const size_t eq = pair.find('=');
                 if(eq == std::string_view::npos) {
-                    parameters.emplace(percent_decode(pair), std::string{});
+                    parameters.emplace_back(percent_decode(pair), std::string{});
                 } else {
-                    parameters.emplace(percent_decode(pair.substr(0, eq)),
-                                       percent_decode(pair.substr(eq + 1)));
+                    parameters.emplace_back(percent_decode(pair.substr(0, eq)),
+                                            percent_decode(pair.substr(eq + 1)));
                 }
             }
 

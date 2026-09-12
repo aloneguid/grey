@@ -1,7 +1,8 @@
 #pragma once
 #include <string>
 #include <string_view>
-#include <unordered_map>
+#include <utility>
+#include <vector>
 
 namespace grey::common {
     class url {
@@ -34,9 +35,9 @@ namespace grey::common {
         std::string query;
 
         /**
-         * Decoded key-value parameters
+         * Decoded key-value parameters in query appearance order, including duplicate keys.
          */
-        std::unordered_map<std::string, std::string> parameters;
+        std::vector<std::pair<std::string, std::string>> parameters;
 
         [[nodiscard]] std::string to_string() const;
 
@@ -65,7 +66,7 @@ namespace grey::common {
         void extract_path_and_query(std::string_view rest);
 
         /**
-         * Split "key=value&key2=value2" into the parameters map. Tolerant of
+         * Split "key=value&key2=value2" into the ordered parameters. Tolerant of
          * malformed pairs (missing '=', empty segments, stray '&'s). O(n) single pass.
          */
         void parse_parameters(std::string_view query);
