@@ -496,4 +496,11 @@ namespace grey::common::str {
         }
         return result;
     }
+
+    std::string pluralize(int number, const std::string& word) {
+        if(abs(number) != 1) {
+            return word + "s";
+        }
+        return word;
+    }
 }

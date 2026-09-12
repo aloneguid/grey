@@ -121,7 +121,7 @@ namespace grey::widgets {
             ImGui::SetNextWindowPos(s.pos, to_imgui_cond(s.pos_cond),point{s.pos_pivot});
 
         if(s.size_cond != act_condition::never)
-            ImGui::SetNextWindowSize(s.size, to_imgui_cond(s.size_cond));
+            ImGui::SetNextWindowSize(s.size * scale, to_imgui_cond(s.size_cond));
 
         if(!s.scrollable) {
             flags |= ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
@@ -231,16 +231,15 @@ namespace grey::widgets {
 
     // ---- container ----
 
-    container::container(float width, float height) : id{generate_id()}, size{width, height} {
+    container::container(float width, float height) : id{generate_id()}, size{width * scale, height * scale} {
     }
 
-    container::container(const std::string& id, float width, float height) : id{id}, size{width, height} {
+    container::container(const std::string& id, float width, float height) : id{id}, size{width * scale, height * scale} {
     }
 
     void container::enter() {
         if(size.y < 0) {
             ImVec2 tsz = size;
-            // pad from the bottom
             ImVec2 wsz = ImGui::GetWindowSize();
             tsz = ImVec2(tsz.x, wsz.y + size.y);
         }
@@ -1187,11 +1186,11 @@ namespace grey::widgets {
     // mouse helpers
 
     bool is_leftclicked() {
-        return ImGui::IsItemHovered() && ImGui::IsMouseDown(ImGuiMouseButton_Left);
+        return ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left);
     }
 
     bool is_rightclicked() {
-        return ImGui::IsItemHovered() && ImGui::IsMouseDown(ImGuiMouseButton_Right);
+        return ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right);
     }
 
     bool is_hovered() {

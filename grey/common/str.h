@@ -132,4 +132,9 @@ namespace grey::common::str {
     */
     std::vector<std::string> split_pipe(const std::string& line);
 
+    /**
+     * @brief Returns singular or plural form of a word depending on the number.
+    */
+    std::string pluralize(int number, const std::string& word);
+
 }
