@@ -159,7 +159,9 @@ namespace grey::widgets {
 
         needs_content = ImGui::Begin(title.c_str(), s.open_ptr, flags);
 
-        scale = ImGui::GetWindowViewport()->DpiScale;
+        const ImGuiViewport* viewport = ImGui::GetWindowViewport();
+        if(viewport && viewport->DpiScale > 0.0f)
+            scale = viewport->DpiScale;
         wdl = ImGui::GetWindowDrawList();
 
         if(s.border >= 0)
@@ -191,14 +193,15 @@ namespace grey::widgets {
 
 
     wnd::~wnd() {
-        // restore window-scoped vars
+        // End needs to be called regardless of whether the window is collapsed or not
+        ImGui::End();
+
+        // restore window-scoped vars after ending the window so the viewport scale stays
+        // active for the complete window scope
         wdl = window_draw_lists.top();
         window_draw_lists.pop();
         scale = window_dpis.top();
         window_dpis.pop();
-
-        // End needs to be called regardless of whether the window is collapsed or not
-        ImGui::End();
     }
 
     float wnd::height() const {

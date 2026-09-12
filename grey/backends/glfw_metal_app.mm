@@ -106,7 +106,9 @@ namespace grey::backends {
             style.FontScaleDpi = w::scale;
 #if GLFW_VERSION_MAJOR >= 3 && GLFW_VERSION_MINOR >= 3
             io.ConfigDpiScaleFonts = true;
-            io.ConfigDpiScaleViewports = true;
+            // Grey applies logical dimensions and per-viewport widget scaling itself. Let
+            // Dear ImGui update fonts for monitor changes without rescaling platform geometry.
+            io.ConfigDpiScaleViewports = false;
 #endif
             if(io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
                 style.WindowRounding = 0.0f;
