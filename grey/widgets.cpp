@@ -1142,6 +1142,17 @@ namespace grey::widgets {
 
     // ---- group ----
 
+    div::div(const std::string& id, const sz& size) {
+        ImGuiChildFlags cf{0};
+        ImGuiWindowFlags wf{0};
+        rendered = ImGui::BeginChild(id.c_str(), size, cf, wf);;
+    }
+
+    div::~div() {
+        //End must be called regardless of whether it was rendered
+        ImGui::EndChild();
+    }
+
     group::group(bool full_width) : full_width{full_width} {
         ImGui::BeginGroup();
     }

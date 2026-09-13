@@ -182,6 +182,20 @@ namespace grey::widgets {
 
 #define with_container(c, ...) { { grey::widgets::guard cg{c}; __VA_ARGS__ }}
 
+    /**
+     * "Division" or "section". The main purpose of "div" is creating scrollable/clippable area. (todo)
+     */
+    class div {
+    public:
+        div(const std::string& id, const sz& size);
+        ~div();
+
+        operator bool() const { return rendered; }
+
+    private:
+        bool rendered{false};
+    };
+
     class group {
     public:
         explicit group(bool full_width = false);
