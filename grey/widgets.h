@@ -96,6 +96,7 @@ namespace grey::widgets {
         operator bool() const { return needs_content; }
     private:
         bool needs_content;
+        ImDrawList* parent_dl;
 
         common::ui_window nw();
     };
@@ -194,6 +195,21 @@ namespace grey::widgets {
 
     private:
         bool rendered{false};
+        const div_opts& opts;
+        ImDrawList* parent_dl;
+    };
+
+    class draw_splitter {
+    public:
+        point p0;
+
+        draw_splitter();
+
+        void swap();
+
+        ~draw_splitter();
+    private:
+        ImDrawListSplitter splitter{};
     };
 
     class group {
@@ -384,7 +400,7 @@ namespace grey::widgets {
     // Basic drawing
 
     /**
-     * Gets rectangle occupied by the last rendered item.
+     * Gets rectangle occupied by the last rendered item in absolute (not scaled) coordinates.
      */
     rect item_rect_get();
 

@@ -353,7 +353,6 @@ namespace grey::common::str {
         return result;
     }
 
-#if WIN32
     size_t word_count(const std::string& sentence) {
         size_t r = 0;
 
@@ -375,7 +374,6 @@ namespace grey::common::str {
 
         return r;
     }
-#endif
 
     std::string remove_non_ascii(const std::string& s) {
         string r;

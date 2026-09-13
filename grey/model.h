@@ -345,6 +345,10 @@ namespace grey {
     struct div_opts {
         bool user_resizeable_horizontal{false};
         bool user_resizeable_vertical{false};
+        bool has_background{true};
+        bool auto_resize_x{false};
+        bool auto_resize_y{false};
+        bool style_like_widget{false};
     };
 
     struct font_config {

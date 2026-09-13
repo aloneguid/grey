@@ -30,7 +30,6 @@ namespace grey::widgets {
 
     static int incrementing_id;
     static stack<float> window_dpis;
-    static stack<ImDrawList*> window_draw_lists;
 
     // Windows Draw List, re-assigned on window initialisation on every frame redraw
     static ImDrawList* wdl{nullptr};
@@ -155,13 +154,13 @@ namespace grey::widgets {
 
         // push window-scoped vars
         window_dpis.push(scale);
-        window_draw_lists.push(wdl);
 
         needs_content = ImGui::Begin(title.c_str(), s.open_ptr, flags);
 
         const ImGuiViewport* viewport = ImGui::GetWindowViewport();
         if(viewport && viewport->DpiScale > 0.0f)
             scale = viewport->DpiScale;
+        parent_dl = wdl;
         wdl = ImGui::GetWindowDrawList();
 
         if(s.border >= 0)
@@ -198,8 +197,7 @@ namespace grey::widgets {
 
         // restore window-scoped vars after ending the window so the viewport scale stays
         // active for the complete window scope
-        wdl = window_draw_lists.top();
-        window_draw_lists.pop();
+        wdl = parent_dl;
         scale = window_dpis.top();
         window_dpis.pop();
     }
@@ -673,7 +671,7 @@ namespace grey::widgets {
     void markdown(const std::string& text, const markdown_config& config) {
         static x::md md;
         // container c;
-        // c.auto_size_y();
+        // c.auto_resize_y();
         // guard gc{c};
         md.print(text.c_str(), text.c_str() + text.size(), config);
     }
@@ -776,7 +774,7 @@ namespace grey::widgets {
     // ----- basic drawing ----
 
     rect item_rect_get() {
-        return rect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+        return rect{ImGui::GetItemRectMin(), ImGui::GetItemRectMax()};
     }
 
     void draw_text(const point& pos, emphasis emp, const std::string& text) {
@@ -1142,24 +1140,53 @@ namespace grey::widgets {
 
     // ---- group ----
 
-    div::div(const std::string& id, const sz& size, const div_opts& opts) {
+    div::div(const std::string& id, const sz& size, const div_opts& opts) : opts{opts} {
         ImGuiChildFlags cf{0};
         ImGuiWindowFlags wf{0};
 
-        if(opts.user_resizeable_horizontal) {
+        if(opts.user_resizeable_horizontal)
             cf |= ImGuiChildFlags_ResizeX;
-        }
 
-        if(opts.user_resizeable_vertical) {
+        if(opts.user_resizeable_vertical)
             cf |= ImGuiChildFlags_ResizeY;
-        }
 
-        rendered = ImGui::BeginChild(id.c_str(), size, cf, wf);;
+        if(!opts.has_background)
+            cf |= ImGuiWindowFlags_NoBackground;
+
+        if(opts.auto_resize_x)
+            cf |= ImGuiChildFlags_AutoResizeX;
+
+        if(opts.auto_resize_y)
+            cf |= ImGuiChildFlags_AutoResizeY;
+
+        if(opts.style_like_widget)
+            cf |= ImGuiChildFlags_FrameStyle;
+
+        rendered = ImGui::BeginChild(id.c_str(), size, cf, wf);
+        parent_dl = wdl;
+        wdl = ImGui::GetWindowDrawList();
     }
 
     div::~div() {
         //End must be called regardless of whether it was rendered
         ImGui::EndChild();
+        wdl = parent_dl;
+
+        // to get rendered div dimensions, just call item_rect_get() after EndGetChild.
+    }
+
+    draw_splitter::draw_splitter() {
+        splitter.Split(wdl, 2);
+        splitter.SetCurrentChannel(wdl, 1);
+        p0 = cur_get();
+    }
+
+    void draw_splitter::swap() {
+        splitter.SetCurrentChannel(wdl, 0);
+    }
+
+    draw_splitter::~draw_splitter() {
+        splitter.Merge(wdl);
     }
 
     group::group(bool full_width) : full_width{full_width} {
@@ -1171,9 +1198,8 @@ namespace grey::widgets {
             // add some content horizontally to force full width
             float max_width = ImGui::GetWindowWidth();
             ImGui::SetCursorPosX(0.0);
-            //ImGui::InvisibleButton("##ib", ImVec2(max_width, 0.1));
-            ImGui::Dummy(ImVec2(max_width, 0.1));
-            ImGui::SameLine();
+            dummy({max_width, 0.1});
+            sl();
         }
 
         ImGui::EndGroup();

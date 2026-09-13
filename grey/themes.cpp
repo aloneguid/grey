@@ -1,4 +1,6 @@
 #include "themes.h"
+
+#include "model.h"
 #include "common/os.h"
 
 using namespace std;
@@ -27,6 +29,7 @@ namespace grey::themes {
 
         ImGuiStyle& style = ImGui::GetStyle();
         style.FrameBorderSize = 0.0f;
+        // style.TouchExtraPadding = ImVec2(5.0f, 5.0f);
 
         ImVec4* colors = style.Colors;
 
@@ -131,7 +134,7 @@ namespace grey::themes {
         colors[ImGuiCol_Tab] = ImVec4(0.86f, 0.86f, 0.86f, 1.00f);
         colors[ImGuiCol_PopupBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.78f);
 
-        // grey specific (ideas from https://getbootstrap.com/docs/5.0/helpers/colored-links/)
+        // grey specific
         GreyColors[GreyCol_EmphasisPrimary] = ImVec4(0.11f, 0.59f, 0.93f, 0.9f);
         GreyColors[GreyCol_EmphasisPrimaryHovered] = ImVec4(0.11f, 0.59f, 0.93f, 1.0f);
         GreyColors[GreyCol_EmphasisPrimaryActive] = ImVec4(0.11f, 0.59f, 0.93f, 0.95f);
@@ -647,6 +650,9 @@ namespace grey::themes {
             style.ChildRounding =
             style.TabRounding =
             3 * scale;
+
+        // theoretically helps with touch devices (originally increased only for grab bar sensitivity in "div" widget)
+        style.TouchExtraPadding = sz::square(2.0f) * scale;
     }
 
     bool is_dark_theme(const string& theme_id) {

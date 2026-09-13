@@ -80,9 +80,7 @@ namespace grey::common::str {
 
     std::string url_decode(const std::string& value);
 
-#if WIN32
     size_t word_count(const std::string& sentence);
-#endif
 
     std::string remove_non_ascii(const std::string& s);
 
