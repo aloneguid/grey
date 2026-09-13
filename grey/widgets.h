@@ -187,7 +187,7 @@ namespace grey::widgets {
      */
     class div {
     public:
-        div(const std::string& id, const sz& size);
+        div(const std::string& id, const sz& size, const div_opts& opts = {});
         ~div();
 
         operator bool() const { return rendered; }

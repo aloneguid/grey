@@ -342,6 +342,11 @@ namespace grey {
         bool native_decorations{true};
     };
 
+    struct div_opts {
+        bool user_resizeable_horizontal{false};
+        bool user_resizeable_vertical{false};
+    };
+
     struct font_config {
         bool load_icons{false};
         bool load_fixed{false};

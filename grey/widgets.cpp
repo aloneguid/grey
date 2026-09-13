@@ -1142,9 +1142,18 @@ namespace grey::widgets {
 
     // ---- group ----
 
-    div::div(const std::string& id, const sz& size) {
+    div::div(const std::string& id, const sz& size, const div_opts& opts) {
         ImGuiChildFlags cf{0};
         ImGuiWindowFlags wf{0};
+
+        if(opts.user_resizeable_horizontal) {
+            cf |= ImGuiChildFlags_ResizeX;
+        }
+
+        if(opts.user_resizeable_vertical) {
+            cf |= ImGuiChildFlags_ResizeY;
+        }
+
         rendered = ImGui::BeginChild(id.c_str(), size, cf, wf);;
     }
 
