@@ -358,7 +358,7 @@ namespace grey::common::str {
 
         size_t wl = 0;
         for (char ch : sentence) {
-            bool is_word_char = iscsym(ch);
+            const bool is_word_char = std::isalnum(static_cast<unsigned char>(ch)) || ch == '_';
 
             if (is_word_char) {
                 wl += 1;

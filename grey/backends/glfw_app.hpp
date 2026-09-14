@@ -118,13 +118,13 @@ namespace grey::backends {
             if(!window)
                 return;
 
-            const int alpha = std::clamp(transparency_window_alpha, 0, 255);
+            const float alpha = std::clamp<float>(opacity, 0.1, 1);
             if(alpha == last_transparency_window_alpha)
                 return;
 
             last_transparency_window_alpha = alpha;
             const common::ui_window w{window};
-            w.opacity(static_cast<float>(alpha) / 255.0f);
+            w.opacity(alpha);
         }
 
         void terminate_glfw() {
@@ -140,7 +140,7 @@ namespace grey::backends {
         std::string title;
         point window_pos{-1, -1};
         sz window_logical_size;
-        int last_transparency_window_alpha{255};
+        float last_transparency_window_alpha{1};
     };
 }
 
