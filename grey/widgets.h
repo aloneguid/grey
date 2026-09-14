@@ -37,14 +37,6 @@ namespace grey::widgets {
      */
     [[nodiscard]] bool initialized();
 
-    class guardable {
-    public:
-        virtual ~guardable() = default;
-
-        virtual void enter() = 0;
-        virtual void leave() = 0;
-    };
-
     /**
      * @brief ID collision avoidance frame. Creates a new ID scope.
      */
@@ -101,97 +93,15 @@ namespace grey::widgets {
         common::ui_window nw();
     };
 
-    class guard {
-    public:
-        explicit guard(guardable& g) : g{g} {
-            g.enter();
-        }
-
-        ~guard() {
-            g.leave();
-        }
-
-    private:
-        guardable& g;
-    };
-
-    class container : public guardable {
-    public:
-        /**
-         * @brief Creates container for other controls, which can be scrollable.
-         * @param width Width of the container, if zero, it will be taking the remaining space.
-         * @param height Height of the container, if zero, it will be taking the remaining space.
-         */
-        container(float width = 0.0F, float height = 0.0F);
-        container(const std::string& id, float width = 0.0F, float height = 0.0F);
-
-        container& border() {
-            flags |= ImGuiChildFlags_Borders;
-            return *this;
-        }
-
-        container& background(bool present) {
-            if(present) {
-                window_flags &= ~ImGuiWindowFlags_NoBackground;
-            } else {
-                window_flags |= ImGuiWindowFlags_NoBackground;
-            }
-            return *this;
-        }
-
-        container& auto_size_y() {
-            flags |= ImGuiChildFlags_AutoResizeY;
-            return *this;
-        }
-
-        container& resize_y() {
-            flags |= ImGuiChildFlags_ResizeY;
-            return *this;
-        }
-
-        container& resize_x() {
-            flags |= ImGuiChildFlags_ResizeX;
-            return *this;
-        }
-
-        container& horizontal_scrollbar() {
-            window_flags |= ImGuiWindowFlags_HorizontalScrollbar;
-            return *this;
-        }
-
-        container& resize(float x, float y) {
-            size = ImVec2(x, y);
-            return *this;
-        }
-
-        container& padding(float x, float y) {
-            flags |= ImGuiChildFlags_AlwaysUseWindowPadding;
-            pad = ImVec2{x * scale, y * scale};
-            return *this;
-        }
-
-        void enter() override;
-        void leave() override;
-
-    private:
-        std::string id;
-        ImVec2 size;
-        ImVec2 pad{0, 0};
-        ImGuiChildFlags flags{0};
-        ImGuiWindowFlags window_flags{0};
-    };
-
-#define with_container(c, ...) { { grey::widgets::guard cg{c}; __VA_ARGS__ }}
-
     /**
      * "Division" or "section". The main purpose of "div" is creating scrollable/clippable area. (todo)
      */
     class div {
     public:
-        div(const std::string& id, const sz& size, const div_opts& opts = {});
+        explicit div(const std::string& id, const div_opts& opts = {});
         ~div();
 
-        operator bool() const { return rendered; }
+        explicit operator bool() const { return rendered; }
 
     private:
         bool rendered{false};
@@ -342,25 +252,19 @@ namespace grey::widgets {
      * @brief Popup is a child element that can display extra items on top.
      *        But unlike raw implementation, this allow to open popups from anywhere in ID-stack.
      */
-    class popup : public guardable {
+    class popup {
     public:
-        explicit popup(std::string id);
+        /**
+         * @brief Constructs popup with given ID and initial open state.
+         * @param id Popup ID
+         * @param is_open When set to true, opens the popup and flips it to false.
+         */
+        explicit popup(const std::string& id, bool& is_open);
+        ~popup();
 
-        void enter() override;
-        void leave() override;
-
-        void open();
-        void open(float x, float y);
-
-        explicit operator bool() const {
-            return rendered;
-        }
+        explicit operator bool() const { return rendered; }
 
     private:
-        std::string id;
-        bool do_open{false};
-        float open_x{.0f};
-        float open_y{.0f};
         bool rendered{false};
     };
 
@@ -443,6 +347,8 @@ namespace grey::widgets {
     bool input(std::string& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
 
     bool input(int& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
+
+    bool input(float& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
 
     bool input(char* value, int value_length, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
 

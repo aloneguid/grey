@@ -18,8 +18,6 @@ bool app_open{true};
 bool show_demo{false};
 string window_title = "Demo app";
 string text;
-w::container scroller{400, 200};
-w::popup status_pop{"status_pop"};
 bool ned_initialised{false};
 bool selected{false};
 // multiline string with sample for text editor
@@ -30,8 +28,6 @@ function foo()
 end
 )";
 
-w::container md_wnd;
-w::container md_wnd1;
 grey::x::graph gr;
 
 void plot_demo() {
@@ -67,44 +63,42 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 
 
     app->run([&app]() {
-        // menu
-        {
-            if(w::menu_bar menu; menu) {
-                {
-                    if(w::menu m("File"); m) {
-                        w::mi("New", true, ICON_MD_DONUT_LARGE);
-                        if(w::mi("Exit", true)) {
-                            app_open = false;
+            // menu
+            {
+                if(w::menu_bar menu; menu) {
+                    {
+                        if(w::menu m("File"); m) {
+                            w::mi("New", true, ICON_MD_DONUT_LARGE);
+                            if(w::mi("Exit", true)) {
+                                app_open = false;
+                            }
+                        }
+                    }
+
+                    {
+                        if(w::menu m("View"); m) {
+                            w::mi_themes([&app](const std::string& id) {
+                                w::toast(emphasis::info, "theme changed to " + id);
+                                app->set_theme(id);
+                            });
+                            w::small_checkbox("Show ImGui demo", show_demo);
+                        }
+                    }
+
+                    {
+                        if(w::menu m("Help"); m) {
+                            w::mi("About");
                         }
                     }
                 }
-
-                {
-                    if(w::menu m("View"); m) {
-                        w::mi_themes([&app](const std::string& id) {
-                            w::toast(emphasis::info, "theme changed to " + id);
-                            app->set_theme(id);
-                        });
-                        w::small_checkbox("Show ImGui demo", show_demo);
-                    }
-                }
-
-                {
-                    if(w::menu m("Help"); m) {
-                        w::mi("About");
-                    }
-                }
             }
-        }
 
-        // top tabs
-        {
-            w::tab_bar tabs{"topTabs", true, true};
-
-            // basics
+            // top tabs
             {
-                if(auto tab = tabs.next_tab("intro")) {
+                w::tab_bar tabs{"topTabs", true, true};
 
+                // basics
+                if(auto tab = tabs.next_tab("Basics"); tab) {
                     if(w::accordion("Icons")) {
                         w::lbl(ICON_MD_5G " icon1");
                     }
@@ -134,13 +128,15 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                         w::slider(border, 0.0f, 10.0f, "border", 0.1f);
 
                         if(is_open) {
-                            if(w::wnd w1{"windows 1", {
-                                .open_ptr = use_is_open ? &is_open : nullptr,
-                                .opacity = opacity,
-                                .show_title_bar = title_bar,
-                                .border = border,
-                                .scrollable = scrollable}}) {
-
+                            if(w::wnd w1{
+                                "windows 1", {
+                                    .open_ptr = use_is_open ? &is_open : nullptr,
+                                    .opacity = opacity,
+                                    .show_title_bar = title_bar,
+                                    .border = border,
+                                    .scrollable = scrollable
+                                }
+                            }) {
                                 w::lbl("DPI: ", {.emp = emphasis::primary});
                                 w::sl();
                                 w::lbl(format("{}", w::scale));
@@ -194,67 +190,72 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                         }
                     }
 
-                    w::sep();
-
-                    w::sep("buttons (click for toast of the same emphasis)");
-
-                    if(w::button("simply add dot")) {
-                        text += '.';
-                    }
-
-                    for(pair<emphasis, string_view> emp: magic_enum::enum_entries<emphasis>()) {
-                        w::sl();
-                        if(w::button(string{emp.second}, emp.first)) {
-                            w::toast(emp.first, format("Toast of {} emphasis", emp.second));
+                    if(w::accordion("Buttons")) {
+                        w::lbl("Clicking a button also opens a toast with the same emphasis");
+                        for(pair<emphasis, string_view> emp: magic_enum::enum_entries<emphasis>()) {
+                            w::sl();
+                            if(w::button(string{emp.second}, emp.first)) {
+                                w::toast(emp.first, format("Toast of {} emphasis", emp.second));
+                            }
                         }
                     }
 
-                    w::sl();
-                    w::lbl(text);
-
-                    w::sep("radios");
-                    w::radio("radio1", selected);
-                    w::sl();
-                    w::radio("radio2", !selected);
-                    w::small_radio("small radio1", selected);
-                    w::sl();
-                    w::small_radio("small radio2", !selected);
-
-                    w::sep("checkboxes");
-                    w::checkbox("basic", selected);
-                    w::sl();
-                    w::small_checkbox("small", selected);
-
-                    if(w::hyperlink("click me")) {
-                        w::toast(emphasis::info, "hyperlink clicked");
-                    }
-                    w::sl();
-                    w::hyperlink("blog", "https://www.aloneguid.uk/posts/");
-
-                    w::input(text, "##input1");
-
-                    w::selectable("default selectable");
-
-                    static float slider_value_float = 0.5f;
-                    static int slider_value_int = 1;
-                    static bool slider_ticks = false;
-                    w::checkbox("ticks", slider_ticks);
-                    w::slider(slider_value_float, 0.0f, 1.0f, "slider float", 0.1f, slider_ticks);
-                    w::slider(slider_value_float, 0.0f, 1.0f, "slider float (small)", 0.1f, slider_ticks,
-                              emphasis::none, true);
-                    w::slider(slider_value_float, 0.0f, 1.0f, "slider float secondary", 0.1f, slider_ticks,
-                              emphasis::secondary);
-                    w::slider_classic(slider_value_float, 0.0f, 1.0f, "slider classic");
-
-                    w::slider(slider_value_int, 0, 10, "slider int", 2, slider_ticks);
-
-                    for(int i = 0; i < 10; i++) {
-                        w::id_frame f{i}; // demonstrates collision avoidance when using id_frame
-                        if(i > 0) w::sl();
-                        w::button("collide");
+                    if(w::accordion("Radios")) {
+                        w::radio("radio1", selected);
+                        w::sl();
+                        w::radio("radio2", !selected);
+                        w::small_radio("small radio1", selected);
+                        w::sl();
+                        w::small_radio("small radio2", !selected);
                     }
 
-                    {
+                    if(w::accordion("Checkboxes")) {
+                        w::checkbox("basic", selected);
+                        w::sl();
+                        w::small_checkbox("small", selected);
+                    }
+
+                    if(w::accordion("Hyperlinks")) {
+                        if(w::hyperlink("click me")) {
+                            w::toast(emphasis::info, "hyperlink clicked");
+                        }
+                        w::sl();
+                        w::hyperlink("blog", "https://www.aloneguid.uk/posts/");
+                    }
+
+                    if(w::accordion("Input text")) {
+                        w::input(text, "##input1");
+                    }
+
+                    if(w::accordion("Selectables")) {
+                        w::selectable("default selectable");
+                    }
+
+                    if(w::accordion("Sliders")) {
+                        static float slider_value_float = 0.5f;
+                        static int slider_value_int = 1;
+                        static bool slider_ticks = false;
+                        w::checkbox("ticks", slider_ticks);
+                        w::slider(slider_value_float, 0.0f, 1.0f, "slider float", 0.1f, slider_ticks);
+                        w::slider(slider_value_float, 0.0f, 1.0f, "slider float (small)", 0.1f, slider_ticks,
+                                  emphasis::none, true);
+                        w::slider(slider_value_float, 0.0f, 1.0f, "slider float secondary", 0.1f, slider_ticks,
+                                  emphasis::secondary);
+                        w::slider_classic(slider_value_float, 0.0f, 1.0f, "slider classic");
+
+                        w::slider(slider_value_int, 0, 10, "slider int", 2, slider_ticks);
+                    }
+
+                    if(w::accordion("IDs and collisions")) {
+                        w::lbl("Creates 10 buttons with the same id, but they don't collide");
+                        for(int i = 0; i < 10; i++) {
+                            w::id_frame f{i}; // demonstrates collision avoidance when using id_frame
+                            if(i > 0) w::sl();
+                            w::button("collide");
+                        }
+                    }
+
+                    if(w::accordion("Fonts")) {
                         static float fa_delta{0.0f};
                         w::slider(fa_delta, -100.0f, 100.0f, "size delta");
 
@@ -275,245 +276,232 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                             w::lbl("and monospace");
                         }
                     }
-                }
-            }
 
-            // containers
-            {
-                auto tab = tabs.next_tab("Containers");
-                if(tab) {
-                    static bool grp_bg{false};
-                    static bool grp_border{false};
-                    static bool grp_fw{false};
-                    static bool grp_hover_bg{false};
-                    static bool grp_hover_border{false};
+                    if(w::accordion("Div")) {
+                        static div_opts opts;
+                        static int line_count = 10;
+                        static int line_length = 10;
 
-                    w::checkbox("full width", grp_fw);
+                        w::sep("Content");;
+                        w::slider(line_count, 1, 1000, "Line count");
+                        w::slider(line_length, 1, 1000, "Line length");
 
-                    {
-                        w::group g{grp_fw};
-                        w::lbl("group content");
-                        w::lbl("a label");
-                        w::button("a button");
-                    }
-
-                    auto item_rect = w::item_rect_get();
-                    bool is_hovered = w::is_hovered();
-
-                    if(w::accordion("decoration")) {
-                        w::checkbox("has background", grp_bg);
-                        w::checkbox("has border", grp_border);
-                        w::checkbox("hover background", grp_hover_bg);
-                        w::checkbox("hover border", grp_hover_border);
-                    }
-
-                    w::lbl("(" + to_string((int) item_rect.x_min) + "x" + to_string((int) item_rect.y_min) + ") - (" +
-                           to_string((int) item_rect.x_max) + "x" + to_string((int) item_rect.y_max) + ")");
-
-                    ImDrawList* fdl = ImGui::GetWindowDrawList();
-                    ImDrawList* bdl = ImGui::GetForegroundDrawList();
-                    auto& style = ImGui::GetStyle();
-
-                    if(grp_border || (grp_hover_border && is_hovered))
-                        fdl->AddRect(item_rect.lt(), item_rect.rb(), w::imcol32(ImGuiCol_Border), style.FrameRounding);
-
-                    if(grp_bg || (grp_hover_bg && is_hovered))
-                        bdl->AddRectFilled(item_rect.lt(), item_rect.rb(), w::imcol32(ImGuiCol_Border),
-                                           style.FrameRounding);
-
-
-                    w::sep("scroller");
-                    {
-                        w::guard g{scroller};
-
-                        // add 100 buttons
-                        for(int i = 0; i < 100; i++) {
-                            w::button("button " + to_string(i));
+                        w::sep("Options");
+                        w::input(opts.size.width, "width");
+                        w::input(opts.size.height, "height");
+                        w::checkbox("horizontally resizeable", opts.user_resizeable_horizontal);
+                        w::checkbox("vertically resizeable", opts.user_resizeable_vertical);
+                        w::checkbox("has background", opts.has_background);
+                        w::checkbox("auto resize X", opts.auto_resize_x);
+                        w::checkbox("auto resize Y", opts.auto_resize_y);
+                        w::checkbox("style like other widgets", opts.style_like_widget);
+                        if(w::button("reset", emphasis::warning)) {
+                            opts = {};
                         }
-                    }
-                }
-            }
 
-            // collapsibles
-            {
-                auto tab = tabs.next_tab("Collapsibles");
-                if(tab) {
-                    if(w::accordion("Accordion")) {
-                        w::lbl("accordion content");
-                    }
+                        w::div ddiv{"demo_div", opts};
 
-                    if(w::tree_node p("Tree Node", true); p) {
-                        if(w::tree_node c1("Child 1"); c1) {
-                            if(w::tree_node l0("Leaf 0", false, true); l0) {
-                                w::lbl("leaf content");
+                        w::lbl(format("div rendered (may not be if going out of view, so you can optimise): {}", (bool)ddiv));
+
+                        if(ddiv) {
+                            string line;
+                            line.resize(line_length);
+                            for(int i = 0; i < line_length; i++) {
+                                line[i] = 'A';
+                            }
+
+                            for(int i = 0; i < line_count; i++) {
+                                w::lbl("Line " + std::to_string(i));
+                                w::sl();
+                                w::lbl(line);
                             }
                         }
                     }
-                }
-            }
 
-            // lists
-            {
-                auto tab = tabs.next_tab("Lists");
-                if(tab) {
-                    w::combo("combo", items, current_item);
-                    w::list("list", items, current_item);
+                    if(w::accordion("Tree node")) {
+                        if(w::tree_node p("Tree Node", true); p) {
+                          if(w::tree_node c1("Child 1"); c1) {
+                              if(w::tree_node l0("Leaf 0", false, true); l0) {
+                                  w::lbl("leaf content");
+                              }
+                          }
+                      }
+                    }
 
-                    w::lbl("selected item: ");
-                    w::sl();
-                    w::lbl(items[current_item]);
-                    w::lbl("selected index: ");
-                    w::sl();
-                    w::lbl(to_string(current_item));
+                    if(w::accordion("Popup")) {
+                        static bool open{false};
 
-                    if(w::button("center on screen")) {
-                        app->center_on_screen = true;
+                        if(w::button("pop")) open = true;
+
+                        if(w::popup pop{"status_pop", open}; pop) {
+                            w::button("button inside popup");
+                            w::lbl("label inside popup");
+                        }
                     }
                 }
-            }
 
-            // table
-            {
-                auto tab = tabs.next_tab("Table");
-                if(tab) {
-                    static int row_count = 100;
-                    w::slider(row_count, 0, 1000, "row count");
-                    int rows_rendered = 0;
-                    if(w::table tbl{"tbl", {"col 1", "col 2", "col 3"}, .0f, -40 * w::scale}; tbl) {
-                        for(int i = 0; i < row_count; i++) {
-                            if(tbl.begin_row()) {
-                                rows_rendered++;
-                                w::lbl("row " + to_string(i));
-                                for(int c = 1; c < 3; c++) {
-                                    if(tbl.next_column()) {
-                                        w::lbl(to_string(i) + " x " + to_string(c));
+                // lists
+                {
+                    auto tab = tabs.next_tab("Lists");
+                    if(tab) {
+                        w::combo("combo", items, current_item);
+                        w::list("list", items, current_item);
+
+                        w::lbl("selected item: ");
+                        w::sl();
+                        w::lbl(items[current_item]);
+                        w::lbl("selected index: ");
+                        w::sl();
+                        w::lbl(to_string(current_item));
+
+                        if(w::button("center on screen")) {
+                            app->center_on_screen = true;
+                        }
+                    }
+                }
+
+                // table
+                {
+                    auto tab = tabs.next_tab("Table");
+                    if(tab) {
+                        static int row_count = 100;
+                        w::slider(row_count, 0, 1000, "row count");
+                        int rows_rendered = 0;
+                        if(w::table tbl{"tbl", {"col 1", "col 2", "col 3"}, .0f, -40 * w::scale}; tbl) {
+                            for(int i = 0; i < row_count; i++) {
+                                if(tbl.begin_row()) {
+                                    rows_rendered++;
+                                    w::lbl("row " + to_string(i));
+                                    for(int c = 1; c < 3; c++) {
+                                        if(tbl.next_column()) {
+                                            w::lbl(to_string(i) + " x " + to_string(c));
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                    w::lbl("rows rendered: ");
-                    w::sl();
-                    w::lbl(to_string(rows_rendered));
-                }
-            }
-
-            // big table
-            {
-                auto tab = tabs.next_tab("Big table");
-                if(tab) {
-                    static int row_count = 1000;
-                    static int col_count = 3;
-                    static bool row_selectable = false;
-                    static bool row_selectable_span = false;
-
-                    w::slider(row_count, 0, 1000000000, "row count");
-                    w::slider(col_count, 1, 100, "col count");
-                    w::checkbox("row selectable", row_selectable);
-                    if(row_selectable) {
+                        w::lbl("rows rendered: ");
                         w::sl();
-                        w::checkbox("span all columns", row_selectable_span);
+                        w::lbl(to_string(rows_rendered));
                     }
+                }
 
-                    static vector<string> columns;
-                    if(col_count != columns.size()) {
-                        columns.clear();
-                        for(int i = 0; i < col_count; i++) {
-                            columns.push_back("col " + to_string(i));
+                // big table
+                {
+                    auto tab = tabs.next_tab("Big table");
+                    if(tab) {
+                        static int row_count = 1000;
+                        static int col_count = 3;
+                        static bool row_selectable = false;
+                        static bool row_selectable_span = false;
+
+                        w::slider(row_count, 0, 1000000000, "row count");
+                        w::slider(col_count, 1, 100, "col count");
+                        w::checkbox("row selectable", row_selectable);
+                        if(row_selectable) {
+                            w::sl();
+                            w::checkbox("span all columns", row_selectable_span);
                         }
-                    }
 
-                    static bool row_bg = false;
-                    w::checkbox("alternate row bg", row_bg);
+                        static vector<string> columns;
+                        if(col_count != columns.size()) {
+                            columns.clear();
+                            for(int i = 0; i < col_count; i++) {
+                                columns.push_back("col " + to_string(i));
+                            }
+                        }
 
-                    w::big_table t{"table2", columns, (size_t) row_count, 0.0f, -20 * w::scale, row_bg};
-                    if(t) {
-                        t.render_data([](int row, int col) {
-                            if(col == 0) {
-                                if(row_selectable) {
-                                    if(w::selectable(to_string(row), row_selectable_span)) {
-                                        w::toast(emphasis::info, "row " + to_string(row) + " selected");
+                        static bool row_bg = false;
+                        w::checkbox("alternate row bg", row_bg);
+
+                        w::big_table t{"table2", columns, (size_t) row_count, 0.0f, -20 * w::scale, row_bg};
+                        if(t) {
+                            t.render_data([](int row, int col) {
+                                if(col == 0) {
+                                    if(row_selectable) {
+                                        if(w::selectable(to_string(row), row_selectable_span)) {
+                                            w::toast(emphasis::info, "row " + to_string(row) + " selected");
+                                        }
+                                    } else {
+                                        w::lbl(to_string(row));
                                     }
                                 } else {
-                                    w::lbl(to_string(row));
+                                    w::lbl(to_string(row) + "x" + to_string(col));
                                 }
-                            } else {
-                                w::lbl(to_string(row) + "x" + to_string(col));
-                            }
-                        });
-                    }
-                }
-            }
-
-
-            // Spinners
-            {
-                auto tab = tabs.next_tab("Spinners");
-                if(tab) {
-                    static float radius = 50;
-                    static float thickness = 4;
-                    static float speed = 1;
-                    static int dot_count = 8;
-                    w::slider(radius, 5, 500, "radius");
-                    w::slider(thickness, 1, 50, "thickness");
-                    w::slider(speed, 0.1, 10, "speed");
-                    w::slider(dot_count, 1, 100, "dot count");
-                    w::spinner_hbo_dots(radius, thickness, speed, dot_count);
-                }
-            }
-
-            // Multiline edit
-            {
-                auto tab = tabs.next_tab("Editor");
-                if(tab) {
-                    static float height = 0;
-                    static bool autoscroll = false;
-                    static bool enabled = true;
-                    static bool use_fixed_font = false;
-                    static bool use_rich_editor = false;
-                    static bool ted_initialised = false;
-                    w::slider(height, -500, 500, "height");
-                    w::checkbox("autoscroll", autoscroll);
-                    w::checkbox("enabled", enabled);
-                    w::checkbox("fixed font", use_fixed_font);
-                    w::checkbox("use rich editor", use_rich_editor);
-
-                    if(use_rich_editor) {
-                        //ted.render(height == 0 ? -FLT_MIN : height);
-                        static w::code_editor ted;
-                        if(!ted_initialised) {
-                            ted.lng = w::code_editor::language::lua;
-                            ted.set_text(text_editor_text);
-                            ted_initialised = true;
+                            });
                         }
-
-                        ted.render();
-                    } else {
-                        w::input_ml("##ml", text_editor_text, height == 0 ? -FLT_MIN : height, autoscroll, enabled,
-                                    use_fixed_font);
                     }
                 }
-            }
 
-            // ImPlot
-            with_tab(tabs, "Plots",
-                     //w::plot_demo();
-                     plot_demo();)
 
-            // markdown
-            {
-                auto tab = tabs.next_tab("Markdown");
-                static w::markdown_config md_config;
-                static bool preview_only{false};
-                if(tab) {
-                    float w = w::avail_x();
+                // Spinners
+                {
+                    auto tab = tabs.next_tab("Spinners");
+                    if(tab) {
+                        static float radius = 50;
+                        static float thickness = 4;
+                        static float speed = 1;
+                        static int dot_count = 8;
+                        w::slider(radius, 5, 500, "radius");
+                        w::slider(thickness, 1, 50, "thickness");
+                        w::slider(speed, 0.1, 10, "speed");
+                        w::slider(dot_count, 1, 100, "dot count");
+                        w::spinner_hbo_dots(radius, thickness, speed, dot_count);
+                    }
+                }
 
-                    w::slider(md_config.h1_size_delta, 0.0f, 100.0f, "h1");
-                    w::slider(md_config.h2_size_delta, 0.0f, 100.0f, "h2");
-                    w::slider(md_config.h3_size_delta, 0.0f, 100.0f, "h3");
-                    w::checkbox("preview only", preview_only);
+                // Multiline edit
+                {
+                    auto tab = tabs.next_tab("Editor");
+                    if(tab) {
+                        static float height = 0;
+                        static bool autoscroll = false;
+                        static bool enabled = true;
+                        static bool use_fixed_font = false;
+                        static bool use_rich_editor = false;
+                        static bool ted_initialised = false;
+                        w::slider(height, -500, 500, "height");
+                        w::checkbox("autoscroll", autoscroll);
+                        w::checkbox("enabled", enabled);
+                        w::checkbox("fixed font", use_fixed_font);
+                        w::checkbox("use rich editor", use_rich_editor);
 
-                    static string md_text = R"(# Built-in markdown support
+                        if(use_rich_editor) {
+                            //ted.render(height == 0 ? -FLT_MIN : height);
+                            static w::code_editor ted;
+                            if(!ted_initialised) {
+                                ted.lng = w::code_editor::language::lua;
+                                ted.set_text(text_editor_text);
+                                ted_initialised = true;
+                            }
+
+                            ted.render();
+                        } else {
+                            w::input_ml("##ml", text_editor_text, height == 0 ? -FLT_MIN : height, autoscroll, enabled,
+                                        use_fixed_font);
+                        }
+                    }
+                }
+
+                // ImPlot
+                with_tab(tabs, "Plots",
+                         //w::plot_demo();
+                         plot_demo();)
+
+                // markdown
+                {
+                    auto tab = tabs.next_tab("Markdown");
+                    static w::markdown_config md_config;
+                    static bool preview_only{false};
+                    if(tab) {
+                        float w = w::avail_x();
+
+                        w::slider(md_config.h1_size_delta, 0.0f, 100.0f, "h1");
+                        w::slider(md_config.h2_size_delta, 0.0f, 100.0f, "h2");
+                        w::slider(md_config.h3_size_delta, 0.0f, 100.0f, "h3");
+                        w::checkbox("preview only", preview_only);
+
+                        static string md_text = R"(# Built-in markdown support
 
 Uses [MD4C](https://github.com/mity/md4c) parser and takes ideas from [imgui_md](https://github.com/mekhontsev/imgui_md) (but does *not* include it).
 
@@ -575,133 +563,123 @@ Also, [GitHub alerts](https://docs.github.com/en/get-started/writing-on-github/g
 > Advises about risks or negative outcomes of certain actions.
 
 )";
-                    if(preview_only) {
-                        w::markdown(md_text, md_config);
-                    } else {
-                        {
-                            md_wnd.resize(w / 2, .0f);
-                            w::guard g{md_wnd};
-                            w::input_ml("##md_input", md_text, 0.0f);
+                        if(preview_only) {
+                            w::markdown(md_text, md_config);
+                        } else {
+                            {
+                                w::div dw{"md_left", {.size = sz{w / 2, 0}}};
+                                w::input_ml("##md_input", md_text, 0.0f);
+                            }
+                            w::sl();
+                            {
+                                w::div dw{"md_right"};
+                                w::markdown(md_text, md_config);
+                            }
+                        }
+                    }
+                }
+
+                // graph
+                {
+                    auto tab = tabs.next_tab("X");
+                    if(tab) {
+                        static bool gr_auto_fr{false};
+                        static string gr_connect_to;
+
+                        if(w::button("add node")) {
+                            int id = gr.get_nodes().size() + 1;
+                            gr.add_node(id);
+                            if(!gr_connect_to.empty()) {
+                                gr.add_edge(id, std::stoi(gr_connect_to));
+                            }
                         }
                         w::sl();
-                        {
-                            w::guard g{md_wnd1};
-                            w::markdown(md_text, md_config);
+                        w::input(gr_connect_to, "connect to", true, 50 * w::scale);
+                        w::sl();
+                        w::lbl("|");
+                        w::sl();
+                        if(w::button("circle")) {
+                            gr.layout_circle();
                         }
-                    }
-                }
-            }
-
-            // graph
-            {
-                auto tab = tabs.next_tab("X");
-                if(tab) {
-                    static bool gr_auto_fr{false};
-                    static string gr_connect_to;
-
-                    if(w::button("add node")) {
-                        int id = gr.get_nodes().size() + 1;
-                        gr.add_node(id);
-                        if(!gr_connect_to.empty()) {
-                            gr.add_edge(id, std::stoi(gr_connect_to));
+                        w::sl();
+                        w::checkbox("auto FR", gr_auto_fr);
+                        if(gr_auto_fr) {
+                            gr.layout_fruchterman_reingold();
                         }
-                    }
-                    w::sl();
-                    w::input(gr_connect_to, "connect to", true, 50 * w::scale);
-                    w::sl();
-                    w::lbl("|");
-                    w::sl();
-                    if(w::button("circle")) {
-                        gr.layout_circle();
-                    }
-                    w::sl();
-                    w::checkbox("auto FR", gr_auto_fr);
-                    if(gr_auto_fr) {
-                        gr.layout_fruchterman_reingold();
-                    }
 
-                    //gr.loop_fr_re();
-                    gr.render();
+                        //gr.loop_fr_re();
+                        gr.render();
+                    }
+                }
+
+                // system
+                {
+                    if(auto tab = tabs.next_tab("sys")) {
+                        bool fps_control = app->fps != -1;
+                        if(w::checkbox("FPS control", fps_control)) {
+                            app->fps = fps_control ? 10.0f : -1;
+                        }
+                        if(fps_control) {
+                            w::slider(app->fps, 0.0f, 500.0f, "FPS", 0.1f);
+                        }
+
+                        w::sep("Monitors");
+                        w::lbl(format("mouse pos: {}", w::mouse_pos()));
+                        for(int i = 0; i < w::mon_count(); i++) {
+                            auto mm = w::mon(i).value();
+                            w::lbl(format("{:2d}: ", i));
+                            w::sl(40);
+                            w::lbl(format("scale: {}", mm.dpi_scale));
+                            w::sl(160);
+                            w::lbl(format("{} (work: {})", mm.area, mm.work_area));
+                        }
+
+                        if(w::button("center on screen")) {
+                            app->center();
+                        }
+
+                        w::sep("Clipboard");
+                        static string clip_text;
+                        w::input_ml("clip", clip_text, w::scaled(200));
+                        if(w::button("read"))
+                            clip_text = common::clipboard::get_text();
+                        w::sl();
+                        if(w::button("write"))
+                            common::clipboard::set_text(clip_text);
+                    }
                 }
             }
 
-            // system
-            {
-                if(auto tab = tabs.next_tab("sys")) {
-                    bool fps_control = app->fps != -1;
-                    if(w::checkbox("FPS control", fps_control)) {
-                        app->fps = fps_control ? 10.0f : -1;
-                    }
-                    if(fps_control) {
-                        w::slider(app->fps, 0.0f, 500.0f, "FPS", 0.1f);
-                    }
 
-                    w::sep("Monitors");
-                    w::lbl(format("mouse pos: {}", w::mouse_pos()));
-                    for(int i = 0; i < w::mon_count(); i++) {
-                        auto mm = w::mon(i).value();
-                        w::lbl(format("{:2d}: ", i));
-                        w::sl(40);
-                        w::lbl(format("scale: {}", mm.dpi_scale));
-                        w::sl(160);
-                        w::lbl(format("{} (work: {})", mm.area, mm.work_area));
-                    }
+            with_status_bar(
+                w::lbl(ICON_MD_HEAT_PUMP, {.emp=emphasis::primary});
+                w::sl();
+                w::lbl("|", {.emp=emphasis::disabled});
 
-                    if(w::button("center on screen")) {
-                        app->center();
-                    }
-
-                    w::sep("Clipboard");
-                    static string clip_text;
-                    w::input_ml("clip", clip_text, w::scaled(200));
-                    if(w::button("read"))
-                        clip_text = common::clipboard::get_text();
-                    w::sl();
-                    if(w::button("write"))
-                        common::clipboard::set_text(clip_text);
-
-                }
-            }
-
-        }
-
-
-        with_status_bar(
-            w::lbl(ICON_MD_HEAT_PUMP, {.emp=emphasis::primary});
-            w::sl();
-            w::lbl("|", {.emp=emphasis::disabled});
-            w::sl();
-            if(w::button("pop!", emphasis::none, true, true)) {
-                status_pop.open();
-            }
-            w::sl();
-
-            w::guard g{status_pop};
-            if(status_pop) {
-                w::lbl("popup content");
-            }
-
-            auto sbi = [](string s, bool sep = true) {
+                auto sbi = [](string s, bool sep = true) {
                 if(sep) {
-                    w::sl(); w::lbl("|", {.emp=emphasis::disabled});
+                w::sl(); w::lbl("|", {.emp=emphasis::disabled});
                 }
                 w::sl();
                 w::lbl(s);
-            };
+                };
 
-            sbi(format("{:.2f} FPS", ImGui::GetIO().Framerate), false);
-            sbi(format("x{:.2f}", w::scale));
-            sbi(ImGui::GetVersion());
-        )
+                sbi(format("{:.2f} FPS", ImGui::GetIO().Framerate), false);
+                sbi(format("x{:.2f}", w::scale));
+                sbi(ImGui::GetVersion());
+            )
 
 
-        if(show_demo)
-            ImGui::ShowDemoWindow();
+            if(show_demo)
+                ImGui::ShowDemoWindow();
 
-        w::toast_render_frame();
+            w::toast_render_frame();
 
-        return app_open;
-    });
+            return app_open;
+        }
 
-    return 0;
+    );
+
+    return
+            0;
 }

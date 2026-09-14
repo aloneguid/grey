@@ -343,6 +343,12 @@ namespace grey {
     };
 
     struct div_opts {
+        /**
+         * Default size makes div use all available space.
+         * Positive size makes div use specified size.
+         * Negative size makes div use remaining space minus the specified size.
+         */
+        sz size{};
         bool user_resizeable_horizontal{false};
         bool user_resizeable_vertical{false};
         bool has_background{true};

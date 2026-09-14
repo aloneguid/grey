@@ -227,34 +227,6 @@ namespace grey::widgets {
         ImGui::PopID();
     }
 
-    // ---- container ----
-
-    container::container(float width, float height) : id{generate_id()}, size{width * scale, height * scale} {
-    }
-
-    container::container(const std::string& id, float width, float height) : id{id}, size{width * scale, height * scale} {
-    }
-
-    void container::enter() {
-        if(size.y < 0) {
-            ImVec2 tsz = size;
-            ImVec2 wsz = ImGui::GetWindowSize();
-            tsz = ImVec2(tsz.x, wsz.y + size.y);
-        }
-
-        if(pad.x > 0 || pad.y > 0) {
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, pad);
-        }
-        ImGui::BeginChild(id.c_str(), size, flags, window_flags);
-    }
-
-    void container::leave() {
-        ImGui::EndChild();
-        if(pad.x > 0 || pad.y > 0) {
-            ImGui::PopStyleVar();
-        }
-    }
-
     bool mi(const std::string& text, bool reserve_icon_space, const std::string& icon) {
         bool r;
         const string prefix = "       ";
@@ -386,7 +358,7 @@ namespace grey::widgets {
 
     template<typename T>
     bool input(T& value, int value_length, const std::string& label, bool enabled, float width, bool is_readonly) {
-        bool fired;
+        bool fired{false};
         if(!enabled) ImGui::BeginDisabled();
         if(width != 0)
             ImGui::PushItemWidth(width);
@@ -400,6 +372,8 @@ namespace grey::widgets {
             fired = ImGui::InputText(label.c_str(), value, value_length, flags);
         } else if constexpr(std::is_same_v<T, int>) {
             fired = ImGui::InputInt(label.c_str(), &value, 1, 100, flags);
+        } else if constexpr(std::is_same_v<T, float>) {
+            fired = ImGui::InputFloat(label.c_str(), &value, 1, 100, "%.3f", flags);
         }
 
         if(width != 0)
@@ -418,6 +392,10 @@ namespace grey::widgets {
 
     bool input(int& value, const std::string& label, bool enabled, float width, bool is_readonly) {
         return input<int>(value, 0, label, enabled, width, is_readonly);
+    }
+
+    bool input(float& value, const std::string& label, bool enabled, float width, bool is_readonly) {
+        return input<float>(value, 0, label, enabled, width, is_readonly);
     }
 
     template<typename T>
@@ -1140,7 +1118,7 @@ namespace grey::widgets {
 
     // ---- group ----
 
-    div::div(const std::string& id, const sz& size, const div_opts& opts) : opts{opts} {
+    div::div(const std::string& id, const div_opts& opts) : opts{opts} {
         ImGuiChildFlags cf{0};
         ImGuiWindowFlags wf{0};
 
@@ -1162,7 +1140,7 @@ namespace grey::widgets {
         if(opts.style_like_widget)
             cf |= ImGuiChildFlags_FrameStyle;
 
-        rendered = ImGui::BeginChild(id.c_str(), size, cf, wf);
+        rendered = ImGui::BeginChild(id.c_str(), opts.size, cf, wf);
         parent_dl = wdl;
         wdl = ImGui::GetWindowDrawList();
     }
@@ -1438,35 +1416,19 @@ namespace grey::widgets {
 
     // ---- popup ----
 
-    popup::popup(std::string id) : id{std::move(id)} {
-    }
-
-    void popup::enter() {
-        if(do_open) {
-            ImGui::OpenPopup(id.c_str());
-            do_open = false;
+    popup::popup(const string& id, bool& is_open) {
+        if(is_open) {
+            ImGui::OpenPopup(id.c_str(), ImGuiPopupFlags_None);
+            is_open = false;
         }
 
-        if(rendered && open_x != 0 && open_y != 0) {
-            ImGui::SetNextWindowPos(ImVec2(open_x, open_y));
-        }
         rendered = ImGui::BeginPopup(id.c_str());
     }
 
-    void popup::leave() {
+    popup::~popup() {
         if(rendered) {
             ImGui::EndPopup();
         }
-    }
-
-    void popup::open() {
-        do_open = true;
-    }
-
-    void popup::open(float x, float y) {
-        do_open = true;
-        open_x = x;
-        open_y = y;
     }
 
     // ImGuiColorTextEdit
