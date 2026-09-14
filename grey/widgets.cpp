@@ -718,7 +718,7 @@ namespace grey::widgets {
         return mon(pio.Monitors[index]);
     }
 
-    optional<monitor> mon_current() {
+    optional<monitor> mon_mouse() {
         const ImGuiPlatformIO& pio = ImGui::GetPlatformIO();
         ImVector<ImGuiPlatformMonitor> mons = pio.Monitors;
         long x, y;
@@ -733,6 +733,12 @@ namespace grey::widgets {
         }
 
         return nullopt;
+    }
+
+    monitor mon_wnd() {
+        ImGuiViewport* vp = ImGui::GetWindowViewport();
+        const ImGuiPlatformMonitor* pm = ImGui::GetViewportPlatformMonitor(vp);
+        return mon(*pm);
     }
 
     rect window_rect_get() {

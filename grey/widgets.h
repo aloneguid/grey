@@ -277,6 +277,8 @@ namespace grey::widgets {
 
     // monitor API
 
+    monitor mon(const ImGuiPlatformMonitor& mon);
+
     /**
      * Gets number of monitors on this system.
      */
@@ -288,9 +290,14 @@ namespace grey::widgets {
     std::optional<monitor> mon(int index);
 
     /**
-     * Get monitor area for the current monitor. Current monitor is the one that contains the mouse cursor.
+     * Get monitor area for the monitor where mouse cursor is located.
      */
-    std::optional<monitor> mon_current();
+    std::optional<monitor> mon_mouse();
+
+    /**
+     * Get monitor area for the monitor where current window is located.
+     */
+    monitor mon_wnd();
 
     /**
      * @brief Get window position and dimensions in screen space;

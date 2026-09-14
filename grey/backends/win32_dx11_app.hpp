@@ -227,7 +227,7 @@ namespace grey::backends {
     class win32_dx11_app : public app {
         HWND hWnd{nullptr};
         bool last_use_transparency_colour_key_value{false};
-        int last_transparency_window_alpha{255};
+        int last_opacity{255};
 
         const float ClearColorF4[4] = {
             ClearColor[0] * ClearColor[3],
@@ -296,13 +296,16 @@ namespace grey::backends {
         void resize(const sz size) override {
             if(hWnd) {
                 UINT uFlags{0};
-                RECT rc{0, 0, static_cast<LONG>(size.width), static_cast<LONG>(size.height)};
+                RECT rc;
 
                 if(center_on_screen) {
-                    point tl = get_monitor_center_window_point(size);
-                    rc.left = tl.x;
-                    rc.top = tl.y;
+                    const point top_left = get_monitor_center_window_point(size);
+                    rc = RECT{static_cast<LONG>(top_left.x),
+                        static_cast<LONG>(top_left.y),
+                        static_cast<LONG>(top_left.x + size.width),
+                        static_cast<LONG>(top_left.y + size.height)};
                 } else {
+                    rc = {0, 0, static_cast<LONG>(size.width), static_cast<LONG>(size.height)};
                     uFlags |= SWP_NOMOVE;
                 }
 
@@ -385,17 +388,17 @@ namespace grey::backends {
             if(!hWnd) return;
 
             bool use_color_key = use_transparency_colour_key_value;
-            int alpha = transparency_window_alpha;
+            int opc = std::clamp<float>(opacity, 0.1, 1) * 255;
             if(use_color_key == last_use_transparency_colour_key_value &&
-               alpha == last_transparency_window_alpha) {
+               opc == last_opacity) {
                 return;
             }
 
             last_use_transparency_colour_key_value = use_color_key;
-            last_transparency_window_alpha = alpha;
+            last_opacity = opc;
 
             LONG_PTR exStyle = ::GetWindowLongPtr(hWnd, GWL_EXSTYLE);
-            if(use_color_key || alpha < 255) {
+            if(use_color_key || opc < 255) {
                 if(!(exStyle & WS_EX_LAYERED)) {
                     ::SetWindowLongPtr(hWnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
                 }
@@ -404,15 +407,15 @@ namespace grey::backends {
                 if(use_color_key) {
                     dwFlags |= LWA_COLORKEY;
                 }
-                if(alpha < 255) {
+                if(opc < 255) {
                     dwFlags |= LWA_ALPHA;
                 }
 
-                if(alpha < 0) alpha = 0;
-                if(alpha > 255) alpha = 255;
+                if(opc < 0) opc = 0;
+                if(opc > 255) opc = 255;
 
                 COLORREF crKey = RGB(ClearColor[0] * 255, ClearColor[1] * 255, ClearColor[2] * 255);
-                ::SetLayeredWindowAttributes(hWnd, crKey, static_cast<BYTE>(alpha), dwFlags);
+                ::SetLayeredWindowAttributes(hWnd, crKey, static_cast<BYTE>(opc), dwFlags);
             } else if(exStyle & WS_EX_LAYERED) {
                 ::SetWindowLongPtr(hWnd, GWL_EXSTYLE, exStyle & ~WS_EX_LAYERED);
             }

@@ -116,12 +116,6 @@ namespace grey {
         [[nodiscard]] std::array<float, 4> get_clear_color() const;
 
         /**
-         * @brief Find the monitor with the largest overlap with the given viewport.
-         * @return Monitor index, or -1 if no monitors are found.
-         */
-        int find_monitor_for_main_viewport();
-
-        /**
          * @brief When set to true, will allow the window to be resized.
          */
         bool can_resize{true};
@@ -149,9 +143,9 @@ namespace grey {
         bool use_transparency_colour_key_value{false};
 
         /**
-         * @brief If less than 255, this value will be used as the alpha value for the entire window, making it semi-transparent.
+         * @brief If less than 1, this value will be used as the alpha value for the entire window, making it semi-transparent.
          */
-        int transparency_window_alpha{255};
+        float opacity{1};
 
         /**
          * Hide main window from Taskbar/Dock or whatever the platform calls it.

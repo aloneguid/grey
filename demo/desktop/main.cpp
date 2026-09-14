@@ -615,6 +615,8 @@ Also, [GitHub alerts](https://docs.github.com/en/get-started/writing-on-github/g
                 // system
                 {
                     if(auto tab = tabs.next_tab("sys")) {
+                        w::slider(app->opacity, 0.1, 1, "Main opacity", 0.1f);
+
                         bool fps_control = app->fps != -1;
                         if(w::checkbox("FPS control", fps_control)) {
                             app->fps = fps_control ? 10.0f : -1;
