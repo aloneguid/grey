@@ -38,10 +38,16 @@
             "name": "fontconfig",
             "platform": "linux"
         },
+        {
+            "name": "curl",
+            "platform": "linux | osx"
+        },
         "implot",
         "simpleini",
         "fkyaml",
         "magic-enum",
-        "md4c"
+        "md4c",
+        "cpp-httplib",
+        "gtest"
     ]
 }

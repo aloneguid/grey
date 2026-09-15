@@ -6,6 +6,8 @@
 
 #if PLATFORM_WINDOWS
 #pragma comment(lib, "winhttp.lib")
+#else
+#include <curl/curl.h>
 #endif
 
 using namespace std;
@@ -205,16 +207,98 @@ namespace grey::common {
 
 #else
 
+    namespace {
+        size_t write_response(char* data, size_t size, size_t count, void* user_data) {
+            auto* response = static_cast<std::string*>(user_data);
+            response->append(data, size * count);
+            return size * count;
+        }
+
+        size_t collect_header(char* data, size_t size, size_t count, void* user_data) {
+            auto* headers = static_cast<std::map<std::string, std::string>*>(user_data);
+            const size_t length = size * count;
+            std::string line(data, length);
+            const size_t separator = line.find(':');
+            if(separator == std::string::npos) return length;
+
+            std::string name = line.substr(0, separator);
+            std::string value = line.substr(separator + 1);
+            str::trim(name);
+            str::trim(value);
+            if(!name.empty()) (*headers)[name] = value;
+            return length;
+        }
+
+        CURL* create_handle(const std::string& request_url) {
+            CURL* handle = curl_easy_init();
+            if(!handle) return nullptr;
+
+            if(curl_easy_setopt(handle, CURLOPT_URL, request_url.c_str()) != CURLE_OK ||
+               curl_easy_setopt(handle, CURLOPT_NOSIGNAL, 1L) != CURLE_OK ||
+               curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT, 10L) != CURLE_OK ||
+               curl_easy_setopt(handle, CURLOPT_TIMEOUT, 30L) != CURLE_OK) {
+                curl_easy_cleanup(handle);
+                return nullptr;
+            }
+            return handle;
+        }
+    }
+
     std::string http::get(const std::string& abs_url) const {
-        return "";
+        std::string result;
+        CURL* handle = create_handle(abs_url);
+        if(!handle) return result;
+
+        const bool configured =
+            curl_easy_setopt(handle, CURLOPT_HTTPGET, 1L) == CURLE_OK &&
+            curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_response) == CURLE_OK &&
+            curl_easy_setopt(handle, CURLOPT_WRITEDATA, &result) == CURLE_OK;
+        if(configured && curl_easy_perform(handle) != CURLE_OK) result.clear();
+        curl_easy_cleanup(handle);
+        return result;
     }
 
     int http::get_get_headers(const std::string& abs_url, std::map<std::string, std::string>& headers) const {
-        return 0;
+        headers.clear();
+        CURL* handle = create_handle(abs_url);
+        if(!handle) return -1;
+
+        const bool configured =
+            curl_easy_setopt(handle, CURLOPT_HTTPGET, 1L) == CURLE_OK &&
+            curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 0L) == CURLE_OK &&
+            curl_easy_setopt(handle, CURLOPT_HEADERFUNCTION, collect_header) == CURLE_OK &&
+            curl_easy_setopt(handle, CURLOPT_HEADERDATA, &headers) == CURLE_OK;
+        if(!configured || curl_easy_perform(handle) != CURLE_OK) {
+            curl_easy_cleanup(handle);
+            return -1;
+        }
+
+        long response_code = 0;
+        const CURLcode info_result = curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &response_code);
+        curl_easy_cleanup(handle);
+        return info_result == CURLE_OK ? static_cast<int>(response_code) : -1;
     }
 
     void http::post(const std::string& domain, const std::string& abs_url, const std::string& data, bool is_async) const {
+        (void)is_async;
+        std::string request_url = domain;
+        if(request_url.find("://") == std::string::npos) request_url = "https://" + request_url;
+        if(abs_url.find("://") == 0) {
+            request_url = abs_url;
+        } else if(!abs_url.empty()) {
+            if(request_url.back() != '/' && abs_url.front() != '/') request_url += '/';
+            request_url += abs_url;
+        }
 
+        CURL* handle = create_handle(request_url);
+        if(!handle) return;
+
+        const bool configured =
+            curl_easy_setopt(handle, CURLOPT_POST, 1L) == CURLE_OK &&
+            curl_easy_setopt(handle, CURLOPT_POSTFIELDS, data.data()) == CURLE_OK &&
+            curl_easy_setopt(handle, CURLOPT_POSTFIELDSIZE_LARGE, static_cast<curl_off_t>(data.size())) == CURLE_OK;
+        if(configured) curl_easy_perform(handle);
+        curl_easy_cleanup(handle);
     }
 
 #endif

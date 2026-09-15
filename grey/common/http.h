@@ -17,7 +17,7 @@ namespace grey::common {
         http();
         ~http();
 
-        std::string get(const std::string& abs_url) const;
+        [[nodiscard]] std::string get(const std::string& abs_url) const;
 
         int get_get_headers(const std::string& abs_url, std::map<std::string, std::string>& headers) const;
 

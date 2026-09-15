@@ -95,6 +95,10 @@ jobs:
       run: cmake --build build --config ${{ env.VCPKG_CONFIG }}
       working-directory: .
 
+    - name: unit tests
+      run: ctest --test-dir build -C ${{ env.VCPKG_CONFIG }} --output-on-failure
+      working-directory: .
+
     - name: debug
       run: ls -R
       working-directory: .

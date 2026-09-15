@@ -6,6 +6,11 @@ set (DYNAMIC_NAME xgrey)
 find_package(imgui CONFIG REQUIRED)
 find_package(implot CONFIG REQUIRED)
 find_package(md4c CONFIG REQUIRED)
+find_package(GTest CONFIG REQUIRED)
+find_package(httplib CONFIG REQUIRED)
+if(NOT WIN32)
+    find_package(CURL REQUIRED)
+endif()
 
 # Linux uses OpenGL+GLFW3; macOS uses GLFW with native Metal.
 if(UNIX)
@@ -22,6 +27,8 @@ file(GLOB core_src
     "common/os.cpp"
     "common/ui_window.cpp"
     "common/keyboard.cpp"
+    "common/http.cpp"
+    "common/url.cpp"
     "common/clipboard.cpp"
     "common/mouse.cpp"
     "common/str.cpp"
@@ -59,6 +66,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         Fontconfig::Fontconfig)
 endif()
 
+if(NOT WIN32)
+    set(private_libs ${private_libs} CURL::libcurl)
+endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_library(COCOA_FRAMEWORK Cocoa REQUIRED)
     find_library(CORETEXT_FRAMEWORK CoreText REQUIRED)
@@ -86,6 +97,14 @@ endif()
 
 add_library(${DYNAMIC_NAME} SHARED ${core_src} "x.cpp")
 add_library(${STATIC_NAME} STATIC ${core_src})
+
+enable_testing()
+file(GLOB test_src "tests/*.cpp")
+add_executable(grey_test ${test_src})
+target_link_libraries(grey_test PRIVATE ${STATIC_NAME} httplib::httplib GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
+target_include_directories(grey_test PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/common")
+include(GoogleTest)
+gtest_discover_tests(grey_test)
 
 #set_property(TARGET grey PROPERTY
 #  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")

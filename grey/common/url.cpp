@@ -46,9 +46,10 @@ namespace grey::common {
 
         out += path;
 
-        std::string effective_query = !query.empty()
-                                          ? query
-                                          : parameters_to_string();
+        std::string serialized_parameters = parameters_to_string();
+        std::string effective_query = (!query.empty() && serialized_parameters == query)
+                                           ? query
+                                           : serialized_parameters;
         if (!effective_query.empty()) {
             out += '?';
             out += effective_query;
