@@ -343,26 +343,28 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                         static spinner_style style{};
 
                         w::enum_combo<emphasis>("emphasis", style.emp);
-
+                        w::slider(style.radius, 5, 500, "radius");
+                        w::slider(style.thickness, 1, 50, "thickness");
+                        w::slider(style.speed, 0.1, 10, "speed");
 
                         w::sep("HBO");
-                        w::slider(style.hbo.radius, 5, 500, "radius##hbo");
-                        w::slider(style.hbo.thickness, 1, 50, "thickness");
-                        w::slider(style.hbo.speed, 0.1, 10, "speed##hbo");
                         w::slider(style.hbo.dot_count, 1, 100, "dot count");
                         w::spinner(spinner_type::hbo_dots, style);
 
                         w::sep("Text fading");
                         w::input(style.text.text, "text##text");
-                        w::slider(style.text.radius, 0, 100, "radius##text");
                         w::slider(style.text.font_size, -5.0f, 10.0f, "font size diff");
-                        w::slider(style.text.speed, 0.1, 10, "speed##text");
                         w::lbl("text before"); w::sl();
                         w::spinner(spinner_type::text_fading, style);
                         w::sl(); w::lbl("text after");
 
-                        // w::sep();
-                        // ImSpinner::demoSpinners();
+                        w::sep("Heart");
+                        w::spinner(spinner_type::rotated_heart, style);
+
+#if _DEBUG
+                        w::sep("Demo");
+                        w::spinner_demo();
+#endif
                     }
                 }
 

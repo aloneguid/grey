@@ -513,6 +513,10 @@ namespace grey::widgets {
 
     void spinner(spinner_type type = spinner_type::hbo_dots, const spinner_style& style = {});
 
+#if _DEBUG
+    void spinner_demo();
+#endif
+
     /**
      * @brief Shows notification toast in the bottom-right corner. Requires notify_render_frame() to be called every frame.
      * @param message 

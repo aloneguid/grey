@@ -5,6 +5,10 @@
 #include "3rdparty/ImSpinner/imspinner.h"
 #include "3rdparty/ImSpinner/imspinner_dots.h"
 #include "3rdparty/ImSpinner/imspinner_text.h"
+#include "3rdparty/ImSpinner/imspinner_shapes.h"
+#if _DEBUG
+#include "3rdparty/ImSpinner/imspinner_demo.h"
+#endif
 #include "x/md.h"
 #include "x/toast.h"
 #include "fonts/font_loader.h"
@@ -1099,19 +1103,27 @@ namespace grey::widgets {
 
         if(t == spinner_type::hbo_dots) {
             ImSpinner::SpinnerHboDots("SpinnerHboDots",
-                style.hbo.radius,
-                style.hbo.thickness,
+                style.radius,
+                style.thickness,
                 colour,
                 0.1f,
                 0.5f,
-                style.hbo.speed,
+                style.speed,
                 style.hbo.dot_count, 0);
+        } else if(t == spinner_type::rotated_heart) {
+            ImSpinner::SpinnerRotatingHeart("SpinnerRotatingHeart", style.radius, style.thickness, colour, style.speed);
         } else if(t == spinner_type::text_fading) {
             const auto size = text_size_get(style.text.text, style.text.font_size);
             ImSpinner::SpinnerTextFading("SpinnerTextFading",
-                style.text.text.c_str(), style.text.radius, size.height, colour, style.text.speed);
+                style.text.text.c_str(), style.radius, size.height, colour, style.speed);
         }
     }
+
+#if _DEBUG
+    void spinner_demo() {
+        ImSpinner::demoSpinners();
+    }
+#endif
 
     void toast(emphasis emp, const std::string& message) {
         x::toast::push(emp, "", message, 5000);
