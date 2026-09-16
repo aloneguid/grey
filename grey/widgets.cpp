@@ -2,7 +2,9 @@
 #include "themes.h"
 #include "imgui_internal.h"
 #include "imgui_stdlib.h"
-#include "3rdparty/imspinner.h"
+#include "3rdparty/ImSpinner/imspinner.h"
+#include "3rdparty/ImSpinner/imspinner_dots.h"
+#include "3rdparty/ImSpinner/imspinner_text.h"
 #include "x/md.h"
 #include "x/toast.h"
 #include "fonts/font_loader.h"
@@ -837,8 +839,8 @@ namespace grey::widgets {
 
     // ---- spacing ----
 
-    void spc(size_t repeat) {
-        for(int i = 0; i < repeat; i++)
+    void spc(size_t count) {
+        for(int i = 0; i < count; i++)
             ImGui::Spacing();
     }
 
@@ -846,6 +848,13 @@ namespace grey::widgets {
 
     void sl(float offset, bool spacing) {
         ImGui::SameLine(offset, spacing ? -1 : 0);
+    }
+
+    void slh() {
+        sl();
+        cur_move(point{.0f, scaled(-2.0f)});
+        lbl("|", {.emp = emphasis::disabled});
+        sl();
     }
 
     // ---- separator ----
@@ -1085,10 +1094,23 @@ namespace grey::widgets {
         return r;
     }
 
-    void spinner_hbo_dots(float radius, float thickness, float speed, size_t dot_count) {
-        //ImSpinner::demoSpinners();
-        ImSpinner::SpinnerHboDots("SpinnerHboDots", radius, thickness, ImSpinner::white, 0.1f, 0.5f, speed, dot_count,
-                                  0);
+    void spinner(spinner_type t, const spinner_style& style) {
+        const rgb_colour colour = get_color(style.emp);
+
+        if(t == spinner_type::hbo_dots) {
+            ImSpinner::SpinnerHboDots("SpinnerHboDots",
+                style.hbo.radius,
+                style.hbo.thickness,
+                colour,
+                0.1f,
+                0.5f,
+                style.hbo.speed,
+                style.hbo.dot_count, 0);
+        } else if(t == spinner_type::text_fading) {
+            const auto size = text_size_get(style.text.text, style.text.font_size);
+            ImSpinner::SpinnerTextFading("SpinnerTextFading",
+                style.text.text.c_str(), style.text.radius, size.height, colour, style.text.speed);
+        }
     }
 
     void toast(emphasis emp, const std::string& message) {
@@ -1205,12 +1227,6 @@ namespace grey::widgets {
 
         if(rendered_mi) ImGui::EndMenuBar();
         if(rendered_bar) ImGui::End();
-    }
-
-    void status_bar::sep() {
-        sl();
-        lbl("|", {.emp=emphasis::disabled});
-        sl();
     }
 
     // mouse helpers

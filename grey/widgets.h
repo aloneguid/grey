@@ -182,8 +182,6 @@ namespace grey::widgets {
         status_bar();
         ~status_bar();
 
-        static void sep();
-
         operator bool() const { return rendered_bar && rendered_mi; }
 
     private:
@@ -427,8 +425,20 @@ namespace grey::widgets {
 
     bool icon_selector(texture_loader& app, const std::string& path, size_t square_size);
 
-    void spc(size_t repeat = 1);
+    /**
+     * Adds vertical spacer, optionally more than one.
+     */
+    void spc(size_t count = 1);
+
+    /**
+     * Specifies that next widget should be rendered on the same line as previous widget.
+     * @param offset Optional offset from the left, absolute.
+     * @param spacing When false, no spacing is added between widgets.
+     */
     void sl(float offset = 0, bool spacing = true);
+
+    void slh();
+
     void sep(const std::string& text = "");
 
     bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false, const std::string& tooltip_text = "", float width = 0, float height = 0);
@@ -501,14 +511,7 @@ namespace grey::widgets {
 
     bool small_radio(const std::string& label, bool is_active);
 
-    /**
-     * @brief Progress spinner in "HBO" style.
-     * @param radius 
-     * @param thickness 
-     * @param speed 
-     * @param dot_count 
-     */
-    void spinner_hbo_dots(float radius = 16, float thickness = 4, float speed = 1.0f, size_t dot_count = 6);
+    void spinner(spinner_type type = spinner_type::hbo_dots, const spinner_style& style = {});
 
     /**
      * @brief Shows notification toast in the bottom-right corner. Requires notify_render_frame() to be called every frame.

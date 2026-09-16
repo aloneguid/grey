@@ -140,8 +140,8 @@ namespace grey::common::fss {
         return true;
     }
 
-    std::string read_all_text(const std::string& name) {
-        ifstream ifs(name, ios::in | ios::binary | ios::ate);
+    std::string read_all_text(const std::string& path) {
+        ifstream ifs(path, ios::in | ios::binary | ios::ate);
         if(!ifs) return "";
         ifstream::pos_type sz = ifs.tellg();
         ifs.seekg(0, ios::beg);
