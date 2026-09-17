@@ -1112,10 +1112,6 @@ namespace grey::widgets {
                 style.hbo.dot_count, 0);
         } else if(t == spinner_type::rotated_heart) {
             ImSpinner::SpinnerRotatingHeart("SpinnerRotatingHeart", style.radius, style.thickness, colour, style.speed);
-        } else if(t == spinner_type::text_fading) {
-            const auto size = text_size_get(style.text.text, style.text.font_size);
-            ImSpinner::SpinnerTextFading("SpinnerTextFading",
-                style.text.text.c_str(), style.radius, size.height, colour, style.speed);
         }
     }
 

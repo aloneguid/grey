@@ -340,30 +340,27 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                     }
 
                     if(w::accordion("Spinners")) {
+                        static spinner_type type{spinner_type::hbo_dots};
                         static spinner_style style{};
 
+                        // options: first general, then speicific
                         w::enum_combo<emphasis>("emphasis", style.emp);
                         w::slider(style.radius, 5, 500, "radius");
                         w::slider(style.thickness, 1, 50, "thickness");
                         w::slider(style.speed, 0.1, 10, "speed");
-
-                        w::sep("HBO");
                         w::slider(style.hbo.dot_count, 1, 100, "dot count");
-                        w::spinner(spinner_type::hbo_dots, style);
 
-                        w::sep("Text fading");
-                        w::input(style.text.text, "text##text");
-                        w::slider(style.text.font_size, -5.0f, 10.0f, "font size diff");
-                        w::lbl("text before"); w::sl();
-                        w::spinner(spinner_type::text_fading, style);
-                        w::sl(); w::lbl("text after");
-
-                        w::sep("Heart");
-                        w::spinner(spinner_type::rotated_heart, style);
+                        // enumerate all enum members of spinner_type
+                        for(const pair<spinner_type, string_view>& st: magic_enum::enum_entries<spinner_type>()) {
+                            w::lbl(string{st.second});
+                            w::spinner(st.first, style);
+                        }
 
 #if _DEBUG
-                        w::sep("Demo");
-                        w::spinner_demo();
+                        if(w::accordion("Original ImSpinner demo")) {
+                            w::sep("Demo");
+                            w::spinner_demo();
+                        }
 #endif
                     }
                 }

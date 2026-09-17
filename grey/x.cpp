@@ -91,11 +91,11 @@ EXPORTED bool checkbox(const char* c_label, bool* is_checked, bool is_small) {
 
 EXPORTED bool button(const char* c_text, int32_t emphasis, bool is_enabled, bool is_small) {
     string text{c_text};
-    return w::button(text, (grey::emphasis)emphasis, is_enabled, is_small);
+    return w::button(text, static_cast<grey::emphasis>(emphasis), is_enabled, is_small);
 }
 
 EXPORTED void sep(const char* c_text) {
-    string text{c_text};
+    const string text{c_text};
     w::sep(text);
 }
 

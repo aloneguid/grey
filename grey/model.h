@@ -73,17 +73,11 @@ namespace grey {
 
     enum class spinner_type {
         hbo_dots,
-        rotated_heart,
-        text_fading
+        rotated_heart
     };
 
     struct hbo_spinner_style {
         int dot_count{6};
-    };
-
-    struct text_spinner_style {
-        std::string text{"Loading..."};
-        float font_size{.0f};
     };
 
     struct spinner_style {
@@ -94,7 +88,6 @@ namespace grey {
         float speed{1.0f};
 
         hbo_spinner_style hbo{};
-        text_spinner_style text{};
     };
 
     /**
