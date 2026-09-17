@@ -131,8 +131,8 @@ EXPORTED bool input_multiline(const char* c_id, char* c_value, int32_t value_max
     return w::input_ml(id, c_value, value_max_length, height, autoscroll, enabled, use_fixed_font);
 }
 
-EXPORTED void spinner_hbo_dots(float radius, float thickness, float speed, int32_t dot_count) {
-    w::spinner_hbo_dots(radius, thickness, speed, dot_count);
+EXPORTED void spinner(int32_t type) {
+    w::spinner(static_cast<spinner_type>(type));
 }
 
 EXPORTED bool slider_float(float* value, float min, float max, const char* c_label, float step, bool ticks, int32_t emphasis) {

@@ -71,8 +71,8 @@ namespace grey {
         bottom_right,
     };
 
-    enum class spinner_type {
-        hbo_dots,
+    enum class spinner_type : int32_t {
+        hbo_dots = 0,
         rotated_heart
     };
 

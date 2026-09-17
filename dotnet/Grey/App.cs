@@ -109,8 +109,8 @@ namespace Grey {
             return Native.input_multiline(id, value, value.Capacity, height, autoscroll, isEnabled, useFixedFont);
         }
 
-        public static void SpinnerHboDots(float radius = 16, float thickness = 4, float speed = 1, int dotCount = 6) {
-            Native.spinner_hbo_dots(radius, thickness, speed, dotCount);
+        public static void Spinner(SpinnerType type) {
+            Native.spinner(type);
         }
 
         public static bool Slider(ref float value, float min, float max, string label, float step = 0, bool ticks = false, Emphasis emphasis = Emphasis.None) {

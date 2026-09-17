@@ -91,7 +91,7 @@ namespace Grey {
             bool use_fixed_font);
 
         [DllImport(_libName)]
-        internal static extern void spinner_hbo_dots(float radius, float thickness, float speed, int dot_count);
+        internal static extern void spinner(SpinnerType type);
 
         [DllImport(_libName)]
         internal static extern bool slider_float(ref float value, float min, float max,

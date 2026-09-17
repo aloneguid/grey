@@ -23,13 +23,85 @@ string[] choices = ["one", "two", "three"];
 uint currentChoice = 0;
 bool xwnd2Show = true;
 
+// Windows
+bool WindowHasTitleBar = true;
+bool WindowIsOpen = false;
+bool WindowUseIsOpen = true;
+float WindowOpacity = 1.0f;
+float WindowBorder = .0f;
+bool WindowScrollable = true;
+
+// Image
+bool ImageRounded = false;
+float ImageRounding = 5.0f;
+float ImageScale = 0.5f;
+
+
 void Basics() {
 
-    Lbl("labels:");
-    foreach(Emphasis emp in Enum.GetValues<Emphasis>()) {
-        SL();
-        Lbl(emp.ToString(), new Style{Emp = emp});
+    if(Accordion("Icons")) {
+        Lbl(Icon.Access_alarms);
     }
+
+    if(Accordion("Label styles")) {
+        Lbl("");
+        foreach(Emphasis emp in Enum.GetValues<Emphasis>()) {
+            SL();
+            Lbl(emp.ToString(), new Style{Emp = emp});
+        }
+    }
+
+    if(Accordion("Windows")) {
+        Checkbox("show window", ref WindowIsOpen);
+        Checkbox("display close button", ref WindowUseIsOpen);
+        Checkbox("title bar", ref WindowHasTitleBar);
+        Slider(ref WindowOpacity, 0.0f, 1.0f, "opacity", 0.1f);
+        Checkbox("scrollable", ref WindowScrollable);
+        Slider(ref WindowBorder, 0.0f, 10.0f, "border", 0.1f);
+        
+        Lbl("window API is not marshalled yet", new Style{Emp = Emphasis.Error});
+
+        if(WindowIsOpen) {
+            // if(w::wnd w1{
+            //     "windows 1", {
+            //         .open_ptr = use_is_open ? &is_open : nullptr,
+            //             .opacity = opacity,
+            //             .show_title_bar = title_bar,
+            //             .border = border,
+            //             .scrollable = scrollable
+            //     }
+            // }) {
+            //     w::lbl("DPI: ", {.emp = emphasis::primary});
+            //     w::sl();
+            //     w::lbl(format("{}", w::scale));
+            //
+            //     w::lbl("Position:", {.emp = emphasis::primary});
+            //     w::sl();
+            //     w::lbl(format("{}", w1.pos()));
+            //
+            //     w::lbl("Size: ", {.emp = emphasis::primary});
+            //     w::sl();
+            //     w::lbl(format("{}", w1.size()));
+            // }
+        }
+    }
+
+    if(Accordion("Image")) {
+        Lbl("Image API is not marshalled yet.");
+        // auto texture = app->get_texture("luna");
+        // if(texture) {
+        //     w::checkbox("rounded", img_rounded);
+        //     w::slider(img_scale, 0.1f, 3.0f, "scale");
+        //     if(img_rounded) {
+        //         w::slider(img_rounding, 1, 50, "rounding");
+        //         w::image_rounded(*app, "luna", texture->size * img_scale, img_rounding);
+        //     } else {
+        //         w::image(*app, "luna", texture->size * img_scale);
+        //     }
+        // }
+    }
+    
+    // ---
 
     Lbl("Buttons:");
     foreach(Emphasis emp in Enum.GetValues<Emphasis>()) {
@@ -146,7 +218,7 @@ Grey.App.Run("Grey# Demo", () => {
             Slider(ref spinnerThickness, 1, 50, "thickness");
             Slider(ref spinnerSpeed, 0.1f, 10, "speed");
             Slider(ref spinnerDotCount, 1, 100, "dot count");
-            SpinnerHboDots(spinnerRadius, spinnerThickness, spinnerSpeed, spinnerDotCount);
+            // SpinnerHboDots(spinnerRadius, spinnerThickness, spinnerSpeed, spinnerDotCount);
         });
 
         tb.TabItem("Editor", () => {

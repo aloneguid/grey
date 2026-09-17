@@ -42,6 +42,11 @@ namespace Grey {
         Markdown
     }
 
+    public enum SpinnerType {
+        HboDots = 0,
+        RotatedHeart
+    }
+
     public struct Style {
         public Emphasis Emp;
     }

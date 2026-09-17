@@ -83,7 +83,7 @@ extern "C" {
 
     EXPORTED void tab(void* tab_bar_ptr, const char* c_title, bool unsaved, bool selected, RenderCallback c_render_callback);
 
-    EXPORTED void spinner_hbo_dots(float radius, float thickness, float speed, int32_t dot_count);
+    EXPORTED void spinner(int32_t type);
 
     EXPORTED void status_bar(RenderCallback c_render_callback);
 
