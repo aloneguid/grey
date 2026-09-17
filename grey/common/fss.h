@@ -25,7 +25,7 @@ namespace grey::common::fss {
      */
     std::string get_config_file_path(const std::string& application_name, const std::string& filename);
 
-    std::string get_current_exec_path();
+    std::filesystem::path get_current_exec_path();
 
 #if PLATFORM_WINDOWS
     std::string get_program_files_dir(bool x32 = false);

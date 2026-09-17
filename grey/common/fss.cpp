@@ -3,11 +3,14 @@
 #include <Windows.h>
 #include <ShlObj_core.h>
 #include <shellapi.h>
+#elif PLATFORM_MACOS
+#include <mach-o/dyld.h>
 #else
 #include <unistd.h>
 #endif
 #include "str.h"
 #include <fstream>
+#include <limits.h>
 #include <vector>
 #include <filesystem>
 
@@ -80,13 +83,25 @@ namespace grey::common::fss {
         return (config_path / filename).string();
     }
 
-    std::string get_current_exec_path() {
+    std::filesystem::path get_current_exec_path() {
 #if PLATFORM_WINDOWS
         TCHAR szFileName[MAX_PATH];
         ::GetModuleFileName(nullptr, szFileName, MAX_PATH);
-        return str::to_str(szFileName);
+        return fs::path(szFileName);
+#elif PLATFORM_LINUX
+        char executable_path[PATH_MAX];
+        const auto path_length = readlink("/proc/self/exe", executable_path, sizeof(executable_path) - 1);
+        if(path_length == -1) return {};
+        executable_path[path_length] = '\0';
+        return fs::path(executable_path);
+#elif PLATFORM_MACOS
+        uint32_t path_size = 0;
+        _NSGetExecutablePath(nullptr, &path_size);
+        std::vector<char> executable_path(path_size);
+        if(_NSGetExecutablePath(executable_path.data(), &path_size) != 0) return {};
+        return fs::path(executable_path.data());
 #else
-        return "";
+        return {};
 #endif
     }
 
