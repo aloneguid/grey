@@ -35,6 +35,11 @@ namespace grey::common {
         std::string query;
 
         /**
+         * Fragment string, no leading '#'
+         */
+        std::string fragment;
+
+        /**
          * Decoded key-value parameters in query appearance order, including duplicate keys.
          */
         std::vector<std::pair<std::string, std::string>> parameters;
@@ -58,10 +63,10 @@ namespace grey::common {
 
         /**
          * Given the remainder of the input after any scheme/authority has been
-         * consumed, split off "path" (up to '?' or '#') and, if present, "query"
-         * (up to '#'), then decode query into parameters. Works equally well for
-         * URL paths and for bare filesystem paths that happen to carry a trailing
-         * "?query" (harmless no-op if there's no '?').
+         * consumed, split off "path" (up to '?' or '#'), "query" (up to '#'),
+         * and "fragment", then decode query into parameters. Works equally well
+         * for URL paths and for bare filesystem paths that happen to carry a
+         * trailing "?query" (harmless no-op if there's no '?').
          */
         void extract_path_and_query(std::string_view rest);
 

@@ -6,12 +6,13 @@ using namespace grey::common;
 
 namespace {
     void expect_parts(const url& actual, const string& scheme, const string& host, const string& port,
-                      const string& path, const string& query) {
+                      const string& path, const string& query, const string& fragment = {}) {
         EXPECT_EQ(scheme, actual.scheme);
         EXPECT_EQ(host, actual.host);
         EXPECT_EQ(port, actual.port);
         EXPECT_EQ(path, actual.path);
         EXPECT_EQ(query, actual.query);
+        EXPECT_EQ(fragment, actual.fragment);
     }
 }
 
@@ -141,12 +142,19 @@ TEST(URL, ToleratesMalformedQueryPairsAndEscapes) {
 
 TEST(URL, FragmentsAreNotPartOfPathOrQuery) {
     url with_query{"https://host/path?key=value#fragment"};
-    expect_parts(with_query, "https", "host", "", "/path", "key=value");
-    EXPECT_EQ("https://host/path?key=value", with_query.to_string());
+    expect_parts(with_query, "https", "host", "", "/path", "key=value", "fragment");
+    EXPECT_EQ("https://host/path?key=value#fragment", with_query.to_string());
 
     url without_query{"https://host/path#fragment"};
-    expect_parts(without_query, "https", "host", "", "/path", "");
-    EXPECT_EQ("https://host/path", without_query.to_string());
+    expect_parts(without_query, "https", "host", "", "/path", "", "fragment");
+    EXPECT_EQ("https://host/path#fragment", without_query.to_string());
+}
+
+TEST(URL, PreservesFragmentWhenQueryParametersAreRemoved) {
+    url actual{"https://github.com/aloneguid/parquet-dotnet/issues/775?email_source=notifications#issuecomment-5613228997"};
+    actual.parameters.clear();
+
+    EXPECT_EQ("https://github.com/aloneguid/parquet-dotnet/issues/775#issuecomment-5613228997", actual.to_string());
 }
 
 TEST(URL, ToStringPreservesEveryParsedForm) {

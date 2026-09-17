@@ -20,7 +20,7 @@ namespace grey::common {
 
     std::string url::to_string() const {
         std::string out;
-        out.reserve(scheme.size() + host.size() + port.size() + path.size() + query.size() + 8);
+        out.reserve(scheme.size() + host.size() + port.size() + path.size() + query.size() + fragment.size() + 8);
 
         const bool has_host = !host.empty();
 
@@ -53,6 +53,11 @@ namespace grey::common {
         if (!effective_query.empty()) {
             out += '?';
             out += effective_query;
+        }
+
+        if (!fragment.empty()) {
+            out += '#';
+            out += fragment;
         }
 
         return out;
@@ -198,6 +203,11 @@ namespace grey::common {
                                              : rest.substr(query_start, frag_pos - query_start);
             query = queryView;
             parse_parameters(queryView);
+            if(frag_pos != std::string_view::npos) {
+                fragment = rest.substr(frag_pos + 1);
+            }
+        } else if(split_pos != std::string_view::npos && rest[split_pos] == '#') {
+            fragment = rest.substr(split_pos + 1);
         }
     }
 
