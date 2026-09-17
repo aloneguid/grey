@@ -73,7 +73,8 @@ namespace grey {
 
     enum class spinner_type : int32_t {
         hbo_dots = 0,
-        rotated_heart
+        rotated_heart,
+        solar_scale_balls
     };
 
     struct hbo_spinner_style {
