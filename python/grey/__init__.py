@@ -1,0 +1,152 @@
+"""Grey framework Python bindings."""
+
+from .enums import (
+    Emphasis,
+    SubEmphasis,
+    ShowDelay,
+    ProgrammingLanguage,
+    SpinnerType,
+)
+from .models import Style, DebugInfo
+from .icons import Icon
+from .context import TableActions, TabBarActions
+from .code_editor import CodeEditor
+from .app import (
+    run,
+    id_frame,
+    sl,
+    lbl,
+    selectable,
+    checkbox,
+    small_checkbox,
+    button,
+    sep,
+    accordion,
+    hyperlink,
+    toast,
+    input,
+    input_int,
+    input_multiline,
+    slider_int,
+    slider_float,
+    slider,
+    tt,
+    combo,
+    list_box,
+    spinner,
+    menu_bar,
+    menu,
+    menu_item,
+    big_table,
+    table,
+    tab_bar,
+    tree_node,
+    status_bar,
+    is_hovered,
+    is_leftclicked,
+    is_rightclicked,
+    get_fps,
+    get_version,
+    get_clipboard_text,
+    set_clipboard_text,
+    # .NET style aliases
+    Run,
+    IdFrame,
+    SL,
+    Lbl,
+    Selectable,
+    Checkbox,
+    SmallCheckbox,
+    Button,
+    Sep,
+    Accordion,
+    Hyperlink,
+    Toast,
+    Input,
+    InputMultiline,
+    Slider,
+    TT,
+    Combo,
+    List,
+    MenuBar,
+    Menu,
+    MenuItem,
+    BigTable,
+    Table,
+    TabBar,
+    TreeNode,
+    StatusBar,
+    IsHovered,
+    IsLeftClicked,
+    IsRightClicked,
+    GetFps,
+    GetVersion,
+    GetClipboardText,
+    SetClipboardText,
+)
+
+
+def __getattr__(name: str):
+    """Provides property-like access for version and fps metrics."""
+    if name in ("version", "GreyVersion"):
+        return get_version()
+    elif name in ("fps", "Fps"):
+        return get_fps()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+__all__ = [
+    # Enums
+    "Emphasis",
+    "SubEmphasis",
+    "ShowDelay",
+    "ProgrammingLanguage",
+    "SpinnerType",
+    # Icons
+    "Icon",
+    # Models
+    "Style",
+    "DebugInfo",
+    # Context
+    "TableActions",
+    "TabBarActions",
+    # Code Editor
+    "CodeEditor",
+    # High-level API
+    "run",
+    "id_frame",
+    "sl",
+    "lbl",
+    "selectable",
+    "checkbox",
+    "small_checkbox",
+    "button",
+    "sep",
+    "accordion",
+    "hyperlink",
+    "toast",
+    "input",
+    "input_int",
+    "input_multiline",
+    "slider_int",
+    "slider_float",
+    "slider",
+    "tt",
+    "combo",
+    "list_box",
+    "spinner",
+    "menu_bar",
+    "menu",
+    "menu_item",
+    "big_table",
+    "table",
+    "tab_bar",
+    "tree_node",
+    "status_bar",
+    "is_hovered",
+    "is_leftclicked",
+    "is_rightclicked",
+    "get_fps",
+    "get_version",
+    "get_clipboard_text",
+    "set_clipboard_text",
+]

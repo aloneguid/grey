@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "grey"
+version = "0.1.0"
+description = "Blazing fast, small, disposable UI for developers that makes their grey matter to be spent on actual problems."
+readme = "README.md"
+authors = [
+    { name = "aloneguid" }
+]
+requires-python = ">=3.9"
+dependencies = []
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: User Interfaces",
+]
+
+[project.urls]
+Homepage = "https://github.com/aloneguid/grey"
+Repository = "https://github.com/aloneguid/grey"
+
+[tool.hatch.build.targets.wheel]
+packages = ["grey"]
