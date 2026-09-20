@@ -6,14 +6,14 @@
 #include <imgui_internal.h>
 #include <vector>
 #include <iostream>
+
+#include "grey.h"
 #include "common/clipboard.h"
 
 using namespace std;
 using namespace grey;
-namespace w = grey::widgets;
+namespace w = widgets;
 
-vector<string> items = {"item1", "item2", "item3"};
-unsigned int current_item = 0;
 bool app_open{true};
 bool show_demo{false};
 string window_title = "Demo app";
@@ -100,7 +100,24 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                 // basics
                 if(auto tab = tabs.next_tab("Basics"); tab) {
                     if(w::accordion("Icons")) {
-                        w::lbl(ICON_MD_5G " icon1");
+
+
+                        const int columns = 16;
+                        int i = 0;
+                        for (unsigned cp = ICON_MIN_MD; cp < ICON_MAX_16_MD; ++cp, ++i) {
+                            char buf[5] = {};
+                            ImTextCharToUtf8(buf, cp);          // built into ImGui (imgui_internal.h), no custom encoder needed
+
+                            if (i % columns != 0) ImGui::SameLine();
+                            ImGui::PushID((int)cp);
+                            ImGui::Button(buf, ImVec2(40, 40));
+                            if (ImGui::IsItemHovered())
+                                ImGui::SetTooltip("U+%04X", cp);
+                            ImGui::PopID();
+                        }
+
+
+
                     }
 
                     if(w::accordion("Label styles")) {
@@ -188,6 +205,26 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                             w::sep();
                             w::lbl(tooltip_text);
                         }
+                    }
+
+                    if(w::accordion("Combo")) {
+                        static unsigned selected{0};
+                        w::combo("elements", {"one", "two", "three"}, selected);
+                        w::sl();
+                        w::lbl(format("current: {}", selected));
+
+                        static show_delay selected_delay{show_delay::normal};
+                        w::enum_combo<show_delay>("enum", selected_delay);
+                        w::sl();
+                        w::lbl(format("current: {}", magic_enum::enum_name(selected_delay)));
+                    }
+
+                    if (w::accordion("List")) {
+                        static vector<string> items = {"item1", "item2", "item3"};
+                        static unsigned int current_item = 0;
+
+                        w::list("list", items, current_item);
+                        w::lbl(format("selected item: {} ({})", current_item, items[current_item]));
                     }
 
                     if(w::accordion("Buttons")) {
@@ -362,26 +399,6 @@ int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
                             w::spinner_demo();
                         }
 #endif
-                    }
-                }
-
-                // lists
-                {
-                    auto tab = tabs.next_tab("Lists");
-                    if(tab) {
-                        w::combo("combo", items, current_item);
-                        w::list("list", items, current_item);
-
-                        w::lbl("selected item: ");
-                        w::sl();
-                        w::lbl(items[current_item]);
-                        w::lbl("selected index: ");
-                        w::sl();
-                        w::lbl(to_string(current_item));
-
-                        if(w::button("center on screen")) {
-                            app->center_on_screen = true;
-                        }
                     }
                 }
 

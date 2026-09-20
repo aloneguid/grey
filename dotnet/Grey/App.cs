@@ -13,18 +13,6 @@ namespace Grey {
 
     public static class App {
 
-        private static readonly Native.Style _defaultStyle = new() {
-            emp = Emphasis.None
-        };
-
-        private static Native.Style ToNativeStyle(Style? style) {
-            if(style == null) return _defaultStyle;
-            Style s = style.Value;
-            return new Native.Style {
-                emp = s.Emp
-            };
-        }
-        
         public static void Run(string title, Func<bool> renderFrame,
             int width = 800, int height = 600,
             bool hasMenuBar = false,
@@ -43,9 +31,13 @@ namespace Grey {
         public static void SL(float offset = 0) {
             Native.sl(offset);
         }
-        public static void Lbl(string text, Style? style = null) {
-            Native.Style cstyle = ToNativeStyle(style);
-            Native.lbl(text, ref cstyle);
+        public static void Lbl(string text, Emphasis emphasis = Emphasis.None,
+            float textWrapPos = 0,
+            bool centerX = false,
+            bool centerY = false,
+            float fontSizeDiff = 0,
+            FontWeight fontWeight = FontWeight.Regular) {
+            Native.lbl(text, emphasis, textWrapPos, centerX, centerY, fontSizeDiff, fontWeight);
         }
 
         public static bool Selectable(string text, bool spanColumns = false) {
@@ -54,6 +46,25 @@ namespace Grey {
 
         public static bool Checkbox(string label, ref bool isChecked) {
             return Native.checkbox(label, ref isChecked, false);
+        }
+        
+        public static void Div(string id, Action render,
+            float width = 0,
+            float height = 0,
+            bool userResizeableHorizontal = false,
+            bool userResizeableVertical = false,
+            bool hasBackground = true,
+            bool autoResizeX = false,
+            bool autoResizeY = false,
+            bool styleLikeWidget = false) {
+            Native.c_div(id, () => render(),
+                width, height,
+                userResizeableHorizontal,
+                userResizeableVertical,
+                hasBackground,
+                autoResizeX,
+                autoResizeY,
+                styleLikeWidget);
         }
 
         public static bool SmallCheckbox(string label, ref bool isChecked) {
@@ -99,6 +110,11 @@ namespace Grey {
         public static bool Input(ref int value, string label,
             bool enabled = true, float width = 0, bool is_readonly = false) {
             return Native.input_int(ref value, label, enabled, width, is_readonly);
+        }
+        
+        public static bool Input(ref float value, string label,
+            bool enabled = true, float width = 0, bool is_readonly = false) {
+            return Native.input_float(ref value, label, enabled, width, is_readonly);
         }
 
         public static bool InputMultiline(string id, StringBuilder value,
@@ -151,6 +167,16 @@ namespace Grey {
         /// <returns>True if selection has changed</returns>
         public static bool Combo(string label, string[] items, ref uint currentItem, float width = 0) {
             return Native.combo(label, items, items.Length, ref currentItem, width);
+        }
+        
+        public static bool Combo<TEnum>(string label, ref TEnum currentItem, float width = 0) where TEnum : Enum {
+            string[] names = typeof(TEnum).GetEnumNames();
+            uint currentIdx = Convert.ToUInt32(currentItem);
+            bool changed = Native.combo(label, names, names.Length, ref currentIdx, width);
+            if(changed) {
+                currentItem = (TEnum)Enum.ToObject(typeof(TEnum), currentIdx);
+            }
+            return changed;
         }
 
         public static bool List(string label, string[] items, ref uint currentItem, float width = 0) {

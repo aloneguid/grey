@@ -42,13 +42,14 @@ namespace Grey {
         Markdown
     }
 
-    public enum SpinnerType {
+    public enum SpinnerType : int {
         HboDots = 0,
         RotatedHeart
     }
-
-    public struct Style {
-        public Emphasis Emp;
-    }
     
+    public enum FontWeight : int {
+        Regular = 0,
+        FixedSize = 1,
+        Bold = 2
+    };
 }

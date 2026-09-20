@@ -16,11 +16,6 @@ namespace Grey {
 
         public delegate void RenderTreeNodeCallback(bool is_open);
         
-        [StructLayout(LayoutKind.Sequential)]
-        public struct Style {
-            public Emphasis emp;
-        }
-        
         [DllImport(_libName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void app_run(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string title,
@@ -38,13 +33,31 @@ namespace Grey {
         internal static extern void sl(float offset);
 
         [DllImport(_libName)]
-        internal static extern void lbl([MarshalAs(UnmanagedType.LPUTF8Str)] string text, ref Style style);
+        internal static extern void lbl([MarshalAs(UnmanagedType.LPUTF8Str)] string text,
+            Emphasis emp,
+            float text_wrap_pos,
+            bool center_x,
+            bool center_y,
+            float font_size_diff,
+            FontWeight fw);
 
         [DllImport(_libName)]
         internal static extern bool selectable([MarshalAs(UnmanagedType.LPUTF8Str)] string text, bool span_columns);
 
         [DllImport(_libName)]
         internal static extern bool checkbox([MarshalAs(UnmanagedType.LPUTF8Str)] string label, ref bool is_checked, bool is_small);
+
+        [DllImport(_libName)]
+        internal static extern void c_div([MarshalAs(UnmanagedType.LPUTF8Str)] string id,
+            RenderCallback c_render_callback,
+            float width,
+            float height,
+            bool user_resizeable_horizontal,
+            bool user_resizeable_vertical,
+            bool has_background,
+            bool auto_resize_x,
+            bool auto_resize_y,
+            bool style_like_widget);
 
         [DllImport(_libName)]
         internal static extern bool button(
@@ -77,6 +90,12 @@ namespace Grey {
         [DllImport(_libName)]
         internal static extern bool input_int(
             ref int value,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
+            bool enabled, float width, bool is_readonly);
+        
+        [DllImport(_libName)]
+        internal static extern bool input_float(
+            ref float value,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
             bool enabled, float width, bool is_readonly);
 

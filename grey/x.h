@@ -14,9 +14,6 @@ typedef void (*RenderTreeNodeCallback)(bool is_open);
 typedef void (*RenderTableCellCallback)(int32_t row_index, int32_t col_index);
 typedef void (*RenderPtrCallback)(void* ptr);
 
-typedef struct cstyle {
-    int32_t emp;
-} cstyle;
 
 extern "C" {
     /**
@@ -40,11 +37,30 @@ extern "C" {
 
     EXPORTED void sl(float offset);
 
-    EXPORTED void lbl(const char* c_text, cstyle* style);
+    EXPORTED void lbl(const char* c_text,
+        // style
+        int32_t emp,
+        float text_wrap_pos,
+        bool center_x,
+        bool center_y,
+        float font_size_diff,
+        int32_t font_weight
+        );
 
     EXPORTED bool selectable(const char* c_text, bool span_columns = false);
 
     EXPORTED bool checkbox(const char* c_label, bool* is_checked, bool is_small);
+
+    EXPORTED void c_div(const char* c_id, RenderCallback c_render_callback,
+        // style
+        float width,
+        float height,
+        bool user_resizeable_horizontal,
+        bool user_resizeable_vertical,
+        bool has_background,
+        bool auto_resize_x,
+        bool auto_resize_y,
+        bool style_like_widget);
 
     EXPORTED bool button(const char* c_text, int32_t emphasis, bool is_enabled, bool is_small);
 
@@ -60,6 +76,9 @@ extern "C" {
             const char* c_label, bool enabled, float width, bool is_readonly);
 
     EXPORTED bool input_int(int32_t* value,
+        const char* c_label, bool enabled, float width, bool is_readonly);
+
+    EXPORTED bool input_float(float* value,
         const char* c_label, bool enabled, float width, bool is_readonly);
 
     EXPORTED bool input_multiline(const char* c_id,

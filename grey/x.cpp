@@ -17,14 +17,6 @@ static void platform_init() {
 #endif
 }
 
-static style as_style(cstyle* style) {
-    grey::style s;
-    if(style) {
-        s.emp = static_cast<emphasis>(style->emp);
-    }
-    return s;
-}
-
 EXPORTED void app_run(
     const char* c_title,
     int32_t width,
@@ -73,9 +65,22 @@ EXPORTED void sl(float offset) {
     w::sl(offset);
 }
 
-EXPORTED void lbl(const char* c_text, cstyle* c_cstyle) {
+EXPORTED void lbl(const char* c_text,
+    int32_t emp,
+    float text_wrap_pos,
+    bool center_x,
+    bool center_y,
+    float font_size_diff,
+    int32_t fw) {
     const string text{c_text};
-    const style s = as_style(c_cstyle);
+    const style s {
+        .emp = static_cast<emphasis>(emp),
+        .text_wrap_pos = text_wrap_pos,
+        .center_x = center_x,
+        .center_y = center_y,
+        .font_size = font_size_diff,
+        .font_w = static_cast<font_weight>(fw)
+    };
     w::lbl(text, s);
 }
 
@@ -88,6 +93,30 @@ EXPORTED bool checkbox(const char* c_label, bool* is_checked, bool is_small) {
     string label{ c_label };
     return is_small ? w::small_checkbox(label, *is_checked) : w::checkbox(label, *is_checked);
 }
+
+EXPORTED void c_div(const char* c_id, RenderCallback c_render_callback,
+    float width,
+    float height,
+    bool user_resizeable_horizontal,
+    bool user_resizeable_vertical,
+    bool has_background,
+    bool auto_resize_x,
+    bool auto_resize_y,
+    bool style_like_widget) {
+    const div_opts opts {
+        .size = {width, height},
+        .user_resizeable_horizontal = user_resizeable_horizontal,
+        .user_resizeable_vertical = user_resizeable_vertical,
+        .has_background = has_background,
+        .auto_resize_x = auto_resize_x,
+        .auto_resize_y = auto_resize_y,
+        .style_like_widget = style_like_widget
+    };
+    if(const w::div d{c_id, opts}; d && c_render_callback) {
+        c_render_callback();
+    }
+}
+
 
 EXPORTED bool button(const char* c_text, int32_t emphasis, bool is_enabled, bool is_small) {
     string text{c_text};
@@ -121,6 +150,11 @@ EXPORTED bool input_string(char* c_value, int32_t value_max_length, const char* 
 }
 
 EXPORTED bool input_int(int32_t* value, const char* c_label, bool enabled, float width, bool is_readonly) {
+    string label{ c_label };
+    return w::input(*value, label, enabled, width * w::scale, is_readonly);
+}
+
+EXPORTED bool input_float(float* value, const char* c_label, bool enabled, float width, bool is_readonly) {
     string label{ c_label };
     return w::input(*value, label, enabled, width * w::scale, is_readonly);
 }

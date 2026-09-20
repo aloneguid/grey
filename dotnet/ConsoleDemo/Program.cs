@@ -19,8 +19,6 @@ bool mlUseFixedFont = false;
 bool alternateTableRowBg = false;
 bool tableSelectables = false;
 bool tableSelectableRow = false;
-string[] choices = ["one", "two", "three"];
-uint currentChoice = 0;
 bool xwnd2Show = true;
 
 // Windows
@@ -37,6 +35,34 @@ float ImageRounding = 5.0f;
 float ImageScale = 0.5f;
 
 
+// Tooltip
+string tooltipText = "tooltip text";
+ShowDelay tooltipShowDelay = ShowDelay.Normal;
+
+// Combo
+uint comboCurrentChoice = 0;
+ShowDelay comboShowDelay = ShowDelay.Normal;
+
+// List
+string[] listChoices = ["one", "two", "three"];
+uint listCurrentChoice = 0;
+
+// Fonts
+float fontsFontDelta = 0;
+
+// Div
+int divLineCount = 10;
+int divLineLength = 10;
+float divWidth = 0;
+float divHeight = 0;
+bool divUserResizeableHorizontal = false;
+bool divUserResizeableVertical = false;
+bool divHasBackground = true;
+bool divAutoResizeX = false;
+bool divAutoResizeY = false;
+bool divStyleLikeWidget = false;
+
+
 void Basics() {
 
     if(Accordion("Icons")) {
@@ -47,7 +73,7 @@ void Basics() {
         Lbl("");
         foreach(Emphasis emp in Enum.GetValues<Emphasis>()) {
             SL();
-            Lbl(emp.ToString(), new Style{Emp = emp});
+            Lbl(emp.ToString(), emp);
         }
     }
 
@@ -59,7 +85,7 @@ void Basics() {
         Checkbox("scrollable", ref WindowScrollable);
         Slider(ref WindowBorder, 0.0f, 10.0f, "border", 0.1f);
         
-        Lbl("window API is not marshalled yet", new Style{Emp = Emphasis.Error});
+        Lbl("window API is not marshalled yet", Emphasis.Error);
 
         if(WindowIsOpen) {
             // if(w::wnd w1{
@@ -100,65 +126,101 @@ void Basics() {
         //     }
         // }
     }
-    
-    // ---
 
-    Lbl("Buttons:");
-    foreach(Emphasis emp in Enum.GetValues<Emphasis>()) {
+    if(Accordion("Tooltips")) {
+
+        Input(ref tooltipText, "text");
+        Combo("show delay", ref tooltipShowDelay);
+
+        Hyperlink("simple");
+        TT(tooltipText, tooltipShowDelay);
+
         SL();
-        Button(emp.ToString(), emp);
+
+        Hyperlink("rich");
+        TT(() => {
+            Lbl("rich one", Emphasis.Primary);
+            Sep();
+            Lbl(tooltipText);
+        }, tooltipShowDelay);
     }
 
-    Lbl(message);
+    if(Accordion("Combo")) {
+        Combo("elements", ["one", "two", "three"], ref comboCurrentChoice);
+        SL();
+        Lbl($"current: {comboCurrentChoice}");
 
-    if(Button("get current date (has tooltip)")) {
-        message = DateTime.Now.ToString();
+        Combo("enum", ref comboShowDelay);
+        SL();
+        Lbl($"current: {comboShowDelay}");
     }
 
-    Lbl("Tooltips:");
-
-    SL(); Lbl("simple"); TT("simple tooltip");
-    SL(); Lbl("rich"); TT(() => {
-        Sep("rich");
-        Lbl("rich tooltip");
-        Button("close");
-    });
-
-    SL();
-    if(Button("Quit")) {
-        isRunning = false;
+    if(Accordion("List")) {
+        if(List("list", listChoices, ref listCurrentChoice)) {
+            Toast(Emphasis.Info, $"{nameof(List)} choice changed to {listChoices[listCurrentChoice]}");
+        }
+        Lbl($"current: {listCurrentChoice} ({listChoices[listCurrentChoice]})");
+    }
+    
+    if(Accordion("Buttons")) 
+    {
+        Lbl("Clicking a button also opens a toast with the same emphasis");
+        foreach(Emphasis emp in Enum.GetValues<Emphasis>()) {
+            SL();
+            if(Button(emp.ToString(), emp)) {
+                Toast(emp, $"Toast of {emp} emphasis");
+            }
+        }
+    }
+    
+    if(Accordion("Fonts")) {
+        Slider(ref fontsFontDelta, -100.0f, 100.0f, "size delta");
+        Lbl("Fonts: regular, ", fontWeight: FontWeight.Regular, fontSizeDiff: fontsFontDelta);
+        SL();
+        Lbl("bold, ", fontWeight: FontWeight.Bold, fontSizeDiff: fontsFontDelta);
+        SL();
+        Lbl("and monospace", fontWeight: FontWeight.FixedSize, fontSizeDiff: fontsFontDelta);
     }
 
-    SL();
-    Button("small button", isSmall: true);
+    
+    if(Accordion("Div")) {
+        Sep("Content");
+        Slider(ref divLineCount, 1, 1000, "Line count");
+        Slider(ref divLineLength, 1, 1000, "Line length");
 
-    Checkbox("checkbox", ref isChecked);
-    SL();
-    SmallCheckbox("small checkbox", ref isChecked);
+        Sep("Options");
+        Input(ref divWidth, "width");
+        Input(ref divHeight, "height");
+        Checkbox("horizontally resizeable", ref divUserResizeableHorizontal);
+        Checkbox("vertically resizeable", ref divUserResizeableVertical);
+        Checkbox("has background", ref divHasBackground);
+        Checkbox("auto resize X", ref divAutoResizeX);
+        Checkbox("auto resize Y", ref divAutoResizeY);
+        Checkbox("style like other widgets", ref divStyleLikeWidget);
+        if(Button("reset", Emphasis.Warning)) {
+            divWidth = 0;
+            divHeight = 0;
+            divUserResizeableHorizontal = false;
+            divUserResizeableVertical = false;
+            divHasBackground = true;
+            divAutoResizeX = false;
+            divAutoResizeY = false;
+            divStyleLikeWidget = false;
+        }
 
-    if(Accordion("Normal accordion")) {
-        Lbl("accordion content");
+        string line = new('A', divLineLength);
+        
+        Div("demo div", () => {
+            for(int i = 0; i < divLineCount; i++) {
+                Lbl($"Line {i}");
+                SL();
+                Lbl(line);
+            }            
+        }, divWidth, divHeight, divUserResizeableHorizontal, divUserResizeableVertical, divHasBackground, divAutoResizeX, divAutoResizeY, divStyleLikeWidget);
     }
 
-    if(Accordion("Open accordion", true)) {
-        Lbl("accordion content (open)");
-    }
-    if(Hyperlink("click me")) {
-        Toast(Emphasis.Info, "hyperlink clicked");
-    }
 
-    Hyperlink("blog", "https://www.aloneguid.uk/posts/");
-
-    if(Input(ref message, "default input")) {
-        Toast(Emphasis.Info, "input changed");
-    }
-
-    Input(ref message, "disabled input", false);
-    Input(ref message, "readonly input", is_readonly: true);
-    Input(ref message, "width explicitly set to 400", width: 400);
-    Input(ref number, "number input");
-
-    Sep("Mouse helpers");
+    // ---
 
     Lbl("hovered: ");
     SL();
@@ -198,16 +260,6 @@ Grey.App.Run("Grey# Demo", () => {
     TabBar("1", tb => {
 
         tb.TabItem("Basics", Basics);
-
-        tb.TabItem("Lists", () => {
-            if(Combo("combo", choices, ref currentChoice)) {
-                Toast(Emphasis.Info, $"COMBO choice changed to {choices[currentChoice]}");
-            }
-            if(List("list", choices, ref currentChoice)) {
-                Toast(Emphasis.Info, $"LIST choice changed to {choices[currentChoice]}");
-            }
-            Lbl($"current: {currentChoice}");
-        });
 
         tb.TabItem("Icons", () => {
             Lbl($"{Icon.Num10k} {Icon.Fireplace} {Icon.Access_alarm}");
@@ -317,4 +369,4 @@ Grey.App.Run("Grey# Demo", () => {
 
     return isRunning;
 
-}, height: 800, centerOnScreen: true, isScrollable: false, hasMenuBar: true);
+}, height: 800, centerOnScreen: true, hasMenuBar: true);
