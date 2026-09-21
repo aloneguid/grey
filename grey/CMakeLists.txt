@@ -92,6 +92,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set_source_files_properties(
         ${CMAKE_CURRENT_SOURCE_DIR}/app.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/common/img.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/common/clipboard.cpp
         PROPERTIES LANGUAGE OBJCXX)
 endif()
 
