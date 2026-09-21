@@ -30,6 +30,7 @@ file(GLOB core_src
     "common/http.cpp"
     "common/url.cpp"
     "common/clipboard.cpp"
+    "common/desktop_shell.cpp"
     "common/mouse.cpp"
     "common/str.cpp"
     "common/img.cpp"
@@ -93,6 +94,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${CMAKE_CURRENT_SOURCE_DIR}/app.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/common/img.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/common/clipboard.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/common/desktop_shell.cpp
         PROPERTIES LANGUAGE OBJCXX)
 endif()
 

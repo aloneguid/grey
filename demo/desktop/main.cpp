@@ -9,6 +9,7 @@
 
 #include "grey.h"
 #include "common/clipboard.h"
+#include "common/desktop_shell.h"
 
 using namespace std;
 using namespace grey;
@@ -650,29 +651,55 @@ Also, [GitHub alerts](https://docs.github.com/en/get-started/writing-on-github/g
                             w::slider(app->fps, 0.0f, 500.0f, "FPS", 0.1f);
                         }
 
-                        w::sep("Monitors");
-                        w::lbl(format("mouse pos: {}", w::mouse_pos()));
-                        for(int i = 0; i < w::mon_count(); i++) {
-                            auto mm = w::mon(i).value();
-                            w::lbl(format("{:2d}: ", i));
-                            w::sl(40);
-                            w::lbl(format("scale: {}", mm.dpi_scale));
-                            w::sl(160);
-                            w::lbl(format("{} (work: {})", mm.area, mm.work_area));
+                        if(w::accordion("Monitors")) {
+                            w::lbl(format("mouse pos: {}", w::mouse_pos()));
+                            for(int i = 0; i < w::mon_count(); i++) {
+                                auto mm = w::mon(i).value();
+                                w::lbl(format("{:2d}: ", i));
+                                w::sl(40);
+                                w::lbl(format("scale: {}", mm.dpi_scale));
+                                w::sl(160);
+                                w::lbl(format("{} (work: {})", mm.area, mm.work_area));
+                            }
                         }
 
                         if(w::button("center on screen")) {
                             app->center();
                         }
 
-                        w::sep("Clipboard");
-                        static string clip_text;
-                        w::input_ml("clip", clip_text, w::scaled(200));
-                        if(w::button("read"))
-                            clip_text = common::clipboard::get_text();
-                        w::sl();
-                        if(w::button("write"))
-                            common::clipboard::set_text(clip_text);
+                        if(w::accordion("File Dialogs")) {
+
+                            w::lbl(format("Support flags:\n  File open: {}\n  File save: {}\n  Directory open: {}",
+                                common::desktop_shell::file_open_dialog_supported(),
+                                common::desktop_shell::file_save_dialog_supported(),
+                                common::desktop_shell::directory_open_dialog_supported()));
+
+                            static string file_path;
+
+                            if(w::button("open file")) {
+                                file_path = common::desktop_shell::file_open_dialog("Text File", "*.txt");
+                            }
+                            w::sl();
+                            if(w::button("save file")) {
+                                file_path = common::desktop_shell::file_save_dialog("Text File", "*.txt");
+                            }
+
+                            if(w::button("directory open")) {
+                                file_path = common::desktop_shell::directory_open_dialog();
+                            }
+
+                            w::lbl("File path: " + file_path);
+                        }
+
+                        if(w::accordion("Clipboard")) {
+                            static string clip_text;
+                            w::input_ml("clip", clip_text, w::scaled(200));
+                            if(w::button("read"))
+                                clip_text = common::clipboard::get_text();
+                            w::sl();
+                            if(w::button("write"))
+                                common::clipboard::set_text(clip_text);
+                        }
                     }
                 }
             }
