@@ -13,6 +13,9 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <cstdio>
+#if PLATFORM_MACOS
+#import <AppKit/AppKit.h>
+#endif
 #endif
 
 using namespace std;
@@ -36,6 +39,63 @@ namespace grey::common {
     static bool has_command(const std::string& cmd) {
         std::string check = "which " + cmd + " > /dev/null 2>&1";
         return system(check.c_str()) == 0;
+    }
+#endif
+
+#if PLATFORM_MACOS
+    static NSArray<NSString *> *macos_allowed_file_types(const std::string& extension) {
+        NSMutableArray<NSString *> *file_types = [NSMutableArray array];
+
+        size_t start = 0;
+        while (start <= extension.size()) {
+            size_t end = extension.find(';', start);
+            std::string type = extension.substr(start, end == std::string::npos ? std::string::npos : end - start);
+
+            const auto first = type.find_first_not_of(" \t\r\n");
+            if (first != std::string::npos) {
+                type.erase(0, first);
+                const auto last = type.find_last_not_of(" \t\r\n");
+                type.erase(last + 1);
+            } else {
+                type.clear();
+            }
+
+            if (type.rfind("*.", 0) == 0) {
+                type.erase(0, 2);
+            } else if (type.rfind('.', 0) == 0) {
+                type.erase(0, 1);
+            }
+
+            if (!type.empty() && type.find_first_of("*?") == std::string::npos) {
+                NSString *file_type = [NSString stringWithUTF8String:type.c_str()];
+                if (file_type != nil) {
+                    [file_types addObject:file_type];
+                }
+            }
+
+            if (end == std::string::npos) {
+                break;
+            }
+            start = end + 1;
+        }
+
+        return file_types;
+    }
+
+    static void macos_set_panel_title(NSPanel *panel, const std::string& file_type_name) {
+        NSString *title = [NSString stringWithUTF8String:file_type_name.c_str()];
+        if (title != nil && title.length > 0) {
+            panel.title = title;
+        }
+    }
+
+    static std::string macos_panel_path(NSURL *url) {
+        if (url == nil || url.path == nil) {
+            return "";
+        }
+
+        const char *path = url.path.UTF8String;
+        return path == nullptr ? "" : std::string(path);
     }
 #endif
 
@@ -297,6 +357,26 @@ namespace grey::common {
 
 #elif PLATFORM_LINUX || PLATFORM_MACOS
     std::string desktop_shell::file_open_dialog(const std::string &file_type_name, const std::string &extension) {
+#if PLATFORM_MACOS
+        @autoreleasepool {
+            NSOpenPanel *panel = [NSOpenPanel openPanel];
+            panel.canChooseFiles = YES;
+            panel.canChooseDirectories = NO;
+            panel.allowsMultipleSelection = NO;
+            macos_set_panel_title(panel, file_type_name);
+
+            NSArray<NSString *> *file_types = macos_allowed_file_types(extension);
+            if (file_types.count > 0) {
+                panel.allowedFileTypes = file_types;
+            }
+
+            if ([panel runModal] == NSModalResponseOK) {
+                return macos_panel_path(panel.URL);
+            }
+        }
+
+        return "";
+#else
         std::string extensions = extension;
         str::replace_all(extensions, ";", " ");
 
@@ -310,14 +390,28 @@ namespace grey::common {
             return run_command(cmd);
         }
 
-#if PLATFORM_MACOS
-        return run_command("osascript -e 'POSIX path of (choose file with prompt \"Open File\")' 2>/dev/null");
-#endif
-
         return "";
+#endif
     }
 
     std::string desktop_shell::file_save_dialog(const std::string &file_type_name, const std::string &extension) {
+#if PLATFORM_MACOS
+        @autoreleasepool {
+            NSSavePanel *panel = [NSSavePanel savePanel];
+            macos_set_panel_title(panel, file_type_name);
+
+            NSArray<NSString *> *file_types = macos_allowed_file_types(extension);
+            if (file_types.count > 0) {
+                panel.allowedFileTypes = file_types;
+            }
+
+            if ([panel runModal] == NSModalResponseOK) {
+                return macos_panel_path(panel.URL);
+            }
+        }
+
+        return "";
+#else
         std::string extensions = extension;
         str::replace_all(extensions, ";", " ");
 
@@ -331,11 +425,8 @@ namespace grey::common {
             return run_command(cmd);
         }
 
-#if PLATFORM_MACOS
-        return run_command("osascript -e 'POSIX path of (choose file name with prompt \"Save File\")' 2>/dev/null");
-#endif
-
         return "";
+#endif
     }
 
     std::string desktop_shell::directory_open_dialog() {

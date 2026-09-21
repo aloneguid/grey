@@ -34,6 +34,7 @@ if(APPLE)
     foreach(target demo tdemo)
         set_target_properties(${target} PROPERTIES
             MACOSX_BUNDLE TRUE
+            MACOSX_BUNDLE_GUI_IDENTIFIER "uk.aloneguid.browsertamer.${target}"
             MACOSX_BUNDLE_ICON_FILE icon.icns)
         set_source_files_properties(icon.icns PROPERTIES
             MACOSX_PACKAGE_LOCATION Resources)
