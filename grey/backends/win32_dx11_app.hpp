@@ -625,11 +625,15 @@ namespace grey::backends {
                 ImGui_ImplWin32_NewFrame();
                 ImGui::NewFrame();
 
+                // frame loop
                 if(!(create_main_window ? render_main_window(render_frame) : render_frame())) {
                     // Post message to close the window, which should be handled in the next iteration of the message loop.
                     ::PostMessage(hWnd, WM_CLOSE, 0, 0);
                     // done = true;
                 }
+
+                // idling detection
+                update_idling();
 
                 // Rendering
                 ImGui::Render();

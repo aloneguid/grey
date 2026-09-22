@@ -152,6 +152,19 @@ namespace grey {
          */
         bool hide_from_taskbar{false};
 
+        /**
+         * Idling interval in seconds. Setting this value to 0 disables idling.
+         */
+        float idling_threshold{5.0f};
+
+        /**
+         * Set by idling computer when application runs.
+         * Setting it does not affect anything, it is just a flag that is set by the idling computer.
+         */
+        bool is_idling{false};
+
+        float idling_timer{0.0f};
+
         // platform-specific flags
 
 #if PLATFORM_WINDOWS
@@ -210,6 +223,7 @@ namespace grey {
         sz initial_size;
         bool wnd_main_is_open{true};
         bool render_main_window(const std::function<bool()>& render_frame);
+        void update_idling();
 
     private:
         // key is texture name, value is texture data. The app will take care of disposing of the textures when the app is closed.

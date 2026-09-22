@@ -81,6 +81,20 @@ namespace grey {
         return wnd_main_is_open;
     }
 
+    void app::update_idling() {
+        ImGuiIO& io = ImGui::GetIO();
+        bool anything_happened =
+            io.MouseDelta.x != .0f || io.MouseDelta.y != .0f || ImGui::IsAnyMouseDown() || io.MouseWheel != .0f ||
+                ImGui::IsAnyItemActive();
+        if(anything_happened) {
+            idling_timer = .0f;
+        } else {
+            idling_timer += io.DeltaTime;
+        }
+
+        is_idling = idling_timer >= idling_threshold;
+    }
+
     void app::set_theme(const std::string& theme_id) {
         auto theme = themes::get_theme(theme_id);
         themes::set_theme(theme_id, widgets::main_scale);

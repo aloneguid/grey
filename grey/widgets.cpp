@@ -16,6 +16,8 @@
 #include <utility>
 #include <stack>
 #include "common/mouse.h"
+#include "common/clipboard.h"
+#include "common/desktop_shell.h"
 
 // for Windows-specific hacks
 #if PLATFORM_WINDOWS
@@ -1115,6 +1117,26 @@ namespace grey::widgets {
         } else if(t == spinner_type::solar_scale_balls) {
             ImSpinner::SpinnerSolarScaleBalls("SpinnerSolarScaleBalls", style.radius, style.thickness, colour, style.speed, 36);
         }
+    }
+
+    void clip_set_text(const std::string& text) {
+        common::clipboard::set_text(text);
+    }
+
+    std::string clip_get_text() {
+        return common::clipboard::get_text();
+    }
+
+    std::string file_open_dialog(const std::string& file_type_name, const std::string& extension) {
+        return common::desktop_shell::file_open_dialog(file_type_name, extension);
+    }
+
+    std::string file_save_dialog(const std::string& file_type_name, const std::string& extension) {
+        return common::desktop_shell::file_save_dialog(file_type_name, extension);
+    }
+
+    std::string directory_open_dialog() {
+        return common::desktop_shell::directory_open_dialog();
     }
 
 #if _DEBUG

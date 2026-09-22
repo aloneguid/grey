@@ -164,6 +164,10 @@ namespace grey {
         sz operator*(const float mult) const { return sz{width * mult, height * mult}; }
 
         sz operator/(const float div) const { return sz{width / div, height / div}; }
+
+        bool operator==(const sz& other) const { return width == other.width && height == other.height; }
+
+        bool operator!=(const sz& other) const { return width != other.width || height != other.height; }
     };
 
     inline point point::operator+(const sz& dimensions) const {

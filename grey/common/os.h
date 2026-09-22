@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <filesystem>
 #include "platform.h"
 
 namespace grey::common::os {
@@ -27,6 +28,8 @@ namespace grey::common::os {
      * @return
      */
     std::string get_win32_last_error_text();
+
+    std::filesystem::path get_start_menu_folder(bool personal = true);
 #else
     /**
      * @brief Gets the path to a specific system font using fontconfig (fc-match).

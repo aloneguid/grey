@@ -513,6 +513,26 @@ namespace grey::widgets {
 
     void spinner(spinner_type type = spinner_type::hbo_dots, const spinner_style& style = {});
 
+    // --- clipboard helpers ---
+
+    /**
+     * Sends text to the system clipboard
+     */
+    void clip_set_text(const std::string& text);
+
+    /**
+     * Gets text from the system clipboard
+     */
+    std::string clip_get_text();
+
+    // --- OS-native file dialogs ---
+
+    std::string file_open_dialog(const std::string &file_type_name, const std::string &extension);
+
+    std::string file_save_dialog(const std::string &file_type_name, const std::string &extension);
+
+    std::string directory_open_dialog();
+
 #if _DEBUG
     void spinner_demo();
 #endif

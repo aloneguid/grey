@@ -21,6 +21,7 @@
 #endif
 
 using namespace std;
+using namespace std::filesystem;
 
 namespace grey::common::os {
     bool is_app_light_theme() {
@@ -106,6 +107,19 @@ namespace grey::common::os {
            GetLastError(),
            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), err, 255,  nullptr);
         return str::to_str(wstring(err));
+    }
+
+    path get_start_menu_folder(bool personal) {
+        PWSTR wpath = nullptr;
+        path r;
+
+        HRESULT hr = ::SHGetKnownFolderPath(personal ? FOLDERID_StartMenu : FOLDERID_CommonStartMenu, 0, nullptr, &wpath);
+        if (SUCCEEDED(hr)) {
+            r = path{wpath};
+            ::CoTaskMemFree(wpath);
+        }
+
+        return r;
     }
 
 #else

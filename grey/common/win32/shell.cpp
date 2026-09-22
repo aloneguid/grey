@@ -153,7 +153,7 @@ namespace grey::common::win32 {
                     wstring wpath = str::to_wstr(path);
                     rc = ipf->Load(wpath.c_str(), STGM_READ);
                     if(SUCCEEDED(rc)) {
-                        rc = shl->Resolve(0, 0);
+                        rc = shl->Resolve(nullptr, SLR_NO_UI);
                         if(SUCCEEDED(rc)) {
                             int ibuf;
                             const size_t buf_size = 1024;
