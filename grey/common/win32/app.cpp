@@ -83,6 +83,8 @@ namespace grey::common::win32 {
                 modifiers |= MOD_ALT;
             } else if(pt == "shift") {
                 modifiers |= MOD_SHIFT;
+            } else if(pt == "space") {
+                vk_code = VK_SPACE;
             } else if(pt[0] >= '0' && pt[0] <= '9') {
                 vk_code = pt[0];
             } else if(pt[0] >= 'A' && pt[0] <= 'Z') {

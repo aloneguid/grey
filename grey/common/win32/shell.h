@@ -3,14 +3,6 @@
 #include <windows.h>
 
 namespace grey::common::win32::shell {
-    struct shell_link {
-        bool is_valid{false};
-        std::string path;
-        std::string args;
-        std::string icon;
-        std::string pwd;
-        std::string description;
-    };
 
     // non-roaming app data
     std::string get_local_app_data_path();
@@ -34,8 +26,6 @@ namespace grey::common::win32::shell {
      * @param user_scoped if app is scoped to user or machine
      */
     void open_default_apps(const std::string& app_registered_name = "", bool user_scoped = true);
-
-    shell_link read_link(const std::string& path);
 
     unsigned int get_dpi();
 

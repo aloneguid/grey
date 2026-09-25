@@ -15,7 +15,9 @@ namespace grey::common::win32 {
         static void ensure_co_initalised() {
             if(co_initialised) return;
 
-            HRESULT ok = ::CoInitializeEx(0, COINIT_MULTITHREADED);
+            // for speed, use apartment-threaded context
+            // HRESULT ok = ::CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+            ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
 
             co_initialised = true;
         }
@@ -134,60 +136,6 @@ namespace grey::common::win32 {
             open_mssettings(url);
         }
 
-        shell_link read_link(const std::string& path) {
-            // see https://renenyffenegger.ch/notes/Windows/development/WinAPI/Shell/read-lnk-file
-
-            ensure_co_initalised();
-
-            shell_link lnk;
-
-            // create shell link interface
-            IShellLink* shl;
-            HRESULT rc = ::CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink,
-                                            (LPVOID *) &shl);
-            if(SUCCEEDED(rc)) {
-                // load file into link
-                IPersistFile* ipf;
-                rc = shl->QueryInterface(IID_IPersistFile, (LPVOID *) &ipf);
-                if(SUCCEEDED(rc)) {
-                    wstring wpath = str::to_wstr(path);
-                    rc = ipf->Load(wpath.c_str(), STGM_READ);
-                    if(SUCCEEDED(rc)) {
-                        rc = shl->Resolve(nullptr, SLR_NO_UI);
-                        if(SUCCEEDED(rc)) {
-                            int ibuf;
-                            const size_t buf_size = 1024;
-                            wchar_t buf[buf_size];
-
-                            rc = shl->GetPath(&buf[0], buf_size, 0, SLGP_RAWPATH);
-                            if(SUCCEEDED(rc)) {
-                                lnk.is_valid = true;
-                                lnk.path = str::to_str(buf);
-                            }
-
-                            if(SUCCEEDED(shl->GetDescription(buf, buf_size))) {
-                                lnk.description = str::to_str(buf);
-                            }
-
-                            if(SUCCEEDED(shl->GetArguments(buf, buf_size))) {
-                                lnk.args = str::to_str(buf);
-                            }
-
-                            if(SUCCEEDED(shl->GetIconLocation(buf, buf_size, &ibuf))) {
-                                lnk.icon = str::to_str(buf) + ":" + std::to_string(ibuf);
-                            }
-
-                            if(SUCCEEDED(shl->GetWorkingDirectory(&buf[0], buf_size))) {
-                                lnk.pwd = str::to_str(buf);
-                            }
-                        }
-                    }
-                }
-            }
-
-
-            return lnk;
-        }
 
         unsigned int get_dpi() {
             //vector<HMONITOR> hmons;
@@ -218,14 +166,13 @@ namespace grey::common::win32 {
         }
 
         void create_start_menu_shortcut(const string& name, const std::string& path) {
-
             fs::path shortcut_path = get_start_menu_path(name);
             std::filesystem::create_directories(shortcut_path.parent_path());
             fs::path working_directory = fs::path{path}.parent_path();
 
             IShellLinkW* shell_link = nullptr;
             HRESULT hr = ::CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_IShellLinkW,
-                                    reinterpret_cast<void **>(&shell_link));
+                                            reinterpret_cast<void **>(&shell_link));
             if(SUCCEEDED(hr) && shell_link != nullptr) {
                 shell_link->SetPath(str::to_wstr(path).c_str());
                 shell_link->SetDescription(str::to_wstr(name).c_str());
