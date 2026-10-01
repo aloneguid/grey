@@ -18,11 +18,6 @@
 #include "backends/glfw_metal_app.mm"
 #endif
 
-#if defined(__APPLE__)
-//#include "backends/glfw_metal.hpp"
-#include "backends/glfw_gl3.hpp"
-#endif
-
 using namespace std;
 
 namespace grey {
