@@ -1,0 +1,18 @@
+## 0.0.0
+
+### todo:
+- mac: https://github.com/WerWolv/ImHex/blob/master/main/gui/source/window/platform/macos.cpp
+  - detect dark mode
+  - load all fonts
+
+- infra:
+  - linux arm?
+
+- general
+  - ?
+
+### done:
+- mac
+- linux
+- windows
+- all

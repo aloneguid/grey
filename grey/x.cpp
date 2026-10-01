@@ -1,0 +1,359 @@
+#include "x.h"
+#include "grey.h"
+#include <string>
+#include <memory>
+#include <vector>
+
+using namespace std;
+using namespace grey;
+namespace w = widgets;
+
+#include "common/os.h"
+#include "common/clipboard.h"
+
+static void platform_init() {
+#if PLATFORM_WINDOWS
+    common::os::set_dpi_awareness();
+#endif
+}
+
+EXPORTED void app_run(
+    const char* c_title,
+    int32_t width,
+    int32_t height,
+    bool has_menu_bar,
+    bool can_scroll,
+    bool center_on_screen,
+    RenderFrameCallback c_frame_callback) {
+
+    platform_init();
+
+    string title = c_title;
+
+    // main window
+    bool is_running = true;
+
+    auto app = app::make(title, sz{static_cast<float>(width), static_cast<float>(height)});
+    wnd_opts& opts = app->main_window_opts();
+
+    opts.has_menu_bar = has_menu_bar;
+    if(!can_scroll) opts.scrollable = false;
+    if(center_on_screen) app->center_on_screen = true;
+    app->can_resize = true;
+    app->fonts.load_all();
+
+    app->run([c_frame_callback]() {
+        if(c_frame_callback) {
+            if(!c_frame_callback()) {
+                return false;
+            }
+        }
+
+        w::toast_render_frame();
+        return true;
+    });
+}
+
+EXPORTED void id_frame(int32_t scope_id, RenderCallback c_ptr_callback) {
+    w::id_frame f{scope_id};
+    if(c_ptr_callback) {
+        c_ptr_callback();
+    }
+}
+
+EXPORTED void sl(float offset) {
+    w::sl(offset);
+}
+
+EXPORTED void lbl(const char* c_text,
+    int32_t emp,
+    float text_wrap_pos,
+    bool center_x,
+    bool center_y,
+    float font_size_diff,
+    int32_t fw) {
+    const string text{c_text};
+    const style s {
+        .emp = static_cast<emphasis>(emp),
+        .text_wrap_pos = text_wrap_pos,
+        .center_x = center_x,
+        .center_y = center_y,
+        .font_size = font_size_diff,
+        .font_w = static_cast<font_weight>(fw)
+    };
+    w::lbl(text, s);
+}
+
+EXPORTED bool selectable(const char* c_text, bool span_columns) {
+    string text{ c_text };
+    return w::selectable(text, span_columns);
+}
+
+EXPORTED bool checkbox(const char* c_label, bool* is_checked, bool is_small) {
+    string label{ c_label };
+    return is_small ? w::small_checkbox(label, *is_checked) : w::checkbox(label, *is_checked);
+}
+
+EXPORTED void c_div(const char* c_id, RenderCallback c_render_callback,
+    float width,
+    float height,
+    bool user_resizeable_horizontal,
+    bool user_resizeable_vertical,
+    bool has_background,
+    bool auto_resize_x,
+    bool auto_resize_y,
+    bool style_like_widget) {
+    const div_opts opts {
+        .size = {width, height},
+        .user_resizeable_horizontal = user_resizeable_horizontal,
+        .user_resizeable_vertical = user_resizeable_vertical,
+        .has_background = has_background,
+        .auto_resize_x = auto_resize_x,
+        .auto_resize_y = auto_resize_y,
+        .style_like_widget = style_like_widget
+    };
+    if(const w::div d{c_id, opts}; d && c_render_callback) {
+        c_render_callback();
+    }
+}
+
+
+EXPORTED bool button(const char* c_text, int32_t emphasis, bool is_enabled, bool is_small) {
+    string text{c_text};
+    return w::button(text, static_cast<grey::emphasis>(emphasis), is_enabled, is_small);
+}
+
+EXPORTED void sep(const char* c_text) {
+    const string text{c_text};
+    w::sep(text);
+}
+
+EXPORTED bool accordion(const char* c_header, bool default_open) {
+    string header{c_header};
+    return w::accordion(header, default_open);
+}
+
+EXPORTED bool hyperlink(const char* c_text, const char* c_url_to_open) {
+    string text{ c_text };
+    string url = c_url_to_open ? c_url_to_open : "";
+    return w::hyperlink(text, url);
+}
+
+EXPORTED void toast(int32_t emphasis, const char* c_message) {
+    string message{ c_message };
+    w::toast((grey::emphasis)emphasis, message);
+}
+
+EXPORTED bool input_string(char* c_value, int32_t value_max_length, const char* c_label, bool enabled, float width, bool is_readonly) {
+    string label{ c_label };
+    return w::input(c_value, value_max_length, label, enabled, width * w::scale, is_readonly);
+}
+
+EXPORTED bool input_int(int32_t* value, const char* c_label, bool enabled, float width, bool is_readonly) {
+    string label{ c_label };
+    return w::input(*value, label, enabled, width * w::scale, is_readonly);
+}
+
+EXPORTED bool input_float(float* value, const char* c_label, bool enabled, float width, bool is_readonly) {
+    string label{ c_label };
+    return w::input(*value, label, enabled, width * w::scale, is_readonly);
+}
+
+EXPORTED bool input_multiline(const char* c_id, char* c_value, int32_t value_max_length, float height, bool autoscroll, bool enabled, bool use_fixed_font) {
+    string id{ c_id };
+    //cout << "fixed font: " << use_fixed_font << endl;
+    return w::input_ml(id, c_value, value_max_length, height, autoscroll, enabled, use_fixed_font);
+}
+
+EXPORTED void spinner(int32_t type) {
+    w::spinner(static_cast<spinner_type>(type));
+}
+
+EXPORTED bool slider_float(float* value, float min, float max, const char* c_label, float step, bool ticks, int32_t emphasis) {
+    string label{ c_label };
+    return w::slider(*value, min, max, label, step, ticks, (grey::emphasis)emphasis);
+}
+
+EXPORTED bool slider_int(int32_t* value, int32_t min, int32_t max, const char* c_label, int step, bool ticks, int32_t emphasis) {
+    string label{ c_label };
+    return w::slider(*value, min, max, label, step, ticks, (grey::emphasis)emphasis);
+}
+
+EXPORTED void tt(const char* text, int32_t delay) {
+    w::tt(text, static_cast<show_delay>(delay));
+}
+
+void rich_tt(RenderCallback c_render_callback, int32_t delay) {
+    w::rich_tt tt{static_cast<show_delay>(delay)};
+    if(tt) {
+        c_render_callback();
+    }
+}
+
+EXPORTED bool combo(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width) {
+    return w::combo(c_label, vector<string>(options, options + options_size), *selected, width * w::scale);
+}
+
+EXPORTED bool list(const char* c_label, const char** options, int32_t options_size, uint32_t* selected, float width) {
+    return w::list(c_label, vector<string>(options, options + options_size), *selected, width * w::scale);
+}
+
+EXPORTED void tab_bar(const char* c_id, RenderPtrCallback c_render_callback) {
+    w::tab_bar tb{ c_id };
+    c_render_callback(&tb); 
+}
+
+EXPORTED void tab(void* tab_bar_ptr, const char* c_title, bool unsaved, bool selected, RenderCallback c_render_callback) {
+    auto* tb = static_cast<w::tab_bar*>(tab_bar_ptr);
+    if(w::tab_bar_item tbi = tb->next_tab(c_title, unsaved, selected)) {
+        c_render_callback();
+    }
+}
+
+EXPORTED void status_bar(RenderCallback c_render_callback) {
+    w::status_bar sb;
+    c_render_callback();
+}
+
+bool is_hovered() {
+    return w::is_hovered();
+}
+
+bool is_leftclicked() {
+    return w::is_leftclicked();
+}
+
+bool is_rightclicked() {
+    return w::is_rightclicked();
+}
+
+EXPORTED void big_table(const char* c_id,
+    const char** c_columns, int32_t c_columns_size, int32_t row_count,
+    float outer_width, float outer_height,
+    bool alternate_row_bg,
+    RenderTableCellCallback c_cell_callback)
+{
+    vector<string> cols;
+    // copy columns into cols vector
+    cols.reserve(c_columns_size);
+    for (int i = 0; i < c_columns_size; i++) {
+        cols.emplace_back(c_columns[i]);
+    }
+
+    w::big_table t{ c_id, cols, static_cast<size_t>(row_count), outer_width * w::scale, outer_height * w::scale, alternate_row_bg };
+    t.render_data([c_cell_callback](int row_idx, int column_idx) {
+            c_cell_callback(row_idx, column_idx);
+        });
+}
+
+EXPORTED void table(const char* c_id, const char** c_columns, int32_t c_columns_size, float outer_width, float outer_height, bool alternate_row_bg, RenderPtrCallback c_ptr_callback) {
+    vector<string> cols;
+    // copy columns into cols vector
+    cols.reserve(c_columns_size);
+    for(int i = 0; i < c_columns_size; i++) {
+        cols.emplace_back(c_columns[i]);
+    }
+
+    w::table t{c_id, cols, outer_width * w::scale, outer_height * w::scale, alternate_row_bg};
+    if(t) {
+        c_ptr_callback(&t);
+    }
+}
+
+EXPORTED bool table_begin_row(void* table_ptr) {
+    auto* t = static_cast<w::table*>(table_ptr);
+    return t->begin_row();
+}
+
+bool table_next_column(void* table_ptr) {
+    auto* t = static_cast<w::table*>(table_ptr);
+    return t->next_column();
+}
+
+EXPORTED void tree_node(const char* c_label, bool open_by_default, bool is_leaf, bool span_all_cols, RenderTreeNodeCallback c_render_callback) {
+    const w::tree_node tn{c_label, open_by_default, is_leaf, span_all_cols};
+    c_render_callback(tn);
+}
+
+EXPORTED void menu_bar(RenderCallback c_render_callback) {
+    if(const w::menu_bar mb; mb) {
+        c_render_callback();
+    }
+}
+
+void menu(const char* c_title, RenderCallback c_render_callback) {
+    string title = c_title;
+    if(w::menu m{title}; m) {
+        c_render_callback();
+    }
+}
+
+// -- application menus
+
+EXPORTED bool menu_item(const char* c_text, bool reserve_icon_space, const char* c_icon) {
+    const string text{c_text};
+    const string icon{c_icon ? c_icon : ""};
+    return w::mi(text, reserve_icon_space, icon);
+}
+
+map<int, unique_ptr<w::code_editor>> code_editor_map;
+
+EXPORTED int32_t code_editor(int32_t id, bool unregister, int32_t language, const char* c_text) {
+    auto it = code_editor_map.find(id);
+    if(it == code_editor_map.end()) {
+        if(unregister) return -1;
+
+        // create new code editor
+        id = w::generate_int_id();
+        code_editor_map[id] = make_unique<w::code_editor>();
+    } else if(unregister) {
+        // delete code editor from map
+        code_editor_map.erase(it);
+        return -1;
+    }
+
+    w::code_editor& ce{*code_editor_map[id]};
+    if(c_text) {
+        ce.set_text(c_text);
+    }
+    ce.lng = static_cast<w::code_editor::language>(language);
+    ce.render();
+    return id;
+}
+
+
+float get_fps() {
+    return ImGui::GetIO().Framerate;
+}
+
+int get_version(char* buffer, int32_t buffer_size) {
+    const std::string version{ImGui::GetVersion()};
+    const int required = static_cast<int>(version.size()) + 1;
+
+    if (buffer == nullptr || buffer_size < required) {
+        return required;
+    }
+
+    std::copy(version.begin(), version.end(), buffer);
+    buffer[version.size()] = '\0';
+
+    return required;
+}
+
+int clipboard_get_text(char* buffer, int32_t buffer_size) {
+    const string text = common::clipboard::get_text();
+    const int required = static_cast<int>(text.size()) + 1;
+
+    if (buffer == nullptr || buffer_size < required) {
+        return required;
+    }
+
+    std::copy(text.begin(), text.end(), buffer);
+    buffer[text.size()] = '\0';
+
+    return required;
+}
+
+void clipboard_set_text(const char* c_text) {
+    common::clipboard::set_text(c_text);
+}

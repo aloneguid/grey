@@ -1,0 +1,298 @@
+﻿using System;
+using System.Text;
+using Microsoft.VisualBasic;
+
+namespace Grey {
+
+    public class DebugInfo {
+        /// <summary>
+        /// Rendering FPS (frames per second)
+        /// </summary>
+        public float FPS { get; set; }
+    }
+
+    public static class App {
+
+        public static void Run(string title, Func<bool> renderFrame,
+            int width = 800, int height = 600,
+            bool hasMenuBar = false,
+            bool isScrollable = true,
+            bool centerOnScreen = false) {
+            var callback = new Native.RenderFrameCallback(renderFrame);
+            Native.app_run(title, width, height, hasMenuBar, isScrollable, centerOnScreen, callback);
+        }
+
+        public static void IdFrame(int scopeId, Action render) {
+            Native.id_frame(scopeId, () => {
+                render();
+            });
+        }
+
+        public static void SL(float offset = 0) {
+            Native.sl(offset);
+        }
+        public static void Lbl(string text, Emphasis emphasis = Emphasis.None,
+            float textWrapPos = 0,
+            bool centerX = false,
+            bool centerY = false,
+            float fontSizeDiff = 0,
+            FontWeight fontWeight = FontWeight.Regular) {
+            Native.lbl(text, emphasis, textWrapPos, centerX, centerY, fontSizeDiff, fontWeight);
+        }
+
+        public static bool Selectable(string text, bool spanColumns = false) {
+            return Native.selectable(text, spanColumns);
+        }
+
+        public static bool Checkbox(string label, ref bool isChecked) {
+            return Native.checkbox(label, ref isChecked, false);
+        }
+        
+        public static void Div(string id, Action render,
+            float width = 0,
+            float height = 0,
+            bool userResizeableHorizontal = false,
+            bool userResizeableVertical = false,
+            bool hasBackground = true,
+            bool autoResizeX = false,
+            bool autoResizeY = false,
+            bool styleLikeWidget = false) {
+            Native.c_div(id, () => render(),
+                width, height,
+                userResizeableHorizontal,
+                userResizeableVertical,
+                hasBackground,
+                autoResizeX,
+                autoResizeY,
+                styleLikeWidget);
+        }
+
+        public static bool SmallCheckbox(string label, ref bool isChecked) {
+            return Native.checkbox(label, ref isChecked, true);
+        }
+
+        public static bool Button(string text, Emphasis emphasis = Emphasis.None,
+            bool isEnabled = true, bool isSmall = false) {
+            return Native.button(text, emphasis, isEnabled, isSmall);
+        }
+
+        public static void Sep(string text = "") {
+            Native.sep(text);
+        }
+
+        public static bool Accordion(string header, bool defaultOpen = false) {
+            return Native.accordion(header, defaultOpen);
+        }
+
+        public static bool Hyperlink(string text, string? urlToOpen = null) {
+            return Native.hyperlink(text, urlToOpen);
+        }
+
+        public static void Toast(Emphasis emphasis, string message) {
+            Native.toast(emphasis, message);
+        }
+
+        public static bool Input(StringBuilder value, string label,
+            bool enabled = true, float width = 0, bool is_readonly = false) {
+            return Native.input_string(value, value.Capacity, label, enabled, width, is_readonly);
+        }
+
+        public static bool Input(ref string value, string label,
+            bool enabled = true, float width = 0, bool is_readonly = false) {
+            var sb = new StringBuilder(value, Math.Max(10, value.Length * 2));
+            bool ret = Native.input_string(sb, sb.Capacity, label, enabled, width, is_readonly);
+            if(ret) {
+                value = sb.ToString();
+            }
+            return ret;
+        }
+
+        public static bool Input(ref int value, string label,
+            bool enabled = true, float width = 0, bool is_readonly = false) {
+            return Native.input_int(ref value, label, enabled, width, is_readonly);
+        }
+        
+        public static bool Input(ref float value, string label,
+            bool enabled = true, float width = 0, bool is_readonly = false) {
+            return Native.input_float(ref value, label, enabled, width, is_readonly);
+        }
+
+        public static bool InputMultiline(string id, StringBuilder value,
+            float height = 0,
+            bool autoscroll = false,
+            bool isEnabled = true,
+            bool useFixedFont = false) {
+            return Native.input_multiline(id, value, value.Capacity, height, autoscroll, isEnabled, useFixedFont);
+        }
+
+        public static void Spinner(SpinnerType type) {
+            Native.spinner(type);
+        }
+
+        public static bool Slider(ref float value, float min, float max, string label, float step = 0, bool ticks = false, Emphasis emphasis = Emphasis.None) {
+            return Native.slider_float(ref value, min, max, label, step, ticks, emphasis);
+        }
+
+        public static bool Slider(ref int value, int min, int max, string label, int step = 0, bool ticks = false, Emphasis emphasis = Emphasis.None) {
+            return Native.slider_int(ref value, min, max, label, step, ticks, emphasis);
+        }
+
+        /// <summary>
+        /// A text-only tooltip appearing on curren item's hover
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="delay"></param>
+        public static void TT(string text, ShowDelay delay = ShowDelay.Normal) {
+            Native.tt(text, delay);
+        }
+
+        /// <summary>
+        /// Rich tooltip
+        /// </summary>
+        /// <param name="renderContent"></param>
+        /// <param name="delay"></param>
+        public static void TT(Action renderContent, ShowDelay delay = ShowDelay.Normal) {
+            Native.rich_tt(() => {
+                renderContent();
+            }, delay);
+        }
+
+        /// <summary>
+        /// Combo selection widget
+        /// </summary>
+        /// <param name="label">Label to display</param>
+        /// <param name="items">List of selection items</param>
+        /// <param name="currentItem">Reference to currently selected item index</param>
+        /// <param name="width"></param>
+        /// <returns>True if selection has changed</returns>
+        public static bool Combo(string label, string[] items, ref uint currentItem, float width = 0) {
+            return Native.combo(label, items, items.Length, ref currentItem, width);
+        }
+        
+        public static bool Combo<TEnum>(string label, ref TEnum currentItem, float width = 0) where TEnum : Enum {
+            string[] names = typeof(TEnum).GetEnumNames();
+            uint currentIdx = Convert.ToUInt32(currentItem);
+            bool changed = Native.combo(label, names, names.Length, ref currentIdx, width);
+            if(changed) {
+                currentItem = (TEnum)Enum.ToObject(typeof(TEnum), currentIdx);
+            }
+            return changed;
+        }
+
+        public static bool List(string label, string[] items, ref uint currentItem, float width = 0) {
+            return Native.list(label, items, items.Length, ref currentItem, width);
+        }
+
+        public static void MenuBar(Action render) {
+            Native.menu_bar(() => {
+                render();
+            });
+        }
+
+        public static void Menu(string label, Action render) {
+            Native.menu(label, () => {
+                render();
+            });
+        }
+
+        public static bool MenuItem(string label, bool reserveIconSpace = false, string icon = "") {
+            return Native.menu_item(label, reserveIconSpace, icon);
+        }
+
+        public static void BigTable(string id, string[] columns, int rowCount, Action<int, int> cellRender,
+            float outer_width = 0, float outerHeight = 0,
+            bool alternateRowBg = false) {
+            Native.big_table(id, columns, columns.Length, rowCount,
+                outer_width, outerHeight,
+                alternateRowBg,
+                (rowIndex, columnIndex) => {
+                    cellRender(rowIndex, columnIndex);
+                });
+        }
+
+        public class TableActions {
+            private readonly nint _table_ptr;
+
+            public TableActions(IntPtr table_ptr) {
+                _table_ptr = table_ptr;
+            }
+
+            public bool BeginRow() {
+                return Native.table_begin_row(_table_ptr);
+            }
+
+            public bool NextColumn() {
+                return Native.table_next_column(_table_ptr);
+            }
+        }
+
+        public static void Table(string id, string[] columns, Action<TableActions> tableActions,
+            float outer_width = 0, float outerHeight = 0,
+            bool alternateRowBg = false) {
+            Native.table(id, columns, columns.Length,
+                outer_width, outerHeight,
+                alternateRowBg,
+                (IntPtr table_ptr) => {
+                    tableActions(new TableActions(table_ptr));
+                });
+        }
+
+        public class TabBarActions {
+            private readonly nint _tabbar_ptr;
+            public TabBarActions(IntPtr tabbar_ptr) {
+                _tabbar_ptr = tabbar_ptr;
+            }
+            public void TabItem(string title, Action render, bool isUnsaved = false, bool isSelected = false) {
+                Native.tab(_tabbar_ptr, title, isUnsaved, isSelected, () => {
+                    render();
+                });
+            }
+        }
+
+        public static void TabBar(string id, Action<TabBarActions> render) {
+            Native.tab_bar(id, (nint tabbar_ptr) => {
+                render(new TabBarActions(tabbar_ptr));
+            });
+        }
+
+        public static void TreeNode(string label, bool openByDefault, bool isLeaf, Action<bool> render, bool spanAllCols = false) {
+            Native.tree_node(label, openByDefault, isLeaf, spanAllCols, (is_open) => {
+                render(is_open);
+            });
+        }
+
+        public static void TreeNode(string label, bool spanAllCols = false) {
+            Native.tree_node(label, true, true, spanAllCols, (isOpen) => { });
+        }
+
+        public static void StatusBar(Action render) {
+            Native.status_bar(() => {
+                render();
+            });
+        }
+
+        public static bool IsHovered => Native.is_hovered();
+
+        public static bool IsLeftClicked => Native.is_leftclicked();
+
+        public static bool IsRightClicked => Native.is_rightclicked();
+
+        public static float Fps => Native.get_fps();
+
+        public static string GreyVersion {
+            get {
+                if(field != null) return field!;
+                
+                var sb = new StringBuilder(64);
+                int len = Native.get_version(sb, sb.Capacity);
+                if(len > sb.Capacity) {
+                    sb = new StringBuilder(len);
+                    Native.get_version(sb, sb.Capacity);
+                }
+                field = sb.ToString();
+
+                return field!;
+            }
+        }
+    }
+}

@@ -1,0 +1,48 @@
+#pragma once
+#include <string>
+#include <filesystem>
+#include "platform.h"
+
+namespace grey::common::os {
+    /**
+     * @brief Determines application theme. Prefer this to make decisions about colours.
+     */
+    bool is_app_light_theme();
+
+    /**
+     * @brief Determines system theme (can different from application theme). Rarely used.
+     */
+    bool is_system_light_theme();
+
+    unsigned int get_dpi();
+
+    /**
+     * @brief Gets the location of the system fonts folder, typically c:\\windows\\fonts
+     * @return 
+     */
+    std::string get_system_fonts_path();
+
+#if PLATFORM_WINDOWS
+    /**
+     * @brief Calls ::GetLastError() and returns the error text.
+     * @return
+     */
+    std::string get_win32_last_error_text();
+
+    std::filesystem::path get_start_menu_folder(bool personal = true);
+#else
+    /**
+     * @brief Gets the path to a specific system font using fontconfig (fc-match).
+     * @param font_name Generic name like "sans-serif" or "monospace".
+     * @return Path to the font file.
+     */
+    std::string get_system_font_path(const std::string& font_name);
+#endif
+
+    void set_dpi_awareness();
+
+    /**
+     * Get current monitor bounds in virtual screen coordinates. The current monitor is the one closes to the mouse cursor.
+     */
+    bool get_current_monitor(int& left, int& top, int& right, int& bottom);
+}

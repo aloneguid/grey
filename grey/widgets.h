@@ -1,0 +1,789 @@
+#pragma once
+#include "imgui.h"
+#include "fonts/MaterialIcons.h"
+#include "model.h"
+#include <string>
+#include <vector>
+#include <functional>
+#include "magic_enum/magic_enum.hpp"
+#include "common/platform.h"
+#include "common/ui_window.h"
+
+// 3rdparty
+#include "3rdparty/ImGuiColorTextEdit/TextEditor.h"
+
+#if GREY_INCLUDE_IMPLOT
+#include "implot.h"
+#endif
+
+// On coordinates.
+// Generally, all the out-of-window processing must use unscaled, raw, physical coordinates. This is because system monitors are lined up in a virtual physical space i.e. if you have a laptop and and external minitor on top, your laptop have are coodinates starting from below the external monitor and so on. Not all of the physical coordinate space is valid or visible.
+// Monitors generally do have different DPIs (unless you have identical monitors, but even there it's possible to set differen DPIs). DPI normally indicate physical dimentions (but not necessarily) And affects the rendering of artifacts inside the monitor, such as shapes, fonts, etc. Generally it's not possible for one shape to look great if it spawns multiple monitors. For once, they may not perfectly align in physical space, and second, due to different DPIs, a thick line, for example, will be thicker on one screen and thinner on the other. Generally, we deside how "big" the shape should be by using DPI of a monitor where most of the shape resides (or DPI of the monitor where most of the dwindow resides) and call it a "window DPI". Global "scale" variable here represents the DPI scale of the currently rendering window, and can change between calls if window moves or user changes monitor settings while the program is running.
+
+namespace grey::widgets {
+
+    extern float scale;
+    extern float main_scale;
+
+    [[nodiscard]] inline float scaled(const float value) { return value * scale; }
+
+    /**
+     * Generates a unique ID to be used in widgets etc.
+     */
+    [[nodiscard]] int generate_int_id();
+
+    /**
+     * Checks if UI system is initialized.
+     */
+    [[nodiscard]] bool initialized();
+
+    /**
+     * @brief ID collision avoidance frame. Creates a new ID scope.
+     */
+    class id_frame {
+    public:
+        explicit id_frame(int scope_id);
+
+        explicit id_frame(const std::string& scope_id);
+
+        ~id_frame();
+    };
+
+    /**
+     * @brief RAII text parameters adjuster
+     */
+    class texter {
+    public:
+        texter(float size_delta = .0f, font_weight weight = font_weight::regular);
+        ~texter();
+
+        static bool make_font(float size_delta, font_weight weight, ImFont** out_font, float& out_font_size);
+    private:
+        bool font_pushed;
+    };
+
+    class clip_rect {
+    public:
+        clip_rect(const ImVec2& min, const ImVec2& max);
+        ~clip_rect();
+    };
+
+    /**
+     * window v2 - an attempt to make it completely stateless
+     */
+    class wnd {
+    public:
+        explicit wnd(const std::string& title, const wnd_opts& s = {});
+        ~wnd();
+
+        /**
+         * Gets current window height
+         */
+        [[nodiscard]] float height() const;
+
+        [[nodiscard]] point pos() const;
+
+        [[nodiscard]] sz size() const;
+
+        operator bool() const { return needs_content; }
+    private:
+        bool needs_content;
+        ImDrawList* parent_dl;
+
+        common::ui_window nw();
+    };
+
+    /**
+     * "Division" or "section". The main purpose of "div" is creating scrollable/clippable area. (todo)
+     */
+    class div {
+    public:
+        explicit div(const std::string& id, const div_opts& opts = {});
+        ~div();
+
+        explicit operator bool() const { return rendered; }
+
+    private:
+        bool rendered{false};
+        const div_opts& opts;
+        ImDrawList* parent_dl;
+    };
+
+    class draw_splitter {
+    public:
+        point p0;
+
+        draw_splitter();
+
+        void swap();
+
+        ~draw_splitter();
+    private:
+        ImDrawListSplitter splitter{};
+    };
+
+    class group {
+    public:
+        explicit group(bool full_width = false);
+        ~group();
+
+        rgb_colour bg_col;
+
+    private:
+        bool full_width;
+    };
+
+    const std::string SetThemeMenuPrefix{"set_theme_"};
+
+    /**
+     * @brief Menu item with optional icon space reservation and icon.
+     * @param text 
+     * @param reserve_icon_space 
+     * @param icon 
+     * @return 
+     */
+    bool mi(const std::string& text, bool reserve_icon_space = false, const std::string& icon = "");
+
+    void mi_themes(const std::function<void(const std::string&)>& on_changed);
+
+    class menu {
+    public:
+        explicit menu(const std::string& title, bool reserve_icon_space = false, std::string icon = "");
+        ~menu();
+
+        explicit operator bool() const {
+            return rendered;
+        }
+
+    private:
+        bool rendered;
+        ImVec2 cp;
+        std::string icon;
+    };
+
+    class menu_bar {
+    public:
+        menu_bar();
+        ~menu_bar();
+
+        operator bool() const {
+            return rendered;
+        }
+
+    private:
+        bool rendered{false};
+    };
+
+#define with_menu_bar(...) { { grey::widgets::menu_bar mb; if(mb) { __VA_ARGS__ } } }
+#define with_menu_item(title, ...) { { grey::widgets::menu mi{title}; if(mi) { __VA_ARGS__ } }}
+
+    class status_bar {
+    public:
+        status_bar();
+        ~status_bar();
+
+        operator bool() const { return rendered_bar && rendered_mi; }
+
+    private:
+        bool rendered_bar{false};
+        bool rendered_mi{false};
+    };
+
+#define with_status_bar(...) { grey::widgets::status_bar sb; if(sb) { __VA_ARGS__ } }
+
+    /**
+     * @brief Rich tooltip container
+     */
+    class rich_tt {
+    public:
+        rich_tt(show_delay delay = show_delay::normal);
+        ~rich_tt();
+
+        operator bool() const {
+            return rendered;
+        }
+
+    private:
+        bool rendered;
+    };
+
+#define with_rich_tt(...) { grey::widgets::rich_tt rtt; if(rtt) { __VA_ARGS__ } }
+
+    class tab_bar_item {
+    public:
+        tab_bar_item(const std::string& id, bool unsaved, bool selected);
+        ~tab_bar_item();
+
+        operator bool() const {
+            return rendered;
+        }
+
+    private:
+        std::string id;
+        ImGuiTabItemFlags flags{0};
+        bool rendered{false};
+    };
+
+    class tab_bar {
+    public:
+        tab_bar(const std::string& id, bool tab_list_popup = false, bool scroll = false);
+        ~tab_bar();
+
+        tab_bar_item next_tab(const std::string& title, bool unsaved = false, bool selected = false);
+
+        /**
+         * @brief Increments tab index
+         * @return Index before increment 
+         */
+        size_t increment_tab_index() { return tab_index++; }
+
+    private:
+        bool rendered{false};
+        std::string id;
+        size_t tab_index{0};
+        ImGuiTabBarFlags flags{ImGuiTabBarFlags_DrawSelectedOverline};
+    };
+
+#define with_tab(tb, title, ...) { auto tab = tb.next_tab(title); if(tab) { __VA_ARGS__  } }
+
+    /**
+     * @brief Popup is a child element that can display extra items on top.
+     *        But unlike raw implementation, this allow to open popups from anywhere in ID-stack.
+     */
+    class popup {
+    public:
+        /**
+         * @brief Constructs popup with given ID and initial open state.
+         * @param id Popup ID
+         * @param is_open When set to true, opens the popup and flips it to false.
+         */
+        explicit popup(const std::string& id, bool& is_open);
+        ~popup();
+
+        explicit operator bool() const { return rendered; }
+
+    private:
+        bool rendered{false};
+    };
+
+    /**
+     * @brief Get cursor position in logical coordinates.
+     */
+    point cur_get();
+    void cur_set(const point& pos);
+    void cur_move(const point& shift);
+
+    // monitor API
+
+    monitor mon(const ImGuiPlatformMonitor& mon);
+
+    /**
+     * Gets number of monitors on this system.
+     */
+    int mon_count();
+
+    /**
+     * Get monitor area by index. Size is not scaled, it's in the absolute coordinates, because each monitor may (and usually does) have different DPI.
+     */
+    std::optional<monitor> mon(int index);
+
+    /**
+     * Get monitor area for the monitor where mouse cursor is located.
+     */
+    std::optional<monitor> mon_mouse();
+
+    /**
+     * Get monitor area for the monitor where current window is located.
+     */
+    monitor mon_wnd();
+
+    /**
+     * @brief Get window position and dimensions in screen space;
+     * @return rect
+     */
+    rect window_rect_get();
+
+    float avail_x();
+    float avail_y();
+
+    // Basic drawing
+
+    /**
+     * Gets rectangle occupied by the last rendered item in absolute (not scaled) coordinates.
+     */
+    rect item_rect_get();
+
+    void draw_text(const point& pos, emphasis emp, const std::string& text);
+
+    void draw_text(const point& pos, const rgb_colour& colour, const std::string& text);
+
+    void draw_rect(const rect& rect, rgb_colour colour, float thickness = 1.0f, float rounding = .0f);
+
+    void draw_rect_filled(const rect& rect, rgb_colour colour, float rounding = .0f);
+
+    void draw_circle(const point& center, float radius, rgb_colour colour, bool filled = false, float thickness = 1.0f, int num_segments = 0);
+
+    void dummy(sz size);
+
+    /**
+     * Draws a label with optional style
+     * @param text label text
+     * @param style label style
+     */
+    void lbl(const std::string& text, const style& style = {});
+
+    /**
+     *
+     * @param text
+     * @param font_size_diff
+     * @param wrap_width
+     * @return Absolute size.
+     */
+    sz text_size_get(const std::string& text, float font_size_diff = .0f, float wrap_width = -1);
+
+    /**
+     * @brief Selectable item
+     * @param text Text to display
+     * @param span_columns Whether to span all columns in a table (only applicable inside tables)
+     * @return True if selection changes
+     */
+    bool selectable(const std::string& text, bool span_columns = false);
+
+    bool input(std::string& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
+
+    bool input(int& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
+
+    bool input(float& value, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
+
+    bool input(char* value, int value_length, const std::string& label = "", bool enabled = true, float width = 0, bool is_readonly = false);
+
+    //bool input_ml(const std::string& id, std::string& value, unsigned int line_height = 10, bool autoscroll = false, bool enabled = true);
+
+    /**
+     * @brief Multiline edit
+     * @param id 
+     * @param value 
+     * @param height Height in pixels, if zero, it will be taking the remaining space. If negative, it will be taking the remaining space minus the value.
+     * @param autoscroll Whether to scroll to the bottom when new text is added.
+     * @param enabled Controls whether the input is enabled.
+     * @param use_fixed_font Use fixed font for the text editor if possible.
+     * @return 
+     */
+    bool input_ml(const std::string& id, std::string& value, float height = 0, bool autoscroll = false, bool enabled = true, bool use_fixed_font = false);
+
+    bool input_ml(const std::string& id, char* value, int value_length, float height = 0, bool autoscroll = false, bool enabled = true, bool use_fixed_font = false);
+
+    struct markdown_config {
+        float h1_size_delta{15};
+        float h2_size_delta{8};
+        float h3_size_delta{4};
+        bool show_cursor{false};
+    };
+
+    /**
+     * @brief Renders markdown text using https://github.com/enkisoftware/imgui_markdown. This is not ready for public consumption yet.
+     * @param text 
+     */
+    void markdown(const std::string& text, const markdown_config& config = {});
+
+    bool slider(float& value, float min, float max, const std::string& label = "", float step = 0.0f, bool ticks = false, emphasis emp = emphasis::none, bool is_small = false);
+    bool slider(int& value, int min, int max, const std::string& label = "", int step = 0, bool ticks = false, emphasis emp = emphasis::none, bool is_small = false);
+
+    // classic sliders will be deprecated in the future, use slider() instead
+    bool slider_classic(float& value, float min, float max, const std::string& label = "");
+    bool slider_classic(int& value, int min, int max, const std::string& label = "");
+
+    /**
+     * @brief Checks if the last rendered item is hovered, and if so, shows a tooltip with the given text.
+     */
+    void tt(const std::string& text, show_delay delay = show_delay::normal);
+
+    /**
+     * @brief Checks if the last rendered item is hovered, and if so, shows a simple tooltip with the given text.
+     */
+    void tt(const char* text, show_delay delay = show_delay::normal);
+
+    /**
+     * @brief Display image from texture loaded in app. The texture must be loaded with preload_texture() beforehand.
+     * @param app 
+     * @param key 
+     * @param uv0_x "UV" coordinates for the top-left corner of the image. Ranges from 0 to 1, where (0, 0) is the top-left of the texture and (1, 1) is the bottom-right.
+     * @param uv0_y 
+     * @param uv1_x 
+     * @param uv1_y 
+     */
+    void image(texture_loader& app, const std::string& key, sz size,
+        float uv0_x = .0f, float uv0_y = .0f, float uv1_x = 1.0f, float uv1_y = 1.0f);
+
+    void image_rounded(texture_loader& app, const std::string& key, sz size, float rounding,
+        float uv0_x = .0f, float uv0_y = .0f, float uv1_x = 1.0f, float uv1_y = 1.0f);
+
+    /**
+     * @brief Same as image, but width/height is pre-configured
+     */
+    void icon_image(texture_loader& app, const std::string& key);
+
+    bool icon_selector(texture_loader& app, const std::string& path, size_t square_size);
+
+    /**
+     * Adds vertical spacer, optionally more than one.
+     */
+    void spc(size_t count = 1);
+
+    /**
+     * Specifies that next widget should be rendered on the same line as previous widget.
+     * @param offset Optional offset from the left, absolute.
+     * @param spacing When false, no spacing is added between widgets.
+     */
+    void sl(float offset = 0, bool spacing = true);
+
+    void slh();
+
+    void sep(const std::string& text = "");
+
+    bool button(const std::string& text, emphasis emp = emphasis::none, bool is_enabled = true, bool is_small = false, const std::string& tooltip_text = "", float width = 0, float height = 0);
+
+    inline bool button(const std::string& text, const std::string& tooltip_text) {return button(text, emphasis::none, true, false, tooltip_text);}
+
+    bool icon_checkbox(const std::string& icon, bool& is_checked, bool reversed = false, const std::string& tooltip = "");
+
+    bool checkbox(const std::string& label, bool& is_checked);
+
+    bool hyperlink(const std::string& text, const std::string& url_to_open = "");
+
+    /**
+     * @brief Colour picker
+     * @param label 
+     * @param colour 
+     * @return 
+     */
+    bool colour(const std::string& label, rgb_colour& colour);
+
+    /**
+     * @brief 
+     * Small (less height) checkbox, similar to small button.
+     * @param label 
+     * @param is_checked 
+     * @return 
+     */
+    bool small_checkbox(const std::string& label, bool& is_checked);
+
+    /**
+     * @brief Selector in a form of horizontal list of icons. Only one can be selected at a time. Returns true if selection has changed.
+     * @param options List of pairs (icon, tooltip)
+     * @param selected 
+     * @return 
+     */
+    bool icon_list(const std::vector<std::pair<std::string, std::string>>& options, unsigned int& selected);
+
+    bool accordion(const std::string& header, bool default_open = false);
+
+    /**
+     * @brief Combo box selection widget
+     * @param label Label to display
+     * @param options List of options
+     * @param selected Selected index 
+     * @param width Unscaled width
+     * @return True if selection has changed.
+     */
+    bool combo(const std::string& label, const std::vector<std::string>& options, unsigned int& selected, float width = 0);
+
+    template<typename TEnum>
+    bool enum_combo(const std::string& label, TEnum& selected, float width = 0) {
+        static std::vector<std::string> names = [] {
+            std::vector<std::string> v;
+            for(auto sv : magic_enum::enum_names<TEnum>())
+                v.emplace_back(sv);
+            return v;
+        }();
+
+        auto selected_uint = static_cast<unsigned int>(selected);
+        const bool changed = combo(label, names, selected_uint, width);
+        if(changed) selected = static_cast<TEnum>(selected_uint);
+        return changed;
+    }
+
+    bool list(const std::string& label, const std::vector<std::string>& options, unsigned int& selected, float width = 0);
+
+    //bool list(const std::string& label, std::ranges::range auto&& options, size_t& selected, size_t& hovered, float width = 0);
+
+    bool radio(const std::string& label, bool is_active);
+
+    bool small_radio(const std::string& label, bool is_active);
+
+    void spinner(spinner_type type = spinner_type::hbo_dots, const spinner_style& style = {});
+
+    // --- clipboard helpers ---
+
+    /**
+     * Sends text to the system clipboard
+     */
+    void clip_set_text(const std::string& text);
+
+    /**
+     * Gets text from the system clipboard
+     */
+    std::string clip_get_text();
+
+    // --- OS-native file dialogs ---
+
+    std::string file_open_dialog(const std::string &file_type_name, const std::string &extension);
+
+    std::string file_save_dialog(const std::string &file_type_name, const std::string &extension);
+
+    std::string directory_open_dialog();
+
+#if _DEBUG
+    void spinner_demo();
+#endif
+
+    /**
+     * @brief Shows notification toast in the bottom-right corner. Requires notify_render_frame() to be called every frame.
+     * @param message 
+     */
+    void toast(emphasis emp, const std::string& message);
+
+    void toast_render_frame();
+
+    // mouse helpers
+
+    /**
+     * Get mouse position in absolute coordinates, not scaled to any monitor DPI.
+     */
+    point mouse_pos();
+
+    bool is_leftclicked();
+
+    bool is_rightclicked();
+
+    bool is_hovered();
+
+    bool is_focused();
+
+    /**
+     * @brief Time passed since last frame in seconds, most likely fractional.
+     */
+    float frame_delta();
+
+    enum class mouse_cursor_type {
+        none = -1,
+        arrow = 0,
+        text_input,
+        resize_all,
+        resize_ns,
+        resize_ew,
+        resize_nesw,
+        resize_nwse,
+        hand,
+        not_allowed
+    };
+
+    void mouse_cursor(mouse_cursor_type mct);
+
+    class tree_node {
+    public:
+        tree_node(const std::string& label, bool open_by_default = false, bool is_leaf = false, bool span_all_cols = false,
+            emphasis emp = emphasis::none);
+        ~tree_node();
+
+        operator bool() const {
+            return opened;
+        }
+    private:
+        const std::string label;
+        bool opened{false};
+    };
+
+    //bool tree_node(const std::string& label, ImGuiTreeNodeFlags flags = 0, emphasis emp = emphasis::none);
+
+    // colour helpers
+
+    ImU32 imcol32(ImGuiCol idx);
+
+    rgb_colour get_color(emphasis emp, sub_emphasis as = sub_emphasis::normal);
+
+    // system debug info
+    void label_debug_info();
+
+    // ImGuiColorTextEdit
+    class code_editor {
+    public:
+
+        /**
+         * @brief Programming language for syntax highlighting.
+         * Do not change the order, as it's mapped directly to TextEditor::LanguageDefinitionId enum.
+         */
+        enum class language : int32_t {
+            none,
+            cpp,
+            c,
+            cs,
+            python,
+            lua,
+            json,
+            sql,
+            markdown
+        };
+
+        language lng;
+
+        code_editor(language l = language::none,
+            bool border = false,
+            bool show_line_numbers = false);
+
+        void set_text(const std::string& text);
+        std::string get_text();
+
+        /**
+         * @brief Renders text editor and returns true if text has changed.
+         * @return 
+         */
+        bool render(float width = 0.0f, float height = 0.0f);
+    private:
+        std::string id;
+        bool border;
+        bool show_line_numbers;
+        TextEditor editor;
+        language current_lng{language::none};
+
+        void set_language(language l);
+    };
+
+    // tables
+
+    /**
+     * @brief Table that allows displaying enormous amounts of data.
+     */
+    class big_table {
+    public:
+        big_table(const std::string& id, const std::vector<std::string>& columns, size_t row_count,
+            float outer_width = 0.0f, float outer_height = 0.0f,
+            bool alternate_row_bg = false);
+        ~big_table();
+
+        operator bool() const {
+            return rendered;
+        }
+
+        /**
+         * @brief Call to initialize table data rendering. Accepts lambda callback to be invoked for each cell.
+         * @param cell_render Callback that will be called for each cell in the table. Row and column indices are passed as parameters.
+         */
+        void render_data(const std::function<void(int, int)>& cell_render);
+
+    private:
+        size_t columns_size;
+        bool rendered{false};
+        ImVec2 outer_size;
+        ImGuiTableFlags flags {
+            ImGuiTableFlags_Borders |
+            ImGuiTableFlags_NoBordersInBodyUntilResize |
+            ImGuiTableFlags_HighlightHoveredColumn |
+            ImGuiTableFlags_Hideable |
+            ImGuiTableFlags_Resizable |
+            ImGuiTableFlags_ScrollY |
+            ImGuiTableFlags_ScrollX };
+        ImGuiListClipper clipper;
+    };
+
+    class table {
+    public:
+        table(const std::string& id, const std::vector<std::string>& columns,
+            float outer_width = 0.0f, float outer_height = 0.0f,
+            bool alternate_row_bg = false);
+        ~table();
+
+        bool begin_row();
+        bool next_column();
+
+        operator bool() const {
+            return rendered;
+        }
+
+    private:
+        size_t columns_size;
+        bool rendered{false};
+        ImVec2 outer_size;
+        ImGuiTableFlags flags {
+            ImGuiTableFlags_Borders |
+            ImGuiTableFlags_NoBordersInBodyUntilResize |
+            ImGuiTableFlags_HighlightHoveredColumn |
+            ImGuiTableFlags_Hideable |
+            ImGuiTableFlags_Resizable |
+            ImGuiTableFlags_ScrollY |
+            ImGuiTableFlags_ScrollX
+        };
+    };
+
+    /*
+    class tree_table {
+        public:
+        tree_table(const std::string& id, const std::vector<std::string>& columns,
+            float outer_width = 0.0f, float outer_height = 0.0f);
+        ~tree_table();
+
+        void render(
+            std::function<bool(std::string&, int, int&, bool&)> row_render,
+            std::function<void(int, int)> column_render);
+
+        operator bool() const {
+            return rendered;
+        }
+
+    private:
+        size_t columns_size;
+        bool rendered{false};
+        ImVec2 outer_size;
+        ImGuiTableFlags flags{
+            ImGuiTableFlags_Borders |
+            ImGuiTableFlags_NoBordersInBodyUntilResize |
+            ImGuiTableFlags_HighlightHoveredColumn |
+            ImGuiTableFlags_Resizable |
+            ImGuiTableFlags_ScrollY |
+            ImGuiTableFlags_ScrollX };
+    };
+    */
+
+    // plotting
+
+#if GREY_INCLUDE_IMPLOT
+    void plot_demo();
+
+    struct scrolling_buffer {
+        int max_size;
+        int offset;
+        ImVector<ImVec2> data;
+
+        scrolling_buffer(int max_size = 2000) {
+            this->max_size = max_size;
+            this->offset = 0;
+            this->data.reserve(this->max_size);
+        }
+
+        void add(float x, float y) {
+            if (data.size() < max_size)
+                data.push_back(ImVec2(x, y));
+            else {
+                data[offset] = ImVec2(x, y);
+                offset = (offset + 1) % max_size;
+            }
+        }
+
+        void erase() {
+            if (data.size() > 0) {
+                data.shrink(0);
+                offset = 0;
+            }
+        }
+    };
+
+    void plot_realtime(const std::string& name, scrolling_buffer& points, float x_min, float x_max, float y_min, float y_max);
+
+    void plot_realtime(const std::string& name,
+        float x_min, float x_max, float y_min, float y_max,
+        const std::string& name1, scrolling_buffer& points1,
+        const std::string& name2, scrolling_buffer& points2,
+        bool fill = false);
+
+#endif
+}

@@ -1,0 +1,63 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <!-- Because "grey" seems to be taken on nuget.org -->
+        <PackageId>GreyMatter</PackageId>
+        <Description>Blazing fast, small, disposable UI for developers that makes their grey matter to be spent to actual problems.</Description>
+        <PackageProjectUrl>https://github.com/aloneguid/grey</PackageProjectUrl>
+        <ApplicationIcon>icon.ico</ApplicationIcon>
+        <PackageIcon>icon64.png</PackageIcon>
+        <Authors>aloneguid</Authors>
+        <RepositoryUrl>https://github.com/aloneguid/grey</RepositoryUrl>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(Configuration)' == 'Release'">
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+        
+        <!-- Windows x64 -->
+        <Content Include="..\..\out\build\x64-debug\grey\xgrey.dll" Link="xgrey.dll" PackagePath="runtimes/win-x64/native">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(Configuration)' == 'Release'">
+
+        <!-- Windows x64 -->
+        <Content Include="..\..\xbin\runtimes\win-x64\native\xgrey.dll" Link="xgrey.dll" PackagePath="runtimes/win-x64/native">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+
+        <!-- Windows ARM -->
+        <Content Include="..\..\xbin\runtimes\win-x64\native\xgrey.dll" Link="xgrey.dll" PackagePath="runtimes/win-arm64/native">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+
+
+        <!-- Linux x64 -->
+        <Content Include="..\..\xbin\runtimes\linux-x64\native\libxgrey.so" Link="libxgrey.so" PackagePath="runtimes/linux-x64/native">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="icon64.png">
+        <Pack>True</Pack>
+        <PackagePath>\</PackagePath>
+      </None>
+    </ItemGroup>
+</Project>

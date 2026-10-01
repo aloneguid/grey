@@ -1,0 +1,55 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Grey {
+    public enum Emphasis : int {
+        None = 0,
+        Primary = 1,
+        Secondary = 2,
+        Success = 3,
+        Error = 4,
+        Warning = 5,
+        Info = 6,
+        Disabled = 7
+    };
+
+    public enum SubEmphasis : int {
+        Normal = 0,
+        NormalText = 1,
+        Hovered = 2,
+        Active = 3
+    }
+
+    public enum ShowDelay : int {
+        Immediate = 0,
+        Quick,
+        Normal,
+        Slow
+    };
+
+    public enum  ProgrammingLanguage : int {
+        None = 0,
+        Cpp,
+        C,
+        Cs,
+        Python,
+        Lua,
+        Json,
+        Sql,
+        Markdown
+    }
+
+    public enum SpinnerType : int {
+        HboDots = 0,
+        RotatedHeart
+    }
+    
+    public enum FontWeight : int {
+        Regular = 0,
+        FixedSize = 1,
+        Bold = 2
+    };
+}
