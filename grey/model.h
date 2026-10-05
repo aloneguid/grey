@@ -84,8 +84,8 @@ namespace grey {
     struct spinner_style {
         emphasis emp{emphasis::none};
 
-        float radius{16.0f};
-        float thickness{2.0f};
+        float radius{8.0f};
+        float thickness{1.0f};
         float speed{1.0f};
 
         hbo_spinner_style hbo{};
