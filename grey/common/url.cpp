@@ -47,9 +47,11 @@ namespace grey::common {
         out += path;
 
         std::string serialized_parameters = parameters_to_string();
-        std::string effective_query = (!query.empty() && serialized_parameters == query)
-                                           ? query
-                                           : serialized_parameters;
+        const bool parsed_query_was_cleared = query_was_parsed && query == parsed_query &&
+                                              parsed_parameter_count > 0 && parameters.empty();
+        std::string effective_query = parsed_query_was_cleared
+                                           ? std::string{}
+                                           : (!query.empty() ? query : serialized_parameters);
         if (!effective_query.empty()) {
             out += '?';
             out += effective_query;
@@ -203,6 +205,9 @@ namespace grey::common {
                                              : rest.substr(query_start, frag_pos - query_start);
             query = queryView;
             parse_parameters(queryView);
+            query_was_parsed = true;
+            parsed_query = query;
+            parsed_parameter_count = parameters.size();
             if(frag_pos != std::string_view::npos) {
                 fragment = rest.substr(frag_pos + 1);
             }
