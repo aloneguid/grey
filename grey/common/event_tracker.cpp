@@ -9,7 +9,7 @@ using namespace std;
 namespace grey::common {
     event_tracker::event_tracker(const std::string& domain, const std::string& app_name, const std::string& version,
         const std::string& cache_file_path, unsigned int max_cache_age_hours) 
-        : version{version}, url{"/events?key=" + app_name},
+        : domain{domain}, version{version}, url{"/events?key=" + app_name},
         cache_file_path{cache_file_path}, max_cache_age_hours{max_cache_age_hours} {
 
         flush();
@@ -82,10 +82,10 @@ namespace grey::common {
         body += str::join(lines.begin(), lines.end(), ", ");
         body += "]";
 
-        h.post(DomainName, url, body);
+        h.post(domain, url, body);
     }
 
-    bool alg::event_tracker::write_to_file(const std::string& body) {
+    bool event_tracker::event_tracker::write_to_file(const std::string& body) {
         fss::append_all_text(cache_file_path, body + "\n");
         return true;
     }

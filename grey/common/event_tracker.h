@@ -19,6 +19,7 @@ namespace grey::common {
 
     private:
         grey::common::http h;
+        const std::string domain;
         const std::string url;
         std::string version;
         std::map<std::string, std::string> constants;
