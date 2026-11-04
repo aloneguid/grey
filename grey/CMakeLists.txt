@@ -98,6 +98,8 @@ endif()
 add_library(${DYNAMIC_NAME} SHARED ${core_src} "x.cpp")
 add_library(${STATIC_NAME} STATIC ${core_src})
 
+target_include_directories(${STATIC_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
 enable_testing()
 file(GLOB test_src "tests/*.cpp")
 add_executable(grey_test ${test_src})

@@ -35,7 +35,7 @@ namespace grey::common::win32 {
 
     void popup_menu::enter_submenu(const std::string& title) {
         HMENU h_sub = ::CreatePopupMenu();
-        ::AppendMenu(*h_menu_nesting.rbegin(), MF_POPUP, (UINT)h_sub, str::to_wstr(title).c_str());
+        ::AppendMenu(*h_menu_nesting.rbegin(), MF_POPUP, reinterpret_cast<UINT>(h_sub), str::to_wstr(title).c_str());
         h_menu_nesting.push_back(h_sub);
     }
 

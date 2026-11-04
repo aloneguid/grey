@@ -30,7 +30,8 @@ namespace grey::common {
         std::string path;
 
         /**
-         * Raw query string, no leading '?'
+         * Raw query string, no leading '?'. For a parsed URL, the original
+         * encoding is retained by to_string().
          */
         std::string query;
 
@@ -41,9 +42,14 @@ namespace grey::common {
 
         /**
          * Decoded key-value parameters in query appearance order, including duplicate keys.
+         * When query is empty, to_string() serializes these values using URL query encoding.
          */
         std::vector<std::pair<std::string, std::string>> parameters;
 
+        /**
+         * Serializes the URL. Parsed raw queries are preserved verbatim; clearing the
+         * parameters of a parsed URL removes its query while preserving its fragment.
+         */
         [[nodiscard]] std::string to_string() const;
 
         /**
@@ -99,5 +105,9 @@ namespace grey::common {
         static std::string encode_query_component(std::string_view in);
 
         [[nodiscard]] std::string parameters_to_string() const;
+
+        bool query_was_parsed{false};
+        std::string parsed_query;
+        size_t parsed_parameter_count{0};
     };
 }

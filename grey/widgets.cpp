@@ -794,6 +794,10 @@ namespace grey::widgets {
         }
     }
 
+    void draw_line(const point& p1, const point& p2, rgb_colour colour, float thickness) {
+        wdl->AddLine(p1, p2, colour, thickness);
+    }
+
     void dummy(sz size) {
         ImGui::Dummy(size);
     }
@@ -1105,17 +1109,26 @@ namespace grey::widgets {
 
         if(t == spinner_type::hbo_dots) {
             ImSpinner::SpinnerHboDots("SpinnerHboDots",
-                style.radius,
-                style.thickness,
+                scaled(style.radius),
+                scaled(style.thickness),
                 colour,
                 0.1f,
                 0.5f,
                 style.speed,
                 style.hbo.dot_count, 0);
         } else if(t == spinner_type::rotated_heart) {
-            ImSpinner::SpinnerRotatingHeart("SpinnerRotatingHeart", style.radius, style.thickness, colour, style.speed);
+            ImSpinner::SpinnerRotatingHeart("SpinnerRotatingHeart",
+                scaled(style.radius),
+                scaled(style.thickness),
+                colour,
+                style.speed);
         } else if(t == spinner_type::solar_scale_balls) {
-            ImSpinner::SpinnerSolarScaleBalls("SpinnerSolarScaleBalls", style.radius, style.thickness, colour, style.speed, 36);
+            ImSpinner::SpinnerSolarScaleBalls("SpinnerSolarScaleBalls",
+                scaled(style.radius),
+                scaled(style.thickness),
+                colour,
+                style.speed,
+                36);
         }
     }
 
