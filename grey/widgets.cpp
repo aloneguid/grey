@@ -794,6 +794,10 @@ namespace grey::widgets {
         }
     }
 
+    void draw_line(const point& p1, const point& p2, rgb_colour colour, float thickness) {
+        wdl->AddLine(p1, p2, colour, thickness);
+    }
+
     void dummy(sz size) {
         ImGui::Dummy(size);
     }

@@ -323,6 +323,8 @@ namespace grey::widgets {
 
     void draw_circle(const point& center, float radius, rgb_colour colour, bool filled = false, float thickness = 1.0f, int num_segments = 0);
 
+    void draw_line(const point& p1, const point& p2, rgb_colour colour, float thickness = 1.0f);
+
     void dummy(sz size);
 
     /**
